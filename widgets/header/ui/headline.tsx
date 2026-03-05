@@ -7,8 +7,8 @@ import { LanguageSwitcher } from "@/widgets/language-switcher";
 export default function Headline() {
   const headline = seed.headline;
   return (
-    <div className="w-full bg-foreground/10 px-2 py-1">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
+    <div className="w-full bg-foreground/10 py-1 hidden md:block">
+      <div className="max-w-7xl mx-auto flex items-center px-2 justify-between">
         <p className="text-sm text-foreground font-normal flex items-center"> <AlertOctagon className="w-4 h-4" /> <span className="ml-2">{headline}</span></p>
         <div className="flex items-center gap-3">
           {seed.socialMedia.map((socialMedia) => {

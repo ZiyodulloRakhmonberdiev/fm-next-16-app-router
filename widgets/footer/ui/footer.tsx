@@ -7,12 +7,12 @@ import Image from 'next/image'
 
 export default function Footer() {
   return (
-    <div className="bg-accent p-4">
-      <div className="max-w-7xl mx-auto">
+    <div className="bg-accent py-4">
+      <div className="max-w-7xl mx-auto px-2">
         <div className="flex items-center justify-between gap-4 flex-nowrap md:flex-wrap">
-            <Link href="/">
-              <Image src="/images/logo.png" alt="logo" width={100} height={100} />
-            </Link>
+          <Link href="/">
+            <Image src="/images/logo.png" alt="logo" width={100} height={100} />
+          </Link>
           <div className="flex items-center justify-end flex-wrap gap-2">
             {seed.socialMedia.map((item) => {
               const style = getSocialPlatformStyle(item.name)
@@ -27,7 +27,7 @@ export default function Footer() {
                       )}
                     >
                       <style.Icon className="size-4 md:size-4 text-white" />
-                      <span className="text-white">{item.name}</span>
+                      <span className="text-white hidden md:block">{item.name}</span>
                     </Button>
                   ) : (
                     <Button variant="outline" className="flex items-center gap-2">
@@ -40,7 +40,7 @@ export default function Footer() {
           </div>
         </div>
         <p className="text-sm text-foreground/70 max-w-sm border-b border-border pb-4">{seed.description}</p>
-        <div className="flex items-center gap-4 text-sm py-4 text-foreground/70 border-b border-border">
+        <div className="flex items-center gap-x-4 gap-y-1 text-sm py-4 text-foreground/70 border-b border-border flex-wrap">
           {seed.links.map((item) => {
             return (
               <Link key={item.href} href={item.href}>
@@ -49,10 +49,8 @@ export default function Footer() {
             )
           })}
         </div>
-        <div className="flex items-center justify-between py-4">
-          <div className="flex items-center gap-2">
-            <p className="text-sm">© 2026 News. All rights reserved. Website powered by <Link href="https://www.google.com" className="text-blue-500 hover:text-blue-600">Turon.io</Link></p>
-          </div>
+        <div className="flex items-center gap-2 py-4">
+          <p className="text-sm text-foreground/70">© 2026 News. All rights reserved. Website powered by <Link href="https://www.google.com" className="text-blue-500 hover:text-blue-600">Turon.io</Link></p>
         </div>
       </div>
     </div>
