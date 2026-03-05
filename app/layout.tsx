@@ -1,0 +1,42 @@
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import { getLocale } from "next-intl/server";
+import "@/shared/common/styles/globals.css";
+import { Providers } from "./providers";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: "Next App",
+  description: "Next.js + next-intl",
+};
+
+export default async function RootLayout({
+  children,
+}: { children: React.ReactNode }) {
+  const locale = await getLocale();
+  return (
+    <html lang={locale} suppressHydrationWarning>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        style={{
+          backgroundImage: `
+            linear-gradient(to right, rgba(0,0,0,.03) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(0,0,0,.03) 1px, transparent 1px)
+          `,
+          backgroundSize: "20px 20px",
+        }}
+      >
+        <Providers>{children}</Providers>
+      </body>
+    </html>
+  );
+}

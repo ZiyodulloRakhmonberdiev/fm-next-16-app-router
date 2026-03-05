@@ -1,0 +1,38 @@
+{
+  "Home": {
+    "is_demo": "Diqqat! Sayt demo rejimida ishlamoqda!",
+    "top": "Top",
+    "latest": "So'nggi",
+    "trending": "Trendlar",
+    "search": "Qidiruv",
+    "settings": "Sozlamalar",
+    "language": "Til"
+  },
+  "auth": {
+    "login": "Kirish",
+    "logout": "Chiqish",
+    "register": "Ro'yxatdan o'tish",
+    "if_have_account": "Hisobingiz bormi?",
+    "if_no_account": "Hisobingiz yo'qmi?",
+    "please_register_first": "avval ro'yxatdan o'ting",
+    "full_name": "To'liq ism-familiyangiz",
+    "email": "Emailingiz",
+    "email_placeholder": "Emailingizni kiriting...",
+    "phone_number": "Telefon raqamingiz",
+    "password": "Parol",
+    "confirm_password": "Parolni tasdiqlang",
+    "cancel": "Bekor qilish",
+    "remember_me": "Meni eslab qol!",
+    "forgot_password": "Parolni unutdingizmi?",
+    "login_title": "Hisobingizga kiring",
+    "welcome_back": "Xush kelibsiz",
+    "login_subtitle": "Kirish uchun ma'lumotlaringizni kiriting.",
+    "or": "YOKI",
+    "google": "Google",
+    "yandex": "Yandex",
+    "register_subtitle": "Hisob yaratish uchun ma'lumotlaringizni kiriting.",
+    "terms_of_service": "Shartlar va shartlar",
+    "privacy_policy": "Maxfiylik siyosati",
+    "register_title": "Hisobingizni yarating"
+  }
+}

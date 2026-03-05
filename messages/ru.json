@@ -1,0 +1,38 @@
+{
+  "Home": {
+    "is_demo": "Внимание! Сайт работает в демо-режиме!",
+    "top": "Топ",
+    "latest": "Последние",
+    "trending": "В тренде",
+    "search": "Поиск",
+    "settings": "Настройки",
+    "language": "Язык"
+  },
+  "auth": {
+    "login": "Войти",
+    "logout": "Выйти",
+    "register": "Регистрация",
+    "if_have_account": "Уже есть аккаунт?",
+    "if_no_account": "Нет аккаунта?",
+    "please_register_first": "сначала зарегистрируйтесь",
+    "full_name": "Полное имя",
+    "email": "Ваш email",
+    "email_placeholder": "Введите email...",
+    "phone_number": "Номер телефона",
+    "password": "Пароль",
+    "confirm_password": "Подтвердите пароль",
+    "cancel": "Отмена",
+    "remember_me": "Запомнить меня",
+    "forgot_password": "Забыли пароль?",
+    "login_title": "Войти в ваш аккаунт",
+    "welcome_back": "С возвращением",
+    "login_subtitle": "Введите данные для входа.",
+    "or": "ИЛИ",
+    "google": "Google",
+    "yandex": "Яндекс",
+    "register_subtitle": "Введите данные для регистрации.",
+    "terms_of_service": "Условия обслуживания",
+    "privacy_policy": "Политика конфиденциальности",
+    "register_title": "Создайте аккаунт, чтобы начать"
+  }
+}

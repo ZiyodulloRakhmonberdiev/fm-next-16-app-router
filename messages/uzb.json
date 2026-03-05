@@ -1,0 +1,38 @@
+{
+  "Home": {
+    "is_demo": "Диққат! Сайт демо режимида ишламоқда!",
+    "top": "Топ",
+    "latest": "Сўнгги",
+    "trending": "Трендлар",
+    "search": "Қидирув",
+    "settings": "Созламалар",
+    "language": "Тил"
+  },
+  "auth": {
+    "login": "Кириш",
+    "logout": "Чиқиш",
+    "register": "Рўйхатдан ўтиш",
+    "if_have_account": "Ҳисобингиз борми?",
+    "if_no_account": "Ҳисобингиз йўқми?",
+    "please_register_first": "аввал рўйхатдан ўтинг",
+    "full_name": "Тўлиқ исм-фамилиянгиз",
+    "email": "Эмаилингиз",
+    "email_placeholder": "Эмаилингизни киритинг...",
+    "phone_number": "Телефон рақамингиз",
+    "password": "Парол",
+    "confirm_password": "Паролни тасдиқланг",
+    "cancel": "Бекор қилиш",
+    "remember_me": "Мени еслаб қол!",
+    "forgot_password": "Паролни унутдингизми?",
+    "login_title": "Ҳисобингизга кириш",
+    "welcome_back": "Хуш келибсиз",
+    "login_subtitle": "Кириш учун маълумотларингизни киритинг.",
+    "or": "ЁКИ",
+    "google": "Google",
+    "yandex": "Yandex",
+    "register_subtitle": "Ҳисоб яратиш учун маълумотларингизни киритинг.",
+    "terms_of_service": "Шартлар ва шартлар",
+    "privacy_policy": "Махфийлик сиёсати",
+    "register_title": "Ҳисобингни яратинг"
+  }
+}
