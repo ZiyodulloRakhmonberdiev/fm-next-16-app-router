@@ -6,14 +6,24 @@ import { MenuIcon, SearchIcon } from 'lucide-react'
 import Image from 'next/image'
 import CategoryList from '@/entities/category/ui/category-list'
 import Headline from './headline'
+import { useState } from 'react'
+import Sidebar from '@/widgets/sidebar/ui/client-sidebar'
+import { SidebarTrigger } from '@/shared/common/components/ui/sidebar'
 
 export default function Header() {
+
+  const [isOpen, setIsOpen] = useState(false)
+ 
+  const handleToggleSidebar = () => {
+    setIsOpen(!isOpen)
+  }
+
   return (
-    <div className='sticky top-0 z-10 bg-accent'>
+    <div className='sticky top-0 z-10 bg-accent border-b border-border shadow-sm'>
       <div className="flex items-center justify-between">
         <Headline />
       </div>
-      <div className="flex items-center justify-between py-2 px-2 max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto flex items-center justify-between py-2 px-4 md:px-6">
         <div className="flex items-center gap-8">
           <Link href="/">
             <Image src="/images/logo.png" alt="logo" width={100} height={100} />
@@ -30,9 +40,7 @@ export default function Header() {
             <div className="hidden md:block">
               <ThemeSwitcher />
             </div>
-            <Button variant="outline" className="block md:hidden">
-              <MenuIcon className="w-4 h-4" />
-            </Button>
+            <SidebarTrigger />
           </div>
         </div>
       </div>

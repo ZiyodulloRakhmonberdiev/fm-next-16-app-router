@@ -7,8 +7,8 @@ import Image from 'next/image'
 
 export default function Footer() {
   return (
-    <div className="bg-accent py-4">
-      <div className="max-w-7xl mx-auto px-2">
+    <div className="bg-accent py-4 border-t border-border shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 md:px-6">
         <div className="flex items-center justify-between gap-4 flex-nowrap md:flex-wrap">
           <Link href="/">
             <Image src="/images/logo.png" alt="logo" width={100} height={100} />
