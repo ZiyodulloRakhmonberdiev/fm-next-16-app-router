@@ -1,14 +1,12 @@
 'use client'
 import { Link } from '@/i18n/navigation'
-import { Button } from '@/shared/common/components/ui/button'
-import { ThemeSwitcher } from '@/widgets/theme-switcher'
-import { MenuIcon, SearchIcon } from 'lucide-react'
 import Image from 'next/image'
-import CategoryList from '@/entities/category/ui/category-list'
+import { SearchIcon } from 'lucide-react'
 import Headline from './headline'
-import { useState } from 'react'
+import { ThemeSwitcher } from '@/widgets/theme-switcher'
+import CategoryList from '@/entities/category/ui/category-list'
 import { SidebarTrigger } from '@/shared/common/components/ui/sidebar'
-import CategoryListForMobile from '@/entities/category/ui/category-list-for-mobile'
+import { CategoryListForMobile } from '@/entities/category'
 
 export default function Header() {
   return (

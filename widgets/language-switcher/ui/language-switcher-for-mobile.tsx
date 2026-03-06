@@ -3,9 +3,9 @@ import { useEffect, useState } from "react";
 import { Button } from "@/shared/common/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem } from "@/shared/common/components/ui/dropdown-menu";
 import { DropdownMenuTrigger } from "@/shared/common/components/ui/dropdown-menu";
-import { ChevronDownIcon, LanguagesIcon } from "lucide-react";
 import { useLocale } from "next-intl";
 import { usePathname, useRouter } from "@/i18n/navigation";
+import { ChevronDownIcon } from "lucide-react";
 
 const LOCALE_STORAGE_KEY = "preferred-locale";
 
@@ -53,10 +53,13 @@ export default function LanguageSwitcherForMobile() {
     <div>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline">
-            <span className="text-base leading-none">{meta?.flag}</span>
-            <span>{meta?.short}</span>
-          </Button>
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-sm font-medium">Ilova tili:</span>
+            <div className="flex items-center gap-1">
+              <span className="text-sm">{meta?.label}</span>
+              <ChevronDownIcon className="w-4 h-4" />
+            </div>
+          </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           <DropdownMenuItem className="flex items-center gap-2" onClick={() => handleSetLocale('uz')}>
