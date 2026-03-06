@@ -1,9 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Button } from "@/shared/common/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem } from "@/shared/common/components/ui/dropdown-menu";
 import { DropdownMenuTrigger } from "@/shared/common/components/ui/dropdown-menu";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { ChevronDownIcon } from "lucide-react";
 
@@ -19,7 +18,8 @@ const localeMeta: Record<
   en: { short: "En", label: "English", flag: "🇺🇸" },
 };
 
-export default function LanguageSwitcherForMobile() {
+export default function LanguageSwitcherForSidebar() {
+  const t = useTranslations("common")
   const router = useRouter();
   const pathname = usePathname();
   const currentLocale = useLocale();
@@ -54,7 +54,7 @@ export default function LanguageSwitcherForMobile() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <div className="flex items-center justify-between gap-2">
-            <span className="text-sm font-medium">Ilova tili:</span>
+            <span className="text-sm font-medium">{t("app_language")}:</span>
             <div className="flex items-center gap-1">
               <span className="text-sm">{meta?.label}</span>
               <ChevronDownIcon className="w-4 h-4" />

@@ -2,7 +2,7 @@
   "Home": {
     "is_demo": "Attention! The site works in demo mode!",
     "top": "Top",
-    "latest": "Latest",
+    "latest": "Latest news",
     "trending": "Trending",
     "search": "Search",
     "settings": "Settings",
@@ -41,5 +41,33 @@
     "by_signing_in_you_agree_to_our": "By signing in, you agree to our",
     "by_signing_up_you_agree_to_our": "By signing up, you agree to our"
 
+  },
+  "common": {
+    "results": "Results",
+    "search": "Search",
+    "search_placeholder": "Search for a news...",
+    "search_results": "Search results",
+    "search_results_empty": "No results found for this query",
+    "categories": "Categories",
+    "quick_links": "Quick links",
+    "follow_us": "Follow us on",
+    "app_language": "App language",
+    "copyright": "© 2026 {name}. All rights reserved.",
+    "all_rights_reserved": "All rights reserved.",
+    "powered_by": "Powered by ",
+    "designed_by": "Designed by {name}",
+    "dark_mode": "Dark mode",
+
+    "terms_of_service": "Terms of service",
+    "privacy_policy": "Privacy policy",
+    "about_us": "About us",
+    "contact_us": "Contact us",
+    "presidents_portal": "President's portal",
+
+    "twitter": "Twitter",
+    "facebook": "Facebook",
+    "instagram": "Instagram",
+    "telegram": "Telegram",
+    "youtube": "YouTube"
   }
 }

@@ -1,2 +1,2 @@
 export { default as LanguageSwitcher } from './ui/language-switcher'
-export { default as LanguageSwitcherForMobile } from './ui/language-switcher-for-mobile'
+export { default as LanguageSwitcherForSidebar } from './ui/language-switcher-for-sidebar'

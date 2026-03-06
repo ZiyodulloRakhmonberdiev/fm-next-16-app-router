@@ -6,6 +6,7 @@ import { Button } from "@/shared/common/components/ui/button";
 import { useEffect, useState } from "react";
 import { Switch } from "@/shared/common/components/ui/switch";
 import { Label } from "@/shared/common/components/ui/label";
+import { useTranslations } from "next-intl";
 
 export default function ThemeSwitcher() {
   const { resolvedTheme, setTheme } = useTheme();
@@ -43,7 +44,7 @@ export default function ThemeSwitcher() {
 export function ThemeSwitcherForSidebar() {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-
+  const t = useTranslations("common")
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -60,7 +61,7 @@ export function ThemeSwitcherForSidebar() {
 
   return (
     <div className="flex items-center gap-2 justify-between">
-      <Label htmlFor="theme-switcher">Tungi rejim</Label> <Switch id="theme-switcher" checked={isDark} onCheckedChange={handleToggle} />
+      <Label htmlFor="theme-switcher">{t("dark_mode")}</Label> <Switch id="theme-switcher" checked={isDark} onCheckedChange={handleToggle} />
     </div>
   );
 }
