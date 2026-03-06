@@ -1,6 +1,5 @@
 import { getMessages } from "next-intl/server";
 import { NextIntlClientProvider } from "next-intl";
-import { Header } from "@/widgets/header";
 
 type Props = {
   children: React.ReactNode;
