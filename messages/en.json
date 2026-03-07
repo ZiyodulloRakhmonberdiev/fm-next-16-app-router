@@ -40,7 +40,7 @@
     "login_success_desc": "You have successfully logged in. You can now access your account.",
     "by_signing_in_you_agree_to_our": "By signing in, you agree to our",
     "by_signing_up_you_agree_to_our": "By signing up, you agree to our"
-
+    
   },
   "common": {
     "results": "Results",
@@ -52,7 +52,7 @@
     "quick_links": "Quick links",
     "follow_us": "Follow us on",
     "app_language": "App language",
-    "copyright": "© 2026 {name}. All rights reserved.",
+    "copyright": "© Since 2024. Fergana Media Press. All rights reserved. When using the information on this website, a reference must be provided.",
     "all_rights_reserved": "All rights reserved.",
     "powered_by": "Powered by ",
     "designed_by": "Designed by {name}",
@@ -63,11 +63,23 @@
     "about_us": "About us",
     "contact_us": "Contact us",
     "presidents_portal": "President's portal",
+    "statistics": "Statistics",
+    "procuratorate": "Procuratorate",
+    "government": "Government of Uzbekistan",
 
-    "twitter": "Twitter",
     "facebook": "Facebook",
     "instagram": "Instagram",
     "telegram": "Telegram",
-    "youtube": "YouTube"
+    "youtube": "YouTube",
+
+    "note": "Note!",
+    "note_desc": "Find any issues or have suggestions? Please contact us at ",
+
+    "read_more": "Read more",
+    "view_all": "View all"
+  },
+  "stayConnected": {
+    "title": "Stay Connected",
+    "subtitle": "Follow us on social media for the latest news and updates."
   }
 }

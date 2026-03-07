@@ -1,1 +1,5 @@
 export { default as TopBanner } from "./top-banner"
+export { default as CategoryWithSlide } from "./category-with-slide"
+export { default as CategoryWithBanner } from "./category-with-banner"
+export { default as CategoryVideo } from "./category-video"
+export { default as CategoryWithColumns } from "./category-with-columns"

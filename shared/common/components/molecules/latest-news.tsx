@@ -24,14 +24,14 @@ export default function LatestNews() {
   const [featured, ...rest] = sorted
 
   return (
-    <div className="flex w-full flex-col gap-4 md:max-w-[33.333333%]">
-      <h2 className="inline-flex items-center text-sm font-semibold">
+    <div className="flex w-full flex-col gap-4">
+      <h2 className="inline-flex items-center text-lg font-semibold">
         {t("latest")}
       </h2>
 
       <div className="flex flex-col gap-3">
 
-        <ul className="flex flex-col gap-3">
+        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1">
           {rest.map((item: NewsItem) => (
             <li key={item.slug}>
               <Card className="overflow-hidden p-0 rounded-sm shadow-none">

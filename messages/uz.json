@@ -6,7 +6,8 @@
     "trending": "Trendlar",
     "search": "Qidiruv",
     "settings": "Sozlamalar",
-    "language": "Til"
+    "language": "Til",
+    "description": "FERGANAMEDIA.UZ internet-nashri 2024-yil 26-sentyabr kuni elektron OAV sifatida prezident administratsiyasi huzuridagi AOKA dan ro'yxatdan o'tkazilgan. Guvohnoma raqami: 414738. Muassis: «FERGANA MEDIA PRESSA» MCHJ"
   },
   "auth": {
     "login": "Kirish",
@@ -61,10 +62,17 @@
     "about_us": "Biz haqimizda",
     "contact_us": "Bog'lanish",
     "presidents_portal": "Prezident portali",
-    "twitter": "Twitter",
+    "statistics": "Statistika",
+    "procuratorate": "Prokuratura",
+    "government": "O'zbekiston Respublikasi hukumat",
+    
     "facebook": "Facebook",
     "instagram": "Instagram",
     "telegram": "Telegram",
     "youtube": "YouTube"
+  },
+  "stayConnected": {
+    "title": "Biz bilan bog'laning",
+    "subtitle": "So'nggi yangiliklar va yangilanishlar uchun ijtimoiy tarmoqlarimizda kuzating."
   }
 }

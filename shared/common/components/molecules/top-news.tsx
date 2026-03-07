@@ -17,7 +17,7 @@ import { cn } from "@/shared/common/lib/utils"
 import { AppLocale, formatDateISO, formatDateTimeLocale } from "../../lib/formatter"
 import { Link } from "@/i18n/navigation"
 import { useLocale } from "next-intl"
-import { truncate } from "../../lib/truncate"
+import { TruncateExpand } from "@/shared/common/components/ui/truncate-expand"
 
 function CarouselDots({
   count,
@@ -88,20 +88,20 @@ export default function TopNews() {
           <CarouselContent className="ml-0">
             {news.map((item: (typeof news)[number]) => (
               <CarouselItem key={item.slug} className="pl-0">
-                <Card className="overflow-hidden p-0 rounded-sm">
-                  <div className="grid md:min-h-[380px] grid-cols-1 md:grid-cols-3">
-                    <div className="flex flex-col justify-between order-1 md:order-0 gap-2 p-4 md:gap-3 md:p-8 bg-background border-none">
+                <Card className="overflow-hidden mx-1 p-0 rounded-sm">
+                  <div className="grid md:min-h-[380px] grid-cols-1 md:grid-cols-5">
+                    <div className="flex flex-col justify-between order-1 md:order-0 gap-2 p-4 md:gap-3 md:p-8 bg-background border-none md:col-span-2">
                       <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                         {item.category}
                       </span>
                       <div className="flex flex-col gap-2">
                         <h3 className="text-lg font-semibold leading-tight md:text-xl">
                           <Link href={`/news/${item.slug}`} className="hover:underline">
-                            {truncate(item.title)}
+                            <TruncateExpand maxLength={156} text={item.title} as="span" className="line-clamp-5" />
                           </Link>
                         </h3>
-                        <p className="line-clamp-3 text-sm text-muted-foreground">
-                          {truncate(item.description)}
+                        <p className="text-sm text-muted-foreground">
+                          <TruncateExpand maxLength={156} text={item.description} as="span" className="line-clamp-6" />
                         </p>
                       </div>
                       <time className="text-xs" dateTime={formatDateISO(item.publishedAt)}>
@@ -110,7 +110,7 @@ export default function TopNews() {
                     </div>
                     <Link
                       href={`/news/${item.slug}`}
-                      className="relative block aspect-video md:aspect-auto min-h-[220px] md:min-h-[380px] col-span-2"
+                      className="relative block aspect-video md:aspect-auto min-h-[220px] md:min-h-[380px] md:col-span-3"
                     >
                       <Image
                         src={item.image}

@@ -1,1 +1,1 @@
-export * from "./ui/client-sidebar"
+export {default as ClientSidebar} from "./ui/client-sidebar"

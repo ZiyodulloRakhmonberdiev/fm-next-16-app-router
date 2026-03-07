@@ -1,12 +1,12 @@
 export const seed = {
   categories: [
     {
-      name: 'Sport',
-      href: '/category/sport',
+      name: 'Sports',
+      href: '/category/sports',
     },
     {
-      name: 'Politics',
-      href: '/category/politics',
+      name: 'Business',
+      href: '/category/business',
     },
     {
       name: 'Economy',
@@ -15,14 +15,6 @@ export const seed = {
     {
       name: 'Technology',
       href: '/category/technology',
-    },
-    {
-      name: 'Science',
-      href: '/category/science',
-    },
-    {
-      name: 'Health',
-      href: '/category/health',
     },
     {
       name: 'Entertainment',
@@ -34,20 +26,27 @@ export const seed = {
     },
   ],
   socialMedia: [
-    { name: 'twitter', href: '/twitter' },
-    { name: 'facebook', href: '/facebook' },
-    { name: 'instagram', href: '/instagram' },
     { name: 'telegram', href: '/telegram' },
+    { name: 'instagram', href: '/instagram' },
+    { name: 'facebook', href: '/facebook' },
     { name: 'youtube', href: '/youtube' },
   ],
   copyright: '© 2026 News. All rights reserved.',
   headline: 'Sayt demo rejimida ishlamoqda!',
-  description: 'Ushbu sayt 2026 yil 5 martda yaratilgan. Ruxsatnoma raqamiz: 1234567890. Prezident qarori bilan ishga tushirilgan. Mahsulotlar sertifikatlangan',
+  description: 'Ferganamedia.uz is registered as an electronic mass media 26 September 2024 by the AOKA under the administration of the President. Certificate number: 414738. Founder: OOO «Fergana Media Press».',
   links: [
     { name: 'about_us', href: '/about-us' },
     { name: 'contact_us', href: '/contact-us' },
     { name: 'terms_of_service', href: '/terms-of-service' },
     { name: 'privacy_policy', href: '/privacy-policy' },
-    { name: 'presidents_portal', href: '/president' },
+    { name: 'presidents_portal', href: 'https://president.uz/uz' },
+    { name: 'statistics', href: 'https://stat.uz/uz/' },
+    { name: 'procuratorate', href: 'https://prokuratura.uz/#/' },
+    { name: 'government', href: 'https://gov.uz/oz/iiv' },
   ],
+  siteConfig: {
+    email: 'info@ferganamedia.uz',
+    phone: '+998 90 123 45 67',
+    address: 'Fergana region, Fergana city, Mashal, Alisher Navoi street, 32',
+  }
 }

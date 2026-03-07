@@ -11,7 +11,7 @@ import type { AppLocale } from "@/shared/common/lib/formatter"
 import { Link } from "@/i18n/navigation"
 import Image from "next/image"
 import { useLocale } from "next-intl"
-import { truncate } from "../../lib/truncate"
+import { TruncateExpand } from "@/shared/common/components/ui/truncate-expand"
 
 type NewsItem = (typeof seedNews.news)[number]
 
@@ -23,14 +23,14 @@ export default function AuthorsChoice() {
     .sort(
       (a, b) =>
         new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
-    )   
+    )
     .slice(0, 4)
 
   const [featured, ...rightItems] = items
 
   return (
     <div className="w-full">
-      <h2 className="mb-4 text-sm font-semibold">Authors choice</h2>
+      <h2 className="mb-4 text-lg font-semibold">Authors choice</h2>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {featured && (
@@ -47,23 +47,28 @@ export default function AuthorsChoice() {
                 </div>
               </Link>
               <div className="flex flex-col gap-2 p-4">
+                <div className="flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground">
+                  <span className="uppercase font-medium text-brand italic">{featured.category}</span>
+                  <span aria-hidden>/</span>
+                  <time dateTime={formatDateISO(featured.publishedAt)}>
+                    {formatDateTimeLocale(featured.publishedAt, locale)}
+                  </time>
+                </div>
                 <h3 className="text-lg font-semibold leading-tight">
                   <Link
                     href={`/news/${featured.slug}`}
                     className="hover:underline"
                   >
-                    {truncate(featured.title)}
+                    <span className="line-clamp-3">
+                      {featured.title}
+                    </span>
                   </Link>
                 </h3>
-                <p className="line-clamp-3 text-sm text-muted-foreground">
-                  {truncate(featured.description)}
+                <p className="text-sm text-muted-foreground">
+                  <span className="line-clamp-3">
+                    {featured.description}
+                  </span>
                 </p>
-                <time
-                  dateTime={formatDateISO(featured.publishedAt)}
-                  className="text-xs text-muted-foreground"
-                >
-                  {formatDateTimeLocale(featured.publishedAt, locale)}
-                </time>
               </div>
             </Card>
           </div>
@@ -75,23 +80,24 @@ export default function AuthorsChoice() {
               key={item.slug}
               className="flex flex-col gap-2 rounded-sm border-none p-4 shadow-none"
             >
+              <div className="flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground">
+                <span className="uppercase font-medium text-brand italic">{item.category}</span>
+                <span aria-hidden>/</span>
+                <time dateTime={formatDateISO(item.publishedAt)}>
+                  {formatDateTimeLocale(item.publishedAt, locale)}
+                </time>
+              </div>
               <h4 className="text-sm font-semibold leading-tight">
                 <Link
                   href={`/news/${item.slug}`}
                   className="hover:underline"
                 >
-                  {truncate(item.title)}
+                  <TruncateExpand text={item.title} as="span" className="line-clamp-3" />
                 </Link>
               </h4>
-              <p className="line-clamp-2 text-sm text-muted-foreground">
-                {truncate(item.description)}
+              <p className="text-sm text-muted-foreground">
+                <TruncateExpand text={item.description} className="line-clamp-3" as="span" />
               </p>
-              <time
-                dateTime={formatDateISO(item.createdAt)}
-                className="mt-auto text-xs text-muted-foreground"
-              >
-                {formatDate(item.createdAt, locale)}
-              </time>
             </Card>
           ))}
         </div>

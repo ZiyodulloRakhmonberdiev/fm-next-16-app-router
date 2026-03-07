@@ -15,8 +15,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Next App",
-  description: "Next.js + next-intl",
+  title: "Fergana Media",
+  description: "Fergana Media is a news website that provides news and information about the latest events in Fergana. Fergana Media is a news website that provides news and information about the latest events in Fergana.",
+  icons: {
+    icon: "/favicon.ico",
+  },
+  metadataBase: new URL("https://ferganamedia.uz"),
 };
 
 export default async function RootLayout({

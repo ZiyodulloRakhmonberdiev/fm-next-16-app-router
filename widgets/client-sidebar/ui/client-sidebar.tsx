@@ -3,12 +3,10 @@ import Image from 'next/image'
 import { useTranslations } from 'next-intl'
 import { CategoryListForSidebar } from '@/entities/category'
 import { Sidebar, SidebarHeader, SidebarContent, SidebarFooter } from '@/shared/common/components/ui/sidebar'
+import { SocialMediaButtons } from '@/shared/common/components/ui/social-media-buttons'
 import { LanguageSwitcherForSidebar } from '@/widgets/language-switcher'
 import { ThemeSwitcherForSidebar } from '@/widgets/theme-switcher'
 import { seed } from '@/scripts/seed'
-import { getSocialPlatformStyle } from '@/shared/config/social-platforms'
-import { Button } from '@/shared/common/components/ui/button'
-import { cn } from '@/shared/common/lib/utils'
 
 export default function ClientSidebar() {
   const t = useTranslations("common")
@@ -42,31 +40,10 @@ export default function ClientSidebar() {
 
         <div className='flex items-start px-4 w-full gap-2 flex-col border-t border-border pt-2'>
           <span className='text-sm font-medium'>{t("follow_us")}:</span>
-          <div className="flex items-center justify-end flex-wrap gap-2">
-            {seed.socialMedia.map((item) => {
-              const style = getSocialPlatformStyle(item.name)
-              return (
-                <Link key={item.href} href={item.href}>
-                  {style ? (
-                    <Button
-                      variant="ghost"
-                      className={cn(
-                        'flex items-center gap-2 border-0 text-white shadow-sm text-xs md:text-sm',
-                        style.bgColor
-                      )}
-                    >
-                      <style.Icon className="size-4 md:size-4 text-white" />
-                      <span className="text-white hidden md:block">{item.name}</span>
-                    </Button>
-                  ) : (
-                    <Button variant="outline" className="flex items-center gap-2">
-                      <span>{item.name}</span>
-                    </Button>
-                  )}
-                </Link>
-              )
-            })}
-          </div>
+          <SocialMediaButtons
+            variant="icon-only"
+            className="flex items-center justify-end flex-wrap gap-2"
+          />
         </div>
       </SidebarContent>
       <SidebarFooter>

@@ -1,3 +1,5 @@
 export { default as TopNews } from "./top-news"
 export { default as LatestNews } from "./latest-news"
 export { default as AuthorsChoice } from "./authors-choice"
+export { default as StayConnected } from "./stay-connected"
+export { default as RelatedNews } from "./related-news"

@@ -6,7 +6,8 @@
     "trending": "Трендлар",
     "search": "Қидирув",
     "settings": "Созламалар",
-    "language": "Тил"
+    "language": "Тил",
+    "description": "ФЕРГАНАМЕДИА.УЗ интернет-нашри 2024-йил 26-сентябр куни электрон ОАВ сифатида президент администрацияси ҳузуридаги АОКА дан рўйхатдан ўтказилган. Гувоҳнома рақами: 414738. Муассис: «ФЕРГАНА МЕДИА ПРЕССА» МЧЖ"
   },
   "auth": {
     "login": "Кириш",
@@ -61,10 +62,17 @@
     "about_us": "Биз ҳақимизда",
     "contact_us": "Боғланиш",
     "presidents_portal": "Президент портали",
-    "twitter": "Twitter",
+    "statistics": "Statistika",
+    "procuratorate": "Prokuratura",
+    "government": "Узбекистон Республикаси ҳукумати",
+    
     "facebook": "Facebook",
     "instagram": "Instagram",
     "telegram": "Telegram",
     "youtube": "YouTube"
+  },
+  "stayConnected": {
+    "title": "Биз билан боғланинг",
+    "subtitle": "Сўнгги янгиликлар ва янгиланишлар учун ижтимоий тармоқларимизда кузатинг."
   }
 }

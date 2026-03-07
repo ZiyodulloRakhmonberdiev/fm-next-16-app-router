@@ -6,7 +6,8 @@
     "trending": "В тренде",
     "search": "Поиск",
     "settings": "Настройки",
-    "language": "Язык"
+    "language": "Язык",
+    "description": "Интернет-сайт Ferganamedia.uz зарегистрировано в качестве электронного средства массовой информации 26 сентября 2024 года АОКА при администрации президента. Номер свидетельства: 414738. Учредитель: ООО «Фергана Медиа Пресса»."
   },
   "auth": {
     "login": "Войти",
@@ -61,10 +62,17 @@
     "about_us": "О нас",
     "contact_us": "Связаться с нами",
     "presidents_portal": "Портал президента",
-    "twitter": "Twitter",
+    "statistics": "Статистика",
+    "procuratorate": "Прокуратура",
+    "government": "Правительство Узбекистана",
+
     "facebook": "Facebook",
     "instagram": "Instagram",
     "telegram": "Telegram",
     "youtube": "YouTube"
+  },
+  "stayConnected": {
+    "title": "Оставайтесь на связи",
+    "subtitle": "Подписывайтесь на нас в соцсетях, чтобы быть в курсе новостей и обновлений."
   }
 }
