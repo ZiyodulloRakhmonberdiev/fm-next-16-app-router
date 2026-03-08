@@ -86,7 +86,7 @@ export default function CategoryWithSlide({
                   <Card className="h-full overflow-hidden rounded-sm border gap-0 p-0 shadow-none transition-shadow hover:shadow-md bg-background">
                     <div className="relative aspect-video w-full">
                       <Image
-                        src={item.image}
+                        src={item.images[0]}
                         alt={item.title}
                         fill
                         className="object-cover"

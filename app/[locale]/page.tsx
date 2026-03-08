@@ -18,6 +18,7 @@ export default function HomePage() {
             <CategoryWithBanner category="Business" />
             <CategoryVideo />
             <CategoryWithBanner category="Sports" featuredPosition="left" />
+            <CategoryWithSlide category="Business" />
             <CategoryWithColumns category="Business" featuredPosition="right" />
           </div>
         </main>

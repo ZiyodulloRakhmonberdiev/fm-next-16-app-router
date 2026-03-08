@@ -44,7 +44,7 @@ export default function RelatedNews({ category, excludeSlug }: RelatedNewsProps)
               <div className="flex gap-3 p-2">
                 <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-sm">
                   <Image
-                    src={item.image}
+                    src={item.images[0]}
                     alt={item.title}
                     fill
                     className="object-cover"

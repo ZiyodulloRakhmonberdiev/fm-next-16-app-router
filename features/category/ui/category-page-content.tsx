@@ -65,7 +65,7 @@ export function CategoryPageContent({ slug }: CategoryPageContentProps) {
             <Card className="h-full overflow-hidden rounded-sm border-border p-0 shadow-none transition-shadow hover:shadow-md">
               <div className="relative aspect-video w-full">
                 <Image
-                  src={item.image}
+                  src={item.images[0]}
                   alt={item.title}
                   fill
                   className="object-cover"
@@ -103,7 +103,7 @@ export function CategoryPageContent({ slug }: CategoryPageContentProps) {
                   <div className="flex gap-3 p-2">
                     <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-sm">
                       <Image
-                        src={item.image}
+                        src={item.images[0]}
                         alt={item.title}
                         fill
                         className="object-cover"

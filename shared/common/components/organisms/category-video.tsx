@@ -20,8 +20,14 @@ import { StayConnected } from "../molecules"
 
 type NewsItem = (typeof seedNews.news)[number]
 
-function isVideoItem(item: NewsItem): item is NewsItem & { type: "video" } {
-  return (item as NewsItem & { type?: string }).type === "video"
+function isVideoNewsItem(item: NewsItem): boolean {
+  const type = (item as NewsItem & { type?: string }).type
+  const videoSource = (item as NewsItem & { videoSource?: string }).videoSource
+  const videoUrl = (item as NewsItem & { videoUrl?: string }).videoUrl
+  const images = (item as NewsItem & { images?: string[] }).images
+  const hasVideo = !!(videoSource && videoUrl)
+  const hasImages = !!(images && images.length > 0)
+  return type === "video" || (hasVideo && hasImages)
 }
 
 export default function CategoryVideo() {
@@ -30,7 +36,7 @@ export default function CategoryVideo() {
   const videoNews = React.useMemo(
     () =>
       [...seedNews.news]
-        .filter(isVideoItem)
+        .filter(isVideoNewsItem)
         .sort(
           (a, b) =>
             new Date(b.publishedAt).getTime() -
@@ -75,7 +81,7 @@ export default function CategoryVideo() {
                       <div className="flex h-full gap-3 p-2">
                         <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-sm">
                           <Image
-                            src={item.image}
+                            src={item.images[0]}
                             alt={item.title}
                             fill
                             className="object-cover"
@@ -111,7 +117,7 @@ export default function CategoryVideo() {
             <Card className="relative h-full min-h-[320px] overflow-hidden rounded-sm border-none p-0 shadow-none transition-shadow hover:shadow-md md:min-h-[420px]">
               <div className="relative aspect-video w-full md:aspect-auto md:h-full md:min-h-[420px]">
                 <Image
-                  src={featured.image}
+                  src={featured.images[0]}
                   alt={featured.title}
                   fill
                   className="object-cover"

@@ -29,7 +29,7 @@ export default async function NewsPage({ params }: Props) {
             </div>
             <aside className="hidden lg:flex flex-col gap-6 lg:col-span-1">
               <StayConnected />
-              <LatestNews />
+              <LatestNews excludeSlug={news.slug} />
             </aside>
           </div>
         </main>

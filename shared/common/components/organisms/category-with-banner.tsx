@@ -37,7 +37,7 @@ function FeaturedBlock({
       <Card className="overflow-hidden rounded-sm border-border p-0 shadow-none transition-shadow hover:shadow-md">
         <div className="relative aspect-video max-h-64 w-full">
           <Image
-            src={featured.image}
+            src={featured.images[0]}
             alt={featured.title}
             fill
             className="object-cover"
@@ -133,7 +133,7 @@ export default function CategoryWithBanner({
               </div>
               <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-sm">
                 <Image
-                  src={item.image}
+                  src={item.images[0]}
                   alt={item.title}
                   fill
                   className="object-cover"

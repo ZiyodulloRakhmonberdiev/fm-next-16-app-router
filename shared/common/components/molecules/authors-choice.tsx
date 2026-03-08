@@ -39,7 +39,7 @@ export default function AuthorsChoice() {
               <Link href={`/news/${featured.slug}`} className="block">
                 <div className="relative aspect-video w-full">
                   <Image
-                    src={featured.image}
+                    src={featured.images[0]}
                     alt={featured.title}
                     fill
                     className="object-cover"

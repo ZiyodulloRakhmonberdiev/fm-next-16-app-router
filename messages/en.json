@@ -76,7 +76,9 @@
     "note_desc": "Find any issues or have suggestions? Please contact us at ",
 
     "read_more": "Read more",
-    "view_all": "View all"
+    "view_all": "View all",
+    "createdBy": "Created by",
+    "tags": "Tags"
   },
   "stayConnected": {
     "title": "Stay Connected",

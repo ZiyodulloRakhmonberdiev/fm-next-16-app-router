@@ -10,11 +10,17 @@ import { useLocale, useTranslations } from "next-intl"
 
 type NewsItem = (typeof seedNews.news)[number]
 
-export default function LatestNews() {
+type LatestNewsProps = {
+  /** Hozir ko‘rilayotgan yangilik slug — ro‘yxatda ko‘rsatilmaydi */
+  excludeSlug?: string
+}
+
+export default function LatestNews({ excludeSlug }: LatestNewsProps = {}) {
   const locale = useLocale() as AppLocale
   const t = useTranslations("Home")
 
   const sorted = [...seedNews.news]
+    .filter((n) => !excludeSlug || n.slug !== excludeSlug)
     .sort(
       (a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -41,7 +47,7 @@ export default function LatestNews() {
                     className="relative block h-20 w-28 shrink-0 overflow-hidden rounded-xs md:h-24 md:w-32"
                   >
                     <Image
-                      src={item.image}
+                      src={item.images[0]}
                       alt={item.title}
                       fill
                       className="object-cover"

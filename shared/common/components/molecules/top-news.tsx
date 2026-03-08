@@ -113,7 +113,7 @@ export default function TopNews() {
                       className="relative block aspect-video md:aspect-auto min-h-[220px] md:min-h-[380px] md:col-span-3"
                     >
                       <Image
-                        src={item.image}
+                        src={item.images[0]}
                         alt={item.title}
                         fill
                         className="object-cover"

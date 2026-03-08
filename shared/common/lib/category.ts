@@ -1,5 +1,5 @@
 /**
- * Category nomidan slug (URL uchun).
+ * Category slug — doim inglizcha (URL uchun).
  * @example slugFromCategory("Sports") → "sports"
  */
 export function slugFromCategory(category: string): string {
@@ -8,6 +8,7 @@ export function slugFromCategory(category: string): string {
 
 /**
  * Slug dan category nomi (sahifa sarlavhasi va filter uchun).
+ * Slug inglizcha bo‘ladi.
  * @example slugToCategory("sports") → "Sports"
  */
 export function slugToCategory(slug: string): string {
