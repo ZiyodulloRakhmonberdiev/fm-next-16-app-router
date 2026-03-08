@@ -80,11 +80,11 @@ export default function CategoryWithColumns({
                     href={`/news/${item.slug}`}
                     className="hover:underline"
                   >
-                    <TruncateExpand text={item.title} as="span" className="line-clamp-3" />
+                    <TruncateExpand text={item.title ?? ""} as="span" className="line-clamp-3" />
                   </Link>
                 </h4>
                 <p className="text-sm text-muted-foreground">
-                  <TruncateExpand text={item.description} className="line-clamp-3" as="span" />
+                  <TruncateExpand text={item.description ?? ""} className="line-clamp-3" as="span" />
                 </p>
               </Card>
             ))}

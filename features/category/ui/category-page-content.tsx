@@ -77,10 +77,10 @@ export function CategoryPageContent({ slug }: CategoryPageContentProps) {
                   {formatDateTimeLocale(item.publishedAt, locale)}
                 </time>
                 <h2 className="text-base font-semibold leading-tight">
-                  <TruncateExpand text={item.title} as="span" maxLength={120} />
+                  <TruncateExpand text={item.title ?? ""} as="span" maxLength={120} />
                 </h2>
                 <p className="line-clamp-3 text-sm text-muted-foreground">
-                  <TruncateExpand text={item.description} as="span" maxLength={160} />
+                  <TruncateExpand text={item.description ?? ""} as="span" maxLength={160} />
                 </p>
               </div>
             </Card>

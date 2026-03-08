@@ -99,11 +99,11 @@ export default function TopNews() {
                       <div className="flex flex-col gap-2">
                         <h3 className="text-lg font-semibold leading-tight md:text-xl">
                           <Link href={`/news/${item.slug}`} className="hover:underline">
-                            <TruncateExpand maxLength={156} text={item.title} as="span" className="line-clamp-5" />
+                            <TruncateExpand maxLength={156} text={item.title ?? ""} as="span" className="line-clamp-5" />
                           </Link>
                         </h3>
                         <p className="text-sm text-muted-foreground">
-                          <TruncateExpand maxLength={156} text={item.description} as="span" className="line-clamp-6" />
+                          <TruncateExpand maxLength={156} text={item.description ?? ""} as="span" className="line-clamp-6" />
                         </p>
                       </div>
                       <time className="text-xs" dateTime={formatDateISO(item.publishedAt)}>
