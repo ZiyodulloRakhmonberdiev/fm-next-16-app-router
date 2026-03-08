@@ -7,7 +7,7 @@
     "search": "Поиск",
     "settings": "Настройки",
     "language": "Язык",
-    "description": "Интернет-сайт Ferganamedia.uz зарегистрировано в качестве электронного средства массовой информации 26 сентября 2024 года АОКА при администрации президента. Номер свидетельства: 414738. Учредитель: ООО «Фергана Медиа Пресса»."
+    "description": "Ferganamedia.uz зарегистрирован как электронное СМИ 26 сентября 2024 года АОКА при администрации Президента. Свидетельство № 414738. Учредитель: ООО «Fergana Media Press»."
   },
   "auth": {
     "login": "Войти",
@@ -15,7 +15,7 @@
     "register": "Регистрация",
     "if_have_account": "Уже есть аккаунт?",
     "if_no_account": "Нет аккаунта?",
-    "please_register_first": "сначала зарегистрируйтесь",
+    "please_register_first": "Пожалуйста, сначала зарегистрируйтесь.",
     "full_name": "Полное имя",
     "email": "Email",
     "email_placeholder": "Введите ваш email...",
@@ -47,7 +47,7 @@
     "search": "Поиск",
     "search_placeholder": "Поиск новостей...",
     "search_results": "Результаты поиска",
-    "search_results_empty": "По запросу ничего не найдено",
+    "search_results_empty": "По запросу ничего не найдено.",
     "categories": "Категории",
     "quick_links": "Быстрые ссылки",
     "follow_us": "Мы в соцсетях",
@@ -61,15 +61,20 @@
     "privacy_policy": "Политика конфиденциальности",
     "about_us": "О нас",
     "contact_us": "Связаться с нами",
-    "presidents_portal": "Портал президента",
+    "presidents_portal": "Портал Президента",
     "statistics": "Статистика",
     "procuratorate": "Прокуратура",
     "government": "Правительство Узбекистана",
-
     "facebook": "Facebook",
     "instagram": "Instagram",
     "telegram": "Telegram",
-    "youtube": "YouTube"
+    "youtube": "YouTube",
+    "note": "Внимание!",
+    "note_desc": "Нашли ошибку или есть предложение? Свяжитесь с нами: ",
+    "read_more": "Подробнее",
+    "view_all": "Смотреть всё",
+    "createdBy": "Автор",
+    "tags": "Теги"
   },
   "stayConnected": {
     "title": "Оставайтесь на связи",

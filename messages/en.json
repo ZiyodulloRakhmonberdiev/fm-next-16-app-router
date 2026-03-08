@@ -6,7 +6,8 @@
     "trending": "Trending",
     "search": "Search",
     "settings": "Settings",
-    "language": "Language"
+    "language": "Language",
+    "description": "Ferganamedia.uz is registered as an electronic mass media 26 September 2024 by the AOKA under the administration of the President. Certificate number: 414738. Founder: OOO «Fergana Media Press»."
   },
   "auth": {
     "login": "Sign in",
@@ -14,7 +15,7 @@
     "register": "Sign up",
     "if_have_account": "Already have an account?",
     "if_no_account": "Don't have an account yet?",
-    "please_register_first": "please sign up first",
+    "please_register_first": "Please sign up first.",
     "full_name": "Full name",
     "email": "Email",
     "email_placeholder": "Enter your email...",
@@ -40,24 +41,22 @@
     "login_success_desc": "You have successfully logged in. You can now access your account.",
     "by_signing_in_you_agree_to_our": "By signing in, you agree to our",
     "by_signing_up_you_agree_to_our": "By signing up, you agree to our"
-    
   },
   "common": {
     "results": "Results",
     "search": "Search",
-    "search_placeholder": "Search for a news...",
+    "search_placeholder": "Search for news...",
     "search_results": "Search results",
-    "search_results_empty": "No results found for this query",
+    "search_results_empty": "No results found for this query.",
     "categories": "Categories",
     "quick_links": "Quick links",
-    "follow_us": "Follow us on",
+    "follow_us": "Follow us",
     "app_language": "App language",
-    "copyright": "© Since 2024. Fergana Media Press. All rights reserved. When using the information on this website, a reference must be provided.",
+    "copyright": "© 2026 {name}. All rights reserved.",
     "all_rights_reserved": "All rights reserved.",
     "powered_by": "Powered by ",
     "designed_by": "Designed by {name}",
     "dark_mode": "Dark mode",
-
     "terms_of_service": "Terms of service",
     "privacy_policy": "Privacy policy",
     "about_us": "About us",
@@ -66,15 +65,12 @@
     "statistics": "Statistics",
     "procuratorate": "Procuratorate",
     "government": "Government of Uzbekistan",
-
     "facebook": "Facebook",
     "instagram": "Instagram",
     "telegram": "Telegram",
     "youtube": "YouTube",
-
     "note": "Note!",
-    "note_desc": "Find any issues or have suggestions? Please contact us at ",
-
+    "note_desc": "Found an issue or have a suggestion? Contact us at ",
     "read_more": "Read more",
     "view_all": "View all",
     "createdBy": "Created by",

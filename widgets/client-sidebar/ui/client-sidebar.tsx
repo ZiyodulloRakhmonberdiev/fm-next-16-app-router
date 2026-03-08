@@ -7,9 +7,12 @@ import { SocialMediaButtons } from '@/shared/common/components/ui/social-media-b
 import { LanguageSwitcherForSidebar } from '@/widgets/language-switcher'
 import { ThemeSwitcherForSidebar } from '@/widgets/theme-switcher'
 import { seed } from '@/scripts/seed'
+import { useLocale } from 'next-intl'
+import type { AppLocale } from '@/shared/common/lib/locale-api'
 
 export default function ClientSidebar() {
   const t = useTranslations("common")
+  const locale = useLocale() as AppLocale
   return (
     <Sidebar className='bg-background'>
       <SidebarHeader>
@@ -31,7 +34,7 @@ export default function ClientSidebar() {
           {seed.links.map((item) => {
             return (
               <Link key={item.href} href={item.href}>
-                {t(item.name)}
+                {item.name[locale]}
               </Link>
             )
           })}
@@ -47,7 +50,7 @@ export default function ClientSidebar() {
         </div>
       </SidebarContent>
       <SidebarFooter>
-        <p className="text-sm text-foreground/70 max-w-sm border-t border-border py-4 text-center">{t("copyright", { name: "Fergana Media" })}</p>
+        <p className="text-sm text-foreground/70 max-w-sm border-t border-border py-4 text-center">{seed.copyright[locale]}</p>
       </SidebarFooter>
     </Sidebar>
   )

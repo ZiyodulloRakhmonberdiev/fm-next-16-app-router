@@ -1,9 +1,10 @@
-export default function PublicLayout({ children }: { children: React.ReactNode }) {
+import { SidebarProvider } from '@/shared/common/components/ui/sidebar'
+import { AdminDashboardShell } from '@/widgets/admin-sidebar'
+
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col">
-      <header>admin header</header>
-      {children}
-      <footer>footer</footer>
-      </div>
-  );
+    <SidebarProvider>
+      <AdminDashboardShell>{children}</AdminDashboardShell>
+    </SidebarProvider>
+  )
 }

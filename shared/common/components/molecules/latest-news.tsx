@@ -1,5 +1,6 @@
 "use client"
 
+import { filterPublishedRawNews, getNewsListForLocale, type NewsItem } from "@/features/news/model"
 import { seedNews } from "@/scripts/seed-news"
 import { Card } from "@/shared/common/components/ui/card"
 import { formatDate, formatDateISO, formatDateTimeLocale } from "@/shared/common/lib/formatter"
@@ -7,8 +8,6 @@ import type { AppLocale } from "@/shared/common/lib/formatter"
 import { Link } from "@/i18n/navigation"
 import Image from "next/image"
 import { useLocale, useTranslations } from "next-intl"
-
-type NewsItem = (typeof seedNews.news)[number]
 
 type LatestNewsProps = {
   /** Hozir ko‘rilayotgan yangilik slug — ro‘yxatda ko‘rsatilmaydi */
@@ -19,14 +18,15 @@ export default function LatestNews({ excludeSlug }: LatestNewsProps = {}) {
   const locale = useLocale() as AppLocale
   const t = useTranslations("Home")
 
-  const sorted = [...seedNews.news]
+  const rawSorted = filterPublishedRawNews([...seedNews.news])
     .filter((n) => !excludeSlug || n.slug !== excludeSlug)
     .sort(
       (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        new Date((b as { createdAt?: Date }).createdAt ?? 0).getTime() -
+        new Date((a as { createdAt?: Date }).createdAt ?? 0).getTime()
     )
     .slice(0, 9)
-
+  const sorted = getNewsListForLocale(rawSorted, locale)
   const [featured, ...rest] = sorted
 
   return (

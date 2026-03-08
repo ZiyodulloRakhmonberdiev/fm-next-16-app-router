@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { filterPublishedRawNews, getNewsListForLocale, type NewsItem } from "@/features/news/model"
 import { seedNews } from "@/scripts/seed-news"
 import { Card } from "@/shared/common/components/ui/card"
 import {
@@ -14,42 +15,34 @@ import Image from "next/image"
 import { useLocale, useTranslations } from "next-intl"
 import { TruncateExpand } from "@/shared/common/components/ui/truncate-expand"
 import { Button } from "../ui/button"
-
-type NewsItem = (typeof seedNews.news)[number]
+import { getCategoryName } from "@/shared/common/lib/seed-helpers"
 
 type CategoryWithColumnsProps = {
-  /** Category name — news filtered by this */
-  category?: string
+  /** Category slug — news filtered by this */
   categorySlug?: string
   /** Featured block: "left" or "right" (default "right") */
   featuredPosition?: "left" | "right"
 }
 
-function slugFromCategory(category: string): string {
-  return category.toLowerCase().replace(/\s+/g, "-")
-}
-
 export default function CategoryWithColumns({
-  category = "Business",
-  categorySlug,
+  categorySlug = "business",
   featuredPosition = "right",
 }: CategoryWithColumnsProps) {
   const locale = useLocale() as AppLocale
   const t = useTranslations("common")
-  const slug = categorySlug ?? slugFromCategory(category)
+  const categoryName = getCategoryName(categorySlug, locale)
 
-  const items = React.useMemo(
-    () =>
-      [...seedNews.news]
-        .filter((n) => n.category === category)
-        .sort(
-          (a, b) =>
-            new Date(b.publishedAt).getTime() -
-            new Date(a.publishedAt).getTime()
-        )
-        .slice(0, 7),
-    [category]
-  )
+  const items = React.useMemo(() => {
+    const raw = filterPublishedRawNews([...seedNews.news])
+      .filter((n) => n.categorySlug === categorySlug)
+      .sort(
+        (a, b) =>
+          new Date(b.publishedAt).getTime() -
+          new Date(a.publishedAt).getTime()
+      )
+      .slice(0, 7)
+    return getNewsListForLocale(raw, locale)
+  }, [categorySlug, locale])
 
   const [featured, ...rightItems] = items
 
@@ -59,9 +52,9 @@ export default function CategoryWithColumns({
     <div className="w-full px-4 md:px-6 mt-4">
       <div className=" border-t-2 border-border py-4">
         <div className="flex items-center justify-between gap-2 mb-4">
-          <h2 className="text-lg font-semibold">{category}</h2>
+          <h2 className="text-lg font-semibold">{categoryName}</h2>
           <Button variant="ghost" size="sm" asChild className="text-brand">
-            <Link href={`/category/${slug}`}>{t("view_all")} {">>"}</Link>
+            <Link href={`/category/${categorySlug}`}>{t("view_all")} {">>"}</Link>
           </Button>
         </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

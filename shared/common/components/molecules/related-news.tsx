@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { filterPublishedRawNews, getNewsListForLocale, type NewsItem } from "@/features/news/model"
 import { seedNews } from "@/scripts/seed-news"
 import { Card } from "@/shared/common/components/ui/card"
 import { formatDate, formatDateISO } from "@/shared/common/lib/formatter"
@@ -9,28 +10,25 @@ import { Link } from "@/i18n/navigation"
 import Image from "next/image"
 import { useLocale } from "next-intl"
 
-type NewsItem = (typeof seedNews.news)[number]
-
 type RelatedNewsProps = {
-  category: string
+  categorySlug: string
   excludeSlug: string
 }
 
-export default function RelatedNews({ category, excludeSlug }: RelatedNewsProps) {
+export default function RelatedNews({ categorySlug, excludeSlug }: RelatedNewsProps) {
   const locale = useLocale() as AppLocale
 
-  const items = React.useMemo(
-    () =>
-      [...seedNews.news]
-        .filter((n) => n.category === category && n.slug !== excludeSlug)
-        .sort(
-          (a, b) =>
-            new Date(b.publishedAt).getTime() -
-            new Date(a.publishedAt).getTime()
-        )
-        .slice(0, 9),
-    [category, excludeSlug]
-  )
+  const items = React.useMemo(() => {
+    const raw = filterPublishedRawNews([...seedNews.news])
+      .filter((n) => n.categorySlug === categorySlug && n.slug !== excludeSlug)
+      .sort(
+        (a, b) =>
+          new Date(b.publishedAt).getTime() -
+          new Date(a.publishedAt).getTime()
+      )
+      .slice(0, 9)
+    return getNewsListForLocale(raw, locale)
+  }, [categorySlug, excludeSlug, locale])
 
   if (items.length === 0) return null
 

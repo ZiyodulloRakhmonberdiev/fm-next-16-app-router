@@ -11,6 +11,7 @@ import {
 } from "@/shared/common/components/ui/carousel"
 import type { CarouselApi } from "@/shared/common/components/ui/carousel"
 import Autoplay from "embla-carousel-autoplay"
+import { filterPublishedRawNews, getNewsListForLocale, type NewsItem } from "@/features/news/model"
 import { seedNews } from "@/scripts/seed-news"
 import Image from "next/image"
 import { cn } from "@/shared/common/lib/utils"
@@ -62,13 +63,14 @@ export default function TopNews() {
     api.on("select", () => setSelectedIndex(api.selectedScrollSnap()))
   }, [api])
 
-  const news = [...seedNews.news]
-    .filter((item) => item.isTop)
+  const rawTop = filterPublishedRawNews([...seedNews.news])
+    .filter((item) => (item as { isTop?: boolean }).isTop)
     .sort(
       (a, b) =>
         new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
     )
     .slice(0, 10)
+  const news = getNewsListForLocale(rawTop, locale)
 
   const handleDotSelect = React.useCallback(
     (index: number) => api?.scrollTo(index),
@@ -86,7 +88,7 @@ export default function TopNews() {
       >
         <div className="relative h-full">
           <CarouselContent className="ml-0">
-            {news.map((item: (typeof news)[number]) => (
+            {news.map((item: NewsItem) => (
               <CarouselItem key={item.slug} className="pl-0">
                 <Card className="overflow-hidden mx-1 p-0 rounded-sm">
                   <div className="grid md:min-h-[380px] grid-cols-1 md:grid-cols-5">

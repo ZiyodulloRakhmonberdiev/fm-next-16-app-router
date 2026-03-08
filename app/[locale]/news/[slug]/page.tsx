@@ -3,16 +3,23 @@ import { Footer } from "@/widgets/client-footer"
 import { Header } from "@/widgets/client-header"
 import ClientSidebar from "@/widgets/client-sidebar/ui/client-sidebar"
 import { NewsPageContent } from "@/features/news/ui/news-page-content"
+import { pickNewsForLocale } from "@/features/news/model"
 import { seedNews } from "@/scripts/seed-news"
 import { StayConnected, LatestNews } from "@/shared/common/components/molecules"
+import { isAppLocale } from "@/shared/common/lib/locale-api"
 
 type Props = {
-  params: Promise<{ slug: string }>
+  params: Promise<{ locale: string; slug: string }>
 }
 
 export default async function NewsPage({ params }: Props) {
-  const { slug } = await params
-  const news = seedNews.news.find((n) => n.slug === slug)
+  const { locale, slug } = await params
+  const currentLocale = isAppLocale(locale) ? locale : "uz"
+
+  const raw = seedNews.news.find((n) => n.slug === slug)
+  if (!raw) notFound()
+  if ((raw.status ?? "published") !== "published") notFound()
+  const news = pickNewsForLocale(raw, currentLocale)
   if (!news) notFound()
 
   return (

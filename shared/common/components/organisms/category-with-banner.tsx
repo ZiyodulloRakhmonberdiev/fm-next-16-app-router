@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { filterPublishedRawNews, getNewsListForLocale, type NewsItem } from "@/features/news/model"
 import { seedNews } from "@/scripts/seed-news"
 import { Card } from "@/shared/common/components/ui/card"
 import { formatDate, formatDateISO } from "@/shared/common/lib/formatter"
@@ -10,19 +11,13 @@ import Image from "next/image"
 import { useLocale, useTranslations } from "next-intl"
 import { Button } from "@/shared/common/components/ui/button"
 import { TruncateExpand } from "@/shared/common/components/ui/truncate-expand"
-
-type NewsItem = (typeof seedNews.news)[number]
+import { getCategoryName } from "@/shared/common/lib/seed-helpers"
 
 type CategoryWithBannerProps = {
-  /** Category name — news filtered by this */
-  category?: string
+  /** Category slug — news filtered by this */
   categorySlug?: string
   /** Featured block: "left" (default) or "right" */
   featuredPosition?: "left" | "right"
-}
-
-function slugFromCategory(category: string): string {
-  return category.toLowerCase().replace(/\s+/g, "-")
 }
 
 function FeaturedBlock({
@@ -63,25 +58,24 @@ function FeaturedBlock({
 }
 
 export default function CategoryWithBanner({
-  category = "Business",
-  categorySlug,
+  categorySlug = "business",
   featuredPosition = "left",
 }: CategoryWithBannerProps) {
   const locale = useLocale() as AppLocale
-  const slug = categorySlug ?? slugFromCategory(category)
   const t = useTranslations("common")
-  const sorted = React.useMemo(
+  const categoryName = getCategoryName(categorySlug, locale)
+  const rawSorted = React.useMemo(
     () =>
-      [...seedNews.news]
-        .filter((n) => n.category === category)
+      filterPublishedRawNews([...seedNews.news])
+        .filter((n) => n.categorySlug === categorySlug)
         .sort(
           (a, b) =>
             new Date(b.publishedAt).getTime() -
             new Date(a.publishedAt).getTime()
         ),
-    [category]
+    [categorySlug]
   )
-
+  const sorted = getNewsListForLocale(rawSorted, locale)
   const [featured, ...rest] = sorted
   const rightItems = rest.slice(0, 6)
 
@@ -90,9 +84,9 @@ export default function CategoryWithBanner({
   return (
     <section className="w-full space-y-4 pt-4 px-4 md:px-6">
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
-        <h2 className="text-lg font-semibold">{category}</h2>
+        <h2 className="text-lg font-semibold">{categoryName}</h2>
         <Button variant="ghost" size="sm" asChild className="text-brand">
-          <Link href={`/category/${slug}`}>{t("view_all")} {">>"}</Link>
+          <Link href={`/category/${categorySlug}`}>{t("view_all")} {">>"}</Link>
         </Button>
       </div>
 

@@ -1,5 +1,6 @@
 "use client"
 
+import { filterPublishedRawNews, getNewsListForLocale, type NewsItem } from "@/features/news/model"
 import { seedNews } from "@/scripts/seed-news"
 import { Card } from "@/shared/common/components/ui/card"
 import {
@@ -13,19 +14,17 @@ import Image from "next/image"
 import { useLocale } from "next-intl"
 import { TruncateExpand } from "@/shared/common/components/ui/truncate-expand"
 
-type NewsItem = (typeof seedNews.news)[number]
-
 export default function AuthorsChoice() {
   const locale = useLocale() as AppLocale
 
-  const items = [...seedNews.news]
-    .filter((item) => item.authorsChoice)
+  const rawFiltered = filterPublishedRawNews([...seedNews.news])
+    .filter((item) => (item as { authorsChoice?: boolean }).authorsChoice)
     .sort(
       (a, b) =>
         new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
     )
     .slice(0, 4)
-
+  const items = getNewsListForLocale(rawFiltered, locale)
   const [featured, ...rightItems] = items
 
   return (

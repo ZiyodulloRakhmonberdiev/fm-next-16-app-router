@@ -9,29 +9,32 @@ import {
   CommandItem,
   CommandList,
 } from "@/shared/common/components/ui/command"
+import { getPublishedNewsListForLocale, type NewsItem } from "@/features/news/model"
 import { useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
+import { useLocale } from "next-intl"
+import { useMemo } from "react"
 import { seedNews } from "@/scripts/seed-news"
-
-type NewsItem = (typeof seedNews.news)[number]
 
 function matchNews(item: NewsItem, search: string): boolean {
   if (!search.trim()) return false
   const q = search.toLowerCase().trim()
   const title = item.title.toLowerCase()
-  const desc = item.description.toLowerCase()
+  const desc = item.description?.toLowerCase() ?? ''
   return title.includes(q) || desc.includes(q)
 }
 
 export function SearchBar({ open, onClose }: { open: boolean; onClose: () => void }) {
   const t = useTranslations("common")
   const router = useRouter()
+  const locale = useLocale() as "en" | "ru" | "uz" | "uzb"
+  const items = useMemo(() => getPublishedNewsListForLocale(seedNews.news, locale), [locale])
 
   return (
     <CommandDialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <Command
         filter={(value, search) => {
-          const item = seedNews.news.find((n) => n.slug === value)
+          const item = items.find((n) => n.slug === value)
           if (!item) return 0
           return matchNews(item, search) ? 1 : 0
         }}
@@ -40,7 +43,7 @@ export function SearchBar({ open, onClose }: { open: boolean; onClose: () => voi
         <CommandList>
           <CommandEmpty>{t("search_results_empty")}</CommandEmpty>
           <CommandGroup heading={t("results")}>
-            {seedNews.news.map((item) => (
+            {items.map((item) => (
               <CommandItem
                 key={item.slug}
                 value={item.slug}

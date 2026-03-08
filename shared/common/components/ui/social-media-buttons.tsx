@@ -1,10 +1,12 @@
 "use client";
 
 import { Link } from "@/i18n/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale } from "next-intl";
 import type { ReactNode } from "react";
 import { seed } from "@/scripts/seed";
 import { cn } from "@/shared/common/lib/utils";
+import type { AppLocale } from "@/shared/common/lib/locale-api";
+import type { LocaleMap } from "@/shared/common/lib/locale-types";
 
 export type SocialPlatformName = "facebook" | "instagram" | "telegram" | "youtube";
 
@@ -56,9 +58,11 @@ export function getSocialStyle(name: string) {
   );
 }
 
+type SocialMediaLink = { slug: string; name: LocaleMap; href: string };
+
 type SocialMediaButtonsProps = {
   variant?: "button" | "icon-only";
-  links?: { name: string; href: string }[];
+  links?: readonly SocialMediaLink[] | SocialMediaLink[];
   className?: string;
   linkClassName?: string;
 };
@@ -69,14 +73,15 @@ export function SocialMediaButtons({
   className,
   linkClassName,
 }: SocialMediaButtonsProps) {
-  const t = useTranslations("common");
+  const locale = useLocale() as AppLocale;
   const isIconOnly = variant === "icon-only";
 
   return (
     <div className={cn("flex flex-wrap items-center gap-2", className)}>
-      {links.map(({ name, href }) => {
-        const style = getSocialStyle(name);
+      {links.map(({ slug, name, href }) => {
+        const style = getSocialStyle(slug);
         const isExternal = href.startsWith("http");
+        const label = name[locale];
         const baseLinkClass =
           "inline-flex items-center justify-center gap-2 text-white shadow-sm transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
         const variantClass = isIconOnly
@@ -85,7 +90,7 @@ export function SocialMediaButtons({
 
         return (
           <Link
-            key={name}
+            key={slug}
             href={href}
             target={isExternal ? "_blank" : undefined}
             rel={isExternal ? "noopener noreferrer" : undefined}
@@ -95,10 +100,10 @@ export function SocialMediaButtons({
               style.bgColor,
               linkClassName
             )}
-            aria-label={t(name)}
+            aria-label={label}
           >
             {style.icon}
-            {!isIconOnly && <span>{t(name)}</span>}
+            {!isIconOnly && <span>{label}</span>}
           </Link>
         );
       })}

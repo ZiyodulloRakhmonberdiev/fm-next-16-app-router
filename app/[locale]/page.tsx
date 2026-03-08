@@ -14,12 +14,12 @@ export default function HomePage() {
         <main className="flex-1 py-4 px-4 md:px-6">
           <div className="max-w-7xl mx-auto">
             <TopBanner />
-            <CategoryWithSlide category="Sports" />
-            <CategoryWithBanner category="Business" />
+            <CategoryWithSlide categorySlug="sports" />
+            <CategoryWithBanner categorySlug="business" />
             <CategoryVideo />
-            <CategoryWithBanner category="Sports" featuredPosition="left" />
-            <CategoryWithSlide category="Business" />
-            <CategoryWithColumns category="Business" featuredPosition="right" />
+            <CategoryWithBanner categorySlug="sports" featuredPosition="left" />
+            <CategoryWithSlide categorySlug="business" />
+            <CategoryWithColumns categorySlug="business" featuredPosition="right" />
           </div>
         </main>
         <Footer />

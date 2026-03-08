@@ -6,7 +6,6 @@ import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { ArrowLeft } from "lucide-react"
 import { Button } from "@/shared/common/components/ui/button"
-import { slugFromCategory } from "@/shared/common/lib/category"
 import { formatDate, formatDateISO } from "@/shared/common/lib/formatter"
 import type { AppLocale } from "@/shared/common/lib/formatter"
 import { RelatedNews, CreatedBy, Tags } from "@/shared/common/components/molecules"
@@ -19,35 +18,20 @@ import {
   CarouselPrevious,
 } from "@/shared/common/components/ui/carousel"
 import { getYoutubeEmbedUrl } from "@/shared/common/lib/youtube"
-import type { NewsContent } from "@/features/news/model/content"
-import { isRichContent } from "@/features/news/model/content"
-import { RichContent } from "@/features/news/ui/rich-content"
+import type { NewsItem, NewsContent } from "@/features/news/model"
+import { isRichContent } from "@/features/news/model"
+import { RichContentBlocks } from "@/features/news/ui/rich-content-blocks"
 
-type NewsItem = {
-  slug: string
-  title: string
-  description: string
-  content: NewsContent
-  images: string[]
-  category: string
-  tags: string[]
-  publishedAt: Date
-  minutes: number
-  views: number
-  author: string
-  /** "youtube" — videoUrl = YouTube link; "local" — videoUrl = /videos/news/... */
-  videoSource?: "youtube" | "local"
-  videoUrl?: string
-}
+export type { NewsItem }
 
-type NewsPageContentProps = {
+export type NewsPageContentProps = {
   news: NewsItem
 }
 
 export function NewsPageContent({ news }: NewsPageContentProps) {
   const router = useRouter()
   const locale = useLocale() as AppLocale
-  const categorySlug = slugFromCategory(news.category)
+  const categorySlug = news.categorySlug
 
   return (
     <article className="pb-8">
@@ -151,9 +135,11 @@ export function NewsPageContent({ news }: NewsPageContentProps) {
         </div>
       )}
 
-      <p className="mb-6 text-muted-foreground leading-relaxed">
-        {news.description}
-      </p>
+      {news.description != null && news.description !== "" && (
+        <p className="mb-6 text-muted-foreground leading-relaxed">
+          {news.description}
+        </p>
+      )}
 
       {news.videoSource && news.videoUrl && news.images && news.images.length > 0 && (
         <div className="mb-6">
@@ -235,12 +221,14 @@ export function NewsPageContent({ news }: NewsPageContentProps) {
         </div>
       )}
 
-      {isRichContent(news.content) ? (
-        <RichContent blocks={news.content} />
-      ) : (
-        <div className="prose prose-neutral dark:prose-invert max-w-none">
-          {news.content}
-        </div>
+      {news.content != null && news.content !== "" && (
+        isRichContent(news.content) ? (
+          <RichContentBlocks blocks={news.content} />
+        ) : (
+          <div className="prose prose-neutral dark:prose-invert max-w-none">
+            {news.content}
+          </div>
+        )
       )}
 
       {/* Author */}
@@ -250,7 +238,7 @@ export function NewsPageContent({ news }: NewsPageContentProps) {
       </div>
 
       {/* Related news */}
-      <RelatedNews category={news.category} excludeSlug={news.slug} />
+      <RelatedNews categorySlug={news.categorySlug} excludeSlug={news.slug} />
     </article>
   )
 }

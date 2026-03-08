@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { filterPublishedRawNews, getNewsListForLocale, type NewsItem, type RawNewsItem } from "@/features/news/model"
 import { seedNews } from "@/scripts/seed-news"
 import { Card } from "@/shared/common/components/ui/card"
 import {
@@ -18,33 +19,26 @@ import { useLocale, useTranslations } from "next-intl"
 import { Play } from "lucide-react"
 import { StayConnected } from "../molecules"
 
-type NewsItem = (typeof seedNews.news)[number]
-
-function isVideoNewsItem(item: NewsItem): boolean {
-  const type = (item as NewsItem & { type?: string }).type
-  const videoSource = (item as NewsItem & { videoSource?: string }).videoSource
-  const videoUrl = (item as NewsItem & { videoUrl?: string }).videoUrl
-  const images = (item as NewsItem & { images?: string[] }).images
-  const hasVideo = !!(videoSource && videoUrl)
-  const hasImages = !!(images && images.length > 0)
-  return type === "video" || (hasVideo && hasImages)
+function isVideoNewsItem(item: RawNewsItem): boolean {
+  const hasVideo = !!(item.videoSource && item.videoUrl)
+  const hasImages = !!(item.images && item.images.length > 0)
+  return item.type === "video" || (hasVideo && hasImages)
 }
 
 export default function CategoryVideo() {
   const locale = useLocale() as AppLocale
 
-  const videoNews = React.useMemo(
-    () =>
-      [...seedNews.news]
-        .filter(isVideoNewsItem)
-        .sort(
-          (a, b) =>
-            new Date(b.publishedAt).getTime() -
-            new Date(a.publishedAt).getTime()
-        )
-        .slice(0, 15),
-    []
-  )
+  const videoNews = React.useMemo(() => {
+    const raw = filterPublishedRawNews([...seedNews.news])
+      .filter(isVideoNewsItem)
+      .sort(
+        (a, b) =>
+          new Date(b.publishedAt).getTime() -
+          new Date(a.publishedAt).getTime()
+      )
+      .slice(0, 15)
+    return getNewsListForLocale(raw, locale)
+  }, [locale])
 
   const [featured, ...listItems] = videoNews
 

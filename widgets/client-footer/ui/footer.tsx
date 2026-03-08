@@ -3,15 +3,17 @@ import { Link } from '@/i18n/navigation'
 import { seed } from '@/scripts/seed'
 import { SocialMediaButtons } from '@/shared/common/components/ui/social-media-buttons'
 import Image from 'next/image'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import { Mail, MapPin, Phone } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTheme } from 'next-themes'
+import type { AppLocale } from '@/shared/common/lib/locale-api'
 
 export default function Footer() {
   const { resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
+  const locale = useLocale() as AppLocale
 
   const logoSrc =
     mounted && resolvedTheme === 'light'
@@ -37,7 +39,7 @@ export default function Footer() {
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0 md:gap-4 lg:gap-6 items-start justify-between'>
           {/* Description */}
           <div className='w-full border-b md:border-none border-border pb-2 flex gap-2 flex-col'>
-            <p className="text-sm text-foreground/70 max-w-md">{seed.description}</p>
+            <p className="text-sm text-foreground/70 max-w-md">{seed.description[locale]}</p>
             <div className="flex items-center gap-2 text-sm text-foreground/70">
               <Mail className="size-4 text-foreground/70" />
               <a href={`mailto:${seed.siteConfig.email}`}>{seed.siteConfig.email}</a>
@@ -48,10 +50,7 @@ export default function Footer() {
             </div>
             <div className="flex items-center gap-2">
               <MapPin className="size-4 text-foreground/70" />
-              <span className="text-sm text-foreground/70">{seed.siteConfig.address}</span>
-            </div>
-            <div className="text-sm text-foreground/70 pb-1 ">
-              <span className="font-bold">{t("note")}</span> {t("note_desc")} <Link href={`mailto:${seed.siteConfig.email}`} className="text-blue-500 hover:text-blue-600">{seed.siteConfig.email}</Link>
+              <span className="text-sm text-foreground/70">{seed.siteConfig.address[locale]}</span>
             </div>
           </div>
           {/* Social and links */}
@@ -59,10 +58,13 @@ export default function Footer() {
             <span className='font-bold'>{t("quick_links")}: </span>{seed.links.map((item) => {
               return (
                 <Link key={item.href} href={item.href} target='_blank'>
-                  {t(item.name)}
+                  {item.name[locale]}
                 </Link>
               )
             })}
+            <div className="text-sm text-foreground/70 mt-2">
+              <span className="font-bold">{t("note")}</span> {t("note_desc")} <Link href={`mailto:${seed.siteConfig.email}`} className="text-blue-500 hover:text-blue-600">{seed.siteConfig.email}</Link>
+            </div>
           </div>
           <div className="flex items-start pt-2 md:pt-0 flex-col gap-2">
             <span className="font-bold text-sm text-foreground/70">{t("follow_us")}:</span>
@@ -78,8 +80,8 @@ export default function Footer() {
             />
           </div>
         </div>
-        <div className="flex items-center gap-2 py-4">
-          <p className="text-sm text-foreground/70">{t("copyright", { name: "Fergana Media" })} {t("powered_by")}<Link href="https://www.google.com" className="text-blue-500 hover:text-blue-600">Turon.io</Link></p>
+        <div className="flex items-center justify-center gap-2 py-4 border-t border-border">
+          <p className="text-sm text-foreground/70 text-center">{seed.copyright[locale]} {t("powered_by")}<Link href="https://www.google.com" className="text-blue-500 hover:text-blue-600">Turon.io</Link></p>
         </div>
       </div>
     </div>

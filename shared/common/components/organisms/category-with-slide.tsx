@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { filterPublishedRawNews, getNewsListForLocale, type NewsItem } from "@/features/news/model"
 import { seedNews } from "@/scripts/seed-news"
 import { Card } from "@/shared/common/components/ui/card"
 import {
@@ -19,39 +20,30 @@ import { useLocale, useTranslations } from "next-intl"
 import { TruncateExpand } from "@/shared/common/components/ui/truncate-expand"
 import { Button } from "@/shared/common/components/ui/button"
 import { ArrowRightIcon } from "lucide-react"
-
-type NewsItem = (typeof seedNews.news)[number]
+import { getCategoryName } from "@/shared/common/lib/seed-helpers"
 
 type CategoryWithSlideProps = {
-  category?: string
   categorySlug?: string
 }
 
-function slugFromCategory(category: string): string {
-  return category.toLowerCase().replace(/\s+/g, "-")
-}
-
 export default function CategoryWithSlide({
-  category = "Sports",
-  categorySlug,
+  categorySlug = "sports",
 }: CategoryWithSlideProps) {
   const locale = useLocale() as AppLocale
   const [api, setApi] = React.useState<CarouselApi | null>(null)
   const t = useTranslations("common")
+  const categoryName = getCategoryName(categorySlug, locale)
 
-  const slug = categorySlug ?? slugFromCategory(category)
-
-  const items = React.useMemo(
-    () =>
-      [...seedNews.news]
-        .filter((n) => n.category === category)
-        .sort(
-          (a, b) =>
-            new Date(b.publishedAt).getTime() -
-            new Date(a.publishedAt).getTime()
-        ),
-    [category]
-  )
+  const items = React.useMemo(() => {
+    const raw = filterPublishedRawNews([...seedNews.news])
+      .filter((n) => n.categorySlug === categorySlug)
+      .sort(
+        (a, b) =>
+          new Date(b.publishedAt).getTime() -
+          new Date(a.publishedAt).getTime()
+      )
+    return getNewsListForLocale(raw, locale)
+  }, [categorySlug, locale])
 
   if (items.length === 0) return null
 
@@ -60,7 +52,7 @@ export default function CategoryWithSlide({
       <div className="border-t-2 border-border">
         <Carousel setApi={setApi} opts={{ align: "start", loop: false }} className="w-full">
           <div className="flex flex-wrap items-center justify-between gap-3 my-4">
-            <h2 className="text-lg font-semibold">{category}</h2>
+            <h2 className="text-lg font-semibold">{categoryName}</h2>
             <div className="flex items-center gap-2">
               <CarouselPrevious
                 className="static size-9 translate-y-0 rounded-sm"
@@ -71,7 +63,7 @@ export default function CategoryWithSlide({
                 variant="outline"
               />
               <Button variant="ghost" asChild className="text-brand">
-                <Link href={`/category/${slug}`}>{t("view_all")} {">>"}</Link>
+                <Link href={`/category/${categorySlug}`}>{t("view_all")} {">>"}</Link>
               </Button>
             </div>
           </div>

@@ -7,7 +7,7 @@
     "search": "Qidiruv",
     "settings": "Sozlamalar",
     "language": "Til",
-    "description": "FERGANAMEDIA.UZ internet-nashri 2024-yil 26-sentyabr kuni elektron OAV sifatida prezident administratsiyasi huzuridagi AOKA dan ro'yxatdan o'tkazilgan. Guvohnoma raqami: 414738. Muassis: «FERGANA MEDIA PRESSA» MCHJ"
+    "description": "Ferganamedia.uz 2024-yil 26-sentabrda Prezident administratsiyasi huzuridagi AOKA tomonidan elektron ommaviy axborot vositasi sifatida ro'yxatdan o'tkazilgan. Guvohnoma raqami: 414738. Tashkilotchi: «Fergana Media Press» MCHJ."
   },
   "auth": {
     "login": "Kirish",
@@ -15,7 +15,7 @@
     "register": "Ro'yxatdan o'tish",
     "if_have_account": "Hisobingiz bormi?",
     "if_no_account": "Hisobingiz yo'qmi?",
-    "please_register_first": "avval ro'yxatdan o'ting",
+    "please_register_first": "Iltimos, avval ro'yxatdan o'ting.",
     "full_name": "To'liq ism",
     "email": "Email",
     "email_placeholder": "Emailingizni kiriting...",
@@ -47,7 +47,7 @@
     "search": "Qidiruv",
     "search_placeholder": "Yangiliklar qidirish...",
     "search_results": "Qidiruv natijalari",
-    "search_results_empty": "Ushbu so'rov bo'yicha natija topilmadi",
+    "search_results_empty": "Ushbu so'rov bo'yicha natija topilmadi.",
     "categories": "Kategoriyalar",
     "quick_links": "Tezkor havolalar",
     "follow_us": "Bizni kuzating",
@@ -64,12 +64,17 @@
     "presidents_portal": "Prezident portali",
     "statistics": "Statistika",
     "procuratorate": "Prokuratura",
-    "government": "O'zbekiston Respublikasi hukumat",
-    
+    "government": "O'zbekiston Respublikasi Hukumati",
     "facebook": "Facebook",
     "instagram": "Instagram",
     "telegram": "Telegram",
-    "youtube": "YouTube"
+    "youtube": "YouTube",
+    "note": "Eslatma!",
+    "note_desc": "Xato topdingiz yoki taklifingiz bormi? Biz bilan bog'laning: ",
+    "read_more": "Batafsil",
+    "view_all": "Barchasini ko'rish",
+    "createdBy": "Muallif",
+    "tags": "Teglar"
   },
   "stayConnected": {
     "title": "Biz bilan bog'laning",

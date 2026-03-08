@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { filterPublishedRawNews, getNewsListForLocale, type NewsItem } from "@/features/news/model"
 import { seedNews } from "@/scripts/seed-news"
 import { Card } from "@/shared/common/components/ui/card"
 import { Button } from "@/shared/common/components/ui/button"
@@ -10,15 +11,13 @@ import {
   formatDateTimeLocale,
 } from "@/shared/common/lib/formatter"
 import type { AppLocale } from "@/shared/common/lib/formatter"
-import { slugToCategory } from "@/shared/common/lib/category"
+import { getCategoryName } from "@/shared/common/lib/seed-helpers"
 import { Link } from "@/i18n/navigation"
 import Image from "next/image"
 import { useLocale, useTranslations } from "next-intl"
 import { TruncateExpand } from "@/shared/common/components/ui/truncate-expand"
 
 const PAGE_SIZE = 99
-
-type NewsItem = (typeof seedNews.news)[number]
 
 type CategoryPageContentProps = {
   slug: string
@@ -27,19 +26,18 @@ type CategoryPageContentProps = {
 export function CategoryPageContent({ slug }: CategoryPageContentProps) {
   const locale = useLocale() as AppLocale
   const t = useTranslations("common")
-  const category = slugToCategory(slug)
+  const category = getCategoryName(slug, locale)
 
-  const allItems = React.useMemo(
-    () =>
-      [...seedNews.news]
-        .filter((n) => n.category === category)
-        .sort(
-          (a, b) =>
-            new Date(b.publishedAt).getTime() -
-            new Date(a.publishedAt).getTime()
-        ),
-    [category]
-  )
+  const allItems = React.useMemo(() => {
+    const raw = filterPublishedRawNews([...seedNews.news])
+      .filter((n) => n.categorySlug === slug)
+      .sort(
+        (a, b) =>
+          new Date(b.publishedAt).getTime() -
+          new Date(a.publishedAt).getTime()
+      )
+    return getNewsListForLocale(raw, locale)
+  }, [slug, locale])
 
   const featured = allItems.slice(0, 3)
   const rest = allItems.slice(3)
