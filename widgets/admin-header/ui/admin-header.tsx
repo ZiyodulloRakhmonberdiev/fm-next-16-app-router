@@ -3,12 +3,27 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { Link, useRouter } from '@/i18n/navigation'
 import { useLocale } from 'next-intl'
+import Image from 'next/image'
 import { SidebarTrigger } from '@/shared/common/components/ui/sidebar'
 import { Button } from '@/shared/common/components/ui/button'
-import { Bell, LayoutDashboard, LogOut, Search, ArrowLeft } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/shared/common/components/ui/dropdown-menu'
+import { Bell, LayoutDashboard, LogOut, Search, ArrowLeft, User, ExternalLink } from 'lucide-react'
+import { ThemeSwitcher } from '@/widgets/theme-switcher'
 import type { NewsItem } from '@/features/news/model'
 
 const DEBOUNCE_MS = 200
+
+const MOCK_USER = {
+  full_name: 'Admin Foydalanuvchi',
+  role: 'Administrator',
+  image: null as string | null,
+}
 
 export default function AdminHeader() {
   const router = useRouter()
@@ -114,17 +129,68 @@ export default function AdminHeader() {
         </div>
       </div>
       <div className="flex items-center gap-2">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="rounded-full">
+              {MOCK_USER.image ? (
+                <Image
+                  src={MOCK_USER.image}
+                  alt={MOCK_USER.full_name}
+                  width={32}
+                  height={32}
+                  className="rounded-full size-8 object-cover"
+                />
+              ) : (
+                <span className="flex size-8 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <User className="size-4" />
+                </span>
+              )}
+              <span className="sr-only">Foydalanuvchi menyu</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <div className="flex items-center gap-3 px-2 py-2">
+              {MOCK_USER.image ? (
+                <Image
+                  src={MOCK_USER.image}
+                  alt={MOCK_USER.full_name}
+                  width={40}
+                  height={40}
+                  className="rounded-full size-10 object-cover"
+                />
+              ) : (
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <User className="size-5" />
+                </span>
+              )}
+              <div className="flex flex-col min-w-0">
+                <p className="text-sm font-medium truncate">{MOCK_USER.full_name}</p>
+                <p className="text-xs text-muted-foreground">{MOCK_USER.role}</p>
+              </div>
+            </div>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link href="/" className="flex items-center gap-2 cursor-pointer">
+                <ExternalLink className="size-4" />
+                Saytga qaytish
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/" className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive">
+                <LogOut className="size-4" />
+                Chiqish
+              </Link>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="size-4" />
           <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-destructive" />
           <span className="sr-only">Bildirishnomalar</span>
         </Button>
-        <Button variant="ghost" size="icon" asChild>
-          <Link href="/">
-            <LogOut className="size-4" />
-            <span className="sr-only">Chiqish</span>
-          </Link>
-        </Button>
+        <div className="flex h-9 w-9 items-center justify-center rounded-md">
+          <ThemeSwitcher />
+        </div>
       </div>
     </header>
   )

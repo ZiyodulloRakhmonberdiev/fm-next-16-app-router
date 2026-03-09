@@ -1,0 +1,66 @@
+{
+  "headline": {
+    "uz": "Sayt demo rejimida ishlamoqda!",
+    "uzb": "Сайт демо режимида ишламоқда!",
+    "ru": "Сайт работает в демо-режиме!",
+    "en": "Site is running in demo mode!"
+  },
+  "description": {
+    "uz": "Ferganamedia.uz 2024-yil 26-sentabrda Prezident administratsiyasi huzuridagi AOKA tomonidan elektron ommaviy axborot vositasi sifatida ro'yxatdan o'tkazilgan. Guvohnoma raqami: 414738. Tashkilotchi: «Fergana Media Press» MCHJ.",
+    "uzb": "Ferganamedia.uz 2024-йил 26-сентябрда Президент мақомоти ҳузуридаги АОКА томонидан электрон оммавий ахборот воситаси сифатида рўйхатдан ўтказилган. Гувоҳнома рақами: 414738. Ташкилотчи: «Fergana Media Press» МЧЖ.",
+    "ru": "Ferganamedia.uz зарегистрирован как электронное СМИ 26 сентября 2024 года АОКА при администрации Президента. Свидетельство № 414738. Учредитель: ООО «Fergana Media Press».",
+    "en": "Ferganamedia.uz is registered as an electronic mass media 26 September 2024 by the AOKA under the administration of the President. Certificate number: 414738. Founder: OOO «Fergana Media Press»."
+  },
+  "socialMedia": [
+    {
+      "slug": "telegram",
+      "name": {
+        "uz": "Telegram",
+        "uzb": "Телеграм",
+        "ru": "Телеграм",
+        "en": "Telegram"
+      },
+      "href": "/telegram"
+    },
+    {
+      "slug": "instagram",
+      "name": {
+        "uz": "Instagram",
+        "uzb": "Инстаграм",
+        "ru": "Инстаграм",
+        "en": "Instagram"
+      },
+      "href": "/instagram"
+    },
+    {
+      "slug": "facebook",
+      "name": {
+        "uz": "Facebook",
+        "uzb": "Фейсбук",
+        "ru": "Фейсбук",
+        "en": "Facebook"
+      },
+      "href": "/facebook"
+    },
+    {
+      "slug": "youtube",
+      "name": {
+        "uz": "YouTube",
+        "uzb": "Ютуб",
+        "ru": "Ютуб",
+        "en": "YouTube"
+      },
+      "href": "/youtube"
+    }
+  ],
+  "siteConfig": {
+    "email": "info@ferganamedia.uz",
+    "phone": "+998 90 123 45 67",
+    "address": {
+      "uz": "Farg'ona viloyati, Farg'ona shahar, Mash'al, Alisher Navoiy ko'chasi, 32",
+      "uzb": "Фарғона вилояти, Фарғона шаҳар, Машъал, Алишер Навоий кўчаси, 32",
+      "ru": "Ферганская область, г. Фергана, Машъал, ул. Алишера Навои, 32",
+      "en": "Fergana region, Fergana city, Mashal, Alisher Navoi street, 32"
+    }
+  }
+}

@@ -81,17 +81,18 @@ export default function TopNews() {
     <div className="w-full">
       <Carousel
         setApi={setApi}
+        opts={{ loop: true }}
         plugins={[plugin.current]}
-        className="w-full h-auto"
+        className="w-full"
         onMouseEnter={plugin.current.stop}
         onMouseLeave={plugin.current.reset}
       >
-        <div className="relative h-full">
+        <div className="relative">
           <CarouselContent className="ml-0">
             {news.map((item: NewsItem) => (
               <CarouselItem key={item.slug} className="pl-0">
                 <Card className="overflow-hidden mx-1 p-0 rounded-sm">
-                  <div className="grid md:min-h-[380px] grid-cols-1 md:grid-cols-5">
+                  <div className="grid grid-cols-1 md:grid-cols-5">
                     <div className="flex flex-col justify-between order-1 md:order-0 gap-2 p-4 md:gap-3 md:p-8 bg-background border-none md:col-span-2">
                       <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                         {item.category}
@@ -112,7 +113,7 @@ export default function TopNews() {
                     </div>
                     <Link
                       href={`/news/${item.slug}`}
-                      className="relative block aspect-video md:aspect-auto min-h-[220px] md:min-h-[380px] md:col-span-3"
+                      className="relative block aspect-video w-full md:col-span-3"
                     >
                       <Image
                         src={item.images[0]}

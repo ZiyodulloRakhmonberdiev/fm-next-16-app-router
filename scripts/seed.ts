@@ -174,5 +174,26 @@ export const seed = {
       en: "Fergana region, Fergana city, Mashal, Alisher Navoi street, 32",
     } satisfies LocaleMap,
   } as const,
+
+  users: [
+    {
+      id: "admin-1",
+      full_name: "Admin Foydalanuvchi",
+      image: null as string | null,
+      role: "administrator",
+      lavozim: "Tizim administratori",
+      login: "admin",
+      password: "admin123",
+    },
+    {
+      id: "editor-1",
+      full_name: "Tahrirchi User",
+      image: null as string | null,
+      role: "moderator",
+      lavozim: "Bosh muharrir",
+      login: "editor",
+      password: "editor123",
+    },
+  ] as const,
 }
 

@@ -43,9 +43,11 @@ export default function AdminSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-r border-border">
-      <SidebarHeader className="border-b border-border">
-        <div className="flex h-12 items-center gap-2 px-2">
-          <span className="font-semibold text-lg hidden md:block">Admin</span>
+      <SidebarHeader className="border-b border-border min-w-0 overflow-hidden shrink-0">
+        <div className="flex h-12 items-center gap-2 px-2 min-w-0">
+          <span className="font-semibold text-lg truncate group-data-[state=collapsed]:hidden">
+            Admin
+          </span>
         </div>
       </SidebarHeader>
       <SidebarContent>
@@ -85,8 +87,8 @@ export default function AdminSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="border-t border-border">
-        <div className="px-2 py-2 text-xs text-muted-foreground">
+      <SidebarFooter className="border-t border-border min-w-0 overflow-hidden shrink-0">
+        <div className="px-2 py-2 text-xs text-muted-foreground truncate group-data-[state=collapsed]:hidden">
           Admin panel v1.0
         </div>
       </SidebarFooter>

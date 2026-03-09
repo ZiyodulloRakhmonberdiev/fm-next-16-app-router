@@ -2,6 +2,7 @@ import { Footer } from "@/widgets/client-footer";
 import { Header } from "@/widgets/client-header";
 import ClientSidebar from "@/widgets/client-sidebar/ui/client-sidebar";
 import { CategoryWithBanner, CategoryWithColumns, CategoryWithSlide, CategoryVideo, TopBanner } from "@/shared/common/components/organisms";
+import { StayConnected } from "@/shared/common/components/molecules";
 
 export default function HomePage() {
   return (
@@ -17,6 +18,7 @@ export default function HomePage() {
             <CategoryWithSlide categorySlug="sports" />
             <CategoryWithBanner categorySlug="business" />
             <CategoryVideo />
+            <StayConnected />
             <CategoryWithBanner categorySlug="sports" featuredPosition="left" />
             <CategoryWithSlide categorySlug="business" />
             <CategoryWithColumns categorySlug="business" featuredPosition="right" />

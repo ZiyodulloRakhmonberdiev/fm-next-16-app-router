@@ -80,7 +80,7 @@ export default function Footer() {
             />
           </div>
         </div>
-        <div className="flex items-center justify-center gap-2 py-4 border-t border-border">
+        <div className="flex items-center justify-center gap-2 py-4 mt-4 border-t border-border">
           <p className="text-sm text-foreground/70 text-center">{seed.copyright[locale]} {t("powered_by")}<Link href="https://www.google.com" className="text-blue-500 hover:text-blue-600">Turon.io</Link></p>
         </div>
       </div>
