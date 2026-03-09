@@ -45,6 +45,7 @@ export const seedNews: { news: RawNewsItem[] } = {
       isLatest: false,
       isPopular: false,
       isTop: true,
+      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
       publishedAt: new Date("2024-01-15T10:00:00Z"),
       createdAt: new Date("2024-01-14T09:00:00Z"),
       updatedAt: new Date("2024-01-16T14:30:00Z"),

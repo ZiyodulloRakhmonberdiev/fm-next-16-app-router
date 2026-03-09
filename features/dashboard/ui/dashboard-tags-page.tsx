@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
+import { toast } from 'sonner'
 import {
   Card,
   CardContent,
@@ -28,7 +29,7 @@ import {
   TableRow,
 } from '@/shared/common/components/ui/table'
 import type { AppLocale } from '@/shared/common/lib/locale-api'
-import { Tag, Search, PlusCircle, Pencil } from 'lucide-react'
+import { Tag, PlusCircle, Pencil, Trash2 } from 'lucide-react'
 
 const LOCALES: AppLocale[] = ['uz', 'uzb', 'ru', 'en']
 const LOCALE_LABELS: Record<AppLocale, string> = {
@@ -50,19 +51,9 @@ type DashboardTagsPageProps = {
 
 export function DashboardTagsPage({ tags: initialTags, locale }: DashboardTagsPageProps) {
   const [tags, setTags] = useState<TagRow[]>(initialTags)
-  const [search, setSearch] = useState('')
   const [createOpen, setCreateOpen] = useState(false)
   const [editTag, setEditTag] = useState<TagRow | null>(null)
-
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase()
-    if (!q) return tags
-    return tags.filter(
-      (t) =>
-        t.slug.toLowerCase().includes(q) ||
-        Object.values(t.name).some((n) => n?.toLowerCase().includes(q))
-    )
-  }, [tags, search])
+  const [deleteTag, setDeleteTag] = useState<TagRow | null>(null)
 
   const handleCreateSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -79,6 +70,7 @@ export function DashboardTagsPage({ tags: initialTags, locale }: DashboardTagsPa
     if (exists) return
     setTags((prev) => [...prev, { slug, name }])
     setCreateOpen(false)
+    toast.success('Teg muvaffaqiyatli qo‘shildi')
   }
 
   const handleUpdateSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -96,6 +88,15 @@ export function DashboardTagsPage({ tags: initialTags, locale }: DashboardTagsPa
     const originalSlug = editTag.slug
     setTags((prev) => prev.map((t) => (t.slug === originalSlug ? { slug, name } : t)))
     setEditTag(null)
+    toast.success('Teg muvaffaqiyatli yangilandi')
+  }
+
+  const handleDeleteConfirm = () => {
+    if (!deleteTag) return
+    const slug = deleteTag.slug
+    setTags((prev) => prev.filter((t) => t.slug !== slug))
+    setDeleteTag(null)
+    toast.success('Teg muvaffaqiyatli o‘chirildi')
   }
 
   return (
@@ -120,26 +121,8 @@ export function DashboardTagsPage({ tags: initialTags, locale }: DashboardTagsPa
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Qidirish</CardTitle>
-          <CardDescription>Slug yoki nom bo‘yicha filtrlash</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-            <Input
-              placeholder="Slug yoki nom..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 max-w-sm"
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
           <CardTitle className="text-base">Ro‘yxat</CardTitle>
-          <CardDescription>Jami: {filtered.length} ta teg</CardDescription>
+          <CardDescription>Jami: {tags.length} ta teg</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="rounded-md border overflow-x-auto">
@@ -155,14 +138,14 @@ export function DashboardTagsPage({ tags: initialTags, locale }: DashboardTagsPa
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filtered.length === 0 ? (
+                {tags.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
                       Teg topilmadi
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filtered.map((row) => (
+                  tags.map((row) => (
                     <TableRow key={row.slug}>
                       <TableCell className="font-mono text-sm">{row.slug}</TableCell>
                       <TableCell>{row.name.uz ?? '—'}</TableCell>
@@ -170,15 +153,24 @@ export function DashboardTagsPage({ tags: initialTags, locale }: DashboardTagsPa
                       <TableCell>{row.name.ru ?? '—'}</TableCell>
                       <TableCell>{row.name.en ?? '—'}</TableCell>
                       <TableCell>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setEditTag(row)}
-                          className="gap-1"
-                        >
-                          <Pencil className="size-4" />
-                          Tahrirlash
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setEditTag(row)}
+                            className="gap-1"
+                          >
+                            <Pencil className="size-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setDeleteTag(row)}
+                            className="gap-1"
+                          >
+                            <Trash2 className="size-4" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))
@@ -260,6 +252,26 @@ export function DashboardTagsPage({ tags: initialTags, locale }: DashboardTagsPa
                 Saqlash
               </Button>
             )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete tag confirm modal */}
+      <Dialog open={!!deleteTag} onOpenChange={(open) => !open && setDeleteTag(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Tegni o‘chirish</DialogTitle>
+            <DialogDescription>
+              Haqiqatan ham "{deleteTag?.name[locale] ?? deleteTag?.slug}" tegini o‘chirishni xohlaysizmi?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setDeleteTag(null)}>
+              Bekor qilish
+            </Button>
+            <Button type="button" variant="destructive" onClick={handleDeleteConfirm}>
+              O‘chirish
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -1,16 +1,17 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Link } from '@/i18n/navigation'
+import { Link, useRouter } from '@/i18n/navigation'
 import { useLocale } from 'next-intl'
 import { SidebarTrigger } from '@/shared/common/components/ui/sidebar'
 import { Button } from '@/shared/common/components/ui/button'
-import { Bell, LayoutDashboard, LogOut, Search } from 'lucide-react'
+import { Bell, LayoutDashboard, LogOut, Search, ArrowLeft } from 'lucide-react'
 import type { NewsItem } from '@/features/news/model'
 
 const DEBOUNCE_MS = 200
 
 export default function AdminHeader() {
+  const router = useRouter()
   const locale = useLocale()
   const [searchQuery, setSearchQuery] = useState('')
   const [results, setResults] = useState<NewsItem[]>([])
@@ -56,6 +57,15 @@ export default function AdminHeader() {
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b border-border bg-background px-4 md:px-6">
       <SidebarTrigger className="-ml-1 hidden md:flex" />
+      <Button
+        variant="ghost"
+        size="icon"
+        className="shrink-0"
+        onClick={() => router.back()}
+        aria-label="Ortga"
+      >
+        <ArrowLeft className="size-5" />
+      </Button>
       <div className="flex flex-1 items-center gap-4">
         <div className="hidden md:flex items-center gap-2 text-sm font-medium text-muted-foreground">
           <LayoutDashboard className="size-4" />
@@ -86,7 +96,7 @@ export default function AdminHeader() {
                   {results.map((item) => (
                     <li key={item.slug}>
                       <Link
-                        href={`/news/${item.slug}`}
+                        href={`/dashboard/news/${item.slug}/edit`}
                         className="block px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground truncate"
                         onClick={() => {
                           setIsOpen(false)

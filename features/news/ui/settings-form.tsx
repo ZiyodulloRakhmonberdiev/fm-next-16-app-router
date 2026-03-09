@@ -1,0 +1,216 @@
+'use client'
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/shared/common/components/ui/card'
+import { Label } from '@/shared/common/components/ui/label'
+import { Switch } from '@/shared/common/components/ui/switch'
+import { Button } from '@/shared/common/components/ui/button'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/shared/common/components/ui/tooltip'
+import { Save, Send, Trash2, RotateCcw, Archive, Ban, ExternalLink } from 'lucide-react'
+import { Link } from '@/i18n/navigation'
+import type { NewsStatus } from '@/features/news/model'
+
+const STATUS_LABELS: Record<NewsStatus, string> = {
+  pending: 'Kutilmoqda',
+  published: 'Nashr qilingan',
+  cancelled: 'Bekor qilingan',
+  deleted: "O'chirilgan (Savat)",
+  archived: 'Arxivlangan',
+}
+
+type SettingsFormProps = {
+  isTop: boolean
+  authorsChoice: boolean
+  pushedToTelegram: boolean
+  isBreaking: boolean
+  isPopular: boolean
+  canPublish: boolean
+  publishDisabledReason?: string
+  onBack: () => void
+  onChangeIsTop: (value: boolean) => void
+  onChangeAuthorsChoice: (value: boolean) => void
+  onChangePushedToTelegram: (value: boolean) => void
+  onChangeIsBreaking: (value: boolean) => void
+  onChangeIsPopular: (value: boolean) => void
+  onSavePending: () => void
+  onPublish: () => void
+  mode?: 'create' | 'edit'
+  currentStatus?: NewsStatus
+  onStatusChange?: (newStatus: NewsStatus) => void
+  /** Edit rejimida: preview uchun yangilik slug (faqat status published bo‘lsa faol) */
+  previewSlug?: string
+}
+
+export function SettingsForm({
+  isTop,
+  authorsChoice,
+  pushedToTelegram,
+  isBreaking,
+  isPopular,
+  canPublish,
+  publishDisabledReason,
+  onBack,
+  onChangeIsTop,
+  onChangeAuthorsChoice,
+  onChangePushedToTelegram,
+  onChangeIsBreaking,
+  onChangeIsPopular,
+  onSavePending,
+  onPublish,
+  mode = 'create',
+  currentStatus = 'published',
+  onStatusChange,
+  previewSlug,
+}: SettingsFormProps) {
+  const statusLabel = STATUS_LABELS[currentStatus]
+  const canRestore = ['pending', 'cancelled', 'deleted', 'archived'].includes(currentStatus)
+  const canPublishBtn = currentStatus === 'pending'
+  const canCancel = currentStatus === 'published' || currentStatus === 'pending'
+  const canMoveToTrash = currentStatus !== 'deleted'
+  const canArchive = currentStatus === 'published'
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Sozlamalar</CardTitle>
+        <CardDescription>
+          Switch orqali belgilang. Saqlash — status pending, Chop etish — nashr qilingan.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border p-4">
+          <Label htmlFor="isTop" className="cursor-pointer">
+            Top yangilik
+          </Label>
+          <Switch id="isTop" checked={isTop} onCheckedChange={onChangeIsTop} />
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border p-4">
+          <Label htmlFor="authorsChoice" className="cursor-pointer">
+            Muallif tanlovi
+          </Label>
+          <Switch id="authorsChoice" checked={authorsChoice} onCheckedChange={onChangeAuthorsChoice} />
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border p-4">
+          <Label htmlFor="pushedToTelegram" className="cursor-pointer">
+            Telegramga yuborish
+          </Label>
+          <Switch id="pushedToTelegram" checked={pushedToTelegram} onCheckedChange={onChangePushedToTelegram} />
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border p-4">
+          <Label htmlFor="isBreaking" className="cursor-pointer">
+            Shoshilinch yangilik (Breaking)
+          </Label>
+          <Switch id="isBreaking" checked={isBreaking} onCheckedChange={onChangeIsBreaking} />
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border p-4">
+          <Label htmlFor="isPopular" className="cursor-pointer">
+            Omabop (Popular)
+          </Label>
+          <Switch id="isPopular" checked={isPopular} onCheckedChange={onChangeIsPopular} />
+        </div>
+        {mode === 'edit' && onStatusChange && (
+          <div className="space-y-3 rounded-lg border p-4">
+            <p className="text-sm font-medium">Status</p>
+            <p className="text-xs text-muted-foreground mb-3">
+              Joriy status: <span className="font-semibold">{statusLabel}</span>
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {canRestore && (
+                <Button variant="default" size="sm" className="gap-2" onClick={() => onStatusChange('published')}>
+                  <RotateCcw className="size-4" />
+                  Qayta tiklash (nashr)
+                </Button>
+              )}
+              {canPublishBtn && (
+                <Button variant="secondary" size="sm" className="gap-2" onClick={() => onStatusChange('published')}>
+                  <Send className="size-4" />
+                  Chop etish
+                </Button>
+              )}
+              {canCancel && (
+                <Button variant="outline" size="sm" className="gap-2" onClick={() => onStatusChange('cancelled')}>
+                  <Ban className="size-4" />
+                  Bekor qilish
+                </Button>
+              )}
+              {canMoveToTrash && (
+                <Button variant="destructive" size="sm" className="gap-2" onClick={() => onStatusChange('deleted')}>
+                  <Trash2 className="size-4" />
+                  Savatga
+                </Button>
+              )}
+              {canArchive && (
+                <Button variant="outline" size="sm" className="gap-2" onClick={() => onStatusChange('archived')}>
+                  <Archive className="size-4" />
+                  Arxivlash
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
+        <div className="flex flex-wrap gap-3 pt-4">
+          <Button variant="outline" onClick={onBack} className="gap-2">
+            Orqaga
+          </Button>
+          <Button variant="secondary" onClick={onSavePending} className="gap-2">
+            <Save className="size-4" />
+            Saqlash (pending)
+          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="inline-flex" aria-disabled={!canPublish}>
+                  <Button onClick={onPublish} className="gap-2" disabled={!canPublish}>
+                    <Send className="size-4" />
+                    Chop etish
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              {!canPublish && publishDisabledReason && (
+                <TooltipContent sideOffset={6}>{publishDisabledReason}</TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
+          {mode === 'edit' && previewSlug != null && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="inline-flex">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-2"
+                      disabled={currentStatus !== 'published'}
+                      asChild={currentStatus === 'published'}
+                    >
+                      {currentStatus === 'published' ? (
+                        <Link href={`/news/${previewSlug}`} target="_blank" rel="noopener noreferrer">
+                          <ExternalLink className="size-4" />
+                          Preview
+                        </Link>
+                      ) : (
+                        <>
+                          <ExternalLink className="size-4" />
+                          Preview
+                        </>
+                      )}
+                    </Button>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent sideOffset={6}>
+                  {currentStatus === 'published'
+                    ? 'Client sahifada yangilikni ochish'
+                    : 'Faqat nashr qilingan (published) yangilikni ko‘rish mumkin'}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  )
+}

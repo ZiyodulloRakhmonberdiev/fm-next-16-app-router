@@ -11,14 +11,14 @@ import {
   Users,
   Newspaper,
   Tag,
+  Plus,
+  PlusCircle,
 } from 'lucide-react'
 
 const navItems = [
   { href: '/dashboard', label: 'Bosh sahifa', icon: LayoutDashboard },
   { href: '/dashboard/news', label: 'Yangiliklar', icon: Newspaper },
-  { href: '/dashboard/categories', label: 'Kategoriyalar', icon: FolderTree },
-  { href: '/dashboard/tags', label: 'Teglar', icon: Tag },
-  { href: '/dashboard/pages', label: 'Sahifalar', icon: FileText },
+  { href: '/dashboard/news/create', label: 'Yangi', icon: PlusCircle },
   { href: '/dashboard/users', label: 'Foydalanuvchilar', icon: Users },
   { href: '/dashboard/settings', label: 'Sozlamalar', icon: Settings },
 ]

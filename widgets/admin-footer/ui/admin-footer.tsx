@@ -6,7 +6,7 @@ export default function AdminFooter() {
   const currentYear = new Date().getFullYear()
 
   return (
-    <footer className="border-t border-border bg-muted/30 py-3 px-4 md:px-6 z-30">
+    <footer className="border-t border-border bg-muted/30 py-3 px-4 md:px-6 z-30 mb-16 md:mb-0">
       <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-sm text-muted-foreground">
         <p>
           © {currentYear} Admin panel. Barcha huquqlar himoyalangan.

@@ -158,7 +158,7 @@ export function DashboardNewsLists({
                   {topSlice.map((item) => (
                     <li key={item.slug} className="flex items-stretch gap-2 rounded-lg border border-border/50 overflow-hidden">
                       <Link
-                        href={`/news/${item.slug}`}
+                        href={`/dashboard/news/${item.slug}/edit`}
                         className="flex min-w-0 flex-1 gap-3 p-2 hover:bg-muted/50 transition-colors"
                       >
                         <div className="relative h-14 w-20 shrink-0 overflow-hidden rounded-md bg-muted">
@@ -221,7 +221,7 @@ export function DashboardNewsLists({
                   {authorsSlice.map((item) => (
                     <li key={item.slug} className="flex items-stretch gap-2 rounded-lg border border-border/50 overflow-hidden">
                       <Link
-                        href={`/news/${item.slug}`}
+                        href={`/dashboard/news/${item.slug}/edit`}
                         className="flex min-w-0 flex-1 gap-3 p-2 hover:bg-muted/50 transition-colors"
                       >
                         <div className="relative h-14 w-20 shrink-0 overflow-hidden rounded-md bg-muted">
@@ -284,7 +284,7 @@ export function DashboardNewsLists({
                   {mostReadSlice.map((item) => (
                     <li key={item.slug}>
                       <Link
-                        href={`/news/${item.slug}`}
+                        href={`/dashboard/news/${item.slug}/edit`}
                         className="flex gap-3 rounded-lg border border-border/50 p-2 hover:bg-muted/50 transition-colors"
                       >
                         <div className="relative h-14 w-20 shrink-0 overflow-hidden rounded-md bg-muted">

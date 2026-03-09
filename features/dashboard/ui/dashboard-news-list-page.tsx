@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
+import { toast } from 'sonner'
 import { Link } from '@/i18n/navigation'
 import Image from 'next/image'
 import {
@@ -39,7 +40,7 @@ import {
 import { formatDateTimeLocale } from '@/shared/common/lib/formatter'
 import type { AppLocale } from '@/shared/common/lib/locale-api'
 import type { NewsItem, NewsStatus } from '@/features/news/model'
-import { Newspaper, PlusCircle, Eye, ChevronLeft, ChevronRight, Search, ChevronDown, ExternalLink, Pencil, Columns3, Languages, Check, CircleOff } from 'lucide-react'
+import { Newspaper, PlusCircle, Eye, ChevronLeft, ChevronRight, Search, ChevronDown, ExternalLink, Pencil, Columns3, Languages, Check, CircleOff, Clock, Send, Ban, Trash2, Archive } from 'lucide-react'
 
 const PER_PAGE = 40
 
@@ -51,6 +52,14 @@ const STATUS_OPTIONS: { value: '' | NewsStatus; label: string }[] = [
   { value: 'deleted', label: "O'chirilgan" },
   { value: 'archived', label: 'Arxivlangan' },
 ]
+
+const STATUS_ICONS: Record<NewsStatus, React.ComponentType<{ className?: string }>> = {
+  pending: Clock,
+  published: Send,
+  cancelled: Ban,
+  deleted: Trash2,
+  archived: Archive,
+}
 
 const TOP_OPTIONS: { value: '' | 'yes' | 'no'; label: string }[] = [
   { value: '', label: 'Barchasi' },
@@ -99,6 +108,8 @@ type DashboardNewsListPageProps = {
   news: NewsItem[]
   locale: AppLocale
   translationsBySlug: Record<string, TranslationsForSlug>
+  variant?: 'full' | 'tableOnly'
+  initialStatus?: '' | NewsStatus
 }
 
 function Pagination({
@@ -191,10 +202,16 @@ function FilterSelect<T extends string>({
 
 const LOCALES: AppLocale[] = ['uz', 'uzb', 'ru', 'en']
 
-export function DashboardNewsListPage({ news, locale, translationsBySlug }: DashboardNewsListPageProps) {
+export function DashboardNewsListPage({
+  news,
+  locale,
+  translationsBySlug,
+  variant = 'full',
+  initialStatus = '',
+}: DashboardNewsListPageProps) {
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState<'' | NewsStatus>('')
+  const [statusFilter, setStatusFilter] = useState<'' | NewsStatus>(initialStatus)
   const [isTopFilter, setIsTopFilter] = useState<'' | 'yes' | 'no'>('')
   const [typeFilter, setTypeFilter] = useState<'' | 'video' | 'image'>('')
   const [dateFrom, setDateFrom] = useState('')
@@ -203,6 +220,23 @@ export function DashboardNewsListPage({ news, locale, translationsBySlug }: Dash
     Object.fromEntries(COLUMN_KEYS.map((k) => [k, true]))
   )
   const [translationsModalSlug, setTranslationsModalSlug] = useState<string | null>(null)
+
+  const countsByStatus = useMemo(() => {
+    const base: Record<NewsStatus, number> = {
+      pending: 0,
+      published: 0,
+      cancelled: 0,
+      deleted: 0,
+      archived: 0,
+    }
+    for (const item of news) {
+      const status = (item.status ?? 'published') as NewsStatus
+      if (base[status] !== undefined) {
+        base[status]++
+      }
+    }
+    return base
+  }, [news])
 
   const filtered = useMemo(() => {
     let list = [...news]
@@ -254,6 +288,24 @@ export function DashboardNewsListPage({ news, locale, translationsBySlug }: Dash
     setPage(1)
   }
 
+  const isTrashView = initialStatus === 'deleted'
+
+  const titleText =
+    variant === 'full'
+      ? 'Yangiliklar'
+      : isTrashView
+      ? 'Savat'
+      : 'Yangiliklar'
+
+  const descriptionText =
+    variant === 'full'
+      ? "Barcha yangiliklar ro‘yxati. Yangi yangilik qo‘shish uchun quyidagi tugmani bosing."
+      : isTrashView
+      ? "Savatga o‘tkazilgan yangiliklar bu yerda 7 kun davomida saqlanadi. Shu muddat ichida ularni tiklash mumkin, aks holda ular avtomatik o‘chib ketadi."
+      : 'Filtrlangan yangiliklar ro‘yxati.'
+
+  const totalNewsCount = news.length
+
   return (
     <div className="space-y-6 min-w-0 overflow-hidden scrollbar-hide">
       <Card className="border-primary/30 bg-primary/5">
@@ -261,89 +313,133 @@ export function DashboardNewsListPage({ news, locale, translationsBySlug }: Dash
           <div>
             <CardTitle className="text-xl flex items-center gap-2">
               <Newspaper className="size-6" />
-              Yangiliklar
+              {titleText}
             </CardTitle>
-            <CardDescription>
-              Barcha yangiliklar ro‘yxati. Yangi yangilik qo‘shish uchun quyidagi tugmani bosing.
-            </CardDescription>
+            <CardDescription>{descriptionText}</CardDescription>
           </div>
-          <Button asChild size="lg" className="shrink-0">
-            <Link href="/dashboard/news/create">
-              <PlusCircle className="size-4 mr-2" />
-              Yangilik yaratish
-            </Link>
-          </Button>
+          {variant === 'full' && (
+            <Button asChild size="lg" className="shrink-0">
+              <Link href="/dashboard/news/create">
+                <PlusCircle className="size-4 mr-2" />
+                Yangilik yaratish
+              </Link>
+            </Button>
+          )}
         </CardHeader>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Filterlar</CardTitle>
-          <CardDescription>Status, Top, tur va sana bo‘yicha filtrlash</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-            <FilterSelect
-              label="Status bo‘yicha"
-              description=""
-              value={statusFilter}
-              options={STATUS_OPTIONS}
-              onSelect={setStatusFilter}
-              placeholder="Barcha statuslar"
-            />
-            <FilterSelect
-              label="Top yangilik bo‘yicha"
-              description=""
-              value={isTopFilter}
-              options={TOP_OPTIONS}
-              onSelect={setIsTopFilter}
-              placeholder="Barchasi"
-            />
-            <FilterSelect
-              label="Turi bo‘yicha"
-              description=""
-              value={typeFilter}
-              options={TYPE_OPTIONS_FULL}
-              onSelect={setTypeFilter}
-              placeholder="Barcha turlar"
-            />
-            <div className="space-y-2">
-              <Label htmlFor="date-from" className="text-sm font-medium">
-                Sana bo‘yicha (dan)
-              </Label>
-              <Input
-                id="date-from"
-                type="date"
-                value={dateFrom}
-                onChange={(e) => setDateFrom(e.target.value)}
-                className="h-9"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="date-to" className="text-sm font-medium">
-                Sana bo‘yicha (gacha)
-              </Label>
-              <Input
-                id="date-to"
-                type="date"
-                value={dateTo}
-                onChange={(e) => setDateTo(e.target.value)}
-                className="h-9"
-              />
-            </div>
-            <div className="flex flex-col justify-end gap-2">
-              {/* <Label className="text-sm font-medium opacity-0 pointer-events-none">Tozalash</Label> */}
-              <p className="text-xs text-muted-foreground opacity-0 pointer-events-none">.</p>
-              <Button variant="outline" size="sm" onClick={clearFilters}>
-                Filterlarni tozalash
-              </Button>
-            </div>
+      {variant === 'full' && (
+        <>
+          <div className="grid gap-4 grid-cols-2 sm:grid-cols-3">
+            <Link href="/dashboard/news" className="block">
+              <Card className="hover:border-primary/60 transition-colors cursor-pointer h-full">
+                <CardHeader className="py-3 flex flex-row items-center gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                    <Newspaper className="size-5 text-primary" />
+                  </div>
+                  <div className="min-w-0">
+                    <CardTitle className="text-sm font-medium">Barcha yangiliklar</CardTitle>
+                    <CardDescription>
+                      {totalNewsCount} ta yangilik
+                    </CardDescription>
+                  </div>
+                </CardHeader>
+              </Card>
+            </Link>
+            {STATUS_OPTIONS.filter((s) => s.value !== '').map((option) => {
+              const value = option.value as NewsStatus
+              const count = countsByStatus[value]
+              const Icon = STATUS_ICONS[value]
+              return (
+                <Link
+                  key={value}
+                  href={`/dashboard/news/status/${value}`}
+                  className="block"
+                >
+                  <Card className="hover:border-primary/60 transition-colors cursor-pointer h-full">
+                    <CardHeader className="py-3 flex flex-row items-center gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                        <Icon className="size-5 text-primary" />
+                      </div>
+                      <div className="min-w-0">
+                        <CardTitle className="text-sm font-medium">{option.label}</CardTitle>
+                        <CardDescription>
+                          {count} ta yangilik
+                        </CardDescription>
+                      </div>
+                    </CardHeader>
+                  </Card>
+                </Link>
+              )
+            })}
           </div>
-          {/* <p className="text-sm text-muted-foreground mt-4">
-            Natija: <strong>{filtered.length}</strong> ta yangilik
-          </p> */}
-        </CardContent>
-      </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Filterlar</CardTitle>
+              <CardDescription>Status, Top, tur va sana bo‘yicha filtrlash</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+                <FilterSelect
+                  label="Status bo‘yicha"
+                  description=""
+                  value={statusFilter}
+                  options={STATUS_OPTIONS}
+                  onSelect={setStatusFilter}
+                  placeholder="Barcha statuslar"
+                />
+                <FilterSelect
+                  label="Top yangilik bo‘yicha"
+                  description=""
+                  value={isTopFilter}
+                  options={TOP_OPTIONS}
+                  onSelect={setIsTopFilter}
+                  placeholder="Barchasi"
+                />
+                <FilterSelect
+                  label="Turi bo‘yicha"
+                  description=""
+                  value={typeFilter}
+                  options={TYPE_OPTIONS_FULL}
+                  onSelect={setTypeFilter}
+                  placeholder="Barcha turlar"
+                />
+                <div className="space-y-2">
+                  <Label htmlFor="date-from" className="text-sm font-medium">
+                    Sana bo‘yicha (dan)
+                  </Label>
+                  <Input
+                    id="date-from"
+                    type="date"
+                    value={dateFrom}
+                    onChange={(e) => setDateFrom(e.target.value)}
+                    className="h-9"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="date-to" className="text-sm font-medium">
+                    Sana bo‘yicha (gacha)
+                  </Label>
+                  <Input
+                    id="date-to"
+                    type="date"
+                    value={dateTo}
+                    onChange={(e) => setDateTo(e.target.value)}
+                    className="h-9"
+                  />
+                </div>
+                <div className="flex flex-col justify-end gap-2">
+                  <p className="text-xs text-muted-foreground opacity-0 pointer-events-none">.</p>
+                  <Button variant="outline" size="sm" onClick={clearFilters}>
+                    Filterlarni tozalash
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </>
+      )}
 
       <Card className="min-w-0">
         <CardHeader>
@@ -459,7 +555,12 @@ export function DashboardNewsListPage({ news, locale, translationsBySlug }: Dash
                         )}
                         {columnVisibility.sarlavha !== false && (
                           <TableCell>
-                            <span className="font-medium line-clamp-2">{item.title}</span>
+                            <Link
+                              href={`/dashboard/news/${item.slug}/edit`}
+                              className="font-medium line-clamp-2 text-primary hover:underline"
+                            >
+                              {item.title}
+                            </Link>
                           </TableCell>
                         )}
                         {columnVisibility.kategoriya !== false && (
@@ -515,12 +616,24 @@ export function DashboardNewsListPage({ news, locale, translationsBySlug }: Dash
                         {columnVisibility.amallar !== false && (
                           <TableCell className="text-right">
                             <div className="flex items-center justify-end gap-1">
-                              <Button variant="outline" size="sm" asChild className="gap-1">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                asChild
+                                className="gap-1"
+                                onClick={() => toast.info('Tahrirlash sahifasi ochildi')}
+                              >
                                 <Link href={`/dashboard/news/${item.slug}/edit`}>
                                   <Pencil className="size-4" />
                                 </Link>
                               </Button>
-                              <Button variant="ghost" size="sm" asChild className="gap-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                asChild
+                                className="gap-1"
+                                onClick={() => toast.info('Yangilik sahifasi yangi oynada ochildi')}
+                              >
                                 <Link href={`/news/${item.slug}`} target="_blank" rel="noopener noreferrer">
                                   <ExternalLink className="size-4" />
                                 </Link>

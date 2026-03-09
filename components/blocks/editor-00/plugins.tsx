@@ -2,7 +2,7 @@ import { useState } from "react"
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary"
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin"
 
-import { ContentEditable } from "@/shared/common/components/editor/editor-ui/content-editable"
+import { ContentEditable } from "@/components/editor/editor-ui/content-editable"
 
 export function Plugins() {
   const [floatingAnchorElem, setFloatingAnchorElem] =
