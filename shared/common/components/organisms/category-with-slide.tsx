@@ -55,15 +55,15 @@ export default function CategoryWithSlide({
             <h2 className="text-lg font-semibold">{categoryName}</h2>
             <div className="flex items-center gap-2">
               <CarouselPrevious
-                className="static size-9 translate-y-0 rounded-sm"
+                className="static size-7 translate-y-0 rounded-sm"
                 variant="outline"
               />
               <CarouselNext
-                className="static size-9 translate-y-0 rounded-sm"
+                className="static size-7 translate-y-0 rounded-sm"
                 variant="outline"
               />
               <Button variant="ghost" asChild className="text-brand">
-                <Link href={`/category/${categorySlug}`}>{t("view_all")} {">>"}</Link>
+                <Link href={`/category/${categorySlug}`} className="text-xs md:text-sm">{t("view_all")} {">>"}</Link>
               </Button>
             </div>
           </div>
@@ -84,7 +84,7 @@ export default function CategoryWithSlide({
                         className="object-cover"
                       />
                     </div>
-                    <div className="flex flex-col gap-2 p-2">
+                    <div className="flex flex-col gap-2 p-4">
                       <time
                         dateTime={formatDateISO(item.publishedAt)}
                         className="text-xs text-muted-foreground"

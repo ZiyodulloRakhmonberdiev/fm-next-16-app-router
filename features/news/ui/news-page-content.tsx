@@ -9,7 +9,7 @@ import { Button } from "@/shared/common/components/ui/button"
 import { formatDate, formatDateISO } from "@/shared/common/lib/formatter"
 import type { AppLocale } from "@/shared/common/lib/formatter"
 import { RelatedNews, CreatedBy, Tags } from "@/shared/common/components/molecules"
-import { useLocale } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import {
   Carousel,
   CarouselContent,
@@ -31,6 +31,7 @@ export type NewsPageContentProps = {
 export function NewsPageContent({ news }: NewsPageContentProps) {
   const router = useRouter()
   const locale = useLocale() as AppLocale
+  const t = useTranslations("common")
   const categorySlug = news.categorySlug
 
   return (
@@ -43,7 +44,7 @@ export function NewsPageContent({ news }: NewsPageContentProps) {
           onClick={() => router.back()}
         >
           <ArrowLeft className="h-4 w-4" />
-          Back
+          {t("back")}
         </Button>
       </div>
 
@@ -59,9 +60,9 @@ export function NewsPageContent({ news }: NewsPageContentProps) {
           {formatDate(news.publishedAt, locale)}
         </time>
         <span aria-hidden className="select-none">·</span>
-        <span>{news.minutes} min read</span>
+        <span>{news.minutes} {t("min_read")}</span>
         <span aria-hidden className="select-none">·</span>
-        <span>{news.views} views</span>
+        <span>{news.views} {t("views")}</span>
       </div>
 
       <h1 className="mb-4 text-2xl font-bold leading-tight md:text-3xl">
@@ -92,7 +93,7 @@ export function NewsPageContent({ news }: NewsPageContentProps) {
               className="h-full w-full object-contain"
               poster={news.images?.[0]}
             >
-              Your browser does not support the video tag.
+              {t("your_browser_does_not_support_the_video_tag")}
             </video>
           )}
         </div>
@@ -109,7 +110,7 @@ export function NewsPageContent({ news }: NewsPageContentProps) {
           />
         </div>
       )}
-     {!news.videoSource && news.images && news.images.length > 1 && (
+      {!news.videoSource && news.images && news.images.length > 1 && (
         <div className="relative mb-6 w-full">
           <Carousel opts={{ align: "start", loop: true }} className="w-full">
             <CarouselContent className="ml-0">
@@ -143,10 +144,10 @@ export function NewsPageContent({ news }: NewsPageContentProps) {
 
       {news.videoSource && news.videoUrl && news.images && news.images.length > 0 && (
         <div className="mb-6">
-          <p className="mb-3 text-sm font-medium text-muted-foreground">Rasmlar</p>
+          <p className="mb-3 text-sm font-medium text-muted-foreground">{t("images")}</p>
           {news.images.length === 1 ? (
             <div className="flex justify-center">
-              <div className="relative w-full max-w-[70%] aspect-video overflow-hidden rounded-lg bg-muted">
+              <div className="relative w-full aspect-video overflow-hidden rounded-lg bg-muted">
                 <Image
                   src={news.images[0]}
                   alt={`${news.title} — 1`}
@@ -157,7 +158,6 @@ export function NewsPageContent({ news }: NewsPageContentProps) {
             </div>
           ) : (
             <>
-              {/* Mobile: carousel (2 va undan ko‘p rasm) */}
               <div className="relative w-full md:hidden">
                 <Carousel opts={{ align: "start", loop: true }} className="w-full">
                   <CarouselContent className="ml-0">
@@ -180,7 +180,6 @@ export function NewsPageContent({ news }: NewsPageContentProps) {
                   </div>
                 </Carousel>
               </div>
-              {/* Desktop: 2 ta 50%, 3+ ustun */}
               {news.images.length === 2 ? (
                 <div className="hidden justify-center md:flex">
                   <div className="grid w-full max-w-[50%] grid-cols-2 gap-3">
@@ -231,13 +230,17 @@ export function NewsPageContent({ news }: NewsPageContentProps) {
         )
       )}
 
-      {/* Author */}
       <div className="my-6 w-full flex md:flex-row flex-col gap-2">
         <CreatedBy author={news.author} />
-        <Tags tags={news.tags} />
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {news.tags && news.tags.length > 0 &&  news.tags.map((tag) => (
+          <span key={tag} className="text-sm text-muted-foreground bg-muted px-2 py-1 rounded-xs">
+            #{" "}{tag}
+          </span>
+        ))}
       </div>
 
-      {/* Related news */}
       <RelatedNews categorySlug={news.categorySlug} excludeSlug={news.slug} />
     </article>
   )

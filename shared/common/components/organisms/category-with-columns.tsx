@@ -5,7 +5,6 @@ import { filterPublishedRawNews, getNewsListForLocale, type NewsItem } from "@/f
 import { seedNews } from "@/scripts/seed-news"
 import { Card } from "@/shared/common/components/ui/card"
 import {
-  formatDate,
   formatDateISO,
   formatDateTimeLocale,
 } from "@/shared/common/lib/formatter"
@@ -18,9 +17,7 @@ import { Button } from "../ui/button"
 import { getCategoryName } from "@/shared/common/lib/seed-helpers"
 
 type CategoryWithColumnsProps = {
-  /** Category slug — news filtered by this */
   categorySlug?: string
-  /** Featured block: "left" or "right" (default "right") */
   featuredPosition?: "left" | "right"
 }
 
@@ -54,7 +51,7 @@ export default function CategoryWithColumns({
         <div className="flex items-center justify-between gap-2 mb-4">
           <h2 className="text-lg font-semibold">{categoryName}</h2>
           <Button variant="ghost" size="sm" asChild className="text-brand">
-            <Link href={`/category/${categorySlug}`}>{t("view_all")} {">>"}</Link>
+            <Link href={`/category/${categorySlug}`} className="text-xs md:text-sm">{t("view_all")} {">>"}</Link>
           </Button>
         </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -66,7 +63,7 @@ export default function CategoryWithColumns({
             {rightItems.map((item: NewsItem) => (
               <Card
                 key={item.slug}
-                className="flex flex-col gap-2 rounded-sm border-none p-3 shadow-none"
+                className="flex flex-col gap-2 rounded-sm border-none p-3 shadow-none bg-foreground/5 md:bg-background"
               >
                 <div className="flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground">
                   <span className="uppercase font-medium text-brand italic">{item.category}</span>
@@ -95,7 +92,7 @@ export default function CategoryWithColumns({
                 featuredPosition === "left" ? "md:order-1" : ""
               }`}
             >
-              <Card className="overflow-hidden rounded-sm border-none p-0 shadow-none">
+              <Card className="overflow-hidden rounded-sm border border-border p-0 shadow-none">
                 <Link href={`/news/${featured.slug}`} className="block">
                   <div className="relative aspect-video w-full">
                     <Image

@@ -12,7 +12,7 @@ export default function HomePage() {
       </div>
       <div className="flex w-full flex-1 flex-col">
         <Header />
-        <main className="flex-1 py-4 px-4 md:px-6">
+        <main className="flex-1 py-4">
           <div className="max-w-7xl mx-auto">
             <TopBanner />
             <CategoryWithSlide categorySlug="sports" />

@@ -11,11 +11,12 @@ import {
 import type { AppLocale } from "@/shared/common/lib/formatter"
 import { Link } from "@/i18n/navigation"
 import Image from "next/image"
-import { useLocale } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { TruncateExpand } from "@/shared/common/components/ui/truncate-expand"
 
 export default function AuthorsChoice() {
   const locale = useLocale() as AppLocale
+  const t = useTranslations("common")
 
   const rawFiltered = filterPublishedRawNews([...seedNews.news])
     .filter((item) => (item as { authorsChoice?: boolean }).authorsChoice)
@@ -29,12 +30,12 @@ export default function AuthorsChoice() {
 
   return (
     <div className="w-full">
-      <h2 className="mb-4 text-lg font-semibold">Authors choice</h2>
+      <h2 className="mb-4 text-lg font-semibold">{t("authors_choice")}</h2>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {featured && (
           <div className="md:col-span-1 h-full">
-            <Card className="overflow-hidden rounded-sm border-none p-0 shadow-none">
+            <Card className="overflow-hidden rounded-sm border-none p-0 shadow-none bg-foreground/5 md:bg-background">
               <Link href={`/news/${featured.slug}`} className="block">
                 <div className="relative aspect-video w-full">
                   <Image
@@ -77,7 +78,7 @@ export default function AuthorsChoice() {
           {rightItems.map((item: NewsItem) => (
             <Card
               key={item.slug}
-              className="flex flex-col gap-2 rounded-sm border-none p-4 shadow-none"
+              className="flex flex-col gap-2 rounded-sm border-none p-4 shadow-none bg-foreground/5  md:bg-background"
             >
               <div className="flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground">
                 <span className="uppercase font-medium text-brand italic">{item.category}</span>

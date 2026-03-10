@@ -45,6 +45,7 @@
   "common": {
     "results": "Results",
     "search": "Search",
+    "video_news": "Video news",
     "search_placeholder": "Search for news...",
     "search_results": "Search results",
     "search_results_empty": "No results found for this query.",
@@ -74,7 +75,15 @@
     "read_more": "Read more",
     "view_all": "View all",
     "createdBy": "Created by",
-    "tags": "Tags"
+    "tags": "Tags",
+    "authors_choice": "Authors choice",
+    "your_browser_does_not_support_the_video_tag": "Your browser does not support the video tag.",
+    "read_article": "Read the article",
+    "related_news": "Related news",
+    "back": "Back",
+    "min_read": "min read",
+    "views": "views",
+    "images": "Images"
   },
   "stayConnected": {
     "title": "Stay Connected",

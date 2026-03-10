@@ -10,13 +10,10 @@ import { Link } from "@/i18n/navigation"
 import Image from "next/image"
 import { useLocale, useTranslations } from "next-intl"
 import { Button } from "@/shared/common/components/ui/button"
-import { TruncateExpand } from "@/shared/common/components/ui/truncate-expand"
 import { getCategoryName } from "@/shared/common/lib/seed-helpers"
 
 type CategoryWithBannerProps = {
-  /** Category slug — news filtered by this */
   categorySlug?: string
-  /** Featured block: "left" (default) or "right" */
   featuredPosition?: "left" | "right"
 }
 
@@ -29,7 +26,7 @@ function FeaturedBlock({
 }) {
   return (
     <Link href={`/news/${featured.slug}`} className="block">
-      <Card className="overflow-hidden rounded-sm border-border p-0 shadow-none transition-shadow hover:shadow-md">
+      <Card className="overflow-hidden rounded-sm border-border p-0 shadow-none transition-shadow hover:shadow-md bg-background">
         <div className="relative aspect-video max-h-64 w-full">
           <Image
             src={featured.images[0]}
@@ -86,7 +83,7 @@ export default function CategoryWithBanner({
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
         <h2 className="text-lg font-semibold">{categoryName}</h2>
         <Button variant="ghost" size="sm" asChild className="text-brand">
-          <Link href={`/category/${categorySlug}`}>{t("view_all")} {">>"}</Link>
+          <Link href={`/category/${categorySlug}`} className="text-xs md:text-sm">{t("view_all")} {">>"}</Link>
         </Button>
       </div>
 
@@ -102,37 +99,37 @@ export default function CategoryWithBanner({
         </div>
 
         <div
-          className={`grid md:grid-cols-2 gap-2 ${
+          className={`grid md:grid-cols-2 gap-2 justify-start items-start ${
             featuredPosition === "left" ? "md:pl-4" : "order-1 md:pr-4"
           }`}
         >
           {rightItems.map((item: NewsItem) => (
-            <Link
-              key={item.slug}
-              href={`/news/${item.slug}`}
-              className="flex gap-3 items-center p-3 transition-colors hover:bg-muted/50 border-b border-border rounded-sm"
-            >
-              <div className="flex min-w-0 flex-1 flex-col justify-center gap-1">
-                <time
-                  dateTime={formatDateISO(item.publishedAt)}
-                  className="text-xs text-muted-foreground"
-                >
-                  {formatDate(item.publishedAt, locale)}
-                </time>
-                <h4 className="text-sm font-medium leading-tight">
-                  <span className="line-clamp-3 hover:underline">
-                    {item.title}
-                  </span>
-                </h4>
-              </div>
-              <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-sm">
-                <Image
-                  src={item.images[0]}
-                  alt={item.title}
-                  fill
-                  className="object-cover"
-                />
-              </div>
+            <Link key={item.slug} href={`/news/${item.slug}`} className="block">
+              <Card className="overflow-hidden p-0 rounded-sm shadow-none border border-border transition-shadow hover:shadow-md bg-background">
+                <div className="flex gap-3">
+                  <div className="relative block h-20 w-28 shrink-0 overflow-hidden rounded-xs md:h-24 md:w-32">
+                    <Image
+                      src={item.images[0]}
+                      alt={item.title}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <div className="flex min-w-0 flex-1 flex-col justify-center gap-1 py-1 pr-2">
+                    <time
+                      dateTime={formatDateISO(item.publishedAt)}
+                      className="text-xs text-muted-foreground"
+                    >
+                      {formatDate(item.publishedAt, locale)}
+                    </time>
+                    <h4 className="text-sm font-medium leading-tight">
+                      <span className="line-clamp-3 hover:underline">
+                        {item.title}
+                      </span>
+                    </h4>
+                  </div>
+                </div>
+              </Card>
             </Link>
           ))}
         </div>
