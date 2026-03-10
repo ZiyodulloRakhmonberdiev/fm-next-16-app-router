@@ -11,6 +11,7 @@ type EditNewsStatusFormProps = {
 
 export function EditNewsStatusForm({ initialStatus = 'pending' }: EditNewsStatusFormProps) {
   const [isTop, setIsTop] = useState(false)
+  const [isTrending, setIsTrending] = useState(false)
   const [authorsChoice, setAuthorsChoice] = useState(false)
   const [pushedToTelegram, setPushedToTelegram] = useState(false)
   const [status, setStatus] = useState<NewsStatus>(initialStatus)
@@ -41,6 +42,8 @@ export function EditNewsStatusForm({ initialStatus = 'pending' }: EditNewsStatus
       authorsChoice={authorsChoice}
       pushedToTelegram={pushedToTelegram}
       isBreaking={isTop}
+      isTrending={isTrending}
+      onChangeIsTrending={setIsTrending}
       isPopular={authorsChoice}
       canPublish={canPublish}
       onBack={() => {}}
