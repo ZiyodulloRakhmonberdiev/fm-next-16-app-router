@@ -51,6 +51,11 @@
         "en": "YouTube"
       },
       "href": "/youtube"
+    },
+    {
+      "slug": "twitter",
+      "name": "Twitter",
+      "href": "/twitter"
     }
   ],
   "siteConfig": {

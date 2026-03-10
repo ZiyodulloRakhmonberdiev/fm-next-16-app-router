@@ -2,19 +2,15 @@
 
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/shared/common/components/ui/card'
-import { Input } from '@/shared/common/components/ui/input'
-import { Label } from '@/shared/common/components/ui/label'
+import { Card, CardDescription, CardHeader, CardTitle } from '@/shared/common/components/ui/card'
 import { Button } from '@/shared/common/components/ui/button'
 import type { AppLocale } from '@/shared/common/lib/locale-api'
-import type { SiteSettingsPayload, SocialMediaItem } from '@/shared/common/lib/site-settings-types'
-import { Settings, Save, Plus, Trash2 } from 'lucide-react'
+import type { SiteSettingsPayload } from '@/shared/common/lib/site-settings-types'
+import { Settings } from 'lucide-react'
+import { HeadlineSection } from '../configs/ui/headline-section'
+import { DescriptionSection } from '../configs/ui/description-section'
+import { SocialMediaSection, type UiSocialItem } from '../configs/ui/social-media-section'
+import { SiteConfigSection } from '../configs/ui/site-config-section'
 
 const LOCALES: AppLocale[] = ['uz', 'uzb', 'ru', 'en']
 const LOCALE_LABELS: Record<AppLocale, string> = {
@@ -26,7 +22,10 @@ const LOCALE_LABELS: Record<AppLocale, string> = {
 
 export function DashboardSettingsPage() {
   const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
+  const [savingHeadline, setSavingHeadline] = useState(false)
+  const [savingDescription, setSavingDescription] = useState(false)
+  const [savingSocial, setSavingSocial] = useState(false)
+  const [savingConfig, setSavingConfig] = useState(false)
   const [data, setData] = useState<SiteSettingsPayload | null>(null)
 
   useEffect(() => {
@@ -77,26 +76,35 @@ export function DashboardSettingsPage() {
     })
   }
 
-  const updateSocialItem = (index: number, item: SocialMediaItem) => {
+  const addSocialItem = (slug: string, href: string) => {
     if (!data) return
-    const next = [...data.socialMedia]
-    next[index] = item
-    setData({ ...data, socialMedia: next })
-  }
-
-  const addSocialItem = () => {
-    if (!data) return
+    const exists = data.socialMedia.some((s) => s.slug === slug)
+    if (exists) {
+      toast.error('Bu platforma allaqachon qo‘shilgan')
+      return
+    }
+    const labelMap: Record<string, string> = {
+      telegram: 'Telegram',
+      instagram: 'Instagram',
+      facebook: 'Facebook',
+      youtube: 'YouTube',
+      twitter: 'Twitter',
+      threads: 'Threads',
+      reddit: 'Reddit',
+    }
+    const name = labelMap[slug] ?? slug
     setData({
       ...data,
-      socialMedia: [
-        ...data.socialMedia,
-        {
-          slug: '',
-          name: { uz: '', uzb: '', ru: '', en: '' },
-          href: '',
-        },
-      ],
+      socialMedia: [...data.socialMedia, { slug, name, href }],
     })
+  }
+
+  const updateSocialHref = (index: number, href: string) => {
+    if (!data) return
+    const next = [...data.socialMedia]
+    if (!next[index]) return
+    next[index] = { ...next[index], href }
+    setData({ ...data, socialMedia: next })
   }
 
   const removeSocialItem = (index: number) => {
@@ -107,25 +115,114 @@ export function DashboardSettingsPage() {
     })
   }
 
-  const handleSave = async () => {
-    if (!data) return
-    setSaving(true)
+  const getCurrentFromServer = async (): Promise<SiteSettingsPayload | null> => {
     try {
-      const res = await fetch('/api/site-settings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      })
-      const result = await res.json()
-      if (result?.ok) {
-        toast.success('Sozlamalar saqlandi')
+      const res = await fetch('/api/site-settings')
+      if (!res.ok) return null
+      return (await res.json()) as SiteSettingsPayload
+    } catch {
+      return null
+    }
+  }
+
+  const postPayload = async (payload: SiteSettingsPayload) => {
+    const res = await fetch('/api/site-settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+    const result = await res.json()
+    if (result?.ok) {
+      return true
+    }
+    return false
+  }
+
+  const handleSaveHeadline = async () => {
+    if (!data) return
+    setSavingHeadline(true)
+    try {
+      const current = (await getCurrentFromServer()) ?? data
+      const next: SiteSettingsPayload = {
+        ...current,
+        headline: data.headline,
+      }
+      const ok = await postPayload(next)
+      if (ok) {
+        toast.success('Sarlavha saqlandi')
       } else {
         toast.error('Saqlashda xato')
       }
     } catch {
       toast.error('Saqlashda xato')
     } finally {
-      setSaving(false)
+      setSavingHeadline(false)
+    }
+  }
+
+  const handleSaveDescription = async () => {
+    if (!data) return
+    setSavingDescription(true)
+    try {
+      const current = (await getCurrentFromServer()) ?? data
+      const next: SiteSettingsPayload = {
+        ...current,
+        description: data.description,
+      }
+      const ok = await postPayload(next)
+      if (ok) {
+        toast.success('Tavsif saqlandi')
+      } else {
+        toast.error('Saqlashda xato')
+      }
+    } catch {
+      toast.error('Saqlashda xato')
+    } finally {
+      setSavingDescription(false)
+    }
+  }
+
+  const handleSaveSocial = async () => {
+    if (!data) return
+    setSavingSocial(true)
+    try {
+      const current = (await getCurrentFromServer()) ?? data
+      const next: SiteSettingsPayload = {
+        ...current,
+        socialMedia: data.socialMedia,
+      }
+      const ok = await postPayload(next)
+      if (ok) {
+        toast.success('Ijtimoiy tarmoqlar saqlandi')
+      } else {
+        toast.error('Saqlashda xato')
+      }
+    } catch {
+      toast.error('Saqlashda xato')
+    } finally {
+      setSavingSocial(false)
+    }
+  }
+
+  const handleSaveConfig = async () => {
+    if (!data) return
+    setSavingConfig(true)
+    try {
+      const current = (await getCurrentFromServer()) ?? data
+      const next: SiteSettingsPayload = {
+        ...current,
+        siteConfig: data.siteConfig,
+      }
+      const ok = await postPayload(next)
+      if (ok) {
+        toast.success('Site config saqlandi')
+      } else {
+        toast.error('Saqlashda xato')
+      }
+    } catch {
+      toast.error('Saqlashda xato')
+    } finally {
+      setSavingConfig(false)
     }
   }
 
@@ -144,182 +241,51 @@ export function DashboardSettingsPage() {
           <div>
             <CardTitle className="text-xl flex items-center gap-2">
               <Settings className="size-6" />
-              Sayt sozlamalari
+              Ma'lumotlar
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="hidden md:block">
               Headline, tavsif, ijtimoiy tarmoqlar va sayt konfiguratsiyasi
             </CardDescription>
           </div>
-          <Button onClick={handleSave} disabled={saving} className="gap-2">
-            <Save className="size-4" />
-            Saqlash
-          </Button>
         </CardHeader>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Headline (sarlavha)</CardTitle>
-          <CardDescription>Barcha tillarda banner sarlavha</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {LOCALES.map((locale) => (
-            <div key={locale} className="space-y-2">
-              <Label>{LOCALE_LABELS[locale]}</Label>
-              <Input
-                value={data.headline[locale] ?? ''}
-                onChange={(e) => updateHeadline(locale, e.target.value)}
-                placeholder={`Headline (${locale})`}
-              />
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+      <HeadlineSection
+        locales={LOCALES}
+        localeLabels={LOCALE_LABELS}
+        values={data.headline}
+        onChange={updateHeadline}
+        onSave={handleSaveHeadline}
+        saving={savingHeadline}
+      />
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Description (tavsif)</CardTitle>
-          <CardDescription>Sayt haqida qisqacha — barcha tillar</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {LOCALES.map((locale) => (
-            <div key={locale} className="space-y-2">
-              <Label>{LOCALE_LABELS[locale]}</Label>
-              <textarea
-                className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                value={data.description[locale] ?? ''}
-                onChange={(e) => updateDescription(locale, e.target.value)}
-                placeholder={`Description (${locale})`}
-              />
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+      <DescriptionSection
+        locales={LOCALES}
+        localeLabels={LOCALE_LABELS}
+        values={data.description}
+        onChange={updateDescription}
+        onSave={handleSaveDescription}
+        saving={savingDescription}
+      />
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle className="text-base">Ijtimoiy tarmoqlar (socialMedia)</CardTitle>
-            <CardDescription>Slug, nomlar va havola har bir til uchun</CardDescription>
-          </div>
-          <Button type="button" variant="outline" size="sm" onClick={addSocialItem} className="gap-1">
-            <Plus className="size-4" />
-            Qo‘shish
-          </Button>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {data.socialMedia.map((item, index) => (
-            <div
-              key={index}
-              className="rounded-lg border border-border p-4 space-y-3"
-            >
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-medium text-muted-foreground">
-                  #{index + 1}
-                </span>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="text-destructive hover:text-destructive"
-                  onClick={() => removeSocialItem(index)}
-                >
-                  <Trash2 className="size-4" />
-                </Button>
-              </div>
-              <div className="grid gap-2 sm:grid-cols-2">
-                <div className="space-y-1">
-                  <Label>Slug</Label>
-                  <Input
-                    value={item.slug}
-                    onChange={(e) =>
-                      updateSocialItem(index, { ...item, slug: e.target.value })
-                    }
-                    placeholder="telegram"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <Label>Href</Label>
-                  <Input
-                    value={item.href}
-                    onChange={(e) =>
-                      updateSocialItem(index, { ...item, href: e.target.value })
-                    }
-                    placeholder="/telegram"
-                  />
-                </div>
-              </div>
-              <div className="grid gap-2 sm:grid-cols-2">
-                {LOCALES.map((locale) => (
-                  <div key={locale} className="space-y-1">
-                    <Label>Nomi ({LOCALE_LABELS[locale]})</Label>
-                    <Input
-                      value={item.name[locale] ?? ''}
-                      onChange={(e) =>
-                        updateSocialItem(index, {
-                          ...item,
-                          name: { ...item.name, [locale]: e.target.value },
-                        })
-                      }
-                      placeholder={`Nomi ${locale}`}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+      <SocialMediaSection
+        items={data.socialMedia as UiSocialItem[]}
+        onAdd={addSocialItem}
+        onUpdateHref={updateSocialHref}
+        onRemove={removeSocialItem}
+        onSave={handleSaveSocial}
+        saving={savingSocial}
+      />
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Site config</CardTitle>
-          <CardDescription>Email, telefon, manzil (til bo‘yicha)</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label>Email</Label>
-              <Input
-                type="email"
-                value={data.siteConfig.email}
-                onChange={(e) => updateSiteConfig('email', e.target.value)}
-                placeholder="info@example.uz"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Telefon</Label>
-              <Input
-                value={data.siteConfig.phone}
-                onChange={(e) => updateSiteConfig('phone', e.target.value)}
-                placeholder="+998 90 123 45 67"
-              />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label>Manzil (har bir til)</Label>
-            {LOCALES.map((locale) => (
-              <div key={locale} className="space-y-1">
-                <Label className="text-muted-foreground text-xs">
-                  {LOCALE_LABELS[locale]}
-                </Label>
-                <Input
-                  value={data.siteConfig.address[locale] ?? ''}
-                  onChange={(e) => updateAddress(locale, e.target.value)}
-                  placeholder={`Manzil (${locale})`}
-                />
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="flex justify-end">
-        <Button onClick={handleSave} disabled={saving} className="gap-2">
-          <Save className="size-4" />
-          Saqlash
-        </Button>
-      </div>
+      <SiteConfigSection
+        locales={LOCALES}
+        localeLabels={LOCALE_LABELS}
+        value={data.siteConfig}
+        onChangeField={updateSiteConfig}
+        onChangeAddress={updateAddress}
+        onSave={handleSaveConfig}
+        saving={savingConfig}
+      />
     </div>
   )
 }

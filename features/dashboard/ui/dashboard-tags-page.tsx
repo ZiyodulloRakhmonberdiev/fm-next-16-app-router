@@ -102,7 +102,7 @@ export function DashboardTagsPage({ tags: initialTags, locale }: DashboardTagsPa
   return (
     <div className="space-y-6 min-w-0 overflow-hidden">
       <Card className="border-primary/30 bg-primary/5">
-        <CardHeader className="flex flex-row items-center justify-between gap-4">
+        <CardHeader className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
             <CardTitle className="text-xl flex items-center gap-2">
               <Tag className="size-6" />
@@ -112,7 +112,7 @@ export function DashboardTagsPage({ tags: initialTags, locale }: DashboardTagsPa
               Sayt teglari ro‘yxati. Teglar yangiliklar uchun ishlatiladi.
             </CardDescription>
           </div>
-          <Button onClick={() => setCreateOpen(true)} size="lg" className="shrink-0">
+          <Button onClick={() => setCreateOpen(true)} size="lg" className="shrink-0 w-full md:w-auto">
             <PlusCircle className="size-4 mr-2" />
             Yangi teg
           </Button>

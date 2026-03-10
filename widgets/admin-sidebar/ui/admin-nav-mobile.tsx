@@ -5,14 +5,10 @@ import { usePathname } from '@/i18n/navigation'
 import { cn } from '@/shared/common/lib/utils'
 import {
   LayoutDashboard,
-  FileText,
-  FolderTree,
-  Settings,
   Users,
   Newspaper,
-  Tag,
-  Plus,
   PlusCircle,
+  Settings2,
 } from 'lucide-react'
 
 const navItems = [
@@ -20,7 +16,7 @@ const navItems = [
   { href: '/dashboard/news', label: 'Yangiliklar', icon: Newspaper },
   { href: '/dashboard/news/create', label: 'Yangi', icon: PlusCircle },
   { href: '/dashboard/users', label: 'Foydalanuvchilar', icon: Users },
-  { href: '/dashboard/settings', label: 'Sozlamalar', icon: Settings },
+  { href: '/dashboard/configs', label: 'Ma\'lumotlar', icon: Settings2 },
 ]
 
 export function AdminNavMobile() {

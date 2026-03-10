@@ -290,7 +290,6 @@ export function CreateNewsForm({ categories, tags, authors, existingSlugs = [], 
   const handleSavePendingStay = () => {
     const payload = buildSavePayload('pending')
     console.log('Save news (stay on page)', payload)
-    // TODO: bu yerda real API chaqirilib, yangilik pending statusda saqlanishi mumkin
     toast.success("Yangilik saqlandi (draft/pending holatda)")
   }
 

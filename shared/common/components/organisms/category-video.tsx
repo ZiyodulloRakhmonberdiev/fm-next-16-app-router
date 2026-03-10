@@ -141,7 +141,7 @@ export default function CategoryVideo() {
                     <h3 className="mt-1 line-clamp-2 text-base font-semibold leading-tight text-white md:text-lg">
                       {featured.title}
                     </h3>
-                    <span className="line-clamp-3 font-medium leading-tight text-muted-foreground">{featured.description}</span>
+                    <span className="line-clamp-3 hidden md:block font-medium leading-tight text-muted-foreground">{featured.description}</span>
                   </div>
                 </div>
               </Card>

@@ -35,7 +35,7 @@ export function VideoForm({
                 onVideoUrlChange(e.target.value)
                 onVideoFileChange(null)
               }}
-              placeholder="https://youtube.com/watch?v=..."
+              placeholder="https://"
             />
           </div>
           <div className="space-y-2">

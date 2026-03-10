@@ -12,8 +12,8 @@ export default function AdminFooter() {
           © {currentYear} Admin panel. Barcha huquqlar himoyalangan.
         </p>
         <div className="flex items-center gap-4">
-          <Link href="/dashboard/settings" className="hover:text-foreground transition-colors">
-            Sozlamalar
+          <Link href="/dashboard/configs" className="hover:text-foreground transition-colors">
+            Configs
           </Link>
           <Link href="/" className="hover:text-foreground transition-colors">
             Saytga qaytish

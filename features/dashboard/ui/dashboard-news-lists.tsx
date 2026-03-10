@@ -23,6 +23,14 @@ import { formatDateTimeLocale } from '@/shared/common/lib/formatter'
 import type { AppLocale } from '@/shared/common/lib/locale-api'
 import type { NewsItem } from '@/features/news/model'
 import { Newspaper, Trash2, Eye, ChevronLeft, ChevronRight } from 'lucide-react'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/shared/common/components/ui/table'
 
 const PER_PAGE = 5
 
@@ -140,7 +148,6 @@ export function DashboardNewsLists({
   return (
     <div className="space-y-8">
       <div className="grid gap-8 lg:grid-cols-3">
-        {/* Top news — delete tugmasi card content tashqarisida (har bir qator o‘ngida) */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -154,44 +161,76 @@ export function DashboardNewsLists({
               <p className="text-sm text-muted-foreground py-4">Top yangiliklar yo‘q.</p>
             ) : (
               <>
-                <ul className="space-y-3">
-                  {topSlice.map((item) => (
-                    <li key={item.slug} className="flex items-stretch gap-2 rounded-lg border border-border/50 overflow-hidden">
-                      <Link
-                        href={`/dashboard/news/${item.slug}/edit`}
-                        className="flex min-w-0 flex-1 gap-3 p-2 hover:bg-muted/50 transition-colors"
-                      >
-                        <div className="relative h-14 w-20 shrink-0 overflow-hidden rounded-md bg-muted">
-                          {item.images[0] ? (
-                            <Image src={item.images[0]} alt="" fill className="object-cover" sizes="80px" />
-                          ) : (
-                            <div className="flex h-full items-center justify-center">
-                              <Newspaper className="size-6 text-muted-foreground" />
-                            </div>
-                          )}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="font-medium text-sm line-clamp-2">{item.title}</p>
-                          <p className="text-xs text-muted-foreground mt-0.5">
-                            {formatDateTimeLocale(item.publishedAt, locale)} · {item.views} ko‘rish
-                          </p>
-                        </div>
-                      </Link>
-                      <div className="flex items-center border-l border-border/50 bg-muted/30 px-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10"
-                          onClick={() => handleRemoveClick(item.slug, 'top')}
-                          title="Top ro‘yxatdan olib tashlash"
-                        >
-                          <Trash2 className="size-4" />
-                          <span className="sr-only">Olib tashlash</span>
-                        </Button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+                <div className="rounded-md border overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-12">#</TableHead>
+                        <TableHead className="w-[84px]">Rasm</TableHead>
+                        <TableHead>Sarlavha</TableHead>
+                        <TableHead className="whitespace-nowrap">Sana</TableHead>
+                        <TableHead className="whitespace-nowrap text-right">Ko‘rishlar</TableHead>
+                        <TableHead className="w-[72px] text-right">Amal</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {topSlice.map((item, index) => (
+                        <TableRow key={item.slug} className="hover:bg-muted/40">
+                          <TableCell className="text-xs text-muted-foreground">
+                            #{(topPage - 1) * PER_PAGE + index + 1}
+                          </TableCell>
+                          <TableCell>
+                            <Link
+                              href={`/dashboard/news/${item.slug}/edit`}
+                              className="block"
+                            >
+                              <div className="relative h-12 w-16 overflow-hidden rounded-md bg-muted">
+                                {item.images[0] ? (
+                                  <Image
+                                    src={item.images[0]}
+                                    alt=""
+                                    fill
+                                    className="object-cover"
+                                    sizes="64px"
+                                  />
+                                ) : (
+                                  <div className="flex h-full items-center justify-center">
+                                    <Newspaper className="size-4 text-muted-foreground" />
+                                  </div>
+                                )}
+                              </div>
+                            </Link>
+                          </TableCell>
+                          <TableCell>
+                            <Link
+                              href={`/dashboard/news/${item.slug}/edit`}
+                              className="text-sm font-medium line-clamp-2 hover:underline"
+                            >
+                              {item.title}
+                            </Link>
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                            {formatDateTimeLocale(item.publishedAt, locale)}
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground text-right whitespace-nowrap">
+                            {item.views.toLocaleString()} ko‘rish
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                              onClick={() => handleRemoveClick(item.slug, 'top')}
+                              title="Top ro‘yxatdan olib tashlash"
+                            >
+                              <Trash2 className="size-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
                 <Pagination
                   page={topPage}
                   totalPages={totalPagesTop}
@@ -203,7 +242,7 @@ export function DashboardNewsLists({
           </CardContent>
         </Card>
 
-        {/* Muallif tanlovi — delete card content tashqarisida */}
+        {/* Muallif tanlovi — jadval ko‘rinishida */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -217,44 +256,76 @@ export function DashboardNewsLists({
               <p className="text-sm text-muted-foreground py-4">Muallif tanlovi yangiliklar yo‘q.</p>
             ) : (
               <>
-                <ul className="space-y-3">
-                  {authorsSlice.map((item) => (
-                    <li key={item.slug} className="flex items-stretch gap-2 rounded-lg border border-border/50 overflow-hidden">
-                      <Link
-                        href={`/dashboard/news/${item.slug}/edit`}
-                        className="flex min-w-0 flex-1 gap-3 p-2 hover:bg-muted/50 transition-colors"
-                      >
-                        <div className="relative h-14 w-20 shrink-0 overflow-hidden rounded-md bg-muted">
-                          {item.images[0] ? (
-                            <Image src={item.images[0]} alt="" fill className="object-cover" sizes="80px" />
-                          ) : (
-                            <div className="flex h-full items-center justify-center">
-                              <Newspaper className="size-6 text-muted-foreground" />
-                            </div>
-                          )}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="font-medium text-sm line-clamp-2">{item.title}</p>
-                          <p className="text-xs text-muted-foreground mt-0.5">
-                            {formatDateTimeLocale(item.publishedAt, locale)} · {item.author}
-                          </p>
-                        </div>
-                      </Link>
-                      <div className="flex items-center border-l border-border/50 bg-muted/30 px-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10"
-                          onClick={() => handleRemoveClick(item.slug, 'authorsChoice')}
-                          title="Muallif tanlovidan olib tashlash"
-                        >
-                          <Trash2 className="size-4" />
-                          <span className="sr-only">Olib tashlash</span>
-                        </Button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+                <div className="rounded-md border overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-12">#</TableHead>
+                        <TableHead className="w-[84px]">Rasm</TableHead>
+                        <TableHead>Sarlavha</TableHead>
+                        <TableHead>Muallif</TableHead>
+                        <TableHead className="whitespace-nowrap">Sana</TableHead>
+                        <TableHead className="w-[72px] text-right">Amal</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {authorsSlice.map((item, index) => (
+                        <TableRow key={item.slug} className="hover:bg-muted/40">
+                          <TableCell className="text-xs text-muted-foreground">
+                            #{(authorsPage - 1) * PER_PAGE + index + 1}
+                          </TableCell>
+                          <TableCell>
+                            <Link
+                              href={`/dashboard/news/${item.slug}/edit`}
+                              className="block"
+                            >
+                              <div className="relative h-12 w-16 overflow-hidden rounded-md bg-muted">
+                                {item.images[0] ? (
+                                  <Image
+                                    src={item.images[0]}
+                                    alt=""
+                                    fill
+                                    className="object-cover"
+                                    sizes="64px"
+                                  />
+                                ) : (
+                                  <div className="flex h-full items-center justify-center">
+                                    <Newspaper className="size-4 text-muted-foreground" />
+                                  </div>
+                                )}
+                              </div>
+                            </Link>
+                          </TableCell>
+                          <TableCell>
+                            <Link
+                              href={`/dashboard/news/${item.slug}/edit`}
+                              className="text-sm font-medium line-clamp-2 hover:underline"
+                            >
+                              {item.title}
+                            </Link>
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground">
+                            {item.author}
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                            {formatDateTimeLocale(item.publishedAt, locale)}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                              onClick={() => handleRemoveClick(item.slug, 'authorsChoice')}
+                              title="Muallif tanlovidan olib tashlash"
+                            >
+                              <Trash2 className="size-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
                 <Pagination
                   page={authorsPage}
                   totalPages={totalPagesAuthors}
@@ -266,7 +337,7 @@ export function DashboardNewsLists({
           </CardContent>
         </Card>
 
-        {/* Ko'p o'qilgan — pagination, delete yo'q */}
+        {/* Ko'p o'qilgan — jadval ko‘rinishi, delete yo'q */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -280,32 +351,64 @@ export function DashboardNewsLists({
               <p className="text-sm text-muted-foreground py-4">Yangiliklar yo‘q.</p>
             ) : (
               <>
-                <ul className="space-y-3">
-                  {mostReadSlice.map((item) => (
-                    <li key={item.slug}>
-                      <Link
-                        href={`/dashboard/news/${item.slug}/edit`}
-                        className="flex gap-3 rounded-lg border border-border/50 p-2 hover:bg-muted/50 transition-colors"
-                      >
-                        <div className="relative h-14 w-20 shrink-0 overflow-hidden rounded-md bg-muted">
-                          {item.images[0] ? (
-                            <Image src={item.images[0]} alt="" fill className="object-cover" sizes="80px" />
-                          ) : (
-                            <div className="flex h-full items-center justify-center">
-                              <Newspaper className="size-6 text-muted-foreground" />
-                            </div>
-                          )}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="font-medium text-sm line-clamp-2">{item.title}</p>
-                          <p className="text-xs text-muted-foreground mt-0.5">
-                            {formatDateTimeLocale(item.publishedAt, locale)} · {item.views} ko‘rish
-                          </p>
-                        </div>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+                <div className="rounded-md border overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-12">#</TableHead>
+                        <TableHead className="w-[84px]">Rasm</TableHead>
+                        <TableHead>Sarlavha</TableHead>
+                        <TableHead className="whitespace-nowrap">Sana</TableHead>
+                        <TableHead className="whitespace-nowrap text-right">Ko‘rishlar</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {mostReadSlice.map((item, index) => (
+                        <TableRow key={item.slug} className="hover:bg-muted/40">
+                          <TableCell className="text-xs text-muted-foreground">
+                            #{(mostReadPage - 1) * PER_PAGE + index + 1}
+                          </TableCell>
+                          <TableCell>
+                            <Link
+                              href={`/dashboard/news/${item.slug}/edit`}
+                              className="block"
+                            >
+                              <div className="relative h-12 w-16 overflow-hidden rounded-md bg-muted">
+                                {item.images[0] ? (
+                                  <Image
+                                    src={item.images[0]}
+                                    alt=""
+                                    fill
+                                    className="object-cover"
+                                    sizes="64px"
+                                  />
+                                ) : (
+                                  <div className="flex h-full items-center justify-center">
+                                    <Newspaper className="size-4 text-muted-foreground" />
+                                  </div>
+                                )}
+                              </div>
+                            </Link>
+                          </TableCell>
+                          <TableCell>
+                            <Link
+                              href={`/dashboard/news/${item.slug}/edit`}
+                              className="text-sm font-medium line-clamp-2 hover:underline"
+                            >
+                              {item.title}
+                            </Link>
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                            {formatDateTimeLocale(item.publishedAt, locale)}
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground text-right whitespace-nowrap">
+                            {item.views.toLocaleString()} ko‘rish
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
                 <Pagination
                   page={mostReadPage}
                   totalPages={totalPagesMostRead}

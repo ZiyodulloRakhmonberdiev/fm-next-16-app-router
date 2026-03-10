@@ -3,10 +3,12 @@ import { Header } from "@/widgets/client-header";
 import ClientSidebar from "@/widgets/client-sidebar/ui/client-sidebar";
 import { CategoryWithBanner, CategoryWithColumns, CategoryWithSlide, CategoryVideo, TopBanner } from "@/shared/common/components/organisms";
 import { StayConnected } from "@/shared/common/components/molecules";
+import { Analytics } from "@vercel/analytics/next"
 
 export default function HomePage() {
   return (
     <>
+      <Analytics />
       <div className="block md:hidden">
         <ClientSidebar />
       </div>

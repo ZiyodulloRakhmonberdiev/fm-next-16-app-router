@@ -309,16 +309,16 @@ export function DashboardNewsListPage({
   return (
     <div className="space-y-6 min-w-0 overflow-hidden scrollbar-hide">
       <Card className="border-primary/30 bg-primary/5">
-        <CardHeader className="flex flex-row items-center justify-between gap-4">
+        <CardHeader className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
             <CardTitle className="text-xl flex items-center gap-2">
               <Newspaper className="size-6" />
               {titleText}
             </CardTitle>
-            <CardDescription>{descriptionText}</CardDescription>
+            <CardDescription className="">{descriptionText}</CardDescription>
           </div>
           {variant === 'full' && (
-            <Button asChild size="lg" className="shrink-0">
+            <Button asChild size="lg" className="shrink-0 w-full md:w-auto">
               <Link href="/dashboard/news/create">
                 <PlusCircle className="size-4 mr-2" />
                 Yangilik yaratish

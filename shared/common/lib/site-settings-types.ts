@@ -1,10 +1,12 @@
 import type { AppLocale } from './locale-api'
-
-export type LocaleMap = Record<AppLocale, string>
+import type { LocaleMap } from './locale-types'
 
 export type SocialMediaItem = {
   slug: string
-  name: LocaleMap
+  /**
+   * Rasmiy nom (faqat bitta tilda, masalan: "Telegram", "YouTube").
+   */
+  name: string
   href: string
 }
 

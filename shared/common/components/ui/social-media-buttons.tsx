@@ -6,7 +6,6 @@ import type { ReactNode } from "react";
 import { seed } from "@/scripts/seed";
 import { cn } from "@/shared/common/lib/utils";
 import type { AppLocale } from "@/shared/common/lib/locale-api";
-import type { LocaleMap } from "@/shared/common/lib/locale-types";
 
 export type SocialPlatformName = "facebook" | "instagram" | "telegram" | "youtube";
 
@@ -58,7 +57,7 @@ export function getSocialStyle(name: string) {
   );
 }
 
-type SocialMediaLink = { slug: string; name: LocaleMap; href: string };
+type SocialMediaLink = { slug: string; name: string; href: string };
 
 type SocialMediaButtonsProps = {
   variant?: "button" | "icon-only";
@@ -81,7 +80,7 @@ export function SocialMediaButtons({
       {links.map(({ slug, name, href }) => {
         const style = getSocialStyle(slug);
         const isExternal = href.startsWith("http");
-        const label = name[locale];
+        const label = name;
         const baseLinkClass =
           "inline-flex items-center justify-center gap-2 text-white shadow-sm transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
         const variantClass = isIconOnly

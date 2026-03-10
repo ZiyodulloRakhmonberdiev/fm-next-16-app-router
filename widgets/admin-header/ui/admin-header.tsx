@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Link, useRouter } from '@/i18n/navigation'
+import { Link } from '@/i18n/navigation'
 import { useLocale } from 'next-intl'
 import Image from 'next/image'
 import { SidebarTrigger } from '@/shared/common/components/ui/sidebar'
@@ -13,9 +13,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/shared/common/components/ui/dropdown-menu'
-import { Bell, LayoutDashboard, LogOut, Search, ArrowLeft, User, ExternalLink } from 'lucide-react'
-import { ThemeSwitcher } from '@/widgets/theme-switcher'
+import { Bell, LogOut, Search, User, ExternalLink, Settings } from 'lucide-react'
 import type { NewsItem } from '@/features/news/model'
+import { useTheme } from 'next-themes'
 
 const DEBOUNCE_MS = 200
 
@@ -26,13 +26,21 @@ const MOCK_USER = {
 }
 
 export default function AdminHeader() {
-  const router = useRouter()
   const locale = useLocale()
   const [searchQuery, setSearchQuery] = useState('')
   const [results, setResults] = useState<NewsItem[]>([])
   const [isOpen, setIsOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const wrapperRef = useRef<HTMLDivElement>(null)
+
+  const { resolvedTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+
+  const logoSrc =
+    mounted && resolvedTheme === 'light'
+      ? '/images/fm-logo-dark.svg'
+      : '/images/fm-logo.svg'
 
   useEffect(() => {
     if (!searchQuery.trim()) {
@@ -72,21 +80,18 @@ export default function AdminHeader() {
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b border-border bg-background px-4 md:px-6">
       <SidebarTrigger className="-ml-1 hidden md:flex" />
-      <Button
-        variant="ghost"
-        size="icon"
-        className="shrink-0"
-        onClick={() => router.back()}
-        aria-label="Ortga"
-      >
-        <ArrowLeft className="size-5" />
-      </Button>
+      <Link href="/dashboard" className="flex md:hidden items-center gap-2 shrink-0">
+        <Image
+          src={mounted ? logoSrc : '/images/fm-logo-dark.png'}
+          alt="Fergana Media"
+          width={120}
+          height={32}
+          className="h-7 w-auto object-contain"
+          priority
+        />
+      </Link>
       <div className="flex flex-1 items-center gap-4">
-        <div className="hidden md:flex items-center gap-2 text-sm font-medium text-muted-foreground">
-          <LayoutDashboard className="size-4" />
-          Admin panel
-        </div>
-        <div className="flex-1 max-w-md relative" ref={wrapperRef}>
+        <div className="hidden md:block flex-1 max-w-md relative" ref={wrapperRef}>
           <div className="relative">
             <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <input
@@ -176,21 +181,23 @@ export default function AdminHeader() {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link href="/" className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive">
+              <Link href="/" className="flex items-center gap-2 cursor-pointer">
                 <LogOut className="size-4" />
                 Chiqish
               </Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="size-4" />
-          <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-destructive" />
-          <span className="sr-only">Bildirishnomalar</span>
+        <Button
+          variant="outline"
+          size="icon"
+          className=""
+          asChild
+        >
+          <Link href="/dashboard/settings" aria-label="Sozlamalar">
+            <Settings className="size-4" />
+          </Link>
         </Button>
-        <div className="flex h-9 w-9 items-center justify-center rounded-md">
-          <ThemeSwitcher />
-        </div>
       </div>
     </header>
   )

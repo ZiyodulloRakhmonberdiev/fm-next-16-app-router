@@ -1,17 +1,24 @@
-import { seed } from '@/scripts/seed'
 import type { UserRow } from '@/features/dashboard'
-import { DashboardUsersPage } from '@/features/dashboard'
+import { UsersPage } from '@/features/dashboard'
 
 export default async function DashboardUsersPageRoute() {
-  const users: UserRow[] = seed.users.map((u) => ({
-    id: u.id,
+  const res = await fetch('http://localhost:3000/api/users', {
+    cache: 'no-store',
+  })
+  if (!res.ok) {
+    throw new Error('Foydalanuvchilarni yuklab bo‘lmadi')
+  }
+  const data = (await res.json()) as any[]
+
+  const users: UserRow[] = data.map((u) => ({
+    id: u._id,
     full_name: u.full_name,
     image: u.image,
     role: u.role,
-    lavozim: u.lavozim,
+    position: u.position,
     login: u.login,
     password: u.password,
   }))
 
-  return <DashboardUsersPage users={users} />
+  return <UsersPage users={users} />
 }

@@ -12,7 +12,7 @@ function getDefaultPayload(): SiteSettingsPayload {
     description: { ...seed.description },
     socialMedia: seed.socialMedia.map((s) => ({
       slug: s.slug,
-      name: { ...s.name },
+      name: s.name,
       href: s.href,
     })),
     siteConfig: {

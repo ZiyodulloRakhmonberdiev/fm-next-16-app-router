@@ -52,7 +52,7 @@ export type UserRow = {
   full_name: string
   image: string | null
   role: UserRole
-  lavozim: string
+  position: string
   login: string
   password: string
 }
@@ -65,7 +65,7 @@ function generateId(): string {
   return `user-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
 }
 
-export function DashboardUsersPage({ users: initialUsers }: DashboardUsersPageProps) {
+export function UsersPage({ users: initialUsers }: DashboardUsersPageProps) {
   const [users, setUsers] = useState<UserRow[]>(initialUsers)
   const [createOpen, setCreateOpen] = useState(false)
   const [createRole, setCreateRole] = useState<UserRole | ''>('')
@@ -73,6 +73,7 @@ export function DashboardUsersPage({ users: initialUsers }: DashboardUsersPagePr
   const [editRole, setEditRole] = useState<UserRole | ''>('')
   const [deleteUser, setDeleteUser] = useState<UserRow | null>(null)
 
+  console.log(users)
   useEffect(() => {
     if (editUser) setEditRole(editUser.role)
   }, [editUser])
@@ -82,11 +83,14 @@ export function DashboardUsersPage({ users: initialUsers }: DashboardUsersPagePr
     const form = e.currentTarget
     const full_name = (form.querySelector('[name="full_name"]') as HTMLInputElement)?.value?.trim() ?? ''
     const role = createRole
-    const lavozim = (form.querySelector('[name="lavozim"]') as HTMLInputElement)?.value?.trim() ?? ''
+    const position = (form.querySelector('[name="position"]') as HTMLInputElement)?.value?.trim() ?? ''
     const login = (form.querySelector('[name="login"]') as HTMLInputElement)?.value?.trim() ?? ''
     const password = (form.querySelector('[name="password"]') as HTMLInputElement)?.value ?? ''
-    const imageInput = form.querySelector('[name="image"]') as HTMLInputElement
-    const image = imageInput?.value?.trim() || null
+
+    const imageUrlInput = form.querySelector('[name="image"]') as HTMLInputElement
+    const imageFileInput = form.querySelector('[name="image_file"]') as HTMLInputElement
+    const file = imageFileInput?.files?.[0]
+    const image = file ? URL.createObjectURL(file) : imageUrlInput?.value?.trim() || null
 
     if (!full_name || !login || !password) {
       toast.error('To‘liq ism, login va parol kiritilishi shart')
@@ -103,7 +107,7 @@ export function DashboardUsersPage({ users: initialUsers }: DashboardUsersPagePr
     }
     setUsers((prev) => [
       ...prev,
-      { id: generateId(), full_name, image, role: role as UserRole, lavozim, login, password },
+      { id: generateId(), full_name, image, role: role as UserRole, position, login, password },
     ])
     setCreateOpen(false)
     setCreateRole('')
@@ -116,12 +120,15 @@ export function DashboardUsersPage({ users: initialUsers }: DashboardUsersPagePr
     const form = e.currentTarget
     const full_name = (form.querySelector('[name="full_name"]') as HTMLInputElement)?.value?.trim() ?? ''
     const role = editRole
-    const lavozim = (form.querySelector('[name="lavozim"]') as HTMLInputElement)?.value?.trim() ?? ''
+    const position = (form.querySelector('[name="position"]') as HTMLInputElement)?.value?.trim() ?? ''
     const login = (form.querySelector('[name="login"]') as HTMLInputElement)?.value?.trim() ?? ''
     const passwordInput = form.querySelector('[name="password"]') as HTMLInputElement
     const password = passwordInput?.value?.trim()
-    const imageInput = form.querySelector('[name="image"]') as HTMLInputElement
-    const image = imageInput?.value?.trim() || null
+
+    const imageUrlInput = form.querySelector('[name="image"]') as HTMLInputElement
+    const imageFileInput = form.querySelector('[name="image_file"]') as HTMLInputElement
+    const file = imageFileInput?.files?.[0]
+    const image = file ? URL.createObjectURL(file) : imageUrlInput?.value?.trim() || null
 
     if (!full_name || !login) {
       toast.error('To‘liq ism va login kiritilishi shart')
@@ -144,7 +151,7 @@ export function DashboardUsersPage({ users: initialUsers }: DashboardUsersPagePr
               full_name,
               image,
               role: role as UserRole,
-              lavozim,
+              position,
               login,
               ...(password ? { password } : {}),
             }
@@ -165,17 +172,17 @@ export function DashboardUsersPage({ users: initialUsers }: DashboardUsersPagePr
   return (
     <div className="space-y-6 min-w-0 overflow-hidden">
       <Card className="border-primary/30 bg-primary/5">
-        <CardHeader className="flex flex-row items-center justify-between gap-4">
+        <CardHeader className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
             <CardTitle className="text-xl flex items-center gap-2">
               <Users className="size-6" />
               Foydalanuvchilar
             </CardTitle>
             <CardDescription>
-              Tizimga kirish huquqi berilgan foydalanuvchilar ro‘yxati. To‘liq ism, rasm, lavozim, login va parol.
+              Tizimga kirish huquqi berilgan foydalanuvchilar ro‘yxati. To‘liq ism, rasm, position, login va parol.
             </CardDescription>
           </div>
-          <Button onClick={() => setCreateOpen(true)} size="lg" className="shrink-0">
+          <Button onClick={() => setCreateOpen(true)} size="lg" className="shrink-0 w-full md:w-auto">
             <PlusCircle className="size-4 mr-2" />
             Yangi foydalanuvchi
           </Button>
@@ -195,7 +202,7 @@ export function DashboardUsersPage({ users: initialUsers }: DashboardUsersPagePr
                   <TableHead className="w-14">Rasm</TableHead>
                   <TableHead>To‘liq ism</TableHead>
                   <TableHead>Rol</TableHead>
-                  <TableHead>Lavozim</TableHead>
+                  <TableHead>position</TableHead>
                   <TableHead>Login</TableHead>
                   <TableHead className="w-[120px]">Amallar</TableHead>
                 </TableRow>
@@ -230,7 +237,7 @@ export function DashboardUsersPage({ users: initialUsers }: DashboardUsersPagePr
                       <TableCell>
                         {USER_ROLES.find((r) => r.value === row.role)?.label ?? row.role}
                       </TableCell>
-                      <TableCell>{row.lavozim || '—'}</TableCell>
+                      <TableCell>{row.position || '—'}</TableCell>
                       <TableCell className="font-mono text-sm">{row.login}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
@@ -267,7 +274,7 @@ export function DashboardUsersPage({ users: initialUsers }: DashboardUsersPagePr
           <DialogHeader>
             <DialogTitle>Yangi foydalanuvchi</DialogTitle>
             <DialogDescription>
-              To‘liq ism, rasm URL, rol, lavozim, tizimga kirish uchun login va parol kiriting.
+              To‘liq ism, rasm (URL yoki fayl), rol, position, tizimga kirish uchun login va parol kiriting.
             </DialogDescription>
           </DialogHeader>
           <form id="create-user-form" onSubmit={handleCreateSubmit} className="space-y-4">
@@ -278,6 +285,10 @@ export function DashboardUsersPage({ users: initialUsers }: DashboardUsersPagePr
             <div className="space-y-2">
               <Label htmlFor="create-image">Rasm (URL)</Label>
               <Input id="create-image" name="image" type="url" placeholder="https://..." />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="create-image_file">Yoki rasm faylini tanlang</Label>
+              <Input id="create-image_file" name="image_file" type="file" accept="image/*" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="create-role">Rol</Label>
@@ -299,8 +310,8 @@ export function DashboardUsersPage({ users: initialUsers }: DashboardUsersPagePr
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="create-lavozim">Lavozim</Label>
-              <Input id="create-lavozim" name="lavozim" placeholder="Masalan: Bosh muharrir, Reklama bo‘limi mudiri" />
+              <Label htmlFor="create-position">position</Label>
+              <Input id="create-position" name="position" placeholder="Masalan: Bosh muharrir, Reklama bo‘limi mudiri" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="create-login">Login</Label>
@@ -328,7 +339,7 @@ export function DashboardUsersPage({ users: initialUsers }: DashboardUsersPagePr
           <DialogHeader>
             <DialogTitle>Tahrirlash: {editUser?.full_name}</DialogTitle>
             <DialogDescription>
-              Foydalanuvchi ma’lumotlarini o‘zgartiring. Parolni o‘zgartirmasangiz bo‘sh qoldiring.
+              Foydalanuvchi ma’lumotlarini o‘zgartiring. Rasmni URL yoki yangi fayl orqali yangilashingiz mumkin. Parolni o‘zgartirmasangiz bo‘sh qoldiring.
             </DialogDescription>
           </DialogHeader>
           {editUser && (
@@ -354,6 +365,10 @@ export function DashboardUsersPage({ users: initialUsers }: DashboardUsersPagePr
                 />
               </div>
               <div className="space-y-2">
+                <Label htmlFor="edit-image_file">Yoki yangi rasm faylini tanlang</Label>
+                <Input id="edit-image_file" name="image_file" type="file" accept="image/*" />
+              </div>
+              <div className="space-y-2">
                 <Label htmlFor="edit-role">Rol</Label>
                 <Select
                   value={editRole}
@@ -372,11 +387,11 @@ export function DashboardUsersPage({ users: initialUsers }: DashboardUsersPagePr
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="edit-lavozim">Lavozim</Label>
+                <Label htmlFor="edit-position">position</Label>
                 <Input
-                  id="edit-lavozim"
-                  name="lavozim"
-                  defaultValue={editUser.lavozim ?? ''}
+                  id="edit-position"
+                  name="position"
+                  defaultValue={editUser.position ?? ''}
                   placeholder="Masalan: Bosh muharrir, Reklama bo‘limi mudiri"
                 />
               </div>

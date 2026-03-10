@@ -102,10 +102,10 @@ export const seed = {
   ] as const,
 
   socialMedia: [
-    { slug: "telegram", name: { uz: "Telegram", uzb: "Телеграм", ru: "Телеграм", en: "Telegram" } satisfies LocaleMap, href: "/telegram" },
-    { slug: "instagram", name: { uz: "Instagram", uzb: "Инстаграм", ru: "Инстаграм", en: "Instagram" } satisfies LocaleMap, href: "/instagram" },
-    { slug: "facebook", name: { uz: "Facebook", uzb: "Фейсбук", ru: "Фейсбук", en: "Facebook" } satisfies LocaleMap, href: "/facebook" },
-    { slug: "youtube", name: { uz: "YouTube", uzb: "Ютуб", ru: "Ютуб", en: "YouTube" } satisfies LocaleMap, href: "/youtube" },
+    { slug: "telegram", name: "Telegram", href: "/telegram" },
+    { slug: "instagram", name: "Instagram", href: "/instagram" },
+    { slug: "facebook", name: "Facebook", href: "/facebook" },
+    { slug: "youtube", name: "YouTube", href: "/youtube" },
   ] as const,
 
   copyright: {
@@ -181,7 +181,7 @@ export const seed = {
       full_name: "Admin Foydalanuvchi",
       image: null as string | null,
       role: "administrator",
-      lavozim: "Tizim administratori",
+      position: "Tizim administratori",
       login: "admin",
       password: "admin123",
     },
@@ -190,7 +190,7 @@ export const seed = {
       full_name: "Tahrirchi User",
       image: null as string | null,
       role: "moderator",
-      lavozim: "Bosh muharrir",
+      position: "Bosh muharrir",
       login: "editor",
       password: "editor123",
     },
