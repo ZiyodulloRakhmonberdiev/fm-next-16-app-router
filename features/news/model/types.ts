@@ -28,21 +28,17 @@ export type RawNewsItem = {
   isLatest?: boolean
   isPopular?: boolean
   isTop?: boolean
-  /** Telegramga yuborilganmi */
+  isBreaking?: boolean
   pushedToTelegram?: boolean
-  /** Telegramga yuborilgan sana */
   pushedToTelegramAt?: Date
   videoSource?: "youtube" | "local"
   videoUrl?: string
 }
 
-/** Frontend/API da ko'rsatiladigan yangilik — bitta til uchun (description/content ixtiyoriy) */
 export type NewsItem = {
   slug: string
   title: string
-  /** Tanlangan tilda bo'lmasa ko'rsatilmaydi */
   description?: string
-  /** Tanlangan tilda bo'lmasa ko'rsatilmaydi */
   content?: NewsContent
   images: string[]
   category: string
@@ -52,21 +48,16 @@ export type NewsItem = {
   minutes: number
   views: number
   author: string
-  /** Dashboard/filter uchun */
   status?: NewsStatus
   isTop?: boolean
   type?: string
+  isBreaking?: boolean
   pushedToTelegram?: boolean
   pushedToTelegramAt?: Date
   videoSource?: "youtube" | "local"
   videoUrl?: string
 }
 
-/**
- * Bitta raw yangilikni berilgan locale uchun NewsItem qilib qaytaradi.
- * Title tanlangan tilda bo'lmasa null qaytaradi (yangilik ko'rsatilmaydi).
- * Description va content faqat shu til uchun mavjud bo'lsa qo'shiladi, fallback yo'q.
- */
 export function pickNewsForLocale(
   raw: RawNewsItem,
   locale: AppLocale
@@ -95,6 +86,7 @@ export function pickNewsForLocale(
     status: raw.status ?? "published",
     isTop: raw.isTop ?? false,
     type: raw.type,
+    isBreaking: raw.isBreaking ?? false,
     pushedToTelegram: raw.pushedToTelegram,
     pushedToTelegramAt: raw.pushedToTelegramAt,
     videoSource: raw.videoSource,
@@ -123,4 +115,16 @@ export function getPublishedNewsListForLocale(
   locale: AppLocale
 ): NewsItem[] {
   return getNewsListForLocale(filterPublishedRawNews(rawList), locale)
+}
+
+/** Faqat matnli yangiliklar (image/video yo'q va type=text). */
+export function isTextOnlyRawNews(item: RawNewsItem): boolean {
+  const hasVideo = Boolean(item.videoSource && item.videoUrl)
+  const hasImages = Array.isArray(item.images) && item.images.length > 0
+  return item.type === "text" && !hasVideo && !hasImages
+}
+
+/** Rasmli/video cardlarda ko'rsatish mumkin bo'lgan yangiliklar. */
+export function isVisualRawNews(item: RawNewsItem): boolean {
+  return !isTextOnlyRawNews(item)
 }

@@ -1,6 +1,7 @@
 'use client'
+/* eslint-disable react/no-unescaped-entities */
 
-import { useState, useEffect } from 'react'
+import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import Image from 'next/image'
 import {
@@ -37,6 +38,9 @@ import {
   SelectValue,
 } from '@/shared/common/components/ui/select'
 import { Users, PlusCircle, Pencil, Trash2, User } from 'lucide-react'
+import { createUserSchema, type CreateUserInput } from '@/features/users/model/schemas'
+import { useUserMutations, useUsersQuery } from '@/features/dashboard/model/admin-hooks'
+import { useUsersUiStore } from '@/features/dashboard/model/admin-ui-store'
 
 export const USER_ROLES = [
   { value: 'ceo', label: 'CEO' },
@@ -57,26 +61,32 @@ export type UserRow = {
   password: string
 }
 
-type DashboardUsersPageProps = {
-  users: UserRow[]
+type UsersPageProps = {
+  users?: UserRow[]
 }
 
-function generateId(): string {
-  return `user-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
-}
+export function UsersPage({ users: initialUsers }: UsersPageProps) {
+  const { data, isLoading, error } = useUsersQuery()
+  const { create, update, remove } = useUserMutations()
+  const { createOpen, editId, deleteId, setCreateOpen, setEditId, setDeleteId } = useUsersUiStore()
+  const users = useMemo<UserRow[]>(
+    () =>
+      (data ?? initialUsers ?? []).map((u) => ({
+        id: 'id' in u ? u.id : u._id,
+        full_name: u.full_name,
+        image: u.image,
+        role: u.role,
+        position: u.position ?? '',
+        login: u.login,
+        password: u.password,
+      })),
+    [data, initialUsers]
+  )
 
-export function UsersPage({ users: initialUsers }: DashboardUsersPageProps) {
-  const [users, setUsers] = useState<UserRow[]>(initialUsers)
-  const [createOpen, setCreateOpen] = useState(false)
   const [createRole, setCreateRole] = useState<UserRole | ''>('')
-  const [editUser, setEditUser] = useState<UserRow | null>(null)
   const [editRole, setEditRole] = useState<UserRole | ''>('')
-  const [deleteUser, setDeleteUser] = useState<UserRow | null>(null)
-
-  console.log(users)
-  useEffect(() => {
-    if (editUser) setEditRole(editUser.role)
-  }, [editUser])
+  const editUser = useMemo(() => users.find((u) => u.id === editId) ?? null, [users, editId])
+  const deleteUser = useMemo(() => users.find((u) => u.id === deleteId) ?? null, [users, deleteId])
 
   const handleCreateSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -92,26 +102,50 @@ export function UsersPage({ users: initialUsers }: DashboardUsersPageProps) {
     const file = imageFileInput?.files?.[0]
     const image = file ? URL.createObjectURL(file) : imageUrlInput?.value?.trim() || null
 
-    if (!full_name || !login || !password) {
-      toast.error('To‘liq ism, login va parol kiritilishi shart')
-      return
-    }
     if (!role || !USER_ROLES.some((r) => r.value === role)) {
       toast.error('Rolni tanlang')
       return
     }
+
+    const candidate: CreateUserInput = {
+      full_name,
+      image: image ?? null,
+      role,
+      position: position || null,
+      login,
+      password,
+    }
+
+    const parsed = createUserSchema.safeParse(candidate)
+    if (!parsed.success) {
+      const firstError = parsed.error.issues[0]
+      toast.error(firstError?.message ?? 'Ma\'lumotlarni tekshiring')
+      return
+    }
+
     const exists = users.some((u) => u.login.toLowerCase() === login.toLowerCase())
     if (exists) {
       toast.error('Bunday login allaqachon mavjud')
       return
     }
-    setUsers((prev) => [
-      ...prev,
-      { id: generateId(), full_name, image, role: role as UserRole, position, login, password },
-    ])
-    setCreateOpen(false)
-    setCreateRole('')
-    toast.success('Foydalanuvchi qo‘shildi')
+    create.mutate(
+      {
+        full_name,
+        image,
+        role: role as UserRole,
+        position: position || null,
+        login,
+        password,
+      },
+      {
+        onSuccess: () => {
+          setCreateOpen(false)
+          setCreateRole('')
+          toast.success('Foydalanuvchi qo\'shildi')
+        },
+        onError: (err) => toast.error(err.message),
+      }
+    )
   }
 
   const handleUpdateSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -131,7 +165,7 @@ export function UsersPage({ users: initialUsers }: DashboardUsersPageProps) {
     const image = file ? URL.createObjectURL(file) : imageUrlInput?.value?.trim() || null
 
     if (!full_name || !login) {
-      toast.error('To‘liq ism va login kiritilishi shart')
+      toast.error('To\'liq ism va login kiritilishi shart')
       return
     }
     if (!role || !USER_ROLES.some((r) => r.value === role)) {
@@ -143,30 +177,37 @@ export function UsersPage({ users: initialUsers }: DashboardUsersPageProps) {
       toast.error('Bunday login boshqa foydalanuvchida mavjud')
       return
     }
-    setUsers((prev) =>
-      prev.map((u) =>
-        u.id === editUser.id
-          ? {
-              ...u,
-              full_name,
-              image,
-              role: role as UserRole,
-              position,
-              login,
-              ...(password ? { password } : {}),
-            }
-          : u
-      )
+    update.mutate(
+      {
+        id: editUser.id,
+        payload: {
+          full_name,
+          image,
+          role: role as UserRole,
+          position: position || null,
+          login,
+          password: password || editUser.password,
+        },
+      },
+      {
+        onSuccess: () => {
+          setEditId(null)
+          toast.success('Foydalanuvchi yangilandi')
+        },
+        onError: (err) => toast.error(err.message),
+      }
     )
-    setEditUser(null)
-    toast.success('Foydalanuvchi yangilandi')
   }
 
   const handleDeleteConfirm = () => {
     if (!deleteUser) return
-    setUsers((prev) => prev.filter((u) => u.id !== deleteUser.id))
-    setDeleteUser(null)
-    toast.success('Foydalanuvchi o‘chirildi')
+    remove.mutate(deleteUser.id, {
+      onSuccess: () => {
+        setDeleteId(null)
+        toast.success('Foydalanuvchi o\'chirildi')
+      },
+      onError: (err) => toast.error(err.message),
+    })
   }
 
   return (
@@ -179,7 +220,7 @@ export function UsersPage({ users: initialUsers }: DashboardUsersPageProps) {
               Foydalanuvchilar
             </CardTitle>
             <CardDescription>
-              Tizimga kirish huquqi berilgan foydalanuvchilar ro‘yxati. To‘liq ism, rasm, position, login va parol.
+              Tizimga kirish huquqi berilgan foydalanuvchilar ro'yxati.
             </CardDescription>
           </div>
           <Button onClick={() => setCreateOpen(true)} size="lg" className="shrink-0 w-full md:w-auto">
@@ -191,18 +232,23 @@ export function UsersPage({ users: initialUsers }: DashboardUsersPageProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Ro‘yxat</CardTitle>
+          <CardTitle className="text-base">Ro'yxat</CardTitle>
           <CardDescription>Jami: {users.length} ta foydalanuvchi</CardDescription>
         </CardHeader>
         <CardContent>
+          {isLoading ? (
+            <p className="text-sm text-muted-foreground">Yuklanmoqda...</p>
+          ) : error ? (
+            <p className="text-sm text-destructive">Foydalanuvchilarni yuklab bo‘lmadi.</p>
+          ) : null}
           <div className="rounded-md border overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-14">Rasm</TableHead>
-                  <TableHead>To‘liq ism</TableHead>
+                  <TableHead>To'liq ism</TableHead>
                   <TableHead>Rol</TableHead>
-                  <TableHead>position</TableHead>
+                  <TableHead>Lavozim</TableHead>
                   <TableHead>Login</TableHead>
                   <TableHead className="w-[120px]">Amallar</TableHead>
                 </TableRow>
@@ -244,17 +290,14 @@ export function UsersPage({ users: initialUsers }: DashboardUsersPageProps) {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => setEditUser(row)}
-                            className="gap-1"
+                            onClick={() => {
+                              setEditRole(row.role)
+                              setEditId(row.id)
+                            }}
                           >
                             <Pencil className="size-4" />
                           </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setDeleteUser(row)}
-                            className="gap-1"
-                          >
+                          <Button variant="outline" size="sm" onClick={() => setDeleteId(row.id)}>
                             <Trash2 className="size-4" />
                           </Button>
                         </div>
@@ -268,18 +311,17 @@ export function UsersPage({ users: initialUsers }: DashboardUsersPageProps) {
         </CardContent>
       </Card>
 
-      {/* Create user modal */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Yangi foydalanuvchi</DialogTitle>
             <DialogDescription>
-              To‘liq ism, rasm (URL yoki fayl), rol, position, tizimga kirish uchun login va parol kiriting.
+              To'liq ism, rasm, rol, lavozim, login va parol kiriting.
             </DialogDescription>
           </DialogHeader>
           <form id="create-user-form" onSubmit={handleCreateSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="create-full_name">To‘liq ism</Label>
+              <Label htmlFor="create-full_name">To'liq ism</Label>
               <Input id="create-full_name" name="full_name" placeholder="Ism Familiya" required />
             </div>
             <div className="space-y-2">
@@ -292,26 +334,20 @@ export function UsersPage({ users: initialUsers }: DashboardUsersPageProps) {
             </div>
             <div className="space-y-2">
               <Label htmlFor="create-role">Rol</Label>
-              <Select
-                value={createRole || undefined}
-                onValueChange={(v) => setCreateRole(v as UserRole)}
-                required
-              >
+              <Select value={createRole || undefined} onValueChange={(v) => setCreateRole(v as UserRole)} required>
                 <SelectTrigger id="create-role" className="w-full">
                   <SelectValue placeholder="Tanlang" />
                 </SelectTrigger>
                 <SelectContent>
                   {USER_ROLES.map((r) => (
-                    <SelectItem key={r.value} value={r.value}>
-                      {r.label}
-                    </SelectItem>
+                    <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="create-position">position</Label>
-              <Input id="create-position" name="position" placeholder="Masalan: Bosh muharrir, Reklama bo‘limi mudiri" />
+              <Label htmlFor="create-position">Lavozim</Label>
+              <Input id="create-position" name="position" placeholder="Masalan: Bosh muharrir" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="create-login">Login</Label>
@@ -323,46 +359,27 @@ export function UsersPage({ users: initialUsers }: DashboardUsersPageProps) {
             </div>
           </form>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setCreateOpen(false)}>
-              Bekor qilish
-            </Button>
-            <Button type="submit" form="create-user-form">
-              Saqlash
-            </Button>
+            <Button type="button" variant="outline" onClick={() => setCreateOpen(false)}>Bekor qilish</Button>
+            <Button type="submit" form="create-user-form" disabled={create.isPending}>Saqlash</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Edit user modal */}
-      <Dialog open={!!editUser} onOpenChange={(open) => !open && setEditUser(null)}>
+      <Dialog open={!!editUser} onOpenChange={(open) => !open && setEditId(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Tahrirlash: {editUser?.full_name}</DialogTitle>
-            <DialogDescription>
-              Foydalanuvchi ma’lumotlarini o‘zgartiring. Rasmni URL yoki yangi fayl orqali yangilashingiz mumkin. Parolni o‘zgartirmasangiz bo‘sh qoldiring.
-            </DialogDescription>
+            <DialogDescription>Foydalanuvchi ma'lumotlarini o'zgartiring.</DialogDescription>
           </DialogHeader>
           {editUser && (
             <form key={editUser.id} id="edit-user-form" onSubmit={handleUpdateSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="edit-full_name">To‘liq ism</Label>
-                <Input
-                  id="edit-full_name"
-                  name="full_name"
-                  defaultValue={editUser.full_name}
-                  placeholder="Ism Familiya"
-                  required
-                />
+                <Label htmlFor="edit-full_name">To'liq ism</Label>
+                <Input id="edit-full_name" name="full_name" defaultValue={editUser.full_name} required />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-image">Rasm (URL)</Label>
-                <Input
-                  id="edit-image"
-                  name="image"
-                  type="url"
-                  defaultValue={editUser.image ?? ''}
-                  placeholder="https://..."
-                />
+                <Input id="edit-image" name="image" type="url" defaultValue={editUser.image ?? ''} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-image_file">Yoki yangi rasm faylini tanlang</Label>
@@ -370,76 +387,49 @@ export function UsersPage({ users: initialUsers }: DashboardUsersPageProps) {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-role">Rol</Label>
-                <Select
-                  value={editRole}
-                  onValueChange={(v) => setEditRole(v as UserRole)}
-                >
+                <Select value={editRole} onValueChange={(v) => setEditRole(v as UserRole)}>
                   <SelectTrigger id="edit-role" className="w-full">
                     <SelectValue placeholder="Tanlang" />
                   </SelectTrigger>
                   <SelectContent>
                     {USER_ROLES.map((r) => (
-                      <SelectItem key={r.value} value={r.value}>
-                        {r.label}
-                      </SelectItem>
+                      <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="edit-position">position</Label>
-                <Input
-                  id="edit-position"
-                  name="position"
-                  defaultValue={editUser.position ?? ''}
-                  placeholder="Masalan: Bosh muharrir, Reklama bo‘limi mudiri"
-                />
+                <Label htmlFor="edit-position">Lavozim</Label>
+                <Input id="edit-position" name="position" defaultValue={editUser.position ?? ''} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-login">Login</Label>
-                <Input
-                  id="edit-login"
-                  name="login"
-                  defaultValue={editUser.login}
-                  placeholder="tizimga kirish uchun"
-                  required
-                />
+                <Input id="edit-login" name="login" defaultValue={editUser.login} required />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-password">Yangi parol (ixtiyoriy)</Label>
-                <Input id="edit-password" name="password" type="password" placeholder="O‘zgartirmasangiz bo‘sh qoldiring" />
+                <Input id="edit-password" name="password" type="password" placeholder="O'zgartirmasangiz bo'sh qoldiring" />
               </div>
             </form>
           )}
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setEditUser(null)}>
-              Bekor qilish
-            </Button>
-            {editUser && (
-              <Button type="submit" form="edit-user-form">
-                Saqlash
-              </Button>
-            )}
+            <Button type="button" variant="outline" onClick={() => setEditId(null)}>Bekor qilish</Button>
+            {editUser && <Button type="submit" form="edit-user-form" disabled={update.isPending}>Saqlash</Button>}
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Delete confirm modal */}
-      <Dialog open={!!deleteUser} onOpenChange={(open) => !open && setDeleteUser(null)}>
+      <Dialog open={!!deleteUser} onOpenChange={(open) => !open && setDeleteId(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Foydalanuvchini o‘chirish</DialogTitle>
+            <DialogTitle>Foydalanuvchini o'chirish</DialogTitle>
             <DialogDescription>
-              Haqiqatan ham "{deleteUser?.full_name}" (login: {deleteUser?.login}) foydalanuvchisini o‘chirishni xohlaysizmi?
+              Haqiqatan ham &quot;{deleteUser?.full_name}&quot; (login: {deleteUser?.login}) foydalanuvchisini o'chirishni xohlaysizmi?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setDeleteUser(null)}>
-              Bekor qilish
-            </Button>
-            <Button type="button" variant="destructive" onClick={handleDeleteConfirm}>
-              O‘chirish
-            </Button>
+            <Button type="button" variant="outline" onClick={() => setDeleteId(null)}>Bekor qilish</Button>
+            <Button type="button" variant="destructive" onClick={handleDeleteConfirm} disabled={remove.isPending}>O'chirish</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

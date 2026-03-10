@@ -1,6 +1,7 @@
 'use client'
+/* eslint-disable react/no-unescaped-entities */
 
-import { useState } from 'react'
+import { useMemo } from 'react'
 import { toast } from 'sonner'
 import {
   Card,
@@ -29,74 +30,132 @@ import {
   TableRow,
 } from '@/shared/common/components/ui/table'
 import type { AppLocale } from '@/shared/common/lib/locale-api'
+import { LOCALES, LOCALE_LABELS } from '@/shared/common/lib/locale-constants'
 import { Tag, PlusCircle, Pencil, Trash2 } from 'lucide-react'
-
-const LOCALES: AppLocale[] = ['uz', 'uzb', 'ru', 'en']
-const LOCALE_LABELS: Record<AppLocale, string> = {
-  uz: "O'zbek (lotin)",
-  uzb: "O'zbek (kirill)",
-  ru: 'Ruscha',
-  en: 'English',
-}
+import { useTagMutations, useTagsQuery } from '@/features/dashboard/model/admin-hooks'
+import { useTagsUiStore } from '@/features/dashboard/model/admin-ui-store'
+import { cyrillicToLatinForSlug, slugify } from '@/shared/common/lib/slug'
+import { getApiErrorDescription } from '@/features/dashboard/model/admin-api'
 
 export type TagRow = {
+  _id: string
   slug: string
   name: Record<AppLocale, string>
 }
 
-type DashboardTagsPageProps = {
-  tags: TagRow[]
+type TagsPageProps = {
   locale: AppLocale
 }
 
-export function DashboardTagsPage({ tags: initialTags, locale }: DashboardTagsPageProps) {
-  const [tags, setTags] = useState<TagRow[]>(initialTags)
-  const [createOpen, setCreateOpen] = useState(false)
-  const [editTag, setEditTag] = useState<TagRow | null>(null)
-  const [deleteTag, setDeleteTag] = useState<TagRow | null>(null)
+function generateTagSlugFromEn(name: Record<AppLocale, string>): string {
+  const base = name.en?.trim() || ''
+  if (!base) return ''
+  const latin = cyrillicToLatinForSlug(base)
+  return slugify(latin || base)
+}
+
+export function TagsPage({ locale }: TagsPageProps) {
+  const { data, isLoading, error } = useTagsQuery()
+  const { create, update, remove } = useTagMutations()
+  const { createOpen, editId, deleteId, setCreateOpen, setEditId, setDeleteId } = useTagsUiStore()
+  const tags = useMemo<TagRow[]>(
+    () =>
+      (data ?? []).map((t) => ({
+        _id: t._id,
+        slug: t.slug,
+        name: t.name,
+      })),
+    [data]
+  )
+  const editTag = useMemo(() => tags.find((t) => t._id === editId) ?? null, [tags, editId])
+  const deleteTag = useMemo(() => tags.find((t) => t._id === deleteId) ?? null, [tags, deleteId])
+
+  const showMutationError = (err: Error) => {
+    toast.error(err.message || 'Validation error', {
+      description: getApiErrorDescription(err),
+    })
+  }
 
   const handleCreateSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const form = e.currentTarget
-    const slug = (form.querySelector('[name="slug"]') as HTMLInputElement)?.value?.trim() || ''
     const name: Record<AppLocale, string> = {
       uz: (form.querySelector('[name="name_uz"]') as HTMLInputElement)?.value?.trim() ?? '',
       uzb: (form.querySelector('[name="name_uzb"]') as HTMLInputElement)?.value?.trim() ?? '',
       ru: (form.querySelector('[name="name_ru"]') as HTMLInputElement)?.value?.trim() ?? '',
       en: (form.querySelector('[name="name_en"]') as HTMLInputElement)?.value?.trim() ?? '',
     }
-    if (!slug) return
+    const slug = generateTagSlugFromEn(name)
+    if (!slug) {
+      toast.error('Validation error', {
+        description: 'Inglizcha nom (en) bo‘yicha slug hosil qilib bo‘lmadi.',
+      })
+      return
+    }
     const exists = tags.some((t) => t.slug.toLowerCase() === slug.toLowerCase())
-    if (exists) return
-    setTags((prev) => [...prev, { slug, name }])
-    setCreateOpen(false)
-    toast.success('Teg muvaffaqiyatli qo‘shildi')
+    if (exists) {
+      toast.error('Validation error', {
+        description: `slug: "${slug}" allaqachon mavjud.`,
+      })
+      return
+    }
+    create.mutate(
+      { slug, name },
+      {
+        onSuccess: () => {
+          setCreateOpen(false)
+          toast.success('Teg muvaffaqiyatli qo\'shildi')
+        },
+        onError: showMutationError,
+      }
+    )
   }
 
   const handleUpdateSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (!editTag) return
     const form = e.currentTarget
-    const slug = (form.querySelector('[name="slug"]') as HTMLInputElement)?.value?.trim() || ''
     const name: Record<AppLocale, string> = {
       uz: (form.querySelector('[name="name_uz"]') as HTMLInputElement)?.value?.trim() ?? '',
       uzb: (form.querySelector('[name="name_uzb"]') as HTMLInputElement)?.value?.trim() ?? '',
       ru: (form.querySelector('[name="name_ru"]') as HTMLInputElement)?.value?.trim() ?? '',
       en: (form.querySelector('[name="name_en"]') as HTMLInputElement)?.value?.trim() ?? '',
     }
-    if (!slug) return
-    const originalSlug = editTag.slug
-    setTags((prev) => prev.map((t) => (t.slug === originalSlug ? { slug, name } : t)))
-    setEditTag(null)
-    toast.success('Teg muvaffaqiyatli yangilandi')
+    const slug = generateTagSlugFromEn(name)
+    if (!slug) {
+      toast.error('Validation error', {
+        description: 'Inglizcha nom (en) bo‘yicha slug hosil qilib bo‘lmadi.',
+      })
+      return
+    }
+    const exists = tags.some((t) => t._id !== editTag._id && t.slug.toLowerCase() === slug.toLowerCase())
+    if (exists) {
+      toast.error('Validation error', {
+        description: `slug: "${slug}" allaqachon mavjud.`,
+      })
+      return
+    }
+    update.mutate(
+      { id: editTag._id, payload: { slug, name } },
+      {
+        onSuccess: () => {
+          setEditId(null)
+          toast.success('Teg muvaffaqiyatli yangilandi')
+        },
+        onError: showMutationError,
+      }
+    )
   }
 
   const handleDeleteConfirm = () => {
     if (!deleteTag) return
-    const slug = deleteTag.slug
-    setTags((prev) => prev.filter((t) => t.slug !== slug))
-    setDeleteTag(null)
-    toast.success('Teg muvaffaqiyatli o‘chirildi')
+    remove.mutate(deleteTag._id, {
+      onSuccess: () => {
+        setDeleteId(null)
+        toast.success('Teg muvaffaqiyatli o\'chirildi')
+      },
+      onError: showMutationError,
+    })
   }
 
   return (
@@ -109,7 +168,7 @@ export function DashboardTagsPage({ tags: initialTags, locale }: DashboardTagsPa
               Teglar
             </CardTitle>
             <CardDescription>
-              Sayt teglari ro‘yxati. Teglar yangiliklar uchun ishlatiladi.
+              Sayt teglari ro'yxati. Teglar yangiliklar uchun ishlatiladi.
             </CardDescription>
           </div>
           <Button onClick={() => setCreateOpen(true)} size="lg" className="shrink-0 w-full md:w-auto">
@@ -121,10 +180,15 @@ export function DashboardTagsPage({ tags: initialTags, locale }: DashboardTagsPa
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Ro‘yxat</CardTitle>
+          <CardTitle className="text-base">Ro'yxat</CardTitle>
           <CardDescription>Jami: {tags.length} ta teg</CardDescription>
         </CardHeader>
         <CardContent>
+          {isLoading ? (
+            <p className="text-sm text-muted-foreground">Yuklanmoqda...</p>
+          ) : error ? (
+            <p className="text-sm text-destructive">Teglarni yuklab bo‘lmadi.</p>
+          ) : null}
           <div className="rounded-md border overflow-x-auto">
             <Table>
               <TableHeader>
@@ -146,7 +210,7 @@ export function DashboardTagsPage({ tags: initialTags, locale }: DashboardTagsPa
                   </TableRow>
                 ) : (
                   tags.map((row) => (
-                    <TableRow key={row.slug}>
+                    <TableRow key={row._id}>
                       <TableCell className="font-mono text-sm">{row.slug}</TableCell>
                       <TableCell>{row.name.uz ?? '—'}</TableCell>
                       <TableCell>{row.name.uzb ?? '—'}</TableCell>
@@ -154,20 +218,10 @@ export function DashboardTagsPage({ tags: initialTags, locale }: DashboardTagsPa
                       <TableCell>{row.name.en ?? '—'}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setEditTag(row)}
-                            className="gap-1"
-                          >
+                          <Button variant="outline" size="sm" onClick={() => setEditId(row._id)}>
                             <Pencil className="size-4" />
                           </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setDeleteTag(row)}
-                            className="gap-1"
-                          >
+                          <Button variant="outline" size="sm" onClick={() => setDeleteId(row._id)}>
                             <Trash2 className="size-4" />
                           </Button>
                         </div>
@@ -181,22 +235,17 @@ export function DashboardTagsPage({ tags: initialTags, locale }: DashboardTagsPa
         </CardContent>
       </Card>
 
-      {/* Create tag modal */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Yangi teg</DialogTitle>
-            <DialogDescription>Teg slug va tillar bo‘yicha nomlarini kiriting.</DialogDescription>
+            <DialogDescription>Tillar bo‘yicha nomlarni kiriting. Slug inglizcha nomdan avtomatik olinadi.</DialogDescription>
           </DialogHeader>
           <form id="create-tag-form" onSubmit={handleCreateSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="create-slug">Slug</Label>
-              <Input id="create-slug" name="slug" placeholder="masalan: sport" required />
-            </div>
             {LOCALES.map((loc) => (
               <div key={loc} className="space-y-2">
                 <Label htmlFor={`create-name_${loc}`}>Nom ({LOCALE_LABELS[loc]})</Label>
-                <Input id={`create-name_${loc}`} name={`name_${loc}`} placeholder="" />
+                <Input id={`create-name_${loc}`} name={`name_${loc}`} required />
               </div>
             ))}
           </form>
@@ -204,51 +253,35 @@ export function DashboardTagsPage({ tags: initialTags, locale }: DashboardTagsPa
             <Button type="button" variant="outline" onClick={() => setCreateOpen(false)}>
               Bekor qilish
             </Button>
-            <Button type="submit" form="create-tag-form">
+            <Button type="submit" form="create-tag-form" disabled={create.isPending}>
               Saqlash
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Update tag modal */}
-      <Dialog open={!!editTag} onOpenChange={(open) => !open && setEditTag(null)}>
+      <Dialog open={!!editTag} onOpenChange={(open) => !open && setEditId(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Tahrirlash: {editTag?.slug}</DialogTitle>
-            <DialogDescription>Teg ma’lumotlarini o‘zgartiring.</DialogDescription>
+            <DialogDescription>Teg ma'lumotlarini o'zgartiring. Slug inglizcha nomdan avtomatik yangilanadi.</DialogDescription>
           </DialogHeader>
           {editTag && (
             <form key={editTag.slug} id="update-tag-form" onSubmit={handleUpdateSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="edit-slug">Slug</Label>
-                <Input
-                  id="edit-slug"
-                  name="slug"
-                  defaultValue={editTag.slug}
-                  placeholder="masalan: sport"
-                  required
-                />
-              </div>
               {LOCALES.map((loc) => (
                 <div key={loc} className="space-y-2">
                   <Label htmlFor={`edit-name_${loc}`}>Nom ({LOCALE_LABELS[loc]})</Label>
-                  <Input
-                    id={`edit-name_${loc}`}
-                    name={`name_${loc}`}
-                    defaultValue={editTag.name[loc] ?? ''}
-                    placeholder=""
-                  />
+                  <Input id={`edit-name_${loc}`} name={`name_${loc}`} defaultValue={editTag.name[loc] ?? ''} required />
                 </div>
               ))}
             </form>
           )}
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setEditTag(null)}>
+            <Button type="button" variant="outline" onClick={() => setEditId(null)}>
               Bekor qilish
             </Button>
             {editTag && (
-              <Button type="submit" form="update-tag-form">
+              <Button type="submit" form="update-tag-form" disabled={update.isPending}>
                 Saqlash
               </Button>
             )}
@@ -256,21 +289,20 @@ export function DashboardTagsPage({ tags: initialTags, locale }: DashboardTagsPa
         </DialogContent>
       </Dialog>
 
-      {/* Delete tag confirm modal */}
-      <Dialog open={!!deleteTag} onOpenChange={(open) => !open && setDeleteTag(null)}>
+      <Dialog open={!!deleteTag} onOpenChange={(open) => !open && setDeleteId(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Tegni o‘chirish</DialogTitle>
+            <DialogTitle>Tegni o'chirish</DialogTitle>
             <DialogDescription>
-              Haqiqatan ham "{deleteTag?.name[locale] ?? deleteTag?.slug}" tegini o‘chirishni xohlaysizmi?
+              Haqiqatan ham &quot;{deleteTag?.name[locale] ?? deleteTag?.slug}&quot; tegini o'chirishni xohlaysizmi?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setDeleteTag(null)}>
+            <Button type="button" variant="outline" onClick={() => setDeleteId(null)}>
               Bekor qilish
             </Button>
-            <Button type="button" variant="destructive" onClick={handleDeleteConfirm}>
-              O‘chirish
+            <Button type="button" variant="destructive" onClick={handleDeleteConfirm} disabled={remove.isPending}>
+              O'chirish
             </Button>
           </DialogFooter>
         </DialogContent>

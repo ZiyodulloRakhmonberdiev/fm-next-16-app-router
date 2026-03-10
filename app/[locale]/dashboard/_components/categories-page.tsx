@@ -1,6 +1,7 @@
 'use client'
+/* eslint-disable react/no-unescaped-entities */
 
-import { useState } from 'react'
+import { useMemo } from 'react'
 import { toast } from 'sonner'
 import { Link } from '@/i18n/navigation'
 import {
@@ -30,137 +31,68 @@ import {
   TableRow,
 } from '@/shared/common/components/ui/table'
 import type { AppLocale } from '@/shared/common/lib/locale-api'
+import { LOCALES, LOCALE_LABELS } from '@/shared/common/lib/locale-constants'
 import { FolderTree, ExternalLink, PlusCircle, Pencil, Trash2 } from 'lucide-react'
-
-const LOCALES: AppLocale[] = ['uz', 'uzb', 'ru', 'en']
-const LOCALE_LABELS: Record<AppLocale, string> = {
-  uz: "O'zbek (lotin)",
-  uzb: "O'zbek (kirill)",
-  ru: 'Ruscha',
-  en: 'English',
-}
-
-function cyrillicToLatinForSlug(text: string): string {
-  if (!text) return ''
-
-  const map: Record<string, string> = {
-    А: 'a',
-    а: 'a',
-    Б: 'b',
-    б: 'b',
-    В: 'v',
-    в: 'v',
-    Г: 'g',
-    г: 'g',
-    Д: 'd',
-    д: 'd',
-    Е: 'e',
-    е: 'e',
-    Ё: 'yo',
-    ё: 'yo',
-    Ж: 'j',
-    ж: 'j',
-    З: 'z',
-    з: 'z',
-    И: 'i',
-    и: 'i',
-    Й: 'y',
-    й: 'y',
-    К: 'k',
-    к: 'k',
-    Л: 'l',
-    л: 'l',
-    М: 'm',
-    м: 'm',
-    Н: 'n',
-    н: 'n',
-    О: 'o',
-    о: 'o',
-    П: 'p',
-    п: 'p',
-    Р: 'r',
-    р: 'r',
-    С: 's',
-    с: 's',
-    Т: 't',
-    т: 't',
-    У: 'u',
-    у: 'u',
-    Ф: 'f',
-    ф: 'f',
-    Х: 'x',
-    х: 'x',
-    Ц: 'ts',
-    ц: 'ts',
-    Ч: 'ch',
-    ч: 'ch',
-    Ш: 'sh',
-    ш: 'sh',
-    Щ: 'sh',
-    щ: 'sh',
-    Ъ: '',
-    ъ: '',
-    Ы: 'y',
-    ы: 'y',
-    Ь: '',
-    ь: '',
-    Э: 'e',
-    э: 'e',
-    Ю: 'yu',
-    ю: 'yu',
-    Я: 'ya',
-    я: 'ya',
-    Қ: 'q',
-    қ: 'q',
-    Ғ: "g'",
-    ғ: "g'",
-    Ҳ: 'h',
-    ҳ: 'h',
-    Ў: "o'",
-    ў: "o'",
-  }
-
-  return text
-    .split('')
-    .map((ch) => map[ch] ?? ch)
-    .join('')
-}
-
-function slugify(text: string): string {
-  return text
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, '-')
-    .replace(/[^a-z0-9-]/g, '')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '')
-}
+import { cyrillicToLatinForSlug, slugify } from '@/shared/common/lib/slug'
+import { useCategoriesQuery, useCategoryMutations } from '@/features/dashboard/model/admin-hooks'
+import { useCategoriesUiStore } from '@/features/dashboard/model/admin-ui-store'
+import { getApiErrorDescription } from '@/features/dashboard/model/admin-api'
 
 function generateSlugFromNames(name: Record<AppLocale, string>): string {
   const base = name.en?.trim() || ''
-
   if (!base) return ''
-
   const latin = cyrillicToLatinForSlug(base)
   return slugify(latin || base)
 }
 
 export type CategoryRow = {
+  _id: string
   slug: string
   href: string
   name: Record<AppLocale, string>
 }
 
-type DashboardCategoriesPageProps = {
-  categories: CategoryRow[]
+type CategoriesPageProps = {
   locale: AppLocale
 }
 
-export function DashboardCategoriesPage({ categories: initialCategories, locale }: DashboardCategoriesPageProps) {
-  const [categories, setCategories] = useState<CategoryRow[]>(initialCategories)
-  const [createOpen, setCreateOpen] = useState(false)
-  const [editCategory, setEditCategory] = useState<CategoryRow | null>(null)
-  const [deleteCategory, setDeleteCategory] = useState<CategoryRow | null>(null)
+export function CategoriesPage({ locale }: CategoriesPageProps) {
+  const { data, isLoading, error } = useCategoriesQuery()
+  const { create, update, remove } = useCategoryMutations()
+  const {
+    createOpen,
+    editId,
+    deleteId,
+    setCreateOpen,
+    setEditId,
+    setDeleteId,
+  } = useCategoriesUiStore()
+
+  const categories = useMemo<CategoryRow[]>(
+    () =>
+      (data ?? []).map((c) => ({
+        _id: c._id,
+        slug: c.slug,
+        href: c.href,
+        name: c.name,
+      })),
+    [data]
+  )
+
+  const editCategory = useMemo(
+    () => categories.find((c) => c._id === editId) ?? null,
+    [categories, editId]
+  )
+  const deleteCategory = useMemo(
+    () => categories.find((c) => c._id === deleteId) ?? null,
+    [categories, deleteId]
+  )
+
+  const showMutationError = (err: Error) => {
+    toast.error(err.message || 'Validation error', {
+      description: getApiErrorDescription(err),
+    })
+  }
 
   const handleCreateSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -172,16 +104,31 @@ export function DashboardCategoriesPage({ categories: initialCategories, locale 
       en: (form.querySelector('[name="name_en"]') as HTMLInputElement)?.value?.trim() ?? '',
     }
     const normalizedSlug = generateSlugFromNames(name)
-
-    if (!normalizedSlug) return
+    if (!normalizedSlug) {
+      toast.error('Validation error', {
+        description: 'Inglizcha nom (en) bo‘yicha slug hosil qilib bo‘lmadi.',
+      })
+      return
+    }
 
     const href = `/category/${normalizedSlug}`
-
     const exists = categories.some((c) => c.slug.toLowerCase() === normalizedSlug.toLowerCase())
-    if (exists) return
-    setCategories((prev) => [...prev, { slug: normalizedSlug, href, name }])
-    setCreateOpen(false)
-    toast.success('Kategoriya muvaffaqiyatli qo‘shildi')
+    if (exists) {
+      toast.error('Validation error', {
+        description: `slug: "${normalizedSlug}" allaqachon mavjud.`,
+      })
+      return
+    }
+    create.mutate(
+      { slug: normalizedSlug, href, name },
+      {
+        onSuccess: () => {
+          setCreateOpen(false)
+          toast.success('Kategoriya muvaffaqiyatli qo\'shildi')
+        },
+        onError: showMutationError,
+      }
+    )
   }
 
   const handleUpdateSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -195,23 +142,47 @@ export function DashboardCategoriesPage({ categories: initialCategories, locale 
       en: (form.querySelector('[name="name_en"]') as HTMLInputElement)?.value?.trim() ?? '',
     }
     const normalizedSlug = generateSlugFromNames(name)
-    if (!normalizedSlug) return
+    if (!normalizedSlug) {
+      toast.error('Validation error', {
+        description: 'Inglizcha nom (en) bo‘yicha slug hosil qilib bo‘lmadi.',
+      })
+      return
+    }
 
     const href = `/category/${normalizedSlug}`
-    const originalSlug = editCategory.slug
-    setCategories((prev) =>
-      prev.map((c) => (c.slug === originalSlug ? { slug: normalizedSlug, href, name } : c))
+    const exists = categories.some(
+      (c) => c._id !== editCategory._id && c.slug.toLowerCase() === normalizedSlug.toLowerCase()
     )
-    setEditCategory(null)
-    toast.success('Kategoriya muvaffaqiyatli yangilandi')
+    if (exists) {
+      toast.error('Validation error', {
+        description: `slug: "${normalizedSlug}" allaqachon mavjud.`,
+      })
+      return
+    }
+    update.mutate(
+      {
+        id: editCategory._id,
+        payload: { slug: normalizedSlug, href, name },
+      },
+      {
+        onSuccess: () => {
+          setEditId(null)
+          toast.success('Kategoriya muvaffaqiyatli yangilandi')
+        },
+        onError: showMutationError,
+      }
+    )
   }
 
   const handleDeleteConfirm = () => {
     if (!deleteCategory) return
-    const slug = deleteCategory.slug
-    setCategories((prev) => prev.filter((c) => c.slug !== slug))
-    setDeleteCategory(null)
-    toast.success('Kategoriya muvaffaqiyatli o‘chirildi')
+    remove.mutate(deleteCategory._id, {
+      onSuccess: () => {
+        setDeleteId(null)
+        toast.success('Kategoriya muvaffaqiyatli o\'chirildi')
+      },
+      onError: showMutationError,
+    })
   }
 
   return (
@@ -224,7 +195,7 @@ export function DashboardCategoriesPage({ categories: initialCategories, locale 
               Kategoriyalar
             </CardTitle>
             <CardDescription>
-              Sayt kategoriyalari ro‘yxati. Kategoriyalar yangiliklar uchun ishlatiladi.
+              Sayt kategoriyalari ro'yxati. Kategoriyalar yangiliklar uchun ishlatiladi.
             </CardDescription>
           </div>
           <Button onClick={() => setCreateOpen(true)} size="lg" className="shrink-0 w-full md:w-auto">
@@ -236,10 +207,15 @@ export function DashboardCategoriesPage({ categories: initialCategories, locale 
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Ro‘yxat</CardTitle>
+          <CardTitle className="text-base">Ro'yxat</CardTitle>
           <CardDescription>Jami: {categories.length} ta kategoriya</CardDescription>
         </CardHeader>
         <CardContent>
+          {isLoading ? (
+            <p className="text-sm text-muted-foreground">Yuklanmoqda...</p>
+          ) : error ? (
+            <p className="text-sm text-destructive">Kategoriyalarni yuklab bo‘lmadi.</p>
+          ) : null}
           <div className="rounded-md border overflow-x-auto">
             <Table>
               <TableHeader>
@@ -262,7 +238,7 @@ export function DashboardCategoriesPage({ categories: initialCategories, locale 
                   </TableRow>
                 ) : (
                   categories.map((row) => (
-                    <TableRow key={row.slug}>
+                    <TableRow key={row._id}>
                       <TableCell className="font-mono text-sm">{row.slug}</TableCell>
                       <TableCell>{row.name.uz}</TableCell>
                       <TableCell>{row.name.uzb}</TableCell>
@@ -271,29 +247,16 @@ export function DashboardCategoriesPage({ categories: initialCategories, locale 
                       <TableCell className="text-muted-foreground text-sm">{row.href}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setEditCategory(row)}
-                            className="gap-1"
-                          >
+                          <Button variant="outline" size="sm" onClick={() => setEditId(row._id)}>
                             <Pencil className="size-4" />
                           </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setDeleteCategory(row)}
-                            className="gap-1"
-                          >
+                          <Button variant="outline" size="sm" onClick={() => setDeleteId(row._id)}>
                             <Trash2 className="size-4" />
                           </Button>
-                          <Link
-                            href={row.href}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
-                          >
-                            <Button variant="outline" size="sm" className="gap-1"><ExternalLink className="size-4" /></Button>
+                          <Link href={row.href} target="_blank" rel="noopener noreferrer">
+                            <Button variant="outline" size="sm">
+                              <ExternalLink className="size-4" />
+                            </Button>
                           </Link>
                         </div>
                       </TableCell>
@@ -306,21 +269,19 @@ export function DashboardCategoriesPage({ categories: initialCategories, locale 
         </CardContent>
       </Card>
 
-      {/* Create category modal */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Yangi kategoriya</DialogTitle>
             <DialogDescription>
-              Har bir til uchun nomni kiriting. Slug inglizcha nomdan avtomatik olinadi,
-              havola esa `/category/slug` ko‘rinishida bo‘ladi.
+              Har bir til uchun nomni kiriting. Slug inglizcha nomdan avtomatik olinadi.
             </DialogDescription>
           </DialogHeader>
           <form id="create-category-form" onSubmit={handleCreateSubmit} className="space-y-4">
             {LOCALES.map((loc) => (
               <div key={loc} className="space-y-2">
                 <Label htmlFor={`create-name_${loc}`}>Nom ({LOCALE_LABELS[loc]})</Label>
-                <Input id={`create-name_${loc}`} name={`name_${loc}`} placeholder="" />
+                <Input id={`create-name_${loc}`} name={`name_${loc}`} required />
               </div>
             ))}
           </form>
@@ -328,19 +289,18 @@ export function DashboardCategoriesPage({ categories: initialCategories, locale 
             <Button type="button" variant="outline" onClick={() => setCreateOpen(false)}>
               Bekor qilish
             </Button>
-            <Button type="submit" form="create-category-form">
+            <Button type="submit" form="create-category-form" disabled={create.isPending}>
               Saqlash
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Update category modal */}
-      <Dialog open={!!editCategory} onOpenChange={(open) => !open && setEditCategory(null)}>
+      <Dialog open={!!editCategory} onOpenChange={(open) => !open && setEditId(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Tahrirlash: {editCategory?.slug}</DialogTitle>
-            <DialogDescription>Kategoriya ma’lumotlarini o‘zgartiring.</DialogDescription>
+            <DialogDescription>Kategoriya ma'lumotlarini o'zgartiring.</DialogDescription>
           </DialogHeader>
           {editCategory && (
             <form key={editCategory.slug} id="update-category-form" onSubmit={handleUpdateSubmit} className="space-y-4">
@@ -351,18 +311,18 @@ export function DashboardCategoriesPage({ categories: initialCategories, locale 
                     id={`edit-name_${loc}`}
                     name={`name_${loc}`}
                     defaultValue={editCategory.name[loc] ?? ''}
-                    placeholder=""
+                    required
                   />
                 </div>
               ))}
             </form>
           )}
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setEditCategory(null)}>
+            <Button type="button" variant="outline" onClick={() => setEditId(null)}>
               Bekor qilish
             </Button>
             {editCategory && (
-              <Button type="submit" form="update-category-form">
+              <Button type="submit" form="update-category-form" disabled={update.isPending}>
                 Saqlash
               </Button>
             )}
@@ -370,21 +330,20 @@ export function DashboardCategoriesPage({ categories: initialCategories, locale 
         </DialogContent>
       </Dialog>
 
-      {/* Delete category confirm modal */}
-      <Dialog open={!!deleteCategory} onOpenChange={(open) => !open && setDeleteCategory(null)}>
+      <Dialog open={!!deleteCategory} onOpenChange={(open) => !open && setDeleteId(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Kategoriyani o‘chirish</DialogTitle>
+            <DialogTitle>Kategoriyani o'chirish</DialogTitle>
             <DialogDescription>
-              Haqiqatan ham "{deleteCategory?.name[locale] ?? deleteCategory?.slug}" kategoriyasini o‘chirishni xohlaysizmi?
+              Haqiqatan ham &quot;{deleteCategory?.name[locale] ?? deleteCategory?.slug}&quot; kategoriyasini o'chirishni xohlaysizmi?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setDeleteCategory(null)}>
+            <Button type="button" variant="outline" onClick={() => setDeleteId(null)}>
               Bekor qilish
             </Button>
-            <Button type="button" variant="destructive" onClick={handleDeleteConfirm}>
-              O‘chirish
+            <Button type="button" variant="destructive" onClick={handleDeleteConfirm} disabled={remove.isPending}>
+              O'chirish
             </Button>
           </DialogFooter>
         </DialogContent>

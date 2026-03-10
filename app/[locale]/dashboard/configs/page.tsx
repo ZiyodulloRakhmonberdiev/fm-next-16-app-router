@@ -1,6 +1,5 @@
-import { DashboardSettingsPage as DashboardConfigsPage } from '@/features/dashboard'
+import { ConfigsPage } from '../_components'
 
 export default function DashboardConfigsRoute() {
-  return <DashboardConfigsPage />
+  return <ConfigsPage />
 }
-

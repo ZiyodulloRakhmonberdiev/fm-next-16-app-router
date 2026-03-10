@@ -1,7 +1,7 @@
 "use client"
 
-import { filterPublishedRawNews, getNewsListForLocale, type NewsItem } from "@/features/news/model"
-import { seedNews } from "@/scripts/seed-news"
+import { getNewsListForLocale, isVisualRawNews, type NewsItem } from "@/features/news/model"
+import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
 import { Card } from "@/shared/common/components/ui/card"
 import {
   formatDate,
@@ -17,8 +17,10 @@ import { TruncateExpand } from "@/shared/common/components/ui/truncate-expand"
 export default function AuthorsChoice() {
   const locale = useLocale() as AppLocale
   const t = useTranslations("common")
+  const { data: publicNews = [] } = usePublicNewsQuery()
 
-  const rawFiltered = filterPublishedRawNews([...seedNews.news])
+  const rawFiltered = [...publicNews]
+    .filter(isVisualRawNews)
     .filter((item) => (item as { authorsChoice?: boolean }).authorsChoice)
     .sort(
       (a, b) =>
@@ -26,6 +28,7 @@ export default function AuthorsChoice() {
     )
     .slice(0, 4)
   const items = getNewsListForLocale(rawFiltered, locale)
+  if (items.length < 3) return null
   const [featured, ...rightItems] = items
 
   return (

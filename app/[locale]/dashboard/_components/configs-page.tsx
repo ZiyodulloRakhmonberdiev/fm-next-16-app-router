@@ -1,26 +1,19 @@
 'use client'
+/* eslint-disable react/no-unescaped-entities */
 
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Card, CardDescription, CardHeader, CardTitle } from '@/shared/common/components/ui/card'
-import { Button } from '@/shared/common/components/ui/button'
 import type { AppLocale } from '@/shared/common/lib/locale-api'
+import { LOCALES, LOCALE_LABELS } from '@/shared/common/lib/locale-constants'
 import type { SiteSettingsPayload } from '@/shared/common/lib/site-settings-types'
 import { Settings } from 'lucide-react'
-import { HeadlineSection } from '../configs/ui/headline-section'
-import { DescriptionSection } from '../configs/ui/description-section'
-import { SocialMediaSection, type UiSocialItem } from '../configs/ui/social-media-section'
-import { SiteConfigSection } from '../configs/ui/site-config-section'
+import { HeadlineSection } from '@/features/dashboard/configs/ui/headline-section'
+import { DescriptionSection } from '@/features/dashboard/configs/ui/description-section'
+import { SocialMediaSection, type UiSocialItem } from '@/features/dashboard/configs/ui/social-media-section'
+import { SiteConfigSection } from '@/features/dashboard/configs/ui/site-config-section'
 
-const LOCALES: AppLocale[] = ['uz', 'uzb', 'ru', 'en']
-const LOCALE_LABELS: Record<AppLocale, string> = {
-  uz: "O'zbek (lotin)",
-  uzb: "O'zbek (kirill)",
-  ru: 'Ruscha',
-  en: 'English',
-}
-
-export function DashboardSettingsPage() {
+export function ConfigsPage() {
   const [loading, setLoading] = useState(true)
   const [savingHeadline, setSavingHeadline] = useState(false)
   const [savingDescription, setSavingDescription] = useState(false)
@@ -29,7 +22,7 @@ export function DashboardSettingsPage() {
   const [data, setData] = useState<SiteSettingsPayload | null>(null)
 
   useEffect(() => {
-    fetch('/api/site-settings')
+    fetch('/api/configs')
       .then((res) => res.json())
       .then((payload: SiteSettingsPayload) => {
         setData(payload)
@@ -40,18 +33,12 @@ export function DashboardSettingsPage() {
 
   const updateHeadline = (locale: AppLocale, value: string) => {
     if (!data) return
-    setData({
-      ...data,
-      headline: { ...data.headline, [locale]: value },
-    })
+    setData({ ...data, headline: { ...data.headline, [locale]: value } })
   }
 
   const updateDescription = (locale: AppLocale, value: string) => {
     if (!data) return
-    setData({
-      ...data,
-      description: { ...data.description, [locale]: value },
-    })
+    setData({ ...data, description: { ...data.description, [locale]: value } })
   }
 
   const updateSiteConfig = <K extends keyof SiteSettingsPayload['siteConfig']>(
@@ -59,10 +46,7 @@ export function DashboardSettingsPage() {
     value: SiteSettingsPayload['siteConfig'][K]
   ) => {
     if (!data) return
-    setData({
-      ...data,
-      siteConfig: { ...data.siteConfig, [key]: value },
-    })
+    setData({ ...data, siteConfig: { ...data.siteConfig, [key]: value } })
   }
 
   const updateAddress = (locale: AppLocale, value: string) => {
@@ -80,23 +64,15 @@ export function DashboardSettingsPage() {
     if (!data) return
     const exists = data.socialMedia.some((s) => s.slug === slug)
     if (exists) {
-      toast.error('Bu platforma allaqachon qo‘shilgan')
+      toast.error('Bu platforma allaqachon qo\'shilgan')
       return
     }
     const labelMap: Record<string, string> = {
-      telegram: 'Telegram',
-      instagram: 'Instagram',
-      facebook: 'Facebook',
-      youtube: 'YouTube',
-      twitter: 'Twitter',
-      threads: 'Threads',
-      reddit: 'Reddit',
+      telegram: 'Telegram', instagram: 'Instagram', facebook: 'Facebook',
+      youtube: 'YouTube', twitter: 'Twitter', threads: 'Threads', reddit: 'Reddit',
     }
     const name = labelMap[slug] ?? slug
-    setData({
-      ...data,
-      socialMedia: [...data.socialMedia, { slug, name, href }],
-    })
+    setData({ ...data, socialMedia: [...data.socialMedia, { slug, name, href }] })
   }
 
   const updateSocialHref = (index: number, href: string) => {
@@ -109,15 +85,12 @@ export function DashboardSettingsPage() {
 
   const removeSocialItem = (index: number) => {
     if (!data) return
-    setData({
-      ...data,
-      socialMedia: data.socialMedia.filter((_, i) => i !== index),
-    })
+    setData({ ...data, socialMedia: data.socialMedia.filter((_, i) => i !== index) })
   }
 
   const getCurrentFromServer = async (): Promise<SiteSettingsPayload | null> => {
     try {
-      const res = await fetch('/api/site-settings')
+      const res = await fetch('/api/configs')
       if (!res.ok) return null
       return (await res.json()) as SiteSettingsPayload
     } catch {
@@ -126,16 +99,13 @@ export function DashboardSettingsPage() {
   }
 
   const postPayload = async (payload: SiteSettingsPayload) => {
-    const res = await fetch('/api/site-settings', {
+    const res = await fetch('/api/configs', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     })
     const result = await res.json()
-    if (result?.ok) {
-      return true
-    }
-    return false
+    return !!result?.ok
   }
 
   const handleSaveHeadline = async () => {
@@ -143,16 +113,8 @@ export function DashboardSettingsPage() {
     setSavingHeadline(true)
     try {
       const current = (await getCurrentFromServer()) ?? data
-      const next: SiteSettingsPayload = {
-        ...current,
-        headline: data.headline,
-      }
-      const ok = await postPayload(next)
-      if (ok) {
-        toast.success('Sarlavha saqlandi')
-      } else {
-        toast.error('Saqlashda xato')
-      }
+      const ok = await postPayload({ ...current, headline: data.headline })
+      toast[ok ? 'success' : 'error'](ok ? 'Sarlavha saqlandi' : 'Saqlashda xato')
     } catch {
       toast.error('Saqlashda xato')
     } finally {
@@ -165,16 +127,8 @@ export function DashboardSettingsPage() {
     setSavingDescription(true)
     try {
       const current = (await getCurrentFromServer()) ?? data
-      const next: SiteSettingsPayload = {
-        ...current,
-        description: data.description,
-      }
-      const ok = await postPayload(next)
-      if (ok) {
-        toast.success('Tavsif saqlandi')
-      } else {
-        toast.error('Saqlashda xato')
-      }
+      const ok = await postPayload({ ...current, description: data.description })
+      toast[ok ? 'success' : 'error'](ok ? 'Tavsif saqlandi' : 'Saqlashda xato')
     } catch {
       toast.error('Saqlashda xato')
     } finally {
@@ -187,16 +141,8 @@ export function DashboardSettingsPage() {
     setSavingSocial(true)
     try {
       const current = (await getCurrentFromServer()) ?? data
-      const next: SiteSettingsPayload = {
-        ...current,
-        socialMedia: data.socialMedia,
-      }
-      const ok = await postPayload(next)
-      if (ok) {
-        toast.success('Ijtimoiy tarmoqlar saqlandi')
-      } else {
-        toast.error('Saqlashda xato')
-      }
+      const ok = await postPayload({ ...current, socialMedia: data.socialMedia })
+      toast[ok ? 'success' : 'error'](ok ? 'Ijtimoiy tarmoqlar saqlandi' : 'Saqlashda xato')
     } catch {
       toast.error('Saqlashda xato')
     } finally {
@@ -209,16 +155,8 @@ export function DashboardSettingsPage() {
     setSavingConfig(true)
     try {
       const current = (await getCurrentFromServer()) ?? data
-      const next: SiteSettingsPayload = {
-        ...current,
-        siteConfig: data.siteConfig,
-      }
-      const ok = await postPayload(next)
-      if (ok) {
-        toast.success('Site config saqlandi')
-      } else {
-        toast.error('Saqlashda xato')
-      }
+      const ok = await postPayload({ ...current, siteConfig: data.siteConfig })
+      toast[ok ? 'success' : 'error'](ok ? 'Site config saqlandi' : 'Saqlashda xato')
     } catch {
       toast.error('Saqlashda xato')
     } finally {
@@ -258,7 +196,6 @@ export function DashboardSettingsPage() {
         onSave={handleSaveHeadline}
         saving={savingHeadline}
       />
-
       <DescriptionSection
         locales={LOCALES}
         localeLabels={LOCALE_LABELS}
@@ -267,7 +204,6 @@ export function DashboardSettingsPage() {
         onSave={handleSaveDescription}
         saving={savingDescription}
       />
-
       <SocialMediaSection
         items={data.socialMedia as UiSocialItem[]}
         onAdd={addSocialItem}
@@ -276,7 +212,6 @@ export function DashboardSettingsPage() {
         onSave={handleSaveSocial}
         saving={savingSocial}
       />
-
       <SiteConfigSection
         locales={LOCALES}
         localeLabels={LOCALE_LABELS}

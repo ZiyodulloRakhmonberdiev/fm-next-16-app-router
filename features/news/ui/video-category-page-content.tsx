@@ -2,12 +2,11 @@
 
 import * as React from "react"
 import {
-  filterPublishedRawNews,
   getNewsListForLocale,
   type NewsItem,
   type RawNewsItem,
 } from "@/features/news/model"
-import { seedNews } from "@/scripts/seed-news"
+import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
 import { Card } from "@/shared/common/components/ui/card"
 import { Button } from "@/shared/common/components/ui/button"
 import {
@@ -20,7 +19,7 @@ import Image from "next/image"
 import { useLocale, useTranslations } from "next-intl"
 import { TruncateExpand } from "@/shared/common/components/ui/truncate-expand"
 import { Play } from "lucide-react"
-import { VideoNewsModal } from "@/shared/common/components/molecules"
+import { ServerLoading, ServerUnavailable, VideoNewsModal } from "@/shared/common/components/molecules"
 
 const PAGE_SIZE = 30
 
@@ -33,11 +32,12 @@ function isVideoNewsItem(item: RawNewsItem): boolean {
 export function VideoCategoryPageContent() {
   const locale = useLocale() as AppLocale
   const t = useTranslations("common")
+  const { data: publicNews = [], isError, isLoading, isFetching } = usePublicNewsQuery()
   const [selected, setSelected] = React.useState<NewsItem | null>(null)
   const [isOpen, setIsOpen] = React.useState(false)
 
   const allItems = React.useMemo(() => {
-    const raw = filterPublishedRawNews([...seedNews.news])
+    const raw = [...publicNews]
       .filter(isVideoNewsItem)
       .sort(
         (a, b) =>
@@ -45,13 +45,20 @@ export function VideoCategoryPageContent() {
           new Date(a.publishedAt).getTime()
       )
     return getNewsListForLocale(raw, locale)
-  }, [locale])
+  }, [locale, publicNews])
 
   const featured = allItems.slice(0, 3)
   const rest = allItems.slice(3)
   const [visibleCount, setVisibleCount] = React.useState(PAGE_SIZE)
   const visibleRest = rest.slice(0, visibleCount)
   const hasMore = rest.length > visibleCount
+
+  if ((isLoading || isFetching) && publicNews.length === 0) {
+    return <ServerLoading />
+  }
+  if (isError && publicNews.length === 0) {
+    return <ServerUnavailable />
+  }
 
   const handleOpenVideo = (item: NewsItem) => {
     if (!item.videoSource || !item.videoUrl) return

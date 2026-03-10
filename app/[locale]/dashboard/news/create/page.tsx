@@ -1,24 +1,40 @@
 import { getLocale } from 'next-intl/server'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/common/components/ui/card'
 import { CreateNewsForm } from '@/features/news/ui/create-news-form'
-import { seed } from '@/scripts/seed'
-import { seedNews } from '@/scripts/seed-news'
 import type { AppLocale } from '@/shared/common/lib/locale-api'
-import { getCategoryName, getTagName } from '@/shared/common/lib/seed-helpers'
+import { getServerApiUrl } from '@/shared/common/lib/server-api-url'
+import type { RawNewsItem } from '@/features/news/model'
+import type { LocaleMap } from '@/shared/common/lib/locale-types'
+
+type NamedSlug = { slug: string; name: LocaleMap }
+type UserRow = { full_name: string }
 
 export default async function CreateNewsPage() {
   const locale = (await getLocale()) as AppLocale
-  const categories = seed.categories.map((c) => ({
+  const [categoriesRes, tagsRes, newsRes, usersRes] = await Promise.all([
+    fetch(await getServerApiUrl('/api/categories'), { cache: 'no-store' }),
+    fetch(await getServerApiUrl('/api/tags'), { cache: 'no-store' }),
+    fetch(await getServerApiUrl('/api/news?page=1&limit=500'), { cache: 'no-store' }),
+    fetch(await getServerApiUrl('/api/users'), { cache: 'no-store' }),
+  ])
+  if (!categoriesRes.ok || !tagsRes.ok || !newsRes.ok || !usersRes.ok) {
+    throw new Error('Dashboard ma’lumotlarini yuklab bo‘lmadi')
+  }
+
+  const categoriesData = (await categoriesRes.json()) as NamedSlug[]
+  const tagsData = (await tagsRes.json()) as NamedSlug[]
+  const newsData = (await newsRes.json()) as { data: RawNewsItem[] }
+  const usersData = (await usersRes.json()) as UserRow[]
+
+  const categories = categoriesData.map((c) => ({
     slug: c.slug,
-    name: getCategoryName(c.slug, locale),
+    name: c.name[locale] ?? c.name.uz ?? c.slug,
   }))
-  const tags = seed.tags.map((t) => ({
+  const tags = tagsData.map((t) => ({
     slug: t.slug,
-    name: getTagName(t.slug, locale),
+    name: t.name[locale] ?? t.name.uz ?? t.slug,
   }))
-  const authors = Array.from(
-    new Set(seedNews.news.map((n) => n.author).filter(Boolean))
-  ).sort()
+  const authors = Array.from(new Set(usersData.map((u) => u.full_name).filter(Boolean))).sort()
 
   return (
     <Card>
@@ -33,7 +49,7 @@ export default async function CreateNewsPage() {
           categories={categories}
           tags={tags}
           authors={authors}
-          existingSlugs={seedNews.news.map((n) => n.slug)}
+          existingSlugs={newsData.data.map((n) => n.slug)}
         />
       </CardContent>
     </Card>

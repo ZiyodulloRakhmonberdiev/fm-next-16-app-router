@@ -25,13 +25,13 @@ function Block({ block }: { block: RichContentBlock }) {
       return <p className="leading-7 not-first:mt-4">{block.text}</p>
     case "image":
       return (
-        <figure className="my-4">
+        <figure className="my-4 mx-auto w-full max-w-3xl">
           <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-muted">
             <Image
               src={block.src}
               alt={block.alt ?? ""}
               fill
-              className="object-contain"
+              className="object-cover"
             />
           </div>
         </figure>
@@ -40,7 +40,7 @@ function Block({ block }: { block: RichContentBlock }) {
       const embedUrl =
         block.source === "youtube" ? getYoutubeEmbedUrl(block.url) : null
       return (
-        <div className="my-4 aspect-video w-full overflow-hidden rounded-lg bg-muted">
+        <div className="my-4 mx-auto aspect-video w-full max-w-3xl overflow-hidden rounded-lg bg-muted">
           {embedUrl ? (
             <iframe
               src={embedUrl}
@@ -53,7 +53,10 @@ function Block({ block }: { block: RichContentBlock }) {
             <video
               src={block.url}
               controls
-              className="h-full w-full object-contain"
+              controlsList="nodownload"
+              disablePictureInPicture
+              onContextMenu={(e) => e.preventDefault()}
+              className="h-full w-full object-cover"
               poster={block.poster}
             >
               Your browser does not support the video tag.

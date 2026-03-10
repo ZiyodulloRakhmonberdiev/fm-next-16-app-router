@@ -1,8 +1,9 @@
 "use client"
 
 import * as React from "react"
-import { filterPublishedRawNews, getNewsListForLocale, type NewsItem } from "@/features/news/model"
-import { seedNews } from "@/scripts/seed-news"
+import { getNewsListForLocale, isVisualRawNews, type NewsItem } from "@/features/news/model"
+import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
+import { getCategoryNameFromApi, usePublicCategoriesQuery } from "@/features/category/model/public-categories-query"
 import { Card } from "@/shared/common/components/ui/card"
 import {
   Carousel,
@@ -20,7 +21,6 @@ import { useLocale, useTranslations } from "next-intl"
 import { TruncateExpand } from "@/shared/common/components/ui/truncate-expand"
 import { Button } from "@/shared/common/components/ui/button"
 import { ArrowRightIcon } from "lucide-react"
-import { getCategoryName } from "@/shared/common/lib/seed-helpers"
 
 type CategoryWithSlideProps = {
   categorySlug?: string
@@ -30,12 +30,15 @@ export default function CategoryWithSlide({
   categorySlug = "sports",
 }: CategoryWithSlideProps) {
   const locale = useLocale() as AppLocale
+  const { data: publicNews = [] } = usePublicNewsQuery()
+  const { data: categories = [] } = usePublicCategoriesQuery()
   const [api, setApi] = React.useState<CarouselApi | null>(null)
   const t = useTranslations("common")
-  const categoryName = getCategoryName(categorySlug, locale)
+  const categoryName = getCategoryNameFromApi(categories, categorySlug, locale)
 
   const items = React.useMemo(() => {
-    const raw = filterPublishedRawNews([...seedNews.news])
+    const raw = [...publicNews]
+      .filter(isVisualRawNews)
       .filter((n) => n.categorySlug === categorySlug)
       .sort(
         (a, b) =>
@@ -43,9 +46,9 @@ export default function CategoryWithSlide({
           new Date(a.publishedAt).getTime()
       )
     return getNewsListForLocale(raw, locale)
-  }, [categorySlug, locale])
+  }, [categorySlug, locale, publicNews])
 
-  if (items.length === 0) return null
+  if (items.length < 4) return null
 
   return (
     <section className="w-full space-y-4 my-4 px-4 md:px-6">

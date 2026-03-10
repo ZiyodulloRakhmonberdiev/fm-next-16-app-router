@@ -27,7 +27,7 @@ export default function Footer() {
         <div className="flex items-start md:items-center justify-between gap-2 flex-col md:flex-row mb-2">
           <Link href="/" className="flex h-8 shrink-0 items-center md:h-10">
             <Image
-              src={mounted ? logoSrc : '/images/fm-logo-dark.png'}
+              src={mounted ? logoSrc : '/images/fm-logo-dark.svg'}
               alt="Logo"
               width={130}
               height={40}

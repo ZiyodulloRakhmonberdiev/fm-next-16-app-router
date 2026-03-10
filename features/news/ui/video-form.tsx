@@ -63,7 +63,14 @@ export function VideoForm({
                 allowFullScreen
               />
             ) : (
-              <video src={videoDisplayUrl} controls className="w-full h-full object-contain">
+              <video
+                src={videoDisplayUrl}
+                controls
+                controlsList="nodownload"
+                disablePictureInPicture
+                onContextMenu={(e) => e.preventDefault()}
+                className="w-full h-full object-contain"
+              >
                 Brauzeringiz video qo'llab-quvvatlamaydi.
               </video>
             )}

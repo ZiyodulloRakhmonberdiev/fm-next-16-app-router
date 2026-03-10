@@ -1,8 +1,12 @@
 "use client"
 
 import * as React from "react"
-import { filterPublishedRawNews, getNewsListForLocale, type NewsItem, type RawNewsItem } from "@/features/news/model"
-import { seedNews } from "@/scripts/seed-news"
+import {
+  getNewsListForLocale,
+  type NewsItem,
+  type RawNewsItem,
+} from "@/features/news/model"
+import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
 import { Card } from "@/shared/common/components/ui/card"
 import { formatDate, formatDateISO } from "@/shared/common/lib/formatter"
 import type { AppLocale } from "@/shared/common/lib/formatter"
@@ -21,11 +25,12 @@ function isVideoNewsItem(item: RawNewsItem): boolean {
 export default function CategoryVideo() {
   const locale = useLocale() as AppLocale
   const t = useTranslations("common")
+  const { data: publicNews = [] } = usePublicNewsQuery()
   const [selected, setSelected] = React.useState<NewsItem | null>(null)
   const [isOpen, setIsOpen] = React.useState(false)
 
   const { featured, leftItems, rightItems } = React.useMemo(() => {
-    const raw = filterPublishedRawNews([...seedNews.news])
+    const raw = [...publicNews]
       .filter(isVideoNewsItem)
       .sort(
         (a, b) =>
@@ -46,7 +51,7 @@ export default function CategoryVideo() {
       leftItems: rest.slice(0, 4),
       rightItems: rest.slice(4, 8),
     }
-  }, [locale])
+  }, [locale, publicNews])
 
   const handleOpenVideo = (item: NewsItem) => {
     if (!item.videoSource || !item.videoUrl) return
@@ -55,6 +60,7 @@ export default function CategoryVideo() {
   }
 
   if (!featured && leftItems.length === 0 && rightItems.length === 0) return null
+  if (1 + leftItems.length + rightItems.length < 7) return null
 
   return (
     <section className="w-full space-y-4 px-4 md:px-6 pt-4">

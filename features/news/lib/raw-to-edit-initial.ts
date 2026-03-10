@@ -6,6 +6,7 @@ const LOCALES: AppLocale[] = ['uz', 'uzb', 'ru', 'en']
 
 /** Edit formasi uchun boshlang'ich ma'lumot (serverdan yig'iladi) */
 export type EditNewsInitialData = {
+  id?: string
   translations: Record<AppLocale, { title: string; description: string }>
   slugs: Record<AppLocale, string>
   categorySlug: string
@@ -17,8 +18,13 @@ export type EditNewsInitialData = {
   contents: Record<AppLocale, string>
   isTop: boolean
   authorsChoice: boolean
+  isTrending: boolean
+  isLatest: boolean
+  isPopular: boolean
+  isBreaking: boolean
   pushedToTelegram: boolean
   status: NewsStatus
+  publishedAt?: Date
 }
 
 function contentToStr(value: NewsContent | undefined): string {
@@ -45,6 +51,7 @@ export function rawNewsToEditInitialData(raw: RawNewsItem): EditNewsInitialData 
   }
 
   return {
+    id: (raw as { _id?: string })._id,
     translations,
     slugs,
     categorySlug: raw.categorySlug ?? '',
@@ -56,7 +63,12 @@ export function rawNewsToEditInitialData(raw: RawNewsItem): EditNewsInitialData 
     contents,
     isTop: raw.isTop ?? false,
     authorsChoice: raw.authorsChoice ?? false,
+    isTrending: raw.isTrending ?? false,
+    isLatest: raw.isLatest ?? false,
+    isPopular: raw.isPopular ?? false,
+    isBreaking: raw.isBreaking ?? false,
     pushedToTelegram: raw.pushedToTelegram ?? false,
     status: (raw.status ?? 'published') as NewsStatus,
+    publishedAt: raw.publishedAt ? new Date(raw.publishedAt) : undefined,
   }
 }

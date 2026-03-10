@@ -27,7 +27,7 @@ export default function StayConnected() {
   const gridColsClass = isWide ? "grid grid-cols-4" : "grid grid-cols-2";
 
   return (
-    <div className="">
+    <div className="bg-background">
       <section
         ref={sectionRef}
         // className="px-4 md:px-6 space-y-4 my-4 border border-border rounded-xl"

@@ -1,6 +1,14 @@
+"use client"
+
 import { AuthorsChoice, LatestNews, TopNews } from "../molecules";
+import { usePublicNewsQuery } from "@/features/news/model/public-news-query";
+import { isVisualRawNews } from "@/features/news/model";
 
 export default function TopBanner() {
+  const { data: publicNews = [] } = usePublicNewsQuery()
+  const hasVisualNews = publicNews.some(isVisualRawNews)
+  if (!hasVisualNews) return null
+
   return (
     <div className="w-full flex flex-col lg:flex-row gap-4 px-4 md:px-6">
       <div className="flex flex-col gap-4 lg:max-w-[70%]">

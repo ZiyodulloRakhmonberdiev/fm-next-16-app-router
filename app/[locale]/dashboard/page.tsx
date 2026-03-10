@@ -1,9 +1,8 @@
 import { getLocale } from 'next-intl/server'
 import { Link } from '@/i18n/navigation'
-import { seed } from '@/scripts/seed'
-import { seedNews } from '@/scripts/seed-news'
-import { getNewsListForLocale } from '@/features/news/model'
+import { getNewsListForLocale, type RawNewsItem } from '@/features/news/model'
 import type { AppLocale } from '@/shared/common/lib/locale-api'
+import { getServerApiUrl } from '@/shared/common/lib/server-api-url'
 import {
   Card,
   CardContent,
@@ -11,20 +10,31 @@ import {
   CardTitle,
 } from '@/shared/common/components/ui/card'
 import {  Newspaper, FolderTree, Tag, BarChart3 } from 'lucide-react'
-import { DashboardNewsLists, DashboardHomeHeader } from '@/features/dashboard'
+import { DashboardNewsLists } from '@/features/dashboard/ui/news-lists'
 
 export default async function DashboardPage() {
   const locale = (await getLocale()) as AppLocale
+  const [categoriesRes, tagsRes, newsRes] = await Promise.all([
+    fetch(await getServerApiUrl('/api/categories'), { cache: 'no-store' }),
+    fetch(await getServerApiUrl('/api/tags'), { cache: 'no-store' }),
+    fetch(await getServerApiUrl('/api/news?page=1&limit=500'), { cache: 'no-store' }),
+  ])
+  if (!categoriesRes.ok || !tagsRes.ok || !newsRes.ok) {
+    throw new Error('Dashboard ma’lumotlarini yuklab bo‘lmadi')
+  }
+  const categories = (await categoriesRes.json()) as unknown[]
+  const tags = (await tagsRes.json()) as unknown[]
+  const newsJson = (await newsRes.json()) as { data: RawNewsItem[] }
 
   const ADMIN_FULL_NAME = 'Admin Foydalanuvchi'
 
-  const allNews = getNewsListForLocale(seedNews.news, locale)
+  const allNews = getNewsListForLocale(newsJson.data, locale)
   const topNews = getNewsListForLocale(
-    seedNews.news.filter((r) => r.isTop),
+    newsJson.data.filter((r) => r.isTop),
     locale
   ).sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
   const authorsChoiceNews = getNewsListForLocale(
-    seedNews.news.filter((r) => r.authorsChoice),
+    newsJson.data.filter((r) => r.authorsChoice),
     locale
   ).sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
   const mostReadNews = [...allNews].sort((a, b) => b.views - a.views)
@@ -39,7 +49,7 @@ export default async function DashboardPage() {
     },
     {
       label: 'Kategoriyalar',
-      value: seed.categories.length,
+      value: categories.length,
       icon: FolderTree,
       href: '/dashboard/categories',
     },
@@ -51,7 +61,7 @@ export default async function DashboardPage() {
     },
     {
       label: 'Teglar',
-      value: seed.tags.length,
+      value: tags.length,
       icon: Tag,
       href: '/dashboard/tags',
     },
@@ -59,7 +69,6 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-8 overflow-x-hidden">
-      <DashboardHomeHeader />
       <div>
         <div className="mb-4 space-y-1">
           <h1 className="text-xl md:text-2xl font-semibold tracking-tight">

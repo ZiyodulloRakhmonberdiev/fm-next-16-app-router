@@ -53,6 +53,9 @@ export default function VideoNewsModal({ item, open, onOpenChange }: VideoNewsMo
                 <video
                   src={item.videoUrl!}
                   controls
+                  controlsList="nodownload"
+                  disablePictureInPicture
+                  onContextMenu={(e) => e.preventDefault()}
                   className="h-full w-full object-contain"
                   poster={item.images?.[0]}
                 >

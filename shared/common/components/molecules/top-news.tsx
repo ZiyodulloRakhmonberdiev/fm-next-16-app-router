@@ -11,8 +11,8 @@ import {
 } from "@/shared/common/components/ui/carousel"
 import type { CarouselApi } from "@/shared/common/components/ui/carousel"
 import Autoplay from "embla-carousel-autoplay"
-import { filterPublishedRawNews, getNewsListForLocale, type NewsItem } from "@/features/news/model"
-import { seedNews } from "@/scripts/seed-news"
+import { getNewsListForLocale, isVisualRawNews, type NewsItem } from "@/features/news/model"
+import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
 import Image from "next/image"
 import { cn } from "@/shared/common/lib/utils"
 import { AppLocale, formatDateISO, formatDateTimeLocale } from "../../lib/formatter"
@@ -54,6 +54,7 @@ export default function TopNews() {
     Autoplay({ delay: 6000, stopOnInteraction: true })
   )
   const locale = useLocale() as AppLocale
+  const { data: publicNews = [] } = usePublicNewsQuery()
   const [api, setApi] = React.useState<CarouselApi | null>(null)
   const [selectedIndex, setSelectedIndex] = React.useState(0)
 
@@ -63,7 +64,8 @@ export default function TopNews() {
     api.on("select", () => setSelectedIndex(api.selectedScrollSnap()))
   }, [api])
 
-  const rawTop = filterPublishedRawNews([...seedNews.news])
+  const rawTop = [...publicNews]
+    .filter(isVisualRawNews)
     .filter((item) => (item as { isTop?: boolean }).isTop)
     .sort(
       (a, b) =>
@@ -71,6 +73,7 @@ export default function TopNews() {
     )
     .slice(0, 10)
   const news = getNewsListForLocale(rawTop, locale)
+  if (news.length === 0) return null
 
   const handleDotSelect = React.useCallback(
     (index: number) => api?.scrollTo(index),

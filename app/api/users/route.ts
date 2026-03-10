@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { dbConnect } from '@/shared/common/lib/db'
-import { UserModel } from '@/features/users/models/user.model'
+import { UserModel } from '@/features/users/model/user.model'
+import { createUserSchema } from '@/features/users/model/schemas'
 
 export async function GET() {
   try {
@@ -18,8 +19,44 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  await dbConnect()
-  const body = await req.json()
-  const user = await UserModel.create(body)
-  return Response.json(user, { status: 201 })
+  try {
+    await dbConnect()
+    const json = await req.json()
+
+    const parsed = createUserSchema.safeParse(json)
+    if (!parsed.success) {
+      return Response.json(
+        {
+          error: 'Validation error',
+          issues: parsed.error.flatten(),
+        },
+        { status: 400 }
+      )
+    }
+
+    const user = await UserModel.create(parsed.data)
+    return Response.json(user, { status: 201 })
+  } catch (err) {
+    const anyErr = err as any
+
+    // Duplicate key (masalan, login unique) xatosi
+    if (anyErr && (anyErr.code === 11000 || anyErr.code === 'E11000')) {
+      const field = Object.keys(anyErr.keyPattern ?? anyErr.keyValue ?? {})[0] ?? 'login'
+      const fieldLabel = field === 'login' ? 'Login' : field
+      return Response.json(
+        {
+          error: 'Unique constraint',
+          message: `${fieldLabel} allaqachon mavjud. Iltimos, boshqasini tanlang.`,
+        },
+        { status: 409 }
+      )
+    }
+
+    const message = err instanceof Error ? err.message : 'DB xatosi'
+    console.error('[api/users POST]', message)
+    return Response.json(
+      { error: 'Foydalanuvchini yaratib bo‘lmadi', details: message },
+      { status: 500 }
+    )
+  }
 }

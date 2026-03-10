@@ -19,8 +19,9 @@ import {
 } from "@/shared/common/components/ui/carousel"
 import { getYoutubeEmbedUrl } from "@/shared/common/lib/youtube"
 import type { NewsItem, NewsContent } from "@/features/news/model"
-import { isRichContent } from "@/features/news/model"
+import { isRichContent, parseRichContentString } from "@/features/news/model"
 import { RichContentBlocks } from "@/features/news/ui/rich-content-blocks"
+import { TextContentRenderer } from "@/features/news/ui/text-content-renderer"
 
 export type { NewsItem }
 
@@ -33,9 +34,11 @@ export function NewsPageContent({ news }: NewsPageContentProps) {
   const locale = useLocale() as AppLocale
   const t = useTranslations("common")
   const categorySlug = news.categorySlug
+  const parsedRichFromString =
+    typeof news.content === "string" ? parseRichContentString(news.content) : null
 
   return (
-    <article className="pb-8">
+    <article className="pb-8 overflow-hidden">
       <div className="mb-6 flex flex-col gap-3">
         <Button
           variant="ghost"
@@ -90,6 +93,9 @@ export function NewsPageContent({ news }: NewsPageContentProps) {
             <video
               src={news.videoUrl}
               controls
+              controlsList="nodownload"
+              disablePictureInPicture
+              onContextMenu={(e) => e.preventDefault()}
               className="h-full w-full object-contain"
               poster={news.images?.[0]}
             >
@@ -223,10 +229,10 @@ export function NewsPageContent({ news }: NewsPageContentProps) {
       {news.content != null && news.content !== "" && (
         isRichContent(news.content) ? (
           <RichContentBlocks blocks={news.content} />
+        ) : parsedRichFromString ? (
+          <RichContentBlocks blocks={parsedRichFromString} />
         ) : (
-          <div className="prose prose-neutral dark:prose-invert max-w-none">
-            {news.content}
-          </div>
+          <TextContentRenderer content={news.content} />
         )
       )}
 

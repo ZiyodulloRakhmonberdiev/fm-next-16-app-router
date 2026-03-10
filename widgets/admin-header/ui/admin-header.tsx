@@ -82,7 +82,7 @@ export default function AdminHeader() {
       <SidebarTrigger className="-ml-1 hidden md:flex" />
       <Link href="/dashboard" className="flex md:hidden items-center gap-2 shrink-0">
         <Image
-          src={mounted ? logoSrc : '/images/fm-logo-dark.png'}
+          src={mounted ? logoSrc : '/images/fm-logo-dark.svg'}
           alt="Fergana Media"
           width={120}
           height={32}

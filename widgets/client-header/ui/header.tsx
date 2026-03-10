@@ -31,7 +31,7 @@ export default function Header() {
         <div className="flex items-center gap-8">
           <Link href="/" className="flex h-8 shrink-0 items-center md:h-10">
             <Image
-              src={mounted ? logoSrc : '/images/fm-logo-dark.png'}
+              src={mounted ? logoSrc : '/images/fm-logo-dark.svg'}
               alt="Logo"
               width={130}
               height={40}

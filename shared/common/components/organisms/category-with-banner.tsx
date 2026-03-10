@@ -1,8 +1,9 @@
 "use client"
 
 import * as React from "react"
-import { filterPublishedRawNews, getNewsListForLocale, type NewsItem } from "@/features/news/model"
-import { seedNews } from "@/scripts/seed-news"
+import { getNewsListForLocale, isVisualRawNews, type NewsItem } from "@/features/news/model"
+import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
+import { getCategoryNameFromApi, usePublicCategoriesQuery } from "@/features/category/model/public-categories-query"
 import { Card } from "@/shared/common/components/ui/card"
 import { formatDate, formatDateISO } from "@/shared/common/lib/formatter"
 import type { AppLocale } from "@/shared/common/lib/formatter"
@@ -10,7 +11,6 @@ import { Link } from "@/i18n/navigation"
 import Image from "next/image"
 import { useLocale, useTranslations } from "next-intl"
 import { Button } from "@/shared/common/components/ui/button"
-import { getCategoryName } from "@/shared/common/lib/seed-helpers"
 
 type CategoryWithBannerProps = {
   categorySlug?: string
@@ -60,23 +60,26 @@ export default function CategoryWithBanner({
 }: CategoryWithBannerProps) {
   const locale = useLocale() as AppLocale
   const t = useTranslations("common")
-  const categoryName = getCategoryName(categorySlug, locale)
+  const { data: publicNews = [] } = usePublicNewsQuery()
+  const { data: categories = [] } = usePublicCategoriesQuery()
+  const categoryName = getCategoryNameFromApi(categories, categorySlug, locale)
   const rawSorted = React.useMemo(
     () =>
-      filterPublishedRawNews([...seedNews.news])
+      [...publicNews]
+        .filter(isVisualRawNews)
         .filter((n) => n.categorySlug === categorySlug)
         .sort(
           (a, b) =>
             new Date(b.publishedAt).getTime() -
             new Date(a.publishedAt).getTime()
         ),
-    [categorySlug]
+    [categorySlug, publicNews]
   )
   const sorted = getNewsListForLocale(rawSorted, locale)
   const [featured, ...rest] = sorted
   const rightItems = rest.slice(0, 6)
 
-  if (sorted.length === 0) return null
+  if (sorted.length < 6) return null
 
   return (
     <section className="w-full space-y-4 pt-4 px-4 md:px-6">

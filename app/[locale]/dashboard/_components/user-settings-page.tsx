@@ -1,4 +1,5 @@
 'use client'
+/* eslint-disable react/no-unescaped-entities */
 
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -22,7 +23,7 @@ export function DashboardUserSettingsPage() {
   const [newPassword, setNewPassword] = useState('')
 
   const handleSaveProfile = () => {
-    toast.success('Profil ma’lumotlari saqlandi (demo)')
+    toast.success('Profil ma\'lumotlari saqlandi (demo)')
   }
 
   const handleChangePassword = () => {
@@ -40,7 +41,7 @@ export function DashboardUserSettingsPage() {
       <div>
         <h1 className="text-xl md:text-2xl font-semibold tracking-tight">Sozlamalar</h1>
         <p className="text-sm text-muted-foreground">
-          Tizim ko‘rinishi va shaxsiy ma’lumotlaringizni boshqaring.
+          Tizim ko'rinishi va shaxsiy ma'lumotlaringizni boshqaring.
         </p>
       </div>
 
@@ -52,7 +53,7 @@ export function DashboardUserSettingsPage() {
               Foydalanuvchi sozlamalari
             </CardTitle>
             <CardDescription>
-              Tema, profil ma’lumotlari va xavfsizlikni boshqarish.
+              Tema, profil ma'lumotlari va xavfsizlikni boshqarish.
             </CardDescription>
           </div>
         </CardHeader>
@@ -61,7 +62,7 @@ export function DashboardUserSettingsPage() {
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Tema</CardTitle>
-          <CardDescription>Yorug‘ yoki qorong‘i rejimni tanlang.</CardDescription>
+          <CardDescription>Yorug' yoki qorong'i rejimni tanlang.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-4">
@@ -72,12 +73,12 @@ export function DashboardUserSettingsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Profil ma’lumotlari</CardTitle>
+          <CardTitle className="text-base">Profil ma'lumotlari</CardTitle>
           <CardDescription>Admin ismi va email.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label>To‘liq ism</Label>
+            <Label>To'liq ism</Label>
             <Input
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
@@ -105,7 +106,7 @@ export function DashboardUserSettingsPage() {
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Parolni almashtirish</CardTitle>
-          <CardDescription>Hisobingiz xavfsizligini ta’minlang.</CardDescription>
+          <CardDescription>Hisobingiz xavfsizligini ta'minlang.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -137,4 +138,3 @@ export function DashboardUserSettingsPage() {
     </div>
   )
 }
-

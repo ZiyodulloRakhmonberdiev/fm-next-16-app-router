@@ -1,7 +1,7 @@
 "use client"
 
-import { filterPublishedRawNews, getNewsListForLocale, type NewsItem } from "@/features/news/model"
-import { seedNews } from "@/scripts/seed-news"
+import { getNewsListForLocale, isVisualRawNews, type NewsItem } from "@/features/news/model"
+import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
 import { Card } from "@/shared/common/components/ui/card"
 import { formatDate, formatDateISO, formatDateTimeLocale } from "@/shared/common/lib/formatter"
 import type { AppLocale } from "@/shared/common/lib/formatter"
@@ -17,8 +17,10 @@ type LatestNewsProps = {
 export default function LatestNews({ excludeSlug }: LatestNewsProps = {}) {
   const locale = useLocale() as AppLocale
   const t = useTranslations("Home")
+  const { data: publicNews = [] } = usePublicNewsQuery()
 
-  const rawSorted = filterPublishedRawNews([...seedNews.news])
+  const rawSorted = [...publicNews]
+    .filter(isVisualRawNews)
     .filter((n) => !excludeSlug || n.slug !== excludeSlug)
     .sort(
       (a, b) =>
@@ -27,7 +29,7 @@ export default function LatestNews({ excludeSlug }: LatestNewsProps = {}) {
     )
     .slice(0, 9)
   const sorted = getNewsListForLocale(rawSorted, locale)
-  const [featured, ...rest] = sorted
+  if (sorted.length < 3) return null
 
   return (
     <div className="flex w-full flex-col gap-4">
@@ -38,7 +40,7 @@ export default function LatestNews({ excludeSlug }: LatestNewsProps = {}) {
       <div className="flex flex-col gap-3">
 
         <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1">
-          {rest.map((item: NewsItem) => (
+          {sorted.map((item: NewsItem) => (
             <li key={item.slug}>
               <Card className="overflow-hidden p-0 rounded-sm shadow-none">
                 <div className="flex gap-3">

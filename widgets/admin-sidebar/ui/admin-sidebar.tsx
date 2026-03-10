@@ -34,7 +34,6 @@ const navItems = [
   { href: '/dashboard/news', label: 'Yangiliklar', icon: Newspaper },
   { href: '/dashboard/categories', label: 'Kategoriyalar', icon: FolderTree },
   { href: '/dashboard/tags', label: 'Teglar', icon: Tag },
-  { href: '/dashboard/pages', label: 'Sahifalar', icon: FileText },
   { href: '/dashboard/users', label: 'Foydalanuvchilar', icon: Users },
   { href: '/dashboard/configs', label: 'Ma\'lumotlar', icon: Settings2 },
 ]
@@ -54,6 +53,13 @@ export default function AdminSidebar() {
       ? '/images/fm-logo-dark.svg'
       : '/images/fm-logo.svg'
 
+  const isItemActive = (href: string) => {
+    if (href === '/dashboard') {
+      return pathname === '/dashboard'
+    }
+    return pathname === href || pathname.startsWith(`${href}/`)
+  }
+
   return (
     <Sidebar collapsible="icon" className="border-r border-border">
       <SidebarHeader className="border-b border-border min-w-0 overflow-hidden shrink-0">
@@ -61,7 +67,7 @@ export default function AdminSidebar() {
           <span className="font-semibold text-lg truncate group-data-[state=collapsed]:hidden">
             <Link href="/dashboard" className="hidden md:flex items-center gap-2 shrink-0">
               <Image
-                src={mounted ? logoSrc : '/images/fm-logo-dark.png'}
+                src={mounted ? logoSrc : '/images/fm-logo-dark.svg'}
                 alt="Fergana Media"
                 width={120}
                 height={32}
@@ -79,7 +85,7 @@ export default function AdminSidebar() {
             <SidebarMenu>
               {navItems.map((item) => (
                 <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton asChild isActive={pathname === item.href || pathname.startsWith(item.href + '/')}>
+                  <SidebarMenuButton asChild isActive={isItemActive(item.href)}>
                     <Link href={item.href}>
                       <item.icon className="size-4" />
                       <span>{item.label}</span>
@@ -97,7 +103,7 @@ export default function AdminSidebar() {
             <SidebarMenu>
               {bottomItems.map((item) => (
                 <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton asChild isActive={pathname === item.href || pathname.startsWith(item.href + '/')}>
+                  <SidebarMenuButton asChild isActive={isItemActive(item.href)}>
                     <Link href={item.href}>
                       <item.icon className="size-4" />
                       <span>{item.label}</span>

@@ -10,11 +10,11 @@ import {
   CommandList,
 } from "@/shared/common/components/ui/command"
 import { getPublishedNewsListForLocale, type NewsItem } from "@/features/news/model"
+import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
 import { useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
 import { useLocale } from "next-intl"
 import { useMemo } from "react"
-import { seedNews } from "@/scripts/seed-news"
 
 function matchNews(item: NewsItem, search: string): boolean {
   if (!search.trim()) return false
@@ -28,7 +28,8 @@ export function SearchBar({ open, onClose }: { open: boolean; onClose: () => voi
   const t = useTranslations("common")
   const router = useRouter()
   const locale = useLocale() as "en" | "ru" | "uz" | "uzb"
-  const items = useMemo(() => getPublishedNewsListForLocale(seedNews.news, locale), [locale])
+  const { data: publicNews = [] } = usePublicNewsQuery()
+  const items = useMemo(() => getPublishedNewsListForLocale(publicNews, locale), [locale, publicNews])
 
   return (
     <CommandDialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>

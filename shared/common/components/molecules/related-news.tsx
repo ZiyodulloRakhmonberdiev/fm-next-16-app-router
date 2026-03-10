@@ -1,8 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { filterPublishedRawNews, getNewsListForLocale, type NewsItem } from "@/features/news/model"
-import { seedNews } from "@/scripts/seed-news"
+import { getNewsListForLocale, isVisualRawNews, type NewsItem } from "@/features/news/model"
+import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
 import { Card } from "@/shared/common/components/ui/card"
 import { formatDate, formatDateISO } from "@/shared/common/lib/formatter"
 import type { AppLocale } from "@/shared/common/lib/formatter"
@@ -19,11 +19,13 @@ type RelatedNewsProps = {
 export default function RelatedNews({ categorySlug, excludeSlug }: RelatedNewsProps) {
   const locale = useLocale() as AppLocale
   const t = useTranslations("common")
+  const { data: publicNews = [] } = usePublicNewsQuery()
   const [selected, setSelected] = React.useState<NewsItem | null>(null)
   const [isOpen, setIsOpen] = React.useState(false)
 
   const items = React.useMemo(() => {
-    const raw = filterPublishedRawNews([...seedNews.news])
+    const raw = [...publicNews]
+      .filter(isVisualRawNews)
       .filter((n) => n.categorySlug === categorySlug && n.slug !== excludeSlug)
       .sort(
         (a, b) =>
@@ -32,7 +34,7 @@ export default function RelatedNews({ categorySlug, excludeSlug }: RelatedNewsPr
       )
       .slice(0, 9)
     return getNewsListForLocale(raw, locale)
-  }, [categorySlug, excludeSlug, locale])
+  }, [categorySlug, excludeSlug, locale, publicNews])
 
   if (items.length === 0) return null
 

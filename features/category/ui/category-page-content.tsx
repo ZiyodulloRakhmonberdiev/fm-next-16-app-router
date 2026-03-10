@@ -1,8 +1,9 @@
 "use client"
 
 import * as React from "react"
-import { filterPublishedRawNews, getNewsListForLocale, type NewsItem } from "@/features/news/model"
-import { seedNews } from "@/scripts/seed-news"
+import { getNewsListForLocale, isVisualRawNews, type NewsItem } from "@/features/news/model"
+import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
+import { getCategoryNameFromApi, usePublicCategoriesQuery } from "@/features/category/model/public-categories-query"
 import { Card } from "@/shared/common/components/ui/card"
 import { Button } from "@/shared/common/components/ui/button"
 import {
@@ -11,11 +12,11 @@ import {
   formatDateTimeLocale,
 } from "@/shared/common/lib/formatter"
 import type { AppLocale } from "@/shared/common/lib/formatter"
-import { getCategoryName } from "@/shared/common/lib/seed-helpers"
 import { Link } from "@/i18n/navigation"
 import Image from "next/image"
 import { useLocale, useTranslations } from "next-intl"
 import { TruncateExpand } from "@/shared/common/components/ui/truncate-expand"
+import { ServerLoading, ServerUnavailable } from "@/shared/common/components/molecules"
 
 const PAGE_SIZE = 99
 
@@ -26,10 +27,18 @@ type CategoryPageContentProps = {
 export function CategoryPageContent({ slug }: CategoryPageContentProps) {
   const locale = useLocale() as AppLocale
   const t = useTranslations("common")
-  const category = getCategoryName(slug, locale)
+  const { data: publicNews = [], isError: newsError, isLoading: newsLoading, isFetching: newsFetching } = usePublicNewsQuery()
+  const {
+    data: categories = [],
+    isError: categoriesError,
+    isLoading: categoriesLoading,
+    isFetching: categoriesFetching,
+  } = usePublicCategoriesQuery()
+  const category = getCategoryNameFromApi(categories, slug, locale)
 
   const allItems = React.useMemo(() => {
-    const raw = filterPublishedRawNews([...seedNews.news])
+    const raw = [...publicNews]
+      .filter(isVisualRawNews)
       .filter((n) => n.categorySlug === slug)
       .sort(
         (a, b) =>
@@ -37,13 +46,20 @@ export function CategoryPageContent({ slug }: CategoryPageContentProps) {
           new Date(a.publishedAt).getTime()
       )
     return getNewsListForLocale(raw, locale)
-  }, [slug, locale])
+  }, [slug, locale, publicNews])
 
   const featured = allItems.slice(0, 3)
   const rest = allItems.slice(3)
   const [visibleCount, setVisibleCount] = React.useState(PAGE_SIZE)
   const visibleRest = rest.slice(0, visibleCount)
   const hasMore = rest.length > visibleCount
+
+  if ((newsLoading || newsFetching || categoriesLoading || categoriesFetching) && publicNews.length === 0) {
+    return <ServerLoading />
+  }
+  if ((newsError || categoriesError) && publicNews.length === 0) {
+    return <ServerUnavailable />
+  }
 
   if (allItems.length === 0) {
     return (

@@ -11,7 +11,7 @@ import { Label } from '@/shared/common/components/ui/label'
 import { Switch } from '@/shared/common/components/ui/switch'
 import { Button } from '@/shared/common/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/shared/common/components/ui/tooltip'
-import { Save, Send, Trash2, RotateCcw, Archive, Ban, ExternalLink } from 'lucide-react'
+import { Save, Send, Trash2, RotateCcw, Archive, Ban, ExternalLink, Loader2 } from 'lucide-react'
 import { Link } from '@/i18n/navigation'
 import type { NewsStatus } from '@/features/news/model'
 
@@ -24,21 +24,24 @@ const STATUS_LABELS: Record<NewsStatus, string> = {
 }
 
 type SettingsFormProps = {
-  isTop: boolean
   authorsChoice: boolean
-  pushedToTelegram: boolean
-  isBreaking: boolean
+  isTrending: boolean
   isPopular: boolean
+  isTop: boolean
+  isBreaking: boolean
+  pushedToTelegram: boolean
   canPublish: boolean
   publishDisabledReason?: string
   onBack: () => void
-  onChangeIsTop: (value: boolean) => void
   onChangeAuthorsChoice: (value: boolean) => void
-  onChangePushedToTelegram: (value: boolean) => void
-  onChangeIsBreaking: (value: boolean) => void
+  onChangeIsTrending: (value: boolean) => void
   onChangeIsPopular: (value: boolean) => void
+  onChangeIsTop: (value: boolean) => void
+  onChangeIsBreaking: (value: boolean) => void
+  onChangePushedToTelegram: (value: boolean) => void
   onSavePending: () => void
   onPublish: () => void
+  isSaving?: boolean
   mode?: 'create' | 'edit'
   currentStatus?: NewsStatus
   onStatusChange?: (newStatus: NewsStatus) => void
@@ -47,21 +50,24 @@ type SettingsFormProps = {
 }
 
 export function SettingsForm({
-  isTop,
   authorsChoice,
-  pushedToTelegram,
-  isBreaking,
+  isTrending,
   isPopular,
+  isTop,
+  isBreaking,
+  pushedToTelegram,
   canPublish,
   publishDisabledReason,
   onBack,
-  onChangeIsTop,
   onChangeAuthorsChoice,
-  onChangePushedToTelegram,
-  onChangeIsBreaking,
+  onChangeIsTrending,
   onChangeIsPopular,
+  onChangeIsTop,
+  onChangeIsBreaking,
+  onChangePushedToTelegram,
   onSavePending,
   onPublish,
+  isSaving = false,
   mode = 'create',
   currentStatus = 'published',
   onStatusChange,
@@ -83,16 +89,28 @@ export function SettingsForm({
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border p-4">
-          <Label htmlFor="isTop" className="cursor-pointer">
-            Top yangilik
-          </Label>
-          <Switch id="isTop" checked={isTop} onCheckedChange={onChangeIsTop} />
-        </div>
-        <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border p-4">
           <Label htmlFor="authorsChoice" className="cursor-pointer">
             Muallif tanlovi
           </Label>
           <Switch id="authorsChoice" checked={authorsChoice} onCheckedChange={onChangeAuthorsChoice} />
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border p-4">
+          <Label htmlFor="isTrending" className="cursor-pointer">
+            Trending
+          </Label>
+          <Switch id="isTrending" checked={isTrending} onCheckedChange={onChangeIsTrending} />
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border p-4">
+          <Label htmlFor="isPopular" className="cursor-pointer">
+            Popular
+          </Label>
+          <Switch id="isPopular" checked={isPopular} onCheckedChange={onChangeIsPopular} />
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border p-4">
+          <Label htmlFor="isTop" className="cursor-pointer">
+            Top
+          </Label>
+          <Switch id="isTop" checked={isTop} onCheckedChange={onChangeIsTop} />
         </div>
         <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border p-4">
           <Label htmlFor="pushedToTelegram" className="cursor-pointer">
@@ -105,12 +123,6 @@ export function SettingsForm({
             Shoshilinch yangilik (Breaking)
           </Label>
           <Switch id="isBreaking" checked={isBreaking} onCheckedChange={onChangeIsBreaking} />
-        </div>
-        <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border p-4">
-          <Label htmlFor="isPopular" className="cursor-pointer">
-            Omabop (Popular)
-          </Label>
-          <Switch id="isPopular" checked={isPopular} onCheckedChange={onChangeIsPopular} />
         </div>
         {mode === 'edit' && onStatusChange && (
           <div className="space-y-3 rounded-lg border p-4">
@@ -156,16 +168,16 @@ export function SettingsForm({
           <Button variant="outline" onClick={onBack} className="gap-2">
             Orqaga
           </Button>
-          <Button variant="secondary" onClick={onSavePending} className="gap-2">
-            <Save className="size-4" />
+          <Button variant="secondary" onClick={onSavePending} className="gap-2" disabled={isSaving}>
+            {isSaving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
             Saqlash (pending)
           </Button>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
                 <span className="inline-flex" aria-disabled={!canPublish}>
-                  <Button onClick={onPublish} className="gap-2" disabled={!canPublish}>
-                    <Send className="size-4" />
+                  <Button onClick={onPublish} className="gap-2" disabled={!canPublish || isSaving}>
+                    {isSaving ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
                     Chop etish
                   </Button>
                 </span>

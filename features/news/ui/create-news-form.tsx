@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
 import { useRouter } from '@/i18n/navigation'
 import { toast } from 'sonner'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import type { AppLocale } from '@/shared/common/lib/locale-api'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Loader2 } from 'lucide-react'
 import { Button } from '@/shared/common/components/ui/button'
 import { cn } from '@/shared/common/lib/utils'
 import { getYoutubeEmbedUrl } from '@/shared/common/lib/youtube'
@@ -17,6 +18,7 @@ import { SettingsForm } from './settings-form'
 import { ContentForm } from './content-form'
 import type { NewsStatus } from '@/features/news/model'
 import type { EditNewsInitialData } from '@/features/news/lib/raw-to-edit-initial'
+import { adminQueryKeys } from '@/features/dashboard/model/admin-hooks'
 
 const LOCALES: AppLocale[] = ['uz', 'uzb', 'ru', 'en']
 const LOCALE_LABELS: Record<AppLocale, string> = {
@@ -169,9 +171,40 @@ const defaultSlugs = (): Record<AppLocale, string> =>
 const defaultContents = (): Record<AppLocale, string> =>
   LOCALES.reduce((acc, loc) => ({ ...acc, [loc]: '' }), {} as Record<AppLocale, string>)
 
+class NewsFormApiError extends Error {
+  description?: string
+
+  constructor(message: string, description?: string) {
+    super(message)
+    this.name = 'NewsFormApiError'
+    this.description = description
+  }
+}
+
+function getValidationDescription(data: unknown): string | undefined {
+  if (!data || typeof data !== 'object' || !('issues' in data)) return undefined
+  const issues = (data as { issues?: { formErrors?: string[]; fieldErrors?: Record<string, string[] | undefined> } }).issues
+  if (!issues) return undefined
+
+  const lines: string[] = []
+  if (issues.formErrors?.length) lines.push(...issues.formErrors)
+  if (issues.fieldErrors) {
+    for (const [field, msgs] of Object.entries(issues.fieldErrors)) {
+      if (!msgs?.length) continue
+      lines.push(`${field}: ${msgs.join(', ')}`)
+    }
+  }
+  return lines.length ? lines.join('\n') : undefined
+}
+
 export function CreateNewsForm({ categories, tags, authors, existingSlugs = [], initialData }: CreateNewsFormProps) {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const isEditMode = !!initialData
+  const [savedNewsId, setSavedNewsId] = useState<string | undefined>(initialData?.id)
+  const [firstPublishedAt, setFirstPublishedAt] = useState<string | undefined>(
+    initialData?.publishedAt ? new Date(initialData.publishedAt).toISOString() : undefined
+  )
 
   const [step, setStep] = useState<1 | 2 | 3>(1)
   const [translations, setTranslations] = useState<TranslationsState>(
@@ -189,13 +222,94 @@ export function CreateNewsForm({ categories, tags, authors, existingSlugs = [], 
   const [minutes, setMinutes] = useState<number | ''>(initialData?.minutes ?? 3)
   const [videoUrl, setVideoUrl] = useState(initialData?.videoUrl ?? '')
   const [videoFile, setVideoFile] = useState<File | null>(null)
-  const [imageFilePreviewUrls, setImageFilePreviewUrls] = useState<string[]>([])
-  const [videoPreviewUrl, setVideoPreviewUrl] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<AppLocale>('uz')
-  const [isTop, setIsTop] = useState(initialData?.isTop ?? false)
   const [authorsChoice, setAuthorsChoice] = useState(initialData?.authorsChoice ?? false)
+  const [isTrending, setIsTrending] = useState(initialData?.isTrending ?? false)
+  const [isLatest] = useState(initialData?.isLatest ?? false)
+  const [isPopular, setIsPopular] = useState(initialData?.isPopular ?? false)
+  const [isTop, setIsTop] = useState(initialData?.isTop ?? false)
+  const [isBreaking, setIsBreaking] = useState(initialData?.isBreaking ?? false)
   const [pushedToTelegram, setPushedToTelegram] = useState(initialData?.pushedToTelegram ?? false)
   const [editStatus, setEditStatus] = useState<NewsStatus>(initialData?.status ?? 'pending')
+  const saveStatus: NewsStatus = isEditMode ? editStatus : 'pending'
+
+  const saveNews = useMutation({
+    mutationFn: async ({ status }: { status: NewsStatus }) => {
+      const slug = (slugs.uz || slugs.uzb || slugs.ru || slugs.en || '').trim().toLowerCase()
+      if (!slug) throw new Error('Slug majburiy')
+
+      const title = {
+        uz: translations.uz.title.trim(),
+        uzb: translations.uzb.title.trim(),
+        ru: translations.ru.title.trim() || undefined,
+        en: translations.en.title.trim() || undefined,
+      }
+      const description = {
+        uz: translations.uz.description.trim() || undefined,
+        uzb: translations.uzb.description.trim() || undefined,
+        ru: translations.ru.description.trim() || undefined,
+        en: translations.en.description.trim() || undefined,
+      }
+      const content = {
+        uz: contents.uz.length ? contents.uz : undefined,
+        uzb: contents.uzb.length ? contents.uzb : undefined,
+        ru: contents.ru.length ? contents.ru : undefined,
+        en: contents.en.length ? contents.en : undefined,
+      }
+      const payload = {
+        slug,
+        title,
+        description,
+        content,
+        categorySlug,
+        tagSlugs,
+        images: [...imageUrls, ...imageFiles.map((f) => f.name)],
+        author: author.trim(),
+        minutes: resolvedMinutes,
+        views: 0,
+        publishedAt:
+          status === 'published' && !firstPublishedAt
+            ? new Date().toISOString()
+            : undefined,
+        status,
+        type: resolvedType,
+        authorsChoice,
+        isTrending,
+        isLatest,
+        isPopular,
+        isTop,
+        isBreaking,
+        pushedToTelegram,
+        videoSource: videoUrl.trim() ? 'youtube' : undefined,
+        videoUrl: videoUrl.trim() || undefined,
+      }
+
+      const targetId = savedNewsId
+      const url = targetId ? `/api/news/${targetId}` : '/api/news'
+      const method = targetId ? 'PATCH' : 'POST'
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      const data = await res.json().catch(() => null)
+      if (!res.ok) {
+        const message =
+          (data && typeof data === 'object' && 'message' in data && typeof data.message === 'string'
+            ? data.message
+            : null) ||
+          (data && typeof data === 'object' && 'error' in data && typeof data.error === 'string'
+            ? data.error
+            : null) ||
+          'Saqlashda xatolik'
+        throw new NewsFormApiError(message, getValidationDescription(data))
+      }
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminQueryKeys.news() })
+    },
+  })
 
   const [contents, setContents] = useState<Record<AppLocale, string>>(
     () => initialData?.contents ?? defaultContents()
@@ -282,42 +396,75 @@ export function CreateNewsForm({ categories, tags, authors, existingSlugs = [], 
       type: resolvedType,
       isTop,
       authorsChoice,
+      isTrending,
+      isLatest,
+      isPopular,
+      isBreaking,
       pushedToTelegram,
       status,
     }
   }
 
-  const handleSavePendingStay = () => {
-    const payload = buildSavePayload('pending')
-    console.log('Save news (stay on page)', payload)
-    toast.success("Yangilik saqlandi (draft/pending holatda)")
+  const savePendingWithoutRedirect = async (): Promise<boolean> => {
+    try {
+      const saved = await saveNews.mutateAsync({ status: saveStatus }) as { _id?: string; publishedAt?: string | Date }
+      if (!savedNewsId && saved?._id) {
+        setSavedNewsId(saved._id)
+      }
+      if (!firstPublishedAt && saved?.publishedAt) {
+        setFirstPublishedAt(new Date(saved.publishedAt).toISOString())
+      }
+      toast.success("Yangilik saqlandi")
+      return true
+    } catch (err) {
+      if (err instanceof NewsFormApiError) {
+        toast.error(err.message, { description: err.description })
+      } else {
+        toast.error(err instanceof Error ? err.message : "Yangilikni saqlab bo'lmadi")
+      }
+      return false
+    }
   }
 
-  const handleSave = (status: 'pending' | 'published') => {
-    const payload = buildSavePayload(status)
-    console.log('Save news', payload)
-    if (status === 'published') {
-      toast.success("Yangilik muvaffaqiyatli chop etildi")
-    } else {
-      toast.success("Yangilik muvaffaqiyatli saqlandi")
-    }
-    if (!isEditMode) {
+  const handleSave = async (status: 'pending' | 'published') => {
+    try {
+      const saved = await saveNews.mutateAsync({ status }) as { _id?: string; publishedAt?: string | Date }
+      if (!savedNewsId && saved?._id) {
+        setSavedNewsId(saved._id)
+      }
+      if (!firstPublishedAt && saved?.publishedAt) {
+        setFirstPublishedAt(new Date(saved.publishedAt).toISOString())
+      }
+      if (status === 'published') {
+        toast.success("Yangilik muvaffaqiyatli chop etildi")
+      } else {
+        toast.success("Yangilik muvaffaqiyatli saqlandi")
+      }
       router.push('/dashboard/news')
+    } catch (err) {
+      if (err instanceof NewsFormApiError) {
+        toast.error(err.message, { description: err.description })
+      } else {
+        toast.error(err instanceof Error ? err.message : "Yangilikni saqlab bo'lmadi")
+      }
     }
   }
 
   const goToStep = (target: 1 | 2 | 3) => {
     setStep(target)
   }
+  const isSaving = saveNews.isPending
 
   const handleNextFromStep1 = () => {
-    handleSavePendingStay()
-    setStep(2)
+    void savePendingWithoutRedirect().then((ok) => {
+      if (ok) setStep(2)
+    })
   }
 
   const handleNextFromStep2 = () => {
-    handleSavePendingStay()
-    setStep(3)
+    void savePendingWithoutRedirect().then((ok) => {
+      if (ok) setStep(3)
+    })
   }
 
   const categoryName = categories.find((c) => c.slug === categorySlug)?.name ?? (categorySlug || '—')
@@ -357,23 +504,25 @@ export function CreateNewsForm({ categories, tags, authors, existingSlugs = [], 
 
   const selectedTags = tagSlugs.map((slug) => tags.find((t) => t.slug === slug)).filter(Boolean) as TagOption[]
 
+  const imageFilePreviewUrls = useMemo(
+    () => imageFiles.map((f) => URL.createObjectURL(f)),
+    [imageFiles]
+  )
   useEffect(() => {
-    const urls = imageFiles.map((f) => URL.createObjectURL(f))
-    setImageFilePreviewUrls(urls)
     return () => {
-      urls.forEach((u) => URL.revokeObjectURL(u))
+      imageFilePreviewUrls.forEach((u) => URL.revokeObjectURL(u))
     }
-  }, [imageFiles])
+  }, [imageFilePreviewUrls])
 
+  const videoPreviewUrl = useMemo(
+    () => (videoFile ? URL.createObjectURL(videoFile) : null),
+    [videoFile]
+  )
   useEffect(() => {
-    if (!videoFile) {
-      setVideoPreviewUrl(null)
-      return
+    return () => {
+      if (videoPreviewUrl) URL.revokeObjectURL(videoPreviewUrl)
     }
-    const url = URL.createObjectURL(videoFile)
-    setVideoPreviewUrl(url)
-    return () => URL.revokeObjectURL(url)
-  }, [videoFile])
+  }, [videoPreviewUrl])
 
   const videoDisplayUrl = videoUrl.trim() || videoPreviewUrl || ''
   const youtubeEmbedUrl = videoUrl.trim() ? getYoutubeEmbedUrl(videoUrl.trim()) : null
@@ -498,10 +647,11 @@ export function CreateNewsForm({ categories, tags, authors, existingSlugs = [], 
                     <span className="inline-flex" aria-disabled={!hasAnyData}>
                       <Button
                         variant="outline"
-                        onClick={handleSavePendingStay}
+                        onClick={() => void savePendingWithoutRedirect()}
                         className="gap-2"
-                        disabled={!hasAnyData}
+                        disabled={!hasAnyData || isSaving}
                       >
+                        {isSaving && <Loader2 className="size-4 animate-spin" />}
                         Saqlash
                       </Button>
                     </span>
@@ -574,10 +724,11 @@ export function CreateNewsForm({ categories, tags, authors, existingSlugs = [], 
                     <span className="inline-flex" aria-disabled={!hasAnyData}>
                       <Button
                         variant="outline"
-                        onClick={handleSavePendingStay}
+                        onClick={() => void savePendingWithoutRedirect()}
                         className="gap-2"
-                        disabled={!hasAnyData}
+                        disabled={!hasAnyData || isSaving}
                       >
+                        {isSaving && <Loader2 className="size-4 animate-spin" />}
                         Saqlash
                       </Button>
                     </span>
@@ -602,29 +753,47 @@ export function CreateNewsForm({ categories, tags, authors, existingSlugs = [], 
         <SettingsForm
           isTop={isTop}
           authorsChoice={authorsChoice}
+          isTrending={isTrending}
+          isPopular={isPopular}
+          isBreaking={isBreaking}
           pushedToTelegram={pushedToTelegram}
-          isBreaking={isTop}
-          isPopular={authorsChoice}
           canPublish={canPublish}
           publishDisabledReason={publishDisabledReason}
           onBack={() => setStep(2)}
-          onChangeIsTop={setIsTop}
           onChangeAuthorsChoice={setAuthorsChoice}
+          onChangeIsTrending={setIsTrending}
+          onChangeIsPopular={setIsPopular}
+          onChangeIsTop={setIsTop}
+          onChangeIsBreaking={setIsBreaking}
           onChangePushedToTelegram={setPushedToTelegram}
-          onChangeIsBreaking={() => {}}
-          onChangeIsPopular={() => {}}
-          onSavePending={() => handleSave('pending')}
-          onPublish={() => handleSave('published')}
+          onSavePending={() => void handleSave(saveStatus === 'published' ? 'published' : 'pending')}
+          onPublish={() => void handleSave('published')}
+          isSaving={isSaving}
           mode={isEditMode ? 'edit' : 'create'}
           currentStatus={editStatus}
           onStatusChange={
             isEditMode
-              ? (newStatus) => {
+              ? async (newStatus) => {
                   setEditStatus(newStatus)
-                  if (newStatus === 'published') toast.success('Yangilik nashr qilingan (published)')
-                  else if (newStatus === 'cancelled') toast.success('Yangilik bekor qilindi')
-                  else if (newStatus === 'deleted') toast.success("Yangilik Savatga o‘tkazildi")
-                  else if (newStatus === 'archived') toast.success('Yangilik arxivlandi')
+                  try {
+                    const saved = await saveNews.mutateAsync({ status: newStatus }) as { _id?: string; publishedAt?: string | Date }
+                    if (!savedNewsId && saved?._id) {
+                      setSavedNewsId(saved._id)
+                    }
+                    if (!firstPublishedAt && saved?.publishedAt) {
+                      setFirstPublishedAt(new Date(saved.publishedAt).toISOString())
+                    }
+                    if (newStatus === 'published') toast.success('Yangilik nashr qilingan (published)')
+                    else if (newStatus === 'cancelled') toast.success('Yangilik bekor qilindi')
+                    else if (newStatus === 'deleted') toast.success("Yangilik Savatga o‘tkazildi")
+                    else if (newStatus === 'archived') toast.success('Yangilik arxivlandi')
+                  } catch (err) {
+                    if (err instanceof NewsFormApiError) {
+                      toast.error(err.message, { description: err.description })
+                    } else {
+                      toast.error(err instanceof Error ? err.message : "Statusni o'zgartirib bo'lmadi")
+                    }
+                  }
                 }
               : undefined
           }

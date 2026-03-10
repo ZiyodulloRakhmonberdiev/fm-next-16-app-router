@@ -24,6 +24,7 @@ import {
   cyrillicToLatinUz,
 } from "@/features/news/lib/latin-cyrill-translator"
 import type { AppLocale } from "@/shared/common/lib/locale-api"
+import { toast } from "sonner"
 
 type LocalMedia = {
   id: string
@@ -60,6 +61,23 @@ export function ContentForm({
 
   const updateContent = (updater: (prev: string) => string) => {
     onChange(updater(content))
+  }
+
+  const uploadMedia = async (file: File, kind: "image" | "video"): Promise<string> => {
+    const formData = new FormData()
+    formData.append("file", file)
+    formData.append("kind", kind)
+
+    const res = await fetch("/api/uploads", {
+      method: "POST",
+      body: formData,
+    })
+    const data = (await res.json().catch(() => null)) as { url?: string; error?: string } | null
+
+    if (!res.ok || !data?.url) {
+      throw new Error(data?.error || "Media upload xatoligi")
+    }
+    return data.url
   }
 
   const insertAtCursor = (textToInsert: string) => {
@@ -126,35 +144,47 @@ export function ContentForm({
     setVideoUrl("")
   }
 
-  const handleLocalImages = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLocalImages = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (!files) return
 
-    const next: LocalMedia[] = []
-    Array.from(files).forEach((file) => {
-      const url = URL.createObjectURL(file)
-      next.push({ id: `${file.name}-${url}`, url, file })
-    })
-    const startIdx = localImages.length
-    setLocalImages((prev) => [...prev, ...next])
-    const markers = Array.from(next, (_, i) => `\n@@local-image(${startIdx + i})\n`).join("")
-    insertAtCursor(markers)
+    const selected = Array.from(files)
+    const uploadedUrls: string[] = []
+    for (const file of selected) {
+      try {
+        const uploadedUrl = await uploadMedia(file, "image")
+        uploadedUrls.push(uploadedUrl)
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Rasm upload bo'lmadi")
+      }
+    }
+
+    if (uploadedUrls.length > 0) {
+      const markers = uploadedUrls.map((url) => `\n![rasm](${url})\n`).join("")
+      insertAtCursor(markers)
+    }
     e.target.value = ""
   }
 
-  const handleLocalVideos = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLocalVideos = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (!files) return
 
-    const next: LocalMedia[] = []
-    Array.from(files).forEach((file) => {
-      const url = URL.createObjectURL(file)
-      next.push({ id: `${file.name}-${url}`, url, file })
-    })
-    const startIdx = localVideos.length
-    setLocalVideos((prev) => [...prev, ...next])
-    const markers = Array.from(next, (_, i) => `\n@@local-video(${startIdx + i})\n`).join("")
-    insertAtCursor(markers)
+    const selected = Array.from(files)
+    const uploadedUrls: string[] = []
+    for (const file of selected) {
+      try {
+        const uploadedUrl = await uploadMedia(file, "video")
+        uploadedUrls.push(uploadedUrl)
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Video upload bo'lmadi")
+      }
+    }
+
+    if (uploadedUrls.length > 0) {
+      const markers = uploadedUrls.map((url) => `\n@@video(${url})\n`).join("")
+      insertAtCursor(markers)
+    }
     e.target.value = ""
   }
 
@@ -295,14 +325,14 @@ export function ContentForm({
         return
       }
 
-      const imgMatch = trimmed.match(/^!\[([^\]]*)\]\((https?:\/\/[^\s)]+)\)$/)
+      const imgMatch = trimmed.match(/^!\[([^\]]*)\]\(((?:https?:\/\/|\/)[^\s)]+)\)$/)
       if (imgMatch) {
         elements.push(
           <div key={keyBase} className="my-2">
             <img
               src={imgMatch[2]}
               alt={imgMatch[1] || "image"}
-              className="max-h-80 w-auto rounded-md border object-contain"
+              className="w-full rounded-md border object-cover"
             />
           </div>
         )
@@ -322,7 +352,7 @@ export function ContentForm({
 
         if (youtubeId) {
           elements.push(
-            <div key={keyBase} className="my-3 aspect-video w-full max-w-xl">
+            <div key={keyBase} className="my-3 aspect-video w-full">
               <iframe
                 src={`https://www.youtube.com/embed/${youtubeId}`}
                 className="h-full w-full rounded-md border"
@@ -338,7 +368,10 @@ export function ContentForm({
               key={keyBase}
               src={url}
               controls
-              className="my-3 max-h-80 w-auto rounded-md border"
+              controlsList="nodownload"
+              disablePictureInPicture
+              onContextMenu={(e) => e.preventDefault()}
+              className="my-3 aspect-video w-full rounded-md border object-cover"
             />
           )
         }
@@ -355,7 +388,7 @@ export function ContentForm({
               <img
                 src={item.url}
                 alt={item.file.name}
-                className="max-h-80 w-auto rounded-md border object-contain"
+                className="w-full rounded-md border object-cover"
               />
             </div>
           )
@@ -373,7 +406,10 @@ export function ContentForm({
               key={keyBase}
               src={item.url}
               controls
-              className="my-3 max-h-80 w-auto rounded-md border"
+              controlsList="nodownload"
+              disablePictureInPicture
+              onContextMenu={(e) => e.preventDefault()}
+              className="my-3 aspect-video w-full rounded-md border object-cover"
             />
           )
         }
@@ -436,7 +472,7 @@ export function ContentForm({
           /^@@video\(.+\)$/.test(trimmed) ||
           /^@@local-image\(\d+\)$/.test(trimmed) ||
           /^@@local-video\(\d+\)$/.test(trimmed) ||
-          /^!\[[^\]]*]\((https?:\/\/[^\s)]+)\)$/.test(trimmed)
+          /^!\[[^\]]*]\(((?:https?:\/\/|\/)[^\s)]+)\)$/.test(trimmed)
         ) {
           return line
         }

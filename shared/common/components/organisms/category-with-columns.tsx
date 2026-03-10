@@ -1,8 +1,9 @@
 "use client"
 
 import * as React from "react"
-import { filterPublishedRawNews, getNewsListForLocale, type NewsItem } from "@/features/news/model"
-import { seedNews } from "@/scripts/seed-news"
+import { getNewsListForLocale, isVisualRawNews, type NewsItem } from "@/features/news/model"
+import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
+import { getCategoryNameFromApi, usePublicCategoriesQuery } from "@/features/category/model/public-categories-query"
 import { Card } from "@/shared/common/components/ui/card"
 import {
   formatDateISO,
@@ -14,7 +15,6 @@ import Image from "next/image"
 import { useLocale, useTranslations } from "next-intl"
 import { TruncateExpand } from "@/shared/common/components/ui/truncate-expand"
 import { Button } from "../ui/button"
-import { getCategoryName } from "@/shared/common/lib/seed-helpers"
 
 type CategoryWithColumnsProps = {
   categorySlug?: string
@@ -27,10 +27,13 @@ export default function CategoryWithColumns({
 }: CategoryWithColumnsProps) {
   const locale = useLocale() as AppLocale
   const t = useTranslations("common")
-  const categoryName = getCategoryName(categorySlug, locale)
+  const { data: publicNews = [] } = usePublicNewsQuery()
+  const { data: categories = [] } = usePublicCategoriesQuery()
+  const categoryName = getCategoryNameFromApi(categories, categorySlug, locale)
 
   const items = React.useMemo(() => {
-    const raw = filterPublishedRawNews([...seedNews.news])
+    const raw = [...publicNews]
+      .filter(isVisualRawNews)
       .filter((n) => n.categorySlug === categorySlug)
       .sort(
         (a, b) =>
@@ -39,11 +42,11 @@ export default function CategoryWithColumns({
       )
       .slice(0, 7)
     return getNewsListForLocale(raw, locale)
-  }, [categorySlug, locale])
+  }, [categorySlug, locale, publicNews])
 
   const [featured, ...rightItems] = items
 
-  if (items.length === 0) return null
+  if (items.length < 6) return null
 
   return (
     <div className="w-full px-4 md:px-6 mt-4">
