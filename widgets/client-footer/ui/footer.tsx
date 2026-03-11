@@ -8,12 +8,18 @@ import { Mail, MapPin, Phone } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTheme } from 'next-themes'
 import type { AppLocale } from '@/shared/common/lib/locale-api'
+import { usePublicSiteSettingsQuery } from '@/shared/common/lib/public-site-settings-query'
 
 export default function Footer() {
   const { resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
   const locale = useLocale() as AppLocale
+  const { data: settings } = usePublicSiteSettingsQuery()
+  const description = settings?.description?.[locale] ?? seed.description[locale]
+  const email = settings?.siteConfig.email ?? seed.siteConfig.email
+  const phone = settings?.siteConfig.phone ?? seed.siteConfig.phone
+  const address = settings?.siteConfig.address?.[locale] ?? seed.siteConfig.address[locale]
 
   const logoSrc =
     mounted && resolvedTheme === 'light'
@@ -39,18 +45,18 @@ export default function Footer() {
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0 md:gap-4 lg:gap-6 items-start justify-between'>
           {/* Description */}
           <div className='w-full border-b md:border-none border-border pb-2 flex gap-2 flex-col'>
-            <p className="text-sm text-foreground/70 max-w-md">{seed.description[locale]}</p>
+            <p className="text-sm text-foreground/70 max-w-md">{description}</p>
             <div className="flex items-center gap-2 text-sm text-foreground/70">
               <Mail className="size-4 text-foreground/70" />
-              <a href={`mailto:${seed.siteConfig.email}`}>{seed.siteConfig.email}</a>
+              <a href={`mailto:${email}`}>{email}</a>
             </div>
             <div className="flex items-center gap-2 text-sm text-foreground/70">
               <Phone className="size-4 text-foreground/70" />
-              <a href={`tel:${seed.siteConfig.phone}`}>{seed.siteConfig.phone}</a>
+              <a href={`tel:${phone}`}>{phone}</a>
             </div>
             <div className="flex items-center gap-2">
               <MapPin className="size-4 text-foreground/70" />
-              <span className="text-sm text-foreground/70">{seed.siteConfig.address[locale]}</span>
+              <span className="text-sm text-foreground/70">{address}</span>
             </div>
           </div>
           {/* Social and links */}
@@ -63,7 +69,7 @@ export default function Footer() {
               )
             })}
             <div className="text-sm text-foreground/70 mt-2">
-              <span className="font-bold">{t("note")}</span> {t("note_desc")} <Link href={`mailto:${seed.siteConfig.email}`} className="text-blue-500 hover:text-blue-600">{seed.siteConfig.email}</Link>
+              <span className="font-bold">{t("note")}</span> {t("note_desc")} <Link href={`mailto:${email}`} className="text-blue-500 hover:text-blue-600">{email}</Link>
             </div>
           </div>
           <div className="flex items-start pt-2 md:pt-0 flex-col gap-2">

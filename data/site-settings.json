@@ -1,9 +1,12 @@
 {
   "headline": {
-    "uz": "Sayt demo rejimida ishlamoqda!",
-    "uzb": "Сайт демо режимида ишламоқда!",
-    "ru": "Сайт работает в демо-режиме!",
-    "en": "Site is running in demo mode!"
+    "enabled": true,
+    "message": {
+      "uz": "Sayt demo rejimida ishlamoqda!",
+      "uzb": "Сайт демо режимида ишламоқда!",
+      "ru": "Сайт работает в демо-режиме!",
+      "en": "Site is running in demo mode!"
+    }
   },
   "description": {
     "uz": "Ferganamedia.uz 2024-yil 26-sentabrda Prezident administratsiyasi huzuridagi AOKA tomonidan elektron ommaviy axborot vositasi sifatida ro'yxatdan o'tkazilgan. Guvohnoma raqami: 414738. Tashkilotchi: «Fergana Media Press» MCHJ.",
@@ -30,7 +33,7 @@
         "ru": "Инстаграм",
         "en": "Instagram"
       },
-      "href": "/instagram"
+      "href": "https://www.ferganamedia.uz/?"
     },
     {
       "slug": "facebook",
@@ -51,11 +54,6 @@
         "en": "YouTube"
       },
       "href": "/youtube"
-    },
-    {
-      "slug": "twitter",
-      "name": "Twitter",
-      "href": "/twitter"
     }
   ],
   "siteConfig": {
@@ -66,6 +64,21 @@
       "uzb": "Фарғона вилояти, Фарғона шаҳар, Машъал, Алишер Навоий кўчаси, 32",
       "ru": "Ферганская область, г. Фергана, Машъал, ул. Алишера Навои, 32",
       "en": "Fergana region, Fergana city, Mashal, Alisher Navoi street, 32"
+    }
+  },
+  "telegram": {
+    "enabled": true,
+    "botToken": "8611748516:AAFfzXXeZcOw7rY3aabhFU-1fP2WEkT4F9g",
+    "chatId": "-1001529545143"
+  },
+  "clientDelivery": {
+    "mode": "normal",
+    "title": "Texnik ishlar",
+    "description": "Hozir tizimda texnik ishlar olib borilmoqda. Iltimos, birozdan keyin qayta urinib ko'ring.",
+    "models": {
+      "news": true,
+      "categories": true,
+      "tags": true
     }
   }
 }

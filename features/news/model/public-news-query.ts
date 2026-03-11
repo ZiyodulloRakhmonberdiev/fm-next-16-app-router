@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query"
 import type { RawNewsItem } from "./types"
+import { usePublicSiteSettingsQuery } from "@/shared/common/lib/public-site-settings-query"
 
 type NewsListResponse = {
   data: RawNewsItem[]
@@ -12,11 +13,12 @@ type NewsListResponse = {
   }
 }
 
-type RawNewsItemApi = Omit<RawNewsItem, "publishedAt" | "createdAt" | "updatedAt" | "pushedToTelegramAt"> & {
+type RawNewsItemApi = Omit<RawNewsItem, "publishedAt" | "createdAt" | "updatedAt" | "pushedToTelegramAt" | "telegramLastAttemptAt"> & {
   publishedAt: string | Date
   createdAt?: string | Date
   updatedAt?: string | Date
   pushedToTelegramAt?: string | Date
+  telegramLastAttemptAt?: string | Date
 }
 
 function toDate(value?: string | Date): Date | undefined {
@@ -32,6 +34,7 @@ function normalizeNews(item: RawNewsItemApi): RawNewsItem {
     createdAt: toDate(item.createdAt),
     updatedAt: toDate(item.updatedAt),
     pushedToTelegramAt: toDate(item.pushedToTelegramAt),
+    telegramLastAttemptAt: toDate(item.telegramLastAttemptAt),
   }
 }
 
@@ -67,10 +70,17 @@ async function fetchPublishedNews(): Promise<RawNewsItem[]> {
 export const publicNewsQueryKey = ["public-news"] as const
 
 export function usePublicNewsQuery() {
+  const { data: settings } = usePublicSiteSettingsQuery()
+  const enabled =
+    (settings?.clientDelivery.mode ?? "normal") !== "server-off" &&
+    (settings?.clientDelivery.models.news ?? true)
+
   return useQuery({
     queryKey: publicNewsQueryKey,
     queryFn: fetchPublishedNews,
     staleTime: 30_000,
     retry: 1,
+    enabled,
+    placeholderData: [],
   })
 }

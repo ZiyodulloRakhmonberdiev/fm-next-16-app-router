@@ -1,7 +1,7 @@
 'use client'
 /* eslint-disable react/no-unescaped-entities */
 
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import {
   Card,
@@ -55,6 +55,7 @@ function generateTagSlugFromEn(name: Record<AppLocale, string>): string {
 }
 
 export function TagsPage({ locale }: TagsPageProps) {
+  const pageSize = 30
   const { data, isLoading, error } = useTagsQuery()
   const { create, update, remove } = useTagMutations()
   const { createOpen, editId, deleteId, setCreateOpen, setEditId, setDeleteId } = useTagsUiStore()
@@ -66,6 +67,15 @@ export function TagsPage({ locale }: TagsPageProps) {
         name: t.name,
       })),
     [data]
+  )
+  const [page, setPage] = useState(1)
+  const totalPages = Math.max(1, Math.ceil(tags.length / pageSize))
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages)
+  }, [page, totalPages])
+  const paginatedTags = useMemo(
+    () => tags.slice((page - 1) * pageSize, page * pageSize),
+    [tags, page]
   )
   const editTag = useMemo(() => tags.find((t) => t._id === editId) ?? null, [tags, editId])
   const deleteTag = useMemo(() => tags.find((t) => t._id === deleteId) ?? null, [tags, deleteId])
@@ -202,14 +212,14 @@ export function TagsPage({ locale }: TagsPageProps) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {tags.length === 0 ? (
+                {paginatedTags.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
                       Teg topilmadi
                     </TableCell>
                   </TableRow>
                 ) : (
-                  tags.map((row) => (
+                  paginatedTags.map((row) => (
                     <TableRow key={row._id}>
                       <TableCell className="font-mono text-sm">{row.slug}</TableCell>
                       <TableCell>{row.name.uz ?? '—'}</TableCell>
@@ -232,6 +242,17 @@ export function TagsPage({ locale }: TagsPageProps) {
               </TableBody>
             </Table>
           </div>
+          {totalPages > 1 ? (
+            <div className="mt-3 flex items-center justify-center gap-2">
+              <Button size="sm" variant="outline" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+                Oldingi
+              </Button>
+              <span className="text-xs text-muted-foreground">{page} / {totalPages}</span>
+              <Button size="sm" variant="outline" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
+                Keyingi
+              </Button>
+            </div>
+          ) : null}
         </CardContent>
       </Card>
 

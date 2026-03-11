@@ -24,29 +24,48 @@ import {
   Newspaper,
   Tag,
   Settings2,
+  KeyRound,
+  Megaphone,
+  LogOut,
+  MessageSquare,
 } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import Image from 'next/image'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { signOut, useSession } from 'next-auth/react'
+import { normalizeRole, type NormalizedRole } from '@/shared/common/lib/rbac'
+import { Button } from '@/shared/common/components/ui/button'
 
 const navItems = [
-  { href: '/dashboard', label: 'Boshqaruv paneli', icon: LayoutDashboard },
-  { href: '/dashboard/news', label: 'Yangiliklar', icon: Newspaper },
-  { href: '/dashboard/categories', label: 'Kategoriyalar', icon: FolderTree },
-  { href: '/dashboard/tags', label: 'Teglar', icon: Tag },
-  { href: '/dashboard/users', label: 'Foydalanuvchilar', icon: Users },
-  { href: '/dashboard/configs', label: 'Ma\'lumotlar', icon: Settings2 },
+  { href: '/dashboard', label: 'Boshqaruv paneli', icon: LayoutDashboard, roles: ['ceo', 'administrator'] as NormalizedRole[] },
+  { href: '/dashboard/news', label: 'Yangiliklar', icon: Newspaper, roles: ['ceo', 'administrator', 'moderator'] as NormalizedRole[] },
+  { href: '/dashboard/categories', label: 'Kategoriyalar', icon: FolderTree, roles: ['ceo', 'administrator', 'moderator'] as NormalizedRole[] },
+  { href: '/dashboard/tags', label: 'Teglar', icon: Tag, roles: ['ceo', 'administrator', 'moderator'] as NormalizedRole[] },
+  { href: '/dashboard/users', label: 'Foydalanuvchilar', icon: Users, roles: ['ceo', 'administrator'] as NormalizedRole[] },
+  { href: '/dashboard/configs', label: 'Maxfiylik', icon: KeyRound, roles: ['ceo'] as NormalizedRole[] },
+  { href: '/dashboard/comments', label: 'Izohlar', icon: MessageSquare, roles: ['ceo', 'administrator', 'moderator'] as NormalizedRole[] },
+  { href: '/dashboard/ads', label: 'Reklama', icon: Megaphone, roles: ['ceo', 'administrator', 'ads_manager'] as NormalizedRole[] },
 ]
 
 const bottomItems = [
-  { href: '/dashboard/settings', label: 'Sozlamalar', icon: Settings },
+  { href: '/dashboard/settings', label: 'Sozlamalar', icon: Settings, roles: ['ceo', 'administrator', 'moderator', 'ads_manager'] as NormalizedRole[] },
 ]
 
 export default function AdminSidebar() {
   const pathname = usePathname()
+  const { data: session } = useSession()
   const { resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
+  const role = normalizeRole(session?.user?.role)
+  const visibleNavItems = useMemo(
+    () => navItems.filter((item) => item.roles.includes(role)),
+    [role]
+  )
+  const visibleBottomItems = useMemo(
+    () => bottomItems.filter((item) => item.roles.includes(role)),
+    [role]
+  )
 
   const logoSrc =
     mounted && resolvedTheme === 'light'
@@ -83,7 +102,7 @@ export default function AdminSidebar() {
           <SidebarGroupLabel>Asosiy</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navItems.map((item) => (
+              {visibleNavItems.map((item) => (
                 <SidebarMenuItem key={item.href}>
                   <SidebarMenuButton asChild isActive={isItemActive(item.href)}>
                     <Link href={item.href}>
@@ -101,7 +120,7 @@ export default function AdminSidebar() {
           <SidebarGroupLabel>Tizim</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {bottomItems.map((item) => (
+              {visibleBottomItems.map((item) => (
                 <SidebarMenuItem key={item.href}>
                   <SidebarMenuButton asChild isActive={isItemActive(item.href)}>
                     <Link href={item.href}>
@@ -116,8 +135,19 @@ export default function AdminSidebar() {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="border-t border-border min-w-0 overflow-hidden shrink-0">
-        <div className="px-2 py-2 text-xs text-muted-foreground truncate group-data-[state=collapsed]:hidden">
-          Admin panel v1.0
+        <div className="px-2 py-2 space-y-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full gap-2 justify-start group-data-[state=collapsed]:justify-center"
+            onClick={() => void signOut({ callbackUrl: '/auth/login' })}
+          >
+            <LogOut className="size-4" />
+            <span className="group-data-[state=collapsed]:hidden">Logout</span>
+          </Button>
+          <div className="text-xs text-muted-foreground truncate group-data-[state=collapsed]:hidden">
+            Admin panel v1.0
+          </div>
         </div>
       </SidebarFooter>
     </Sidebar>

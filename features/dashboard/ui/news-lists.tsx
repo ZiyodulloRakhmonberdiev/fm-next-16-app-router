@@ -104,13 +104,24 @@ export function DashboardNewsLists({
       ? "Tasdiqlanganda bu yangilik Top yangiliklar ro'yxatidan chiqariladi."
       : "Tasdiqlanganda bu yangilik Muallif tanlovi ro'yxatidan chiqariladi."
 
-  function NewsTableRow({ item, index, page: currentPage, showAuthor, showViews, listType }: {
-    item: NewsItem; index: number; page: number; showAuthor?: boolean; showViews?: boolean; listType?: ListType
+  function NewsTableRow({ item, index, page: currentPage, showAuthor, showViews, showRanking, listType }: {
+    item: NewsItem
+    index: number
+    page: number
+    showAuthor?: boolean
+    showViews?: boolean
+    showRanking?: boolean
+    listType?: ListType
   }) {
+    const rank = (currentPage - 1) * PER_PAGE + index + 1
     return (
       <TableRow className="hover:bg-muted/40">
         <TableCell className="text-xs text-muted-foreground">
-          #{(currentPage - 1) * PER_PAGE + index + 1}
+          {showRanking ? (
+            <span className="font-medium text-foreground">TOP-{rank}</span>
+          ) : (
+            <span>#{rank}</span>
+          )}
         </TableCell>
         <TableCell>
           <Link href={`/dashboard/news/${item.slug}/edit`} className="block">
@@ -270,7 +281,7 @@ export function DashboardNewsLists({
                     </TableHeader>
                     <TableBody>
                       {mostReadSlice.map((item, index) => (
-                        <NewsTableRow key={item.slug} item={item} index={index} page={mostReadPage} showViews />
+                        <NewsTableRow key={item.slug} item={item} index={index} page={mostReadPage} showViews showRanking />
                       ))}
                     </TableBody>
                   </Table>

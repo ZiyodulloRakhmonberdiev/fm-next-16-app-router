@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto"
 import { mkdir, writeFile } from "node:fs/promises"
 import path from "node:path"
 import { NextRequest } from "next/server"
+import { requireAdminSession } from "@/shared/common/lib/require-admin-session"
 
 const IMAGE_EXTENSIONS = new Set([".jpg", ".jpeg", ".png", ".webp", ".gif", ".svg"])
 const VIDEO_EXTENSIONS = new Set([".mp4", ".webm", ".ogg", ".mov", ".m4v"])
@@ -15,6 +16,9 @@ function sanitizeBaseName(name: string): string {
 }
 
 export async function POST(req: NextRequest) {
+  const unauthorized = await requireAdminSession(['ceo', 'administrator', 'moderator', 'ads_manager'])
+  if (unauthorized) return unauthorized
+
   try {
     const formData = await req.formData()
     const file = formData.get("file")

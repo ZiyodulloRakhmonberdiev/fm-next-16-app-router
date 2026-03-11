@@ -3,12 +3,14 @@
 import { useQuery } from "@tanstack/react-query"
 import type { AppLocale } from "@/shared/common/lib/locale-api"
 import type { LocaleMap } from "@/shared/common/lib/locale-types"
+import { usePublicSiteSettingsQuery } from "@/shared/common/lib/public-site-settings-query"
 
 export type PublicCategory = {
   _id?: string
   slug: string
   href?: string
   name: LocaleMap
+  priority?: number
 }
 
 async function fetchPublicCategories(): Promise<PublicCategory[]> {
@@ -18,7 +20,8 @@ async function fetchPublicCategories(): Promise<PublicCategory[]> {
   }
 
   const data = (await res.json()) as PublicCategory[]
-  return Array.isArray(data) ? data : []
+  if (!Array.isArray(data)) return []
+  return [...data].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))
 }
 
 export function getCategoryNameFromApi(
@@ -31,9 +34,16 @@ export function getCategoryNameFromApi(
 }
 
 export function usePublicCategoriesQuery() {
+  const { data: settings } = usePublicSiteSettingsQuery()
+  const enabled =
+    (settings?.clientDelivery.mode ?? "normal") !== "server-off" &&
+    (settings?.clientDelivery.models.categories ?? true)
+
   return useQuery({
     queryKey: ["public-categories"],
     queryFn: fetchPublicCategories,
     staleTime: 60_000,
+    enabled,
+    placeholderData: [],
   })
 }

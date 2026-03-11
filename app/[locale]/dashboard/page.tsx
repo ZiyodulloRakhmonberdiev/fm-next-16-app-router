@@ -29,21 +29,26 @@ export default async function DashboardPage() {
   const ADMIN_FULL_NAME = 'Admin Foydalanuvchi'
 
   const allNews = getNewsListForLocale(newsJson.data, locale)
-  const topNews = getNewsListForLocale(
+  const latestNews = [...allNews].sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
+  const topNewsRaw = getNewsListForLocale(
     newsJson.data.filter((r) => r.isTop),
     locale
   ).sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
-  const authorsChoiceNews = getNewsListForLocale(
+  const authorsChoiceRaw = getNewsListForLocale(
     newsJson.data.filter((r) => r.authorsChoice),
     locale
   ).sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
+  const topNews = topNewsRaw.length ? topNewsRaw : latestNews.slice(0, 20)
+  const authorsChoiceNews = authorsChoiceRaw.length ? authorsChoiceRaw : latestNews.slice(0, 20)
   const mostReadNews = [...allNews].sort((a, b) => b.views - a.views)
-  const totalViews = allNews.reduce((acc, item) => acc + (item.views ?? 0), 0)
+  const totalCount = newsJson.data.length
+  const publishedCount = newsJson.data.filter((item) => (item.status ?? 'published') === 'published').length
+  const totalViews = newsJson.data.reduce((acc, item) => acc + (item.views ?? 0), 0)
 
   const stats = [
     {
       label: 'Yangiliklar',
-      value: allNews.length,
+      value: `${publishedCount}/${totalCount}`,
       icon: Newspaper,
       href: '/dashboard/news',
     },
@@ -95,7 +100,7 @@ export default async function DashboardPage() {
                 </CardHeader>
                 <CardContent className="flex items-end justify-between gap-2">
                   <p className="text-2xl sm:text-3xl font-semibold tracking-tight">
-                    {s.value.toLocaleString()}
+                    {typeof s.value === 'number' ? s.value.toLocaleString() : s.value}
                   </p>
                 </CardContent>
               </Card>

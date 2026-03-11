@@ -40,6 +40,7 @@ import {
 } from '@/shared/common/components/ui/table'
 import { PaginationControl } from '@/shared/common/components/ui/pagination-control'
 import { formatDateTimeLocale } from '@/shared/common/lib/formatter'
+import { cn } from '@/shared/common/lib/utils'
 import type { AppLocale } from '@/shared/common/lib/locale-api'
 import { LOCALES } from '@/shared/common/lib/locale-constants'
 import type { NewsItem, NewsStatus, RawNewsItem } from '@/features/news/model'
@@ -79,13 +80,13 @@ const TYPE_OPTIONS_FULL: { value: '' | 'video' | 'image'; label: string }[] = [
 
 const COLUMN_KEYS = [
   'rasm', 'sarlavha', 'kategoriya', 'status', 'tur', 'top',
-  'publishedAt', 'views', 'tarjimalar', 'amallar',
+  'publishedAt', 'views', 'telegram', 'tarjimalar', 'amallar',
 ] as const
 
 const COLUMN_LABELS: Record<(typeof COLUMN_KEYS)[number], string> = {
   rasm: 'Rasm', sarlavha: 'Sarlavha', kategoriya: 'Kategoriya',
   status: 'Status', tur: 'Tur', top: 'Top', publishedAt: 'publishedAt',
-  views: "Ko'rishlar", tarjimalar: 'Tarjimalar', amallar: 'Amallar',
+  views: "Ko'rishlar", telegram: 'Telegram', tarjimalar: 'Tarjimalar', amallar: 'Amallar',
 }
 
 export type TranslationsForSlug = {
@@ -175,6 +176,11 @@ export function DashboardNewsListPage({
           isBreaking: raw.isBreaking ?? false,
           pushedToTelegram: raw.pushedToTelegram,
           pushedToTelegramAt: raw.pushedToTelegramAt,
+          telegramMessageId: raw.telegramMessageId,
+          telegramMessageLink: raw.telegramMessageLink,
+          telegramPushStatus: raw.telegramPushStatus,
+          telegramPushReason: raw.telegramPushReason,
+          telegramLastAttemptAt: raw.telegramLastAttemptAt,
           videoSource: raw.videoSource,
           videoUrl: raw.videoUrl,
         }))
@@ -414,6 +420,7 @@ export function DashboardNewsListPage({
                       {columnVisibility.top !== false && <TableHead className="text-center">{COLUMN_LABELS.top}</TableHead>}
                       {columnVisibility.publishedAt !== false && <TableHead>{COLUMN_LABELS.publishedAt}</TableHead>}
                       {columnVisibility.views !== false && <TableHead className="text-right">{COLUMN_LABELS.views}</TableHead>}
+                      {columnVisibility.telegram !== false && <TableHead>{COLUMN_LABELS.telegram}</TableHead>}
                       {columnVisibility.tarjimalar !== false && <TableHead className="text-center w-20">{COLUMN_LABELS.tarjimalar}</TableHead>}
                       {columnVisibility.amallar !== false && <TableHead className="w-[140px] text-right">{COLUMN_LABELS.amallar}</TableHead>}
                     </TableRow>
@@ -466,6 +473,31 @@ export function DashboardNewsListPage({
                               <Eye className="size-3.5 text-muted-foreground" />
                               {item.views}
                             </span>
+                          </TableCell>
+                        )}
+                        {columnVisibility.telegram !== false && (
+                          <TableCell className="text-xs">
+                            {item.telegramPushStatus ? (
+                              <div className="space-y-1">
+                                <span
+                                  className={cn(
+                                    'inline-flex rounded-md px-2 py-0.5 text-xs font-medium',
+                                    item.telegramPushStatus === 'sent'
+                                      ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                                      : 'bg-destructive/10 text-destructive'
+                                  )}
+                                >
+                                  {item.telegramPushStatus}
+                                </span>
+                                {item.telegramPushReason ? (
+                                  <p className="max-w-[180px] truncate text-muted-foreground" title={item.telegramPushReason}>
+                                    {item.telegramPushReason}
+                                  </p>
+                                ) : null}
+                              </div>
+                            ) : (
+                              <span className="text-muted-foreground">—</span>
+                            )}
                           </TableCell>
                         )}
                         {columnVisibility.tarjimalar !== false && (

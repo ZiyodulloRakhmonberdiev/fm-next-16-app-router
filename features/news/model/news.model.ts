@@ -27,6 +27,11 @@ export interface INews {
   isBreaking?: boolean
   pushedToTelegram?: boolean
   pushedToTelegramAt?: Date
+  telegramMessageId?: number
+  telegramMessageLink?: string
+  telegramPushStatus?: 'sent' | 'failed'
+  telegramPushReason?: string
+  telegramLastAttemptAt?: Date
   videoSource?: 'youtube' | 'local'
   videoUrl?: string
   createdAt: Date
@@ -75,8 +80,14 @@ const NewsSchema = new Schema<INews>(
     isLatest: { type: Boolean, default: false },
     isPopular: { type: Boolean, default: false },
     isTop: { type: Boolean, default: false },
+    isBreaking: { type: Boolean, default: false },
     pushedToTelegram: { type: Boolean, default: false },
     pushedToTelegramAt: Date,
+    telegramMessageId: Number,
+    telegramMessageLink: String,
+    telegramPushStatus: { type: String, enum: ['sent', 'failed'] },
+    telegramPushReason: String,
+    telegramLastAttemptAt: Date,
     videoSource: { type: String, enum: ['youtube', 'local'] },
     videoUrl: String,
   },

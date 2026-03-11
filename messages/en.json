@@ -83,10 +83,43 @@
     "back": "Back",
     "min_read": "min read",
     "views": "views",
-    "images": "Images"
+    "images": "Images",
+    "comments": "Comments",
+    "reactions": "Reactions"
   },
   "stayConnected": {
     "title": "Stay Connected",
     "subtitle": "Follow us on social media for the latest news and updates."
+  },
+  "ads": {
+    "title": "Ad Management",
+    "description": "Manage media, logo, site information and links for ad blocks of the same height.",
+    "placement_header_top_full": "Top",
+    "placement_sidebar_widget": "Sidebar",
+    "placement_home_bottom_full": "Home Bottom",
+    "placement_article_bottom_full": "Article Bottom",
+    "ad_type": "Ad Type",
+    "media": "Media",
+    "media_placeholder_url": "Enter URL or select from local",
+    "media_select_local": "Select from local",
+    "ad_url": "Ad URL",
+    "placement": "Placement",
+    "priority": "Priority",
+    "duration": "Duration (seconds)",
+    "title_label": "Title",
+    "description_label": "Description",
+    "logo": "Logo",
+    "site_name": "Site Name",
+    "links": "Links",
+    "link_add": "Add link",
+    "advertiser_about": "About advertiser",
+    "ad_about": "About ad",
+    "advertise_with_us": "Advertise with us",
+    "active": "Active",
+    "create": "Create",
+    "update": "Update",
+    "cancel": "Cancel",
+    "list_title": "Ads list",
+    "optional": "optional"
   }
 }

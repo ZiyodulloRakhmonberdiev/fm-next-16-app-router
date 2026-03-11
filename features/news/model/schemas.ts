@@ -78,6 +78,11 @@ export const createNewsSchema = z.object({
   isBreaking: z.boolean().default(false),
   pushedToTelegram: z.boolean().default(false),
   pushedToTelegramAt: z.coerce.date().optional(),
+  telegramMessageId: z.number().int().optional(),
+  telegramMessageLink: z.string().url().optional(),
+  telegramPushStatus: z.enum(['sent', 'failed']).optional(),
+  telegramPushReason: z.string().optional(),
+  telegramLastAttemptAt: z.coerce.date().optional(),
   videoSource: z.enum(['youtube', 'local']).optional(),
   videoUrl: z.string().url('Video URL noto\'g\'ri').optional(),
 })

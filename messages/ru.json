@@ -83,10 +83,43 @@
   "back": "Назад",
   "min_read": "мин",
   "views": "просмотров",
-  "images": "Изображения"
+  "images": "Изображения",
+  "comments": "Комментарии",
+  "reactions": "Реакции"
   },
   "stayConnected": {
     "title": "Оставайтесь на связи",
     "subtitle": "Подписывайтесь на нас в соцсетях, чтобы быть в курсе новостей и обновлений."
+  },
+  "ads": {
+    "title": "Управление рекламой",
+    "description": "Управляйте медиа, логотипом, информацией о сайте и ссылками для рекламных блоков одинаковой высоты.",
+    "placement_header_top_full": "Верх",
+    "placement_sidebar_widget": "Боковая панель",
+    "placement_home_bottom_full": "Низ главной",
+    "placement_article_bottom_full": "Низ статьи",
+    "ad_type": "Тип рекламы",
+    "media": "Медиа",
+    "media_placeholder_url": "Введите URL или выберите локально",
+    "media_select_local": "Выбрать локально",
+    "ad_url": "URL рекламы",
+    "placement": "Размещение",
+    "priority": "Приоритет",
+    "duration": "Длительность (сек)",
+    "title_label": "Заголовок",
+    "description_label": "Описание",
+    "logo": "Логотип",
+    "site_name": "Название сайта",
+    "links": "Ссылки",
+    "link_add": "Добавить ссылку",
+    "advertiser_about": "О рекламодателе",
+    "ad_about": "О рекламе",
+    "advertise_with_us": "Разместить рекламу",
+    "active": "Активно",
+    "create": "Создать",
+    "update": "Обновить",
+    "cancel": "Отмена",
+    "list_title": "Список рекламы",
+    "optional": "необязательно"
   }
 }

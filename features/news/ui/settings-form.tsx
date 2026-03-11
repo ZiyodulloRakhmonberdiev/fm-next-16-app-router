@@ -10,6 +10,7 @@ import {
 import { Label } from '@/shared/common/components/ui/label'
 import { Switch } from '@/shared/common/components/ui/switch'
 import { Button } from '@/shared/common/components/ui/button'
+import { Badge } from '@/shared/common/components/ui/badge'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/shared/common/components/ui/tooltip'
 import { Save, Send, Trash2, RotateCcw, Archive, Ban, ExternalLink, Loader2 } from 'lucide-react'
 import { Link } from '@/i18n/navigation'
@@ -29,7 +30,7 @@ type SettingsFormProps = {
   isPopular: boolean
   isTop: boolean
   isBreaking: boolean
-  pushedToTelegram: boolean
+  pushedToTelegram?: boolean
   canPublish: boolean
   publishDisabledReason?: string
   onBack: () => void
@@ -38,7 +39,8 @@ type SettingsFormProps = {
   onChangeIsPopular: (value: boolean) => void
   onChangeIsTop: (value: boolean) => void
   onChangeIsBreaking: (value: boolean) => void
-  onChangePushedToTelegram: (value: boolean) => void
+  onSendToTelegram: () => void
+  onRemoveFromTelegram: () => void
   onSavePending: () => void
   onPublish: () => void
   isSaving?: boolean
@@ -47,6 +49,13 @@ type SettingsFormProps = {
   onStatusChange?: (newStatus: NewsStatus) => void
   /** Edit rejimida: preview uchun yangilik slug (faqat status published bo‘lsa faol) */
   previewSlug?: string
+  telegramMessageId?: number
+  telegramMessageLink?: string
+  telegramPushStatus?: 'sent' | 'failed'
+  telegramPushReason?: string
+  telegramLastAttemptAt?: string
+  pushedToTelegramAt?: string
+  isTelegramProcessing?: boolean
 }
 
 export function SettingsForm({
@@ -55,7 +64,7 @@ export function SettingsForm({
   isPopular,
   isTop,
   isBreaking,
-  pushedToTelegram,
+  pushedToTelegram = false,
   canPublish,
   publishDisabledReason,
   onBack,
@@ -64,7 +73,8 @@ export function SettingsForm({
   onChangeIsPopular,
   onChangeIsTop,
   onChangeIsBreaking,
-  onChangePushedToTelegram,
+  onSendToTelegram,
+  onRemoveFromTelegram,
   onSavePending,
   onPublish,
   isSaving = false,
@@ -72,6 +82,13 @@ export function SettingsForm({
   currentStatus = 'published',
   onStatusChange,
   previewSlug,
+  telegramMessageId,
+  telegramMessageLink,
+  telegramPushStatus,
+  telegramPushReason,
+  telegramLastAttemptAt,
+  pushedToTelegramAt,
+  isTelegramProcessing = false,
 }: SettingsFormProps) {
   const statusLabel = STATUS_LABELS[currentStatus]
   const canRestore = ['pending', 'cancelled', 'deleted', 'archived'].includes(currentStatus)
@@ -113,16 +130,83 @@ export function SettingsForm({
           <Switch id="isTop" checked={isTop} onCheckedChange={onChangeIsTop} />
         </div>
         <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border p-4">
-          <Label htmlFor="pushedToTelegram" className="cursor-pointer">
-            Telegramga yuborish
-          </Label>
-          <Switch id="pushedToTelegram" checked={pushedToTelegram} onCheckedChange={onChangePushedToTelegram} />
-        </div>
-        <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border p-4">
           <Label htmlFor="isBreaking" className="cursor-pointer">
             Shoshilinch yangilik (Breaking)
           </Label>
           <Switch id="isBreaking" checked={isBreaking} onCheckedChange={onChangeIsBreaking} />
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border p-4">
+          <Label className="cursor-pointer">Telegram</Label>
+          {telegramMessageId ? (
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              onClick={onRemoveFromTelegram}
+              disabled={isTelegramProcessing}
+              className="gap-2"
+            >
+              {isTelegramProcessing ? <Loader2 className="size-4 animate-spin" /> : null}
+              Telegramdan O&apos;chirish
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={onSendToTelegram}
+              disabled={isTelegramProcessing}
+              className="gap-2"
+            >
+              {isTelegramProcessing ? <Loader2 className="size-4 animate-spin" /> : null}
+              Telegramga yuborish
+            </Button>
+          )}
+        </div>
+        <div className="rounded-lg border p-4 space-y-2">
+          <p className="text-sm font-medium">Telegram monitoring</p>
+          <p className="text-xs text-muted-foreground">
+            pushedToTelegram: <span className="font-medium">{String(pushedToTelegram)}</span>
+          </p>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span>Yuborish holati:</span>
+            {telegramPushStatus ? (
+              <Badge variant={telegramPushStatus === 'sent' ? 'default' : 'destructive'}>
+                {telegramPushStatus}
+              </Badge>
+            ) : (
+              <span>{pushedToTelegram ? "kutilyapti (published bo'lganda yuboriladi)" : "hali yuborilmagan"}</span>
+            )}
+          </div>
+          {telegramPushReason ? (
+            <p className="text-xs text-destructive">Sabab: {telegramPushReason}</p>
+          ) : null}
+          {telegramLastAttemptAt ? (
+            <p className="text-xs text-muted-foreground">Oxirgi urinish: {new Date(telegramLastAttemptAt).toLocaleString()}</p>
+          ) : null}
+          {pushedToTelegramAt ? (
+            <p className="text-xs text-muted-foreground">Yuborilgan vaqt: {new Date(pushedToTelegramAt).toLocaleString()}</p>
+          ) : null}
+          {telegramMessageId ? (
+            <p className="text-xs text-muted-foreground">Message ID: {telegramMessageId}</p>
+          ) : null}
+          {telegramMessageLink ? (
+            <a
+              href={telegramMessageLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex text-xs text-primary hover:underline"
+            >
+              Telegramdagi xabar havolasi
+            </a>
+          ) : (
+            <p className="text-xs text-muted-foreground">Telegram havolasi push muvaffaqiyatli bo'lgandan keyin chiqadi.</p>
+          )}
+        </div>
+        <div className="rounded-lg border border-dashed p-4">
+          <p className="text-xs text-muted-foreground">
+            Bot API limiti sabab Telegram post view statistikasini avtomatik sync qilib news views ga qo&apos;shib bo&apos;lmaydi.
+          </p>
         </div>
         {mode === 'edit' && onStatusChange && (
           <div className="space-y-3 rounded-lg border p-4">

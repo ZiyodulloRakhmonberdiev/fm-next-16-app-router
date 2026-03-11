@@ -12,11 +12,14 @@ import { Label } from '@/shared/common/components/ui/label'
 import { Input } from '@/shared/common/components/ui/input'
 import { Button } from '@/shared/common/components/ui/button'
 import { Save } from 'lucide-react'
+import { Switch } from '@/shared/common/components/ui/switch'
 
 type HeadlineSectionProps = {
   locales: AppLocale[]
   localeLabels: Record<AppLocale, string>
+  enabled: boolean
   values: Record<AppLocale, string>
+  onToggleEnabled: (enabled: boolean) => void
   onChange: (locale: AppLocale, value: string) => void
   onSave: () => void
   saving: boolean
@@ -25,7 +28,9 @@ type HeadlineSectionProps = {
 export function HeadlineSection({
   locales,
   localeLabels,
+  enabled,
   values,
+  onToggleEnabled,
   onChange,
   onSave,
   saving,
@@ -35,10 +40,19 @@ export function HeadlineSection({
       <CardHeader>
         <CardTitle className="text-base">Sarlavha</CardTitle>
         <CardDescription className="hidden md:block">
-          Barcha tillarda banner sarlavha
+          Yoqilsa banner ko'rsatiladi, o'chirilsa client saytda yashiriladi.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        <div className="flex items-center justify-between rounded-md border p-3">
+          <div className="space-y-0.5">
+            <Label className="text-sm">Headline holati</Label>
+            <p className="text-xs text-muted-foreground">
+              {enabled ? 'Yoqilgan' : "O'chirilgan"}
+            </p>
+          </div>
+          <Switch checked={enabled} onCheckedChange={onToggleEnabled} />
+        </div>
         {locales.map((locale) => (
           <div key={locale} className="space-y-2">
             <Label>{localeLabels[locale]}</Label>
@@ -46,6 +60,7 @@ export function HeadlineSection({
               value={values[locale] ?? ''}
               onChange={(e) => onChange(locale, e.target.value)}
               placeholder={`Headline (${locale})`}
+              disabled={!enabled}
             />
           </div>
         ))}

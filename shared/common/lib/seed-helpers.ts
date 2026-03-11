@@ -11,6 +11,7 @@ export function getTagName(slug: string, locale: AppLocale): string {
   return tag?.name[locale] ?? slug
 }
 
-export function getTagNames(slugs: string[], locale: AppLocale): string[] {
+export function getTagNames(slugs: string[] | undefined | null, locale: AppLocale): string[] {
+  if (!slugs || !Array.isArray(slugs)) return []
   return slugs.map((slug) => getTagName(slug, locale))
 }

@@ -7,6 +7,7 @@ export interface ICategory {
   slug: string
   href: string
   name: LocaleMap
+  priority: number
   createdAt: Date
   updatedAt: Date
 }
@@ -22,6 +23,7 @@ const CategorySchema = new Schema<ICategory>(
       ru: { type: String, required: true },
       en: { type: String, required: true },
     },
+    priority: { type: Number, default: 0 },
   },
   { timestamps: true }
 )

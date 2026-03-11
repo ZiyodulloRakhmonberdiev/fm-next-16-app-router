@@ -16,9 +16,38 @@ export type SiteConfigSettings = {
   address: LocaleMap
 }
 
+export type HeadlineSettings = {
+  enabled: boolean
+  message: LocaleMap
+}
+
+export type TelegramCredentials = {
+  enabled: boolean
+  botToken: string
+  chatId: string
+  threadId?: string
+}
+
+export type ClientDeliveryMode = 'normal' | 'nothing' | 'server-off'
+
+export type ClientModelSwitches = {
+  news: boolean
+  categories: boolean
+  tags: boolean
+}
+
+export type ClientDeliveryControl = {
+  mode: ClientDeliveryMode
+  title: string
+  description: string
+  models: ClientModelSwitches
+}
+
 export type SiteSettingsPayload = {
-  headline: LocaleMap
+  headline: HeadlineSettings
   description: LocaleMap
   socialMedia: SocialMediaItem[]
   siteConfig: SiteConfigSettings
+  telegram: TelegramCredentials
+  clientDelivery: ClientDeliveryControl
 }

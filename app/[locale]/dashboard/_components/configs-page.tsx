@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
-import { Card, CardDescription, CardHeader, CardTitle } from '@/shared/common/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/common/components/ui/card'
 import type { AppLocale } from '@/shared/common/lib/locale-api'
 import { LOCALES, LOCALE_LABELS } from '@/shared/common/lib/locale-constants'
 import type { SiteSettingsPayload } from '@/shared/common/lib/site-settings-types'
@@ -12,6 +12,11 @@ import { HeadlineSection } from '@/features/dashboard/configs/ui/headline-sectio
 import { DescriptionSection } from '@/features/dashboard/configs/ui/description-section'
 import { SocialMediaSection, type UiSocialItem } from '@/features/dashboard/configs/ui/social-media-section'
 import { SiteConfigSection } from '@/features/dashboard/configs/ui/site-config-section'
+import { Label } from '@/shared/common/components/ui/label'
+import { Input } from '@/shared/common/components/ui/input'
+import { Button } from '@/shared/common/components/ui/button'
+import { Switch } from '@/shared/common/components/ui/switch'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/common/components/ui/select'
 
 export function ConfigsPage() {
   const [loading, setLoading] = useState(true)
@@ -19,6 +24,8 @@ export function ConfigsPage() {
   const [savingDescription, setSavingDescription] = useState(false)
   const [savingSocial, setSavingSocial] = useState(false)
   const [savingConfig, setSavingConfig] = useState(false)
+  const [savingTelegram, setSavingTelegram] = useState(false)
+  const [savingDelivery, setSavingDelivery] = useState(false)
   const [data, setData] = useState<SiteSettingsPayload | null>(null)
 
   useEffect(() => {
@@ -33,7 +40,13 @@ export function ConfigsPage() {
 
   const updateHeadline = (locale: AppLocale, value: string) => {
     if (!data) return
-    setData({ ...data, headline: { ...data.headline, [locale]: value } })
+    setData({
+      ...data,
+      headline: {
+        ...data.headline,
+        message: { ...data.headline.message, [locale]: value },
+      },
+    })
   }
 
   const updateDescription = (locale: AppLocale, value: string) => {
@@ -112,6 +125,13 @@ export function ConfigsPage() {
     if (!data) return
     setSavingHeadline(true)
     try {
+      if (data.headline.enabled) {
+        const hasAnyMessage = LOCALES.some((locale) => (data.headline.message[locale] ?? '').trim().length > 0)
+        if (!hasAnyMessage) {
+          toast.error("Headline yoqilgan bo'lsa, kamida bitta xabar kiriting")
+          return
+        }
+      }
       const current = (await getCurrentFromServer()) ?? data
       const ok = await postPayload({ ...current, headline: data.headline })
       toast[ok ? 'success' : 'error'](ok ? 'Sarlavha saqlandi' : 'Saqlashda xato')
@@ -164,6 +184,42 @@ export function ConfigsPage() {
     }
   }
 
+  const handleSaveTelegram = async () => {
+    if (!data) return
+    setSavingTelegram(true)
+    try {
+      if (data.telegram.enabled && (!data.telegram.botToken.trim() || !data.telegram.chatId.trim())) {
+        toast.error("Telegram yoqilgan bo'lsa bot token va chat id majburiy")
+        return
+      }
+      const current = (await getCurrentFromServer()) ?? data
+      const ok = await postPayload({ ...current, telegram: data.telegram })
+      toast[ok ? 'success' : 'error'](ok ? 'Telegram credentiallar saqlandi' : 'Saqlashda xato')
+    } catch {
+      toast.error('Saqlashda xato')
+    } finally {
+      setSavingTelegram(false)
+    }
+  }
+
+  const handleSaveDelivery = async () => {
+    if (!data) return
+    setSavingDelivery(true)
+    try {
+      if (data.clientDelivery.mode !== 'normal' && (!data.clientDelivery.title.trim() || !data.clientDelivery.description.trim())) {
+        toast.error("Bu rejimda title va description majburiy")
+        return
+      }
+      const current = (await getCurrentFromServer()) ?? data
+      const ok = await postPayload({ ...current, clientDelivery: data.clientDelivery })
+      toast[ok ? 'success' : 'error'](ok ? "Client boshqaruvi saqlandi" : 'Saqlashda xato')
+    } catch {
+      toast.error('Saqlashda xato')
+    } finally {
+      setSavingDelivery(false)
+    }
+  }
+
   if (loading || !data) {
     return (
       <div className="flex items-center justify-center py-12 text-muted-foreground">
@@ -191,7 +247,12 @@ export function ConfigsPage() {
       <HeadlineSection
         locales={LOCALES}
         localeLabels={LOCALE_LABELS}
-        values={data.headline}
+        enabled={data.headline.enabled}
+        values={data.headline.message}
+        onToggleEnabled={(enabled) => {
+          if (!data) return
+          setData({ ...data, headline: { ...data.headline, enabled } })
+        }}
         onChange={updateHeadline}
         onSave={handleSaveHeadline}
         saving={savingHeadline}
@@ -221,6 +282,159 @@ export function ConfigsPage() {
         onSave={handleSaveConfig}
         saving={savingConfig}
       />
+
+      <Card className="border-destructive/40 bg-destructive/5">
+        <CardHeader>
+          <CardTitle className="text-base text-destructive">Danger zone: Telegram credentiallar</CardTitle>
+          <CardDescription>News create/publish bo'lganda Telegramga yuborish uchun sozlamalar.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between rounded-md border p-3">
+            <div>
+              <Label>Telegram yuborishni yoqish</Label>
+              <p className="text-xs text-muted-foreground">Faqat yoqilganda ishlaydi.</p>
+            </div>
+            <Switch
+              checked={data.telegram.enabled}
+              onCheckedChange={(checked) =>
+                setData((prev) => (prev ? { ...prev, telegram: { ...prev.telegram, enabled: checked } } : prev))
+              }
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Bot token</Label>
+            <Input
+              value={data.telegram.botToken}
+              onChange={(e) =>
+                setData((prev) =>
+                  prev ? { ...prev, telegram: { ...prev.telegram, botToken: e.target.value } } : prev
+                )
+              }
+              placeholder="123456:AA..."
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Chat ID</Label>
+            <Input
+              value={data.telegram.chatId}
+              onChange={(e) =>
+                setData((prev) =>
+                  prev ? { ...prev, telegram: { ...prev.telegram, chatId: e.target.value } } : prev
+                )
+              }
+              placeholder="-1001234567890"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Thread ID (ixtiyoriy)</Label>
+            <Input
+              value={data.telegram.threadId ?? ''}
+              onChange={(e) =>
+                setData((prev) =>
+                  prev ? { ...prev, telegram: { ...prev.telegram, threadId: e.target.value || undefined } } : prev
+                )
+              }
+              placeholder="42"
+            />
+          </div>
+          <div className="flex justify-end">
+            <Button type="button" onClick={handleSaveTelegram} disabled={savingTelegram}>
+              Saqlash
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="border-destructive/40 bg-destructive/5">
+        <CardHeader>
+          <CardTitle className="text-base text-destructive">Danger zone: Client uzatish boshqaruvi</CardTitle>
+          <CardDescription>Faqat client saytga ta'sir qiladi. Admin dashboard ishlashda davom etadi.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label>Rejim</Label>
+            <Select
+              value={data.clientDelivery.mode}
+              onValueChange={(value) =>
+                setData((prev) =>
+                  prev
+                    ? {
+                        ...prev,
+                        clientDelivery: {
+                          ...prev.clientDelivery,
+                          mode: value as SiteSettingsPayload['clientDelivery']['mode'],
+                        },
+                      }
+                    : prev
+                )
+              }
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="normal">normal</SelectItem>
+                <SelectItem value="nothing">nothing</SelectItem>
+                <SelectItem value="server-off">server-off</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>Title</Label>
+            <Input
+              value={data.clientDelivery.title}
+              onChange={(e) =>
+                setData((prev) =>
+                  prev ? { ...prev, clientDelivery: { ...prev.clientDelivery, title: e.target.value } } : prev
+                )
+              }
+              placeholder="Texnik ishlar"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Description</Label>
+            <Input
+              value={data.clientDelivery.description}
+              onChange={(e) =>
+                setData((prev) =>
+                  prev
+                    ? { ...prev, clientDelivery: { ...prev.clientDelivery, description: e.target.value } }
+                    : prev
+                )
+              }
+              placeholder="Qisqacha tushuntirish"
+            />
+          </div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            {(['news', 'categories', 'tags'] as const).map((key) => (
+              <div key={key} className="flex items-center justify-between rounded-md border p-3">
+                <Label className="capitalize">{key}</Label>
+                <Switch
+                  checked={data.clientDelivery.models[key]}
+                  onCheckedChange={(checked) =>
+                    setData((prev) =>
+                      prev
+                        ? {
+                            ...prev,
+                            clientDelivery: {
+                              ...prev.clientDelivery,
+                              models: { ...prev.clientDelivery.models, [key]: checked },
+                            },
+                          }
+                        : prev
+                    )
+                  }
+                />
+              </div>
+            ))}
+          </div>
+          <div className="flex justify-end">
+            <Button type="button" onClick={handleSaveDelivery} disabled={savingDelivery}>
+              Saqlash
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

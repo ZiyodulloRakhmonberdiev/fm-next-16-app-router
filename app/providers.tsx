@@ -6,6 +6,7 @@ import { useState } from "react";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { SessionProvider } from "next-auth/react";
 import { TooltipProvider } from "@/shared/common/components/ui/tooltip";
 import { SidebarProvider } from "@/shared/common/components/ui/sidebar";
 
@@ -33,12 +34,14 @@ export function Providers({ children }: PropsWithChildren<unknown>) {
         enableSystem
         disableTransitionOnChange
       >
-        <QueryClientProvider client={queryClient}>
-          <Toaster position="bottom-right" duration={6000} />
-          <TooltipProvider>
-            {children}
-          </TooltipProvider>
-        </QueryClientProvider>
+        <SessionProvider>
+          <QueryClientProvider client={queryClient}>
+            <Toaster position="bottom-right" duration={6000} />
+            <TooltipProvider>
+              {children}
+            </TooltipProvider>
+          </QueryClientProvider>
+        </SessionProvider>
       </ThemeProvider>
     </SidebarProvider>
   );

@@ -18,6 +18,7 @@ export const createCategorySchema = z.object({
     .min(1, 'Havola majburiy').max(128, 'Havola 128 ta belgidan oshmasligi kerak')
     .max(256, 'Havola 256 ta belgidan oshmasligi kerak'),
   name: localeMapSchema,
+  priority: z.number().int().default(0),
 })
 
 export type CreateCategoryInput = z.infer<typeof createCategorySchema>

@@ -175,7 +175,34 @@ export const seed = {
     } satisfies LocaleMap,
   } as const,
 
+  telegram: {
+    enabled: false,
+    botToken: "",
+    chatId: "",
+    threadId: "",
+  } as const,
+
+  clientDelivery: {
+    mode: "normal",
+    title: "Texnik ishlar",
+    description: "Hozir tizimda texnik ishlar olib borilmoqda. Iltimos, birozdan keyin qayta urinib ko'ring.",
+    models: {
+      news: true,
+      categories: true,
+      tags: true,
+    },
+  } as const,
+
   users: [
+    {
+      id: "ceo-1",
+      full_name: "CEO Foydalanuvchi",
+      image: null as string | null,
+      role: "ceo",
+      position: "Bosh direktor",
+      login: "ceo",
+      password: "ceo123",
+    },
     {
       id: "admin-1",
       full_name: "Admin Foydalanuvchi",

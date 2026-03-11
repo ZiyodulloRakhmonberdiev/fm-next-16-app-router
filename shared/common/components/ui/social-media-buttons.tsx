@@ -1,11 +1,10 @@
 "use client";
 
 import { Link } from "@/i18n/navigation";
-import { useLocale } from "next-intl";
 import type { ReactNode } from "react";
 import { seed } from "@/scripts/seed";
 import { cn } from "@/shared/common/lib/utils";
-import type { AppLocale } from "@/shared/common/lib/locale-api";
+import { usePublicSiteSettingsQuery } from "@/shared/common/lib/public-site-settings-query";
 
 export type SocialPlatformName = "facebook" | "instagram" | "telegram" | "youtube";
 
@@ -45,6 +44,30 @@ export const SOCIAL_ICONS: Record<
       </svg>
     ),
   },
+  twitter: {
+    bgColor: "bg-[#1DA1F2] hover:opacity-90",
+    icon: (
+      <svg className="size-[1em] shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+        <path d="M18.244 2H21.5l-7.114 8.132L22.75 22h-6.554l-5.133-6.713L5.19 22H1.93l7.61-8.699L1.5 2h6.72l4.64 6.124L18.244 2zm-1.149 18h1.806L7.193 3.896H5.255L17.095 20z" />
+      </svg>
+    ),
+  },
+  threads: {
+    bgColor: "bg-black hover:opacity-90",
+    icon: (
+      <svg className="size-[1em] shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+        <path d="M14.93 11.07c-.2-.1-.41-.19-.64-.26-.09-1.52-.95-2.46-2.37-2.58-1.53-.13-2.58.66-3.03 2.27l1.66.46c.2-.72.56-1.03 1.21-.98.58.05.92.39 1.03 1.02-.52-.04-1.05-.03-1.58.04-1.77.24-2.88 1.31-2.82 2.75.06 1.4 1.22 2.42 2.86 2.53 1.55.1 2.73-.52 3.3-1.74.33-.71.42-1.48.39-2.26.12.05.23.11.34.17.66.37.98.86.96 1.49-.03.95-.82 1.87-2.15 2.32-1.91.64-4.22.22-5.7-1.07-1.45-1.25-2.18-3.18-1.95-5.14.23-1.99 1.42-3.7 3.19-4.59 1.79-.9 3.89-.86 5.65.1 1.28.7 2.2 1.89 2.58 3.35.18.68.24 1.39.18 2.1l1.73.13c.08-.94 0-1.88-.24-2.79-.52-1.99-1.8-3.65-3.58-4.62-2.26-1.23-4.95-1.29-7.28-.12C5.84 5.18 4.3 7.4 4 10c-.3 2.56.65 5.07 2.54 6.7 1.98 1.7 5.01 2.27 7.56 1.42 2.02-.68 3.27-2.18 3.32-3.95.03-1.31-.66-2.42-2.49-3.1z" />
+      </svg>
+    ),
+  },
+  reddit: {
+    bgColor: "bg-[#FF4500] hover:opacity-90",
+    icon: (
+      <svg className="size-[1em] shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+        <path d="M24 11.54c0-1.2-.98-2.18-2.18-2.18-.59 0-1.12.23-1.52.61-1.49-1.03-3.5-1.7-5.74-1.78l1.16-3.64 3.1.73a1.64 1.64 0 10.38-1.06l-3.86-.91a.55.55 0 00-.66.36l-1.38 4.32c-2.35.02-4.46.68-6.01 1.74a2.15 2.15 0 00-1.47-.58 2.18 2.18 0 00-2.18 2.18c0 .79.43 1.48 1.07 1.86-.04.25-.06.5-.06.76 0 3.09 3.57 5.6 7.96 5.6 4.4 0 7.97-2.51 7.97-5.6 0-.24-.02-.48-.06-.71A2.16 2.16 0 0024 11.54zM8.88 13.73a1.3 1.3 0 110-2.6 1.3 1.3 0 010 2.6zm6.85 3.07c-.9.9-2.61.97-3.73.97-1.12 0-2.83-.07-3.73-.97a.42.42 0 010-.6.42.42 0 01.6 0c.56.56 1.76.73 3.13.73 1.37 0 2.57-.17 3.13-.73a.42.42 0 01.6 0c.16.16.16.44 0 .6zm-.61-3.07a1.3 1.3 0 110-2.6 1.3 1.3 0 010 2.6z" />
+      </svg>
+    ),
+  },
 };
 
 export function getSocialStyle(name: string) {
@@ -66,21 +89,34 @@ type SocialMediaButtonsProps = {
   linkClassName?: string;
 };
 
+function resolveSocialLabel(name: unknown): string {
+  if (typeof name === "string") return name
+  if (name && typeof name === "object") {
+    const map = name as Record<string, unknown>
+    const firstString = ["uz", "uzb", "ru", "en"]
+      .map((k) => map[k])
+      .find((v) => typeof v === "string")
+    if (typeof firstString === "string") return firstString
+  }
+  return "Social"
+}
+
 export function SocialMediaButtons({
   variant = "button",
-  links = seed.socialMedia,
+  links,
   className,
   linkClassName,
 }: SocialMediaButtonsProps) {
-  const locale = useLocale() as AppLocale;
+  const { data: settings } = usePublicSiteSettingsQuery()
   const isIconOnly = variant === "icon-only";
+  const resolvedLinks = links?.length ? links : (settings?.socialMedia ?? seed.socialMedia)
 
   return (
     <div className={cn("flex flex-wrap items-center gap-2", className)}>
-      {links.map(({ slug, name, href }) => {
+      {resolvedLinks.map(({ slug, name, href }) => {
         const style = getSocialStyle(slug);
         const isExternal = href.startsWith("http");
-        const label = name;
+        const label = resolveSocialLabel(name);
         const baseLinkClass =
           "inline-flex items-center justify-center gap-2 text-white shadow-sm transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
         const variantClass = isIconOnly

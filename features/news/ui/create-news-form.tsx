@@ -230,11 +230,28 @@ export function CreateNewsForm({ categories, tags, authors, existingSlugs = [], 
   const [isTop, setIsTop] = useState(initialData?.isTop ?? false)
   const [isBreaking, setIsBreaking] = useState(initialData?.isBreaking ?? false)
   const [pushedToTelegram, setPushedToTelegram] = useState(initialData?.pushedToTelegram ?? false)
+  const [telegramMessageId, setTelegramMessageId] = useState<number | undefined>(initialData?.telegramMessageId)
+  const [telegramMessageLink, setTelegramMessageLink] = useState<string | undefined>(initialData?.telegramMessageLink)
+  const [telegramPushStatus, setTelegramPushStatus] = useState<'sent' | 'failed' | undefined>(initialData?.telegramPushStatus)
+  const [telegramPushReason, setTelegramPushReason] = useState<string | undefined>(initialData?.telegramPushReason)
+  const [telegramLastAttemptAt, setTelegramLastAttemptAt] = useState<string | undefined>(
+    initialData?.telegramLastAttemptAt ? new Date(initialData.telegramLastAttemptAt).toISOString() : undefined
+  )
+  const [pushedToTelegramAt, setPushedToTelegramAt] = useState<string | undefined>(
+    initialData?.pushedToTelegramAt ? new Date(initialData.pushedToTelegramAt).toISOString() : undefined
+  )
+  const [isTelegramProcessing, setIsTelegramProcessing] = useState(false)
   const [editStatus, setEditStatus] = useState<NewsStatus>(initialData?.status ?? 'pending')
   const saveStatus: NewsStatus = isEditMode ? editStatus : 'pending'
 
   const saveNews = useMutation({
-    mutationFn: async ({ status }: { status: NewsStatus }) => {
+    mutationFn: async ({
+      status,
+      pushedToTelegramOverride,
+    }: {
+      status: NewsStatus
+      pushedToTelegramOverride?: boolean
+    }) => {
       const slug = (slugs.uz || slugs.uzb || slugs.ru || slugs.en || '').trim().toLowerCase()
       if (!slug) throw new Error('Slug majburiy')
 
@@ -266,7 +283,7 @@ export function CreateNewsForm({ categories, tags, authors, existingSlugs = [], 
         images: [...imageUrls, ...imageFiles.map((f) => f.name)],
         author: author.trim(),
         minutes: resolvedMinutes,
-        views: 0,
+        ...(isEditMode ? {} : { views: 0 }),
         publishedAt:
           status === 'published' && !firstPublishedAt
             ? new Date().toISOString()
@@ -279,7 +296,7 @@ export function CreateNewsForm({ categories, tags, authors, existingSlugs = [], 
         isPopular,
         isTop,
         isBreaking,
-        pushedToTelegram,
+        pushedToTelegram: pushedToTelegramOverride ?? pushedToTelegram,
         videoSource: videoUrl.trim() ? 'youtube' : undefined,
         videoUrl: videoUrl.trim() || undefined,
       }
@@ -304,7 +321,16 @@ export function CreateNewsForm({ categories, tags, authors, existingSlugs = [], 
           'Saqlashda xatolik'
         throw new NewsFormApiError(message, getValidationDescription(data))
       }
-      return data
+      return data as {
+        _id?: string
+        publishedAt?: string | Date
+        telegramMessageId?: number
+        telegramMessageLink?: string
+        telegramPushStatus?: 'sent' | 'failed'
+        telegramPushReason?: string
+        telegramLastAttemptAt?: string | Date
+        pushedToTelegramAt?: string | Date
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminQueryKeys.news() })
@@ -405,15 +431,31 @@ export function CreateNewsForm({ categories, tags, authors, existingSlugs = [], 
     }
   }
 
-  const savePendingWithoutRedirect = async (): Promise<boolean> => {
+  const savePendingWithoutRedirect = async (
+    status: NewsStatus = saveStatus,
+    pushedToTelegramOverride?: boolean
+  ): Promise<boolean> => {
     try {
-      const saved = await saveNews.mutateAsync({ status: saveStatus }) as { _id?: string; publishedAt?: string | Date }
+      const saved = await saveNews.mutateAsync({
+        status,
+        pushedToTelegramOverride,
+      })
       if (!savedNewsId && saved?._id) {
         setSavedNewsId(saved._id)
       }
       if (!firstPublishedAt && saved?.publishedAt) {
         setFirstPublishedAt(new Date(saved.publishedAt).toISOString())
       }
+      setTelegramMessageId(saved.telegramMessageId)
+      setTelegramMessageLink(saved.telegramMessageLink)
+      setTelegramPushStatus(saved.telegramPushStatus)
+      setTelegramPushReason(saved.telegramPushReason)
+      setTelegramLastAttemptAt(
+        saved.telegramLastAttemptAt ? new Date(saved.telegramLastAttemptAt).toISOString() : undefined
+      )
+      setPushedToTelegramAt(
+        saved.pushedToTelegramAt ? new Date(saved.pushedToTelegramAt).toISOString() : undefined
+      )
       toast.success("Yangilik saqlandi")
       return true
     } catch (err) {
@@ -426,21 +468,86 @@ export function CreateNewsForm({ categories, tags, authors, existingSlugs = [], 
     }
   }
 
-  const handleSave = async (status: 'pending' | 'published') => {
+  const syncTelegram = async (method: 'POST' | 'DELETE') => {
+    if (!savedNewsId) return false
+    const res = await fetch(`/api/news/${savedNewsId}/telegram`, { method })
+    const data = await res.json().catch(() => null)
+    if (!res.ok || !data) {
+      throw new Error((data && data.error) || 'Telegram sync xatosi')
+    }
+    setPushedToTelegram(Boolean(data.pushedToTelegram))
+    setTelegramMessageId(data.telegramMessageId)
+    setTelegramMessageLink(data.telegramMessageLink)
+    setTelegramPushStatus(data.telegramPushStatus)
+    setTelegramPushReason(data.telegramPushReason)
+    setTelegramLastAttemptAt(
+      data.telegramLastAttemptAt ? new Date(data.telegramLastAttemptAt).toISOString() : undefined
+    )
+    setPushedToTelegramAt(
+      data.pushedToTelegramAt ? new Date(data.pushedToTelegramAt).toISOString() : undefined
+    )
+    return true
+  }
+
+  const handleSendToTelegram = async () => {
     try {
-      const saved = await saveNews.mutateAsync({ status }) as { _id?: string; publishedAt?: string | Date }
+      setIsTelegramProcessing(true)
+      if (!savedNewsId) {
+        const ok = await savePendingWithoutRedirect(saveStatus, true)
+        if (!ok) return
+      } else {
+        setPushedToTelegram(true)
+        const ok = await savePendingWithoutRedirect(saveStatus, true)
+        if (!ok) return
+      }
+      await syncTelegram('POST')
+      toast.success("Telegramga yuborish so'rovi bajarildi")
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Telegramga yuborib bo‘lmadi')
+    } finally {
+      setIsTelegramProcessing(false)
+    }
+  }
+
+  const handleRemoveFromTelegram = async () => {
+    try {
+      setIsTelegramProcessing(true)
+      await syncTelegram('DELETE')
+      toast.success("Telegramdan o'chirildi")
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Telegramdan o'chirib bo'lmadi")
+    } finally {
+      setIsTelegramProcessing(false)
+    }
+  }
+
+  const handleSave = async (status: 'pending' | 'published', redirectOnSuccess: boolean) => {
+    try {
+      const saved = await saveNews.mutateAsync({ status })
       if (!savedNewsId && saved?._id) {
         setSavedNewsId(saved._id)
       }
       if (!firstPublishedAt && saved?.publishedAt) {
         setFirstPublishedAt(new Date(saved.publishedAt).toISOString())
       }
+      setTelegramMessageId(saved.telegramMessageId)
+      setTelegramMessageLink(saved.telegramMessageLink)
+      setTelegramPushStatus(saved.telegramPushStatus)
+      setTelegramPushReason(saved.telegramPushReason)
+      setTelegramLastAttemptAt(
+        saved.telegramLastAttemptAt ? new Date(saved.telegramLastAttemptAt).toISOString() : undefined
+      )
+      setPushedToTelegramAt(
+        saved.pushedToTelegramAt ? new Date(saved.pushedToTelegramAt).toISOString() : undefined
+      )
       if (status === 'published') {
         toast.success("Yangilik muvaffaqiyatli chop etildi")
       } else {
         toast.success("Yangilik muvaffaqiyatli saqlandi")
       }
-      router.push('/dashboard/news')
+      if (redirectOnSuccess) {
+        router.push('/dashboard/news')
+      }
     } catch (err) {
       if (err instanceof NewsFormApiError) {
         toast.error(err.message, { description: err.description })
@@ -765,24 +872,51 @@ export function CreateNewsForm({ categories, tags, authors, existingSlugs = [], 
           onChangeIsPopular={setIsPopular}
           onChangeIsTop={setIsTop}
           onChangeIsBreaking={setIsBreaking}
-          onChangePushedToTelegram={setPushedToTelegram}
-          onSavePending={() => void handleSave(saveStatus === 'published' ? 'published' : 'pending')}
-          onPublish={() => void handleSave('published')}
+          onSendToTelegram={() => void handleSendToTelegram()}
+          onRemoveFromTelegram={() => void handleRemoveFromTelegram()}
+          onSavePending={() => void savePendingWithoutRedirect(saveStatus === 'published' ? 'published' : 'pending')}
+          onPublish={() => void handleSave('published', true)}
           isSaving={isSaving}
+          isTelegramProcessing={isTelegramProcessing}
           mode={isEditMode ? 'edit' : 'create'}
           currentStatus={editStatus}
+          telegramMessageId={telegramMessageId}
+          telegramMessageLink={telegramMessageLink}
+          telegramPushStatus={telegramPushStatus}
+          telegramPushReason={telegramPushReason}
+          telegramLastAttemptAt={telegramLastAttemptAt}
+          pushedToTelegramAt={pushedToTelegramAt}
           onStatusChange={
             isEditMode
               ? async (newStatus) => {
                   setEditStatus(newStatus)
                   try {
-                    const saved = await saveNews.mutateAsync({ status: newStatus }) as { _id?: string; publishedAt?: string | Date }
+                    const saved = await saveNews.mutateAsync({ status: newStatus }) as {
+                      _id?: string
+                      publishedAt?: string | Date
+                      telegramMessageId?: number
+                      telegramMessageLink?: string
+                      telegramPushStatus?: 'sent' | 'failed'
+                      telegramPushReason?: string
+                      telegramLastAttemptAt?: string | Date
+                      pushedToTelegramAt?: string | Date
+                    }
                     if (!savedNewsId && saved?._id) {
                       setSavedNewsId(saved._id)
                     }
                     if (!firstPublishedAt && saved?.publishedAt) {
                       setFirstPublishedAt(new Date(saved.publishedAt).toISOString())
                     }
+                    setTelegramMessageId(saved.telegramMessageId)
+                    setTelegramMessageLink(saved.telegramMessageLink)
+                    setTelegramPushStatus(saved.telegramPushStatus)
+                    setTelegramPushReason(saved.telegramPushReason)
+                    setTelegramLastAttemptAt(
+                      saved.telegramLastAttemptAt ? new Date(saved.telegramLastAttemptAt).toISOString() : undefined
+                    )
+                    setPushedToTelegramAt(
+                      saved.pushedToTelegramAt ? new Date(saved.pushedToTelegramAt).toISOString() : undefined
+                    )
                     if (newStatus === 'published') toast.success('Yangilik nashr qilingan (published)')
                     else if (newStatus === 'cancelled') toast.success('Yangilik bekor qilindi')
                     else if (newStatus === 'deleted') toast.success("Yangilik Savatga o‘tkazildi")

@@ -83,10 +83,43 @@
   "back": "Орқага",
   "min_read": "дақиқада о'қилади",
   "views": "ко'ришлар",
-  "images": "Расмлар"
+  "images": "Расмлар",
+  "comments": "Изоҳлар",
+  "reactions": "Реакциялар"
   },
   "stayConnected": {
     "title": "Биз билан боғланинг",
     "subtitle": "Сўнгги янгиликлар ва янгиланишлар учун ижтимоий тармоқларимизда кузатинг."
+  },
+  "ads": {
+    "title": "Реклама бошқаруви",
+    "description": "Бир хил баландликдаги реклама блоклари учун медиа, логотип, сайт маълумоти ва ҳаволаларни бошқаринг.",
+    "placement_header_top_full": "Юқори",
+    "placement_sidebar_widget": "Ён панел",
+    "placement_home_bottom_full": "Бош саҳифа пасти",
+    "placement_article_bottom_full": "Мақола пасти",
+    "ad_type": "Реклама тури",
+    "media": "Медиа",
+    "media_placeholder_url": "URL киритинг ёки локалдан танланг",
+    "media_select_local": "Локалдан танлаш",
+    "ad_url": "Реклама URL",
+    "placement": "Жойлашув",
+    "priority": "Устуворилик",
+    "duration": "Давомлилик (секунд)",
+    "title_label": "Сарлавха",
+    "description_label": "Тавсиф",
+    "logo": "Логотип",
+    "site_name": "Сайт номи",
+    "links": "Ҳаволалар",
+    "link_add": "Ҳавола қўшиш",
+    "advertiser_about": "Реклама берувчи ҳақида",
+    "ad_about": "Реклама ҳақида",
+    "advertise_with_us": "Реклама бериш учун",
+    "active": "Фаол",
+    "create": "Яратиш",
+    "update": "Янгилаш",
+    "cancel": "Бекор қилиш",
+    "list_title": "Рекламалар рўйхати",
+    "optional": "ихтиёрий"
   }
 }

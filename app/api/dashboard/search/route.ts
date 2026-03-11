@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { seedNews } from '@/scripts/seed-news'
 import { getNewsListForLocale } from '@/features/news/model'
 import type { AppLocale } from '@/shared/common/lib/locale-api'
+import { requireAdminSession } from '@/shared/common/lib/require-admin-session'
 
 function matchesQuery(title: string, description: string | undefined, q: string): boolean {
   const lower = q.trim().toLowerCase()
@@ -12,6 +13,9 @@ function matchesQuery(title: string, description: string | undefined, q: string)
 }
 
 export async function GET(request: NextRequest) {
+  const unauthorized = await requireAdminSession(['ceo', 'administrator', 'moderator'])
+  if (unauthorized) return unauthorized
+
   const { searchParams } = new URL(request.url)
   const q = searchParams.get('q') ?? ''
   const locale = (searchParams.get('locale') ?? 'uz') as AppLocale

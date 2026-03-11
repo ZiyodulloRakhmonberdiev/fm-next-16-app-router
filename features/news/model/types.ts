@@ -1,5 +1,6 @@
 import type { AppLocale } from "@/shared/common/lib/locale-api"
 import type { NewsTitleLocale, NewsOptionalLocale } from "@/shared/common/lib/locale-types"
+import { LOCALES } from "@/shared/common/lib/locale-constants"
 import { getCategoryName, getTagNames } from "@/shared/common/lib/seed-helpers"
 import type { NewsContent } from "./content"
 
@@ -31,6 +32,11 @@ export type RawNewsItem = {
   isBreaking?: boolean
   pushedToTelegram?: boolean
   pushedToTelegramAt?: Date
+  telegramMessageId?: number
+  telegramMessageLink?: string
+  telegramPushStatus?: "sent" | "failed"
+  telegramPushReason?: string
+  telegramLastAttemptAt?: Date
   videoSource?: "youtube" | "local"
   videoUrl?: string
 }
@@ -54,6 +60,11 @@ export type NewsItem = {
   isBreaking?: boolean
   pushedToTelegram?: boolean
   pushedToTelegramAt?: Date
+  telegramMessageId?: number
+  telegramMessageLink?: string
+  telegramPushStatus?: "sent" | "failed"
+  telegramPushReason?: string
+  telegramLastAttemptAt?: Date
   videoSource?: "youtube" | "local"
   videoUrl?: string
 }
@@ -62,7 +73,9 @@ export function pickNewsForLocale(
   raw: RawNewsItem,
   locale: AppLocale
 ): NewsItem | null {
-  const title = raw.title[locale]
+  const localizedTitle = raw.title[locale]
+  const fallbackTitle = LOCALES.map((loc) => raw.title?.[loc]).find((item) => typeof item === "string" && item.trim())
+  const title = localizedTitle && localizedTitle.trim() ? localizedTitle : fallbackTitle
   if (title === undefined || title === null || title === "") return null
 
   const description = raw.description?.[locale]
@@ -89,6 +102,11 @@ export function pickNewsForLocale(
     isBreaking: raw.isBreaking ?? false,
     pushedToTelegram: raw.pushedToTelegram,
     pushedToTelegramAt: raw.pushedToTelegramAt,
+    telegramMessageId: raw.telegramMessageId,
+    telegramMessageLink: raw.telegramMessageLink,
+    telegramPushStatus: raw.telegramPushStatus,
+    telegramPushReason: raw.telegramPushReason,
+    telegramLastAttemptAt: raw.telegramLastAttemptAt,
     videoSource: raw.videoSource,
     videoUrl: raw.videoUrl,
   }

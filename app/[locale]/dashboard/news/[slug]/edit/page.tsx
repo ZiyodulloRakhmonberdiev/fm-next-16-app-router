@@ -1,4 +1,5 @@
 import { getLocale } from 'next-intl/server'
+import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/common/components/ui/card'
 import { CreateNewsForm } from '@/features/news/ui/create-news-form'
@@ -13,18 +14,34 @@ type Props = {
 }
 type UserRow = { full_name: string }
 
+function getFetchOptions(cookie: string | null): RequestInit {
+  return {
+    cache: 'no-store' as RequestCache,
+    headers: cookie ? { cookie } : undefined,
+  }
+}
+
 export default async function EditNewsPage({ params }: Props) {
   const { slug } = await params
   const locale = (await getLocale()) as AppLocale
+  const h = await headers()
+  const cookie = h.get('cookie')
+  const opts = getFetchOptions(cookie)
 
   const [categoriesRes, tagsRes, newsRes, usersRes] = await Promise.all([
-    fetch(await getServerApiUrl('/api/categories'), { cache: 'no-store' }),
-    fetch(await getServerApiUrl('/api/tags'), { cache: 'no-store' }),
-    fetch(await getServerApiUrl('/api/news?page=1&limit=500'), { cache: 'no-store' }),
-    fetch(await getServerApiUrl('/api/users'), { cache: 'no-store' }),
+    fetch(await getServerApiUrl('/api/categories'), opts),
+    fetch(await getServerApiUrl('/api/tags'), opts),
+    fetch(await getServerApiUrl('/api/news?page=1&limit=500'), opts),
+    fetch(await getServerApiUrl('/api/users'), opts),
   ])
-  if (!categoriesRes.ok || !tagsRes.ok || !newsRes.ok || !usersRes.ok) {
-    throw new Error('Dashboard ma’lumotlarini yuklab bo‘lmadi')
+  const failed = [
+    !categoriesRes.ok && 'categories',
+    !tagsRes.ok && 'tags',
+    !newsRes.ok && 'news',
+    !usersRes.ok && 'users',
+  ].filter(Boolean)
+  if (failed.length > 0) {
+    throw new Error(`Dashboard ma'lumotlarini yuklab bo'lmadi: ${failed.join(', ')}`)
   }
 
   const categoriesData = (await categoriesRes.json()) as Array<{ slug: string; name: LocaleMap }>

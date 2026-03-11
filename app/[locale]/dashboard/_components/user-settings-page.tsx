@@ -1,9 +1,8 @@
 'use client'
-/* eslint-disable react/no-unescaped-entities */
-
-import { useState } from 'react'
-import { toast } from 'sonner'
 import { ThemeSwitcher } from '@/widgets/theme-switcher'
+import { useSession } from 'next-auth/react'
+import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import {
   Card,
   CardContent,
@@ -14,26 +13,54 @@ import {
 import { Input } from '@/shared/common/components/ui/input'
 import { Label } from '@/shared/common/components/ui/label'
 import { Button } from '@/shared/common/components/ui/button'
-import { Settings, Save } from 'lucide-react'
+import { Settings } from 'lucide-react'
+import { normalizeRole } from '@/shared/common/lib/rbac'
 
 export function DashboardUserSettingsPage() {
-  const [fullName, setFullName] = useState('Admin Foydalanuvchi')
-  const [email, setEmail] = useState('admin@example.uz')
+  const { data: session } = useSession()
+  const role = normalizeRole(session?.user?.role)
+  const canEditProfile = role === 'ceo' || role === 'administrator'
+  const [fullName, setFullName] = useState('')
+  const [position, setPosition] = useState('')
+  const [image, setImage] = useState('')
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
+  const [loading, setLoading] = useState(false)
 
-  const handleSaveProfile = () => {
-    toast.success('Profil ma\'lumotlari saqlandi (demo)')
-  }
+  useEffect(() => {
+    if (!canEditProfile) return
+    void (async () => {
+      const res = await fetch('/api/me', { cache: 'no-store' })
+      if (!res.ok) return
+      const data = await res.json()
+      setFullName(data.full_name ?? '')
+      setPosition(data.position ?? '')
+      setImage(data.image ?? '')
+    })()
+  }, [canEditProfile])
 
-  const handleChangePassword = () => {
-    if (!currentPassword || !newPassword) {
-      toast.error('Joriy va yangi parolni kiriting')
+  async function saveProfile() {
+    setLoading(true)
+    const res = await fetch('/api/me', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        full_name: fullName,
+        position,
+        image: image || null,
+        currentPassword: currentPassword || undefined,
+        newPassword: newPassword || undefined,
+      }),
+    })
+    setLoading(false)
+    if (!res.ok) {
+      const err = await res.json().catch(() => null)
+      toast.error(err?.error ?? 'Saqlab bo‘lmadi')
       return
     }
-    toast.success('Parol yangilandi (demo)')
     setCurrentPassword('')
     setNewPassword('')
+    toast.success('Profil yangilandi')
   }
 
   return (
@@ -41,7 +68,7 @@ export function DashboardUserSettingsPage() {
       <div>
         <h1 className="text-xl md:text-2xl font-semibold tracking-tight">Sozlamalar</h1>
         <p className="text-sm text-muted-foreground">
-          Tizim ko'rinishi va shaxsiy ma'lumotlaringizni boshqaring.
+          Bu bo&apos;limda faqat tema boshqaruvi mavjud.
         </p>
       </div>
 
@@ -50,10 +77,10 @@ export function DashboardUserSettingsPage() {
           <div>
             <CardTitle className="text-xl flex items-center gap-2">
               <Settings className="size-6" />
-              Foydalanuvchi sozlamalari
+              Sozlamalar
             </CardTitle>
             <CardDescription>
-              Tema, profil ma'lumotlari va xavfsizlikni boshqarish.
+              Sozlamalar bo&apos;limi.
             </CardDescription>
           </div>
         </CardHeader>
@@ -71,70 +98,39 @@ export function DashboardUserSettingsPage() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Profil ma'lumotlari</CardTitle>
-          <CardDescription>Admin ismi va email.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label>To'liq ism</Label>
-            <Input
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              placeholder="Ism Familiya"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>Email</Label>
-            <Input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@example.uz"
-            />
-          </div>
-          <div className="flex justify-end">
-            <Button type="button" onClick={handleSaveProfile} className="gap-2">
-              <Save className="size-4" />
-              Saqlash
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Parolni almashtirish</CardTitle>
-          <CardDescription>Hisobingiz xavfsizligini ta'minlang.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label>Joriy parol</Label>
-            <Input
-              type="password"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              placeholder="••••••••"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>Yangi parol</Label>
-            <Input
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="••••••••"
-            />
-          </div>
-          <div className="flex justify-end">
-            <Button type="button" onClick={handleChangePassword} className="gap-2">
-              <Save className="size-4" />
-              Yangilash
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      {canEditProfile ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Profil ma&apos;lumotlari</CardTitle>
+            <CardDescription>Admin/CEO profilini yangilash.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>Full name</Label>
+              <Input value={fullName} onChange={(e) => setFullName(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Position</Label>
+              <Input value={position} onChange={(e) => setPosition(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Image URL</Label>
+              <Input value={image} onChange={(e) => setImage(e.target.value)} />
+            </div>
+            <div className="grid gap-3 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Joriy parol</Label>
+                <Input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Yangi parol</Label>
+                <Input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+              </div>
+            </div>
+            <Button onClick={() => void saveProfile()} disabled={loading}>Saqlash</Button>
+          </CardContent>
+        </Card>
+      ) : null}
     </div>
   )
 }

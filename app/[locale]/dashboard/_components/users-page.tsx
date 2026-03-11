@@ -47,6 +47,8 @@ export const USER_ROLES = [
   { value: 'administrator', label: 'Administrator' },
   { value: 'moderator', label: 'Moderator' },
   { value: 'ads-manager', label: 'Ads manager' },
+  { value: 'ads_manager', label: 'Ads manager (underscore)' },
+  { value: 'user', label: 'User (no access)' },
 ] as const
 
 export type UserRole = (typeof USER_ROLES)[number]['value']

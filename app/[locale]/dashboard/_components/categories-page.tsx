@@ -50,6 +50,7 @@ export type CategoryRow = {
   slug: string
   href: string
   name: Record<AppLocale, string>
+  priority: number
 }
 
 type CategoriesPageProps = {
@@ -75,6 +76,7 @@ export function CategoriesPage({ locale }: CategoriesPageProps) {
         slug: c.slug,
         href: c.href,
         name: c.name,
+        priority: c.priority ?? 0,
       })),
     [data]
   )
@@ -112,6 +114,8 @@ export function CategoriesPage({ locale }: CategoriesPageProps) {
     }
 
     const href = `/category/${normalizedSlug}`
+    const priorityRaw = (form.querySelector('[name="priority"]') as HTMLInputElement)?.value ?? '0'
+    const priority = Number(priorityRaw) || 0
     const exists = categories.some((c) => c.slug.toLowerCase() === normalizedSlug.toLowerCase())
     if (exists) {
       toast.error('Validation error', {
@@ -120,7 +124,7 @@ export function CategoriesPage({ locale }: CategoriesPageProps) {
       return
     }
     create.mutate(
-      { slug: normalizedSlug, href, name },
+      { slug: normalizedSlug, href, name, priority },
       {
         onSuccess: () => {
           setCreateOpen(false)
@@ -150,6 +154,8 @@ export function CategoriesPage({ locale }: CategoriesPageProps) {
     }
 
     const href = `/category/${normalizedSlug}`
+    const priorityRaw = (form.querySelector('[name="priority"]') as HTMLInputElement)?.value ?? '0'
+    const priority = Number(priorityRaw) || 0
     const exists = categories.some(
       (c) => c._id !== editCategory._id && c.slug.toLowerCase() === normalizedSlug.toLowerCase()
     )
@@ -162,7 +168,7 @@ export function CategoriesPage({ locale }: CategoriesPageProps) {
     update.mutate(
       {
         id: editCategory._id,
-        payload: { slug: normalizedSlug, href, name },
+        payload: { slug: normalizedSlug, href, name, priority },
       },
       {
         onSuccess: () => {
@@ -226,13 +232,14 @@ export function CategoriesPage({ locale }: CategoriesPageProps) {
                   <TableHead>Nom (ru)</TableHead>
                   <TableHead>Nom (en)</TableHead>
                   <TableHead>Havola</TableHead>
+                  <TableHead>Priority</TableHead>
                   <TableHead className="w-[140px]">Amallar</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {categories.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                    <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
                       Kategoriya topilmadi
                     </TableCell>
                   </TableRow>
@@ -245,6 +252,7 @@ export function CategoriesPage({ locale }: CategoriesPageProps) {
                       <TableCell>{row.name.ru}</TableCell>
                       <TableCell>{row.name.en}</TableCell>
                       <TableCell className="text-muted-foreground text-sm">{row.href}</TableCell>
+                      <TableCell>{row.priority}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Button variant="outline" size="sm" onClick={() => setEditId(row._id)}>
@@ -284,6 +292,10 @@ export function CategoriesPage({ locale }: CategoriesPageProps) {
                 <Input id={`create-name_${loc}`} name={`name_${loc}`} required />
               </div>
             ))}
+            <div className="space-y-2">
+              <Label htmlFor="create-priority">Priority</Label>
+              <Input id="create-priority" name="priority" type="number" defaultValue={0} />
+            </div>
           </form>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setCreateOpen(false)}>
@@ -315,6 +327,10 @@ export function CategoriesPage({ locale }: CategoriesPageProps) {
                   />
                 </div>
               ))}
+              <div className="space-y-2">
+                <Label htmlFor="edit-priority">Priority</Label>
+                <Input id="edit-priority" name="priority" type="number" defaultValue={editCategory.priority ?? 0} />
+              </div>
             </form>
           )}
           <DialogFooter>

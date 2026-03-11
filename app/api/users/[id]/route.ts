@@ -1,5 +1,7 @@
 import { NextRequest } from 'next/server'
+import { hash } from 'bcryptjs'
 import { dbConnect } from '@/shared/common/lib/db'
+import { requireAdminSession } from '@/shared/common/lib/require-admin-session'
 import { UserModel } from '@/features/users/model/user.model'
 import { createUserSchema } from '@/features/users/model/schemas'
 
@@ -7,6 +9,9 @@ export async function GET(
   _req: NextRequest,
   { params }: {params: Promise<{ id: string }> }
 ) {
+  const unauthorized = await requireAdminSession(['ceo', 'administrator'])
+  if (unauthorized) return unauthorized
+
   await dbConnect()
   const user = await UserModel.findById((await params).id).lean()
 
@@ -21,6 +26,9 @@ export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const unauthorized = await requireAdminSession(['ceo', 'administrator'])
+  if (unauthorized) return unauthorized
+
   await dbConnect()
   const json = await req.json()
 
@@ -34,7 +42,10 @@ export async function PUT(
 
   const updated = await UserModel.findByIdAndUpdate(
     (await params).id,
-    parsed.data,
+    {
+      ...parsed.data,
+      password: await hash(parsed.data.password, 10),
+    },
     { new: true, runValidators: true }
   ).lean()
 
@@ -49,6 +60,9 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const unauthorized = await requireAdminSession(['ceo', 'administrator'])
+  if (unauthorized) return unauthorized
+
   await dbConnect()
   const json = await req.json()
 
@@ -63,7 +77,12 @@ export async function PATCH(
 
   const updated = await UserModel.findByIdAndUpdate(
     (await params).id,
-    parsed.data,
+    {
+      ...parsed.data,
+      ...(parsed.data.password
+        ? { password: await hash(parsed.data.password, 10) }
+        : {}),
+    },
     { new: true, runValidators: true }
   ).lean()
 
@@ -78,6 +97,9 @@ export async function DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const unauthorized = await requireAdminSession(['ceo', 'administrator'])
+  if (unauthorized) return unauthorized
+
   await dbConnect()
   const deleted = await UserModel.findByIdAndDelete((await params).id).lean()
 

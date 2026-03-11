@@ -13,7 +13,6 @@ export function EditNewsStatusForm({ initialStatus = 'pending' }: EditNewsStatus
   const [isTop, setIsTop] = useState(false)
   const [isTrending, setIsTrending] = useState(false)
   const [authorsChoice, setAuthorsChoice] = useState(false)
-  const [pushedToTelegram, setPushedToTelegram] = useState(false)
   const [status, setStatus] = useState<NewsStatus>(initialStatus)
 
   const canPublish = true
@@ -40,7 +39,6 @@ export function EditNewsStatusForm({ initialStatus = 'pending' }: EditNewsStatus
     <SettingsForm
       isTop={isTop}
       authorsChoice={authorsChoice}
-      pushedToTelegram={pushedToTelegram}
       isBreaking={isTop}
       isTrending={isTrending}
       onChangeIsTrending={setIsTrending}
@@ -49,7 +47,8 @@ export function EditNewsStatusForm({ initialStatus = 'pending' }: EditNewsStatus
       onBack={() => {}}
       onChangeIsTop={setIsTop}
       onChangeAuthorsChoice={setAuthorsChoice}
-      onChangePushedToTelegram={setPushedToTelegram}
+      onSendToTelegram={() => toast.info('Telegram tugmasi create/edit sahifada ishlaydi')}
+      onRemoveFromTelegram={() => toast.info('Telegram tugmasi create/edit sahifada ishlaydi')}
       onChangeIsBreaking={() => {}}
       onChangeIsPopular={() => {}}
       onSavePending={handleSavePending}

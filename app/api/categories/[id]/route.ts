@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server'
 import { dbConnect } from '@/shared/common/lib/db'
+import { requireAdminSession } from '@/shared/common/lib/require-admin-session'
 import { CategoryModel } from '@/features/category/model/category.model'
 import { createCategorySchema } from '@/features/category/model/schemas'
 
@@ -21,6 +22,9 @@ export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const unauthorized = await requireAdminSession(['ceo', 'administrator', 'moderator'])
+  if (unauthorized) return unauthorized
+
   await dbConnect()
   const json = await req.json()
 
@@ -49,6 +53,9 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const unauthorized = await requireAdminSession(['ceo', 'administrator', 'moderator'])
+  if (unauthorized) return unauthorized
+
   await dbConnect()
   const json = await req.json()
 
@@ -77,6 +84,9 @@ export async function DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const unauthorized = await requireAdminSession(['ceo', 'administrator', 'moderator'])
+  if (unauthorized) return unauthorized
+
   await dbConnect()
   const deleted = await CategoryModel.findByIdAndDelete((await params).id).lean()
 

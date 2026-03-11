@@ -9,7 +9,7 @@ import {
   TopBanner,
   Yangiliklar,
 } from "@/shared/common/components/organisms"
-import { ServerLoading, ServerUnavailable, StayConnected } from "@/shared/common/components/molecules"
+import { AdSlot, ServerLoading, ServerUnavailable, StayConnected } from "@/shared/common/components/molecules"
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
 import { isVisualRawNews, type RawNewsItem } from "@/features/news/model"
 import { usePublicCategoriesQuery } from "@/features/category/model/public-categories-query"

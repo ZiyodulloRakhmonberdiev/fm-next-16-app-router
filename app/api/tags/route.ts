@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server'
 import { dbConnect } from '@/shared/common/lib/db'
+import { requireAdminSession } from '@/shared/common/lib/require-admin-session'
 import { TagModel } from '@/features/tags/model/tag.model'
 import { createTagSchema } from '@/features/tags/model/schemas'
 
@@ -19,6 +20,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const unauthorized = await requireAdminSession(['ceo', 'administrator', 'moderator'])
+  if (unauthorized) return unauthorized
+
   try {
     await dbConnect()
     const json = await req.json()

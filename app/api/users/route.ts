@@ -1,9 +1,14 @@
 import { NextRequest } from 'next/server'
+import { hash } from 'bcryptjs'
 import { dbConnect } from '@/shared/common/lib/db'
+import { requireAdminSession } from '@/shared/common/lib/require-admin-session'
 import { UserModel } from '@/features/users/model/user.model'
 import { createUserSchema } from '@/features/users/model/schemas'
 
 export async function GET() {
+  const unauthorized = await requireAdminSession(['ceo', 'administrator', 'moderator'])
+  if (unauthorized) return unauthorized
+
   try {
     await dbConnect()
     const users = await UserModel.find().lean()
@@ -19,6 +24,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const unauthorized = await requireAdminSession(['ceo', 'administrator'])
+  if (unauthorized) return unauthorized
+
   try {
     await dbConnect()
     const json = await req.json()
@@ -34,7 +42,11 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const user = await UserModel.create(parsed.data)
+    const hashedPassword = await hash(parsed.data.password, 10)
+    const user = await UserModel.create({
+      ...parsed.data,
+      password: hashedPassword,
+    })
     return Response.json(user, { status: 201 })
   } catch (err) {
     const anyErr = err as any

@@ -14,6 +14,7 @@ export type EditNewsInitialData = {
   author: string
   imageUrls: string[]
   minutes: number
+  views: number
   videoUrl: string
   contents: Record<AppLocale, string>
   isTop: boolean
@@ -23,6 +24,12 @@ export type EditNewsInitialData = {
   isPopular: boolean
   isBreaking: boolean
   pushedToTelegram: boolean
+  telegramMessageId?: number
+  telegramMessageLink?: string
+  telegramPushStatus?: 'sent' | 'failed'
+  telegramPushReason?: string
+  telegramLastAttemptAt?: Date
+  pushedToTelegramAt?: Date
   status: NewsStatus
   publishedAt?: Date
 }
@@ -59,6 +66,7 @@ export function rawNewsToEditInitialData(raw: RawNewsItem): EditNewsInitialData 
     author: raw.author ?? '',
     imageUrls: Array.isArray(raw.images) ? [...raw.images] : [],
     minutes: typeof raw.minutes === 'number' ? raw.minutes : 3,
+    views: typeof raw.views === 'number' ? raw.views : 0,
     videoUrl: raw.videoUrl ?? '',
     contents,
     isTop: raw.isTop ?? false,
@@ -68,6 +76,12 @@ export function rawNewsToEditInitialData(raw: RawNewsItem): EditNewsInitialData 
     isPopular: raw.isPopular ?? false,
     isBreaking: raw.isBreaking ?? false,
     pushedToTelegram: raw.pushedToTelegram ?? false,
+    telegramMessageId: raw.telegramMessageId,
+    telegramMessageLink: raw.telegramMessageLink,
+    telegramPushStatus: raw.telegramPushStatus,
+    telegramPushReason: raw.telegramPushReason,
+    telegramLastAttemptAt: raw.telegramLastAttemptAt ? new Date(raw.telegramLastAttemptAt) : undefined,
+    pushedToTelegramAt: raw.pushedToTelegramAt ? new Date(raw.pushedToTelegramAt) : undefined,
     status: (raw.status ?? 'published') as NewsStatus,
     publishedAt: raw.publishedAt ? new Date(raw.publishedAt) : undefined,
   }

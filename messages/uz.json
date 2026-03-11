@@ -83,10 +83,43 @@
   "back": "Orqaga",
   "min_read": "daqiqada o'qiladi",
   "views": "ko'rishlar",
-  "images": "Rasmlar"
+  "images": "Rasmlar",
+  "comments": "Izohlar",
+  "reactions": "Reaksiyalar"
   },
   "stayConnected": {
     "title": "Bizga qo'shiling",
     "subtitle": "So'nggi yangiliklar va yangilanishlar uchun ijtimoiy tarmoqlarimizda bizni kuzating."
+  },
+  "ads": {
+    "title": "Reklama boshqaruvi",
+    "description": "Bir xil balandlikdagi reklama bloklari uchun media, logo, sayt ma'lumoti va havolalarni boshqaring.",
+    "placement_header_top_full": "Yuqori",
+    "placement_sidebar_widget": "Yon panel",
+    "placement_home_bottom_full": "Bosh sahifa pasti",
+    "placement_article_bottom_full": "Maqola pasti",
+    "ad_type": "Reklama turi",
+    "media": "Media",
+    "media_placeholder_url": "URL kiriting yoki lokaldan tanlang",
+    "media_select_local": "Lokaldan tanlash",
+    "ad_url": "Reklama URL",
+    "placement": "Joylashuv",
+    "priority": "Ustuvorlik",
+    "duration": "Davomiylik (sekund)",
+    "title_label": "Sarlavha",
+    "description_label": "Tavsif",
+    "logo": "Logo",
+    "site_name": "Sayt nomi",
+    "links": "Havolalar",
+    "link_add": "Link qo'shish",
+    "advertiser_about": "Reklama beruvchi haqida",
+    "ad_about": "Reklama haqida",
+    "advertise_with_us": "Reklama berish uchun",
+    "active": "Faol",
+    "create": "Yaratish",
+    "update": "Yangilash",
+    "cancel": "Bekor qilish",
+    "list_title": "Reklamalar ro'yxati",
+    "optional": "ixtiyoriy"
   }
 }

@@ -16,6 +16,7 @@ export type AdminCategory = {
   slug: string
   href: string
   name: LocaleMap
+  priority?: number
 }
 
 export type AdminTag = {
@@ -24,7 +25,7 @@ export type AdminTag = {
   name: LocaleMap
 }
 
-export type AdminUserRole = 'ceo' | 'administrator' | 'moderator' | 'ads-manager'
+export type AdminUserRole = 'ceo' | 'administrator' | 'moderator' | 'ads-manager' | 'ads_manager' | 'user'
 
 export type AdminUser = {
   _id: string
@@ -40,6 +41,7 @@ export type CreateCategoryPayload = {
   slug: string
   href: string
   name: LocaleMap
+  priority?: number
 }
 
 export type CreateTagPayload = {
