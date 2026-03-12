@@ -1,4 +1,5 @@
 import { getLocale } from 'next-intl/server'
+import { headers } from 'next/headers'
 import { Link } from '@/i18n/navigation'
 import { getNewsListForLocale, type RawNewsItem } from '@/features/news/model'
 import type { AppLocale } from '@/shared/common/lib/locale-api'
@@ -9,25 +10,50 @@ import {
   CardHeader,
   CardTitle,
 } from '@/shared/common/components/ui/card'
-import {  Newspaper, FolderTree, Tag, BarChart3 } from 'lucide-react'
+import { Newspaper, FolderTree, Tag, BarChart3, MessageSquare, Megaphone, Heart } from 'lucide-react'
 import { DashboardNewsLists } from '@/features/dashboard/ui/news-lists'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/shared/common/lib/auth-options'
+
+function getFetchOptions(cookie: string | null): RequestInit {
+  return {
+    cache: 'no-store' as RequestCache,
+    headers: cookie ? { cookie } : undefined,
+  }
+}
 
 export default async function DashboardPage() {
+  const session = await getServerSession(authOptions)
   const locale = (await getLocale()) as AppLocale
-  const [categoriesRes, tagsRes, newsRes] = await Promise.all([
-    fetch(await getServerApiUrl('/api/categories'), { cache: 'no-store' }),
-    fetch(await getServerApiUrl('/api/tags'), { cache: 'no-store' }),
-    fetch(await getServerApiUrl('/api/news?page=1&limit=500'), { cache: 'no-store' }),
+  const h = await headers()
+  const cookie = h.get('cookie')
+  const opts = getFetchOptions(cookie)
+
+  const [categoriesRes, tagsRes, newsRes, commentsRes, adsRes, reactionsRes] = await Promise.all([
+    fetch(await getServerApiUrl('/api/categories'), opts),
+    fetch(await getServerApiUrl('/api/tags'), opts),
+    fetch(await getServerApiUrl('/api/news?page=1&limit=500'), opts),
+    fetch(await getServerApiUrl('/api/comments'), opts),
+    fetch(await getServerApiUrl('/api/ads'), opts),
+    fetch(await getServerApiUrl('/api/reactions'), opts),
   ])
-  if (!categoriesRes.ok || !tagsRes.ok || !newsRes.ok) {
+  const failed = [
+    !categoriesRes.ok && 'categories',
+    !tagsRes.ok && 'tags',
+    !newsRes.ok && 'news',
+    !commentsRes.ok && 'comments',
+    !adsRes.ok && 'ads',
+    !reactionsRes.ok && 'reactions',
+  ].filter(Boolean)
+  if (failed.length > 0) {
     throw new Error('Dashboard ma’lumotlarini yuklab bo‘lmadi')
   }
   const categories = (await categoriesRes.json()) as unknown[]
   const tags = (await tagsRes.json()) as unknown[]
   const newsJson = (await newsRes.json()) as { data: RawNewsItem[] }
-
-  const ADMIN_FULL_NAME = 'Admin Foydalanuvchi'
-
+  const comments = (await commentsRes.json()) as unknown[]
+  const ads = (await adsRes.json()) as unknown[]
+  const reactionsJson = (await reactionsRes.json()) as { count: number }
   const allNews = getNewsListForLocale(newsJson.data, locale)
   const latestNews = [...allNews].sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
   const topNewsRaw = getNewsListForLocale(
@@ -70,6 +96,24 @@ export default async function DashboardPage() {
       icon: Tag,
       href: '/dashboard/tags',
     },
+    {
+      label: 'Izohlar',
+      value: comments.length ?? 0,
+      icon: MessageSquare,
+      href: '/dashboard/comments',
+    },
+    {
+      label: 'Reklama',
+      value: ads.length ?? 0,
+      icon: Megaphone,
+      href: '/dashboard/ads',
+    },
+    {
+      label: 'Reaksiyalar',
+      value: reactionsJson.count ?? 0,
+      icon: Heart,
+      href: '/dashboard/reactions',
+    },
   ]
 
   return (
@@ -77,7 +121,7 @@ export default async function DashboardPage() {
       <div>
         <div className="mb-4 space-y-1">
           <h1 className="text-xl md:text-2xl font-semibold tracking-tight">
-            Hush kelibsiz, {ADMIN_FULL_NAME}
+            Hush kelibsiz, {session?.user?.name}
           </h1>
           <p className="text-sm text-muted-foreground">
             Boshqaruv panelidan yangiliklar, kategoriyalar va teglarni tezkor boshqaring.
@@ -109,7 +153,6 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* Qidiruv va ro'yxatlar: Top news, Muallif tanlovi, Ko'p o'qilgan */}
       <DashboardNewsLists
         topNews={topNews}
         authorsChoiceNews={authorsChoiceNews}

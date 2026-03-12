@@ -8,7 +8,7 @@ import type { RawNewsItem } from '@/features/news/model'
 import type { LocaleMap } from '@/shared/common/lib/locale-types'
 
 type NamedSlug = { slug: string; name: LocaleMap }
-type UserRow = { full_name: string }
+type UserRow = { full_name: string; role: string }
 
 function getFetchOptions(cookie: string | null): RequestInit {
   return {
@@ -52,17 +52,24 @@ export default async function CreateNewsPage() {
     slug: t.slug,
     name: t.name[locale] ?? t.name.uz ?? t.slug,
   }))
-  const authors = Array.from(new Set(usersData.map((u) => u.full_name).filter(Boolean))).sort()
+  const authors = Array.from(
+    new Set(
+      usersData
+        .filter((u) => u.role && u.role !== "user")
+        .map((u) => u.full_name)
+        .filter(Boolean)
+    )
+  ).sort()
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className='pt-4'>
+      <CardHeader className='px-4'>
         <CardTitle>Yangilik yaratish</CardTitle>
         <CardDescription>
           Ikki bosqichda: birinchi — tarjimalar va umumiy maydonlar, ikkinchi — boolean sozlamalar va saqlash.
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className='px-4'>
         <CreateNewsForm
           categories={categories}
           tags={tags}

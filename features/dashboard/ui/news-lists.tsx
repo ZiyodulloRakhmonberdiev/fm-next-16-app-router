@@ -168,7 +168,7 @@ export function DashboardNewsLists({
 
   return (
     <div className="space-y-8">
-      <div className="grid gap-8 lg:grid-cols-3">
+      <div className="grid gap-8">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">

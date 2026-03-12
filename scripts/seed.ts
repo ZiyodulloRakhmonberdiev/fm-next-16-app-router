@@ -190,6 +190,11 @@ export const seed = {
       news: true,
       categories: true,
       tags: true,
+      comments: true,
+      reactions: true,
+      ads: true,
+      team: true,
+      users: true,
     },
   } as const,
 

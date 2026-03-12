@@ -16,6 +16,7 @@ import {
 import { Bell, LogOut, Search, User, ExternalLink, Settings } from 'lucide-react'
 import type { NewsItem } from '@/features/news/model'
 import { useTheme } from 'next-themes'
+import { signOut } from 'next-auth/react'
 
 const DEBOUNCE_MS = 200
 
@@ -174,17 +175,24 @@ export default function AdminHeader() {
               </div>
             </div>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link href="/" className="flex items-center gap-2 cursor-pointer">
-                <ExternalLink className="size-4" />
-                Saytga qaytish
-              </Link>
+            <DropdownMenuItem className='my-2 w-full justify-start' asChild>
+              <Button variant="outline">
+                <Link href="/uz" className="flex items-center gap-2 cursor-pointer">
+                  <ExternalLink className="size-4" />
+                  Saytga qaytish
+                </Link>
+              </Button>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link href="/" className="flex items-center gap-2 cursor-pointer">
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full gap-2 justify-start group-data-[state=collapsed]:justify-center"
+                onClick={() => void signOut({ callbackUrl: '/auth/login' })}
+              >
                 <LogOut className="size-4" />
-                Chiqish
-              </Link>
+                <span className="group-data-[state=collapsed]:hidden">Chiqish</span>
+              </Button>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

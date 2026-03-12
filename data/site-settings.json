@@ -57,8 +57,8 @@
     }
   ],
   "siteConfig": {
-    "email": "info@ferganamedia.uz",
-    "phone": "+998 90 123 45 67",
+    "email": "farmaxt@gmail.com",
+    "phone": "+998 91 677 05 50",
     "address": {
       "uz": "Farg'ona viloyati, Farg'ona shahar, Mash'al, Alisher Navoiy ko'chasi, 32",
       "uzb": "Фарғона вилояти, Фарғона шаҳар, Машъал, Алишер Навоий кўчаси, 32",
@@ -73,12 +73,17 @@
   },
   "clientDelivery": {
     "mode": "normal",
-    "title": "Texnik ishlar",
+    "title": "Texnik ishlar olib borilmoqda",
     "description": "Hozir tizimda texnik ishlar olib borilmoqda. Iltimos, birozdan keyin qayta urinib ko'ring.",
     "models": {
       "news": true,
       "categories": true,
-      "tags": true
+      "tags": true,
+      "comments": true,
+      "reactions": true,
+      "ads": true,
+      "team": true,
+      "users": true
     }
   }
 }

@@ -28,6 +28,9 @@ import {
   Megaphone,
   LogOut,
   MessageSquare,
+  UsersRound,
+  Users2,
+  UserSquare,
 } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import Image from 'next/image'
@@ -42,7 +45,8 @@ const navItems = [
   { href: '/dashboard/categories', label: 'Kategoriyalar', icon: FolderTree, roles: ['ceo', 'administrator', 'moderator'] as NormalizedRole[] },
   { href: '/dashboard/tags', label: 'Teglar', icon: Tag, roles: ['ceo', 'administrator', 'moderator'] as NormalizedRole[] },
   { href: '/dashboard/users', label: 'Foydalanuvchilar', icon: Users, roles: ['ceo', 'administrator'] as NormalizedRole[] },
-  { href: '/dashboard/configs', label: 'Maxfiylik', icon: KeyRound, roles: ['ceo'] as NormalizedRole[] },
+  { href: '/dashboard/team', label: 'Jamoa', icon: UserSquare, roles: ['ceo', 'administrator'] as NormalizedRole[] },
+  { href: '/dashboard/configs', label: 'Maxfiylik', icon: KeyRound, roles: ['ceo', 'administrator'] as NormalizedRole[] },
   { href: '/dashboard/comments', label: 'Izohlar', icon: MessageSquare, roles: ['ceo', 'administrator', 'moderator'] as NormalizedRole[] },
   { href: '/dashboard/ads', label: 'Reklama', icon: Megaphone, roles: ['ceo', 'administrator', 'ads_manager'] as NormalizedRole[] },
 ]
@@ -81,8 +85,8 @@ export default function AdminSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-r border-border">
-      <SidebarHeader className="border-b border-border min-w-0 overflow-hidden shrink-0">
-        <div className="flex h-12 items-center gap-2 px-2 min-w-0">
+      <SidebarHeader className="border-b border-border">
+        <div className="flex h-12 items-center gap-2 px-2">
           <span className="font-semibold text-lg truncate group-data-[state=collapsed]:hidden">
             <Link href="/dashboard" className="hidden md:flex items-center gap-2 shrink-0">
               <Image
@@ -143,7 +147,7 @@ export default function AdminSidebar() {
             onClick={() => void signOut({ callbackUrl: '/auth/login' })}
           >
             <LogOut className="size-4" />
-            <span className="group-data-[state=collapsed]:hidden">Logout</span>
+            <span className="group-data-[state=collapsed]:hidden">Chiqish</span>
           </Button>
           <div className="text-xs text-muted-foreground truncate group-data-[state=collapsed]:hidden">
             Admin panel v1.0

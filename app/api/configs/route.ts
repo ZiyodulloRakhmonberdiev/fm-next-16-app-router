@@ -1,4 +1,7 @@
 import { NextRequest } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/shared/common/lib/auth-options'
+import { normalizeRole } from '@/shared/common/lib/rbac'
 import { seed } from '@/scripts/seed'
 import type { SiteSettingsPayload } from '@/shared/common/lib/site-settings-types'
 import { requireAdminSession } from '@/shared/common/lib/require-admin-session'
@@ -35,6 +38,11 @@ function getDefaultPayload(): SiteSettingsPayload {
         news: seed.clientDelivery.models.news,
         categories: seed.clientDelivery.models.categories,
         tags: seed.clientDelivery.models.tags,
+        comments: seed.clientDelivery.models.comments,
+        reactions: seed.clientDelivery.models.reactions,
+        ads: seed.clientDelivery.models.ads,
+        team: seed.clientDelivery.models.team,
+        users: seed.clientDelivery.models.users,
       },
     },
   }
@@ -104,14 +112,45 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  const unauthorized = await requireAdminSession(['ceo'])
+  const unauthorized = await requireAdminSession(['ceo', 'administrator'])
   if (unauthorized) return unauthorized
+
+  const session = await getServerSession(authOptions)
+  const role = normalizeRole(session?.user?.role)
+  const isCeo = role === 'ceo'
 
   try {
     const body = (await request.json()) as SiteSettingsPayload
     const dir = join(process.cwd(), 'data')
     await mkdir(dir, { recursive: true })
-    await writeFile(SETTINGS_PATH, JSON.stringify(body, null, 2), 'utf-8')
+
+    let payloadToWrite: SiteSettingsPayload
+    if (isCeo) {
+      payloadToWrite = body
+    } else {
+      const existingRaw = await readFile(SETTINGS_PATH, 'utf-8').catch(() => '{}')
+      const existing = JSON.parse(existingRaw) as Partial<SiteSettingsPayload>
+      const defaultPayload = getDefaultPayload()
+      payloadToWrite = {
+        headline: body.headline ?? existing.headline ?? defaultPayload.headline,
+        description: { ...defaultPayload.description, ...existing.description, ...body.description },
+        socialMedia: Array.isArray(body.socialMedia) ? body.socialMedia : (existing.socialMedia ?? defaultPayload.socialMedia),
+        siteConfig: {
+          ...defaultPayload.siteConfig,
+          ...existing.siteConfig,
+          ...body.siteConfig,
+          address: {
+            ...defaultPayload.siteConfig.address,
+            ...(existing.siteConfig as SiteSettingsPayload['siteConfig'] | undefined)?.address,
+            ...body.siteConfig?.address,
+          },
+        },
+        telegram: (existing.telegram ?? defaultPayload.telegram) as SiteSettingsPayload['telegram'],
+        clientDelivery: (existing.clientDelivery ?? defaultPayload.clientDelivery) as SiteSettingsPayload['clientDelivery'],
+      }
+    }
+
+    await writeFile(SETTINGS_PATH, JSON.stringify(payloadToWrite, null, 2), 'utf-8')
     return Response.json({ ok: true })
   } catch (e) {
     console.error('site-settings POST', e)

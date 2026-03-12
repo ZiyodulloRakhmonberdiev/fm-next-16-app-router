@@ -37,14 +37,14 @@ export function ImageForm({
   onRemoveImageFile,
 }: ImageFormProps) {
   return (
-    <Card>
-      <CardHeader>
+    <Card className='pt-0 md:pt-4 border-none md:border-border'>
+      <CardHeader className='px-0 md:px-4'>
         <CardTitle>Rasmlar</CardTitle>
         <CardDescription>
           URL kiritish yoki shaxsiy PC dan rasm yuklash. Bir nechta rasm qo&apos;shish mumkin.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 px-0 md:px-4">
         <div className="flex flex-wrap gap-2">
           <Input
             value={imageUrlInput}

@@ -2,6 +2,8 @@
 /* eslint-disable react/no-unescaped-entities */
 
 import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
+import { normalizeRole } from '@/shared/common/lib/rbac'
 import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/common/components/ui/card'
 import type { AppLocale } from '@/shared/common/lib/locale-api'
@@ -19,6 +21,9 @@ import { Switch } from '@/shared/common/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/common/components/ui/select'
 
 export function ConfigsPage() {
+  const { data: session } = useSession()
+  const role = normalizeRole(session?.user?.role)
+  const isCeo = role === 'ceo'
   const [loading, setLoading] = useState(true)
   const [savingHeadline, setSavingHeadline] = useState(false)
   const [savingDescription, setSavingDescription] = useState(false)
@@ -283,158 +288,169 @@ export function ConfigsPage() {
         saving={savingConfig}
       />
 
-      <Card className="border-destructive/40 bg-destructive/5">
-        <CardHeader>
-          <CardTitle className="text-base text-destructive">Danger zone: Telegram credentiallar</CardTitle>
-          <CardDescription>News create/publish bo'lganda Telegramga yuborish uchun sozlamalar.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between rounded-md border p-3">
-            <div>
-              <Label>Telegram yuborishni yoqish</Label>
-              <p className="text-xs text-muted-foreground">Faqat yoqilganda ishlaydi.</p>
-            </div>
-            <Switch
-              checked={data.telegram.enabled}
-              onCheckedChange={(checked) =>
-                setData((prev) => (prev ? { ...prev, telegram: { ...prev.telegram, enabled: checked } } : prev))
-              }
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>Bot token</Label>
-            <Input
-              value={data.telegram.botToken}
-              onChange={(e) =>
-                setData((prev) =>
-                  prev ? { ...prev, telegram: { ...prev.telegram, botToken: e.target.value } } : prev
-                )
-              }
-              placeholder="123456:AA..."
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>Chat ID</Label>
-            <Input
-              value={data.telegram.chatId}
-              onChange={(e) =>
-                setData((prev) =>
-                  prev ? { ...prev, telegram: { ...prev.telegram, chatId: e.target.value } } : prev
-                )
-              }
-              placeholder="-1001234567890"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>Thread ID (ixtiyoriy)</Label>
-            <Input
-              value={data.telegram.threadId ?? ''}
-              onChange={(e) =>
-                setData((prev) =>
-                  prev ? { ...prev, telegram: { ...prev.telegram, threadId: e.target.value || undefined } } : prev
-                )
-              }
-              placeholder="42"
-            />
-          </div>
-          <div className="flex justify-end">
-            <Button type="button" onClick={handleSaveTelegram} disabled={savingTelegram}>
-              Saqlash
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card className="border-destructive/40 bg-destructive/5">
-        <CardHeader>
-          <CardTitle className="text-base text-destructive">Danger zone: Client uzatish boshqaruvi</CardTitle>
-          <CardDescription>Faqat client saytga ta'sir qiladi. Admin dashboard ishlashda davom etadi.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label>Rejim</Label>
-            <Select
-              value={data.clientDelivery.mode}
-              onValueChange={(value) =>
-                setData((prev) =>
-                  prev
-                    ? {
-                        ...prev,
-                        clientDelivery: {
-                          ...prev.clientDelivery,
-                          mode: value as SiteSettingsPayload['clientDelivery']['mode'],
-                        },
-                      }
-                    : prev
-                )
-              }
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="normal">normal</SelectItem>
-                <SelectItem value="nothing">nothing</SelectItem>
-                <SelectItem value="server-off">server-off</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label>Title</Label>
-            <Input
-              value={data.clientDelivery.title}
-              onChange={(e) =>
-                setData((prev) =>
-                  prev ? { ...prev, clientDelivery: { ...prev.clientDelivery, title: e.target.value } } : prev
-                )
-              }
-              placeholder="Texnik ishlar"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>Description</Label>
-            <Input
-              value={data.clientDelivery.description}
-              onChange={(e) =>
-                setData((prev) =>
-                  prev
-                    ? { ...prev, clientDelivery: { ...prev.clientDelivery, description: e.target.value } }
-                    : prev
-                )
-              }
-              placeholder="Qisqacha tushuntirish"
-            />
-          </div>
-          <div className="grid gap-3 sm:grid-cols-3">
-            {(['news', 'categories', 'tags'] as const).map((key) => (
-              <div key={key} className="flex items-center justify-between rounded-md border p-3">
-                <Label className="capitalize">{key}</Label>
+      {isCeo ? (
+        <>
+          <Card className="border-destructive/40 bg-destructive/5">
+            <CardHeader>
+              <CardTitle className="text-base text-destructive">Danger zone: Telegram credentiallar</CardTitle>
+              <CardDescription>News create/publish bo'lganda Telegramga yuborish uchun sozlamalar. Faqat CEO o&apos;zgartira oladi.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between rounded-md border p-3">
+                <div>
+                  <Label>Telegram yuborishni yoqish</Label>
+                  <p className="text-xs text-muted-foreground">Faqat yoqilganda ishlaydi.</p>
+                </div>
                 <Switch
-                  checked={data.clientDelivery.models[key]}
+                  checked={data.telegram.enabled}
                   onCheckedChange={(checked) =>
+                    setData((prev) => (prev ? { ...prev, telegram: { ...prev.telegram, enabled: checked } } : prev))
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Bot token</Label>
+                <Input
+                  value={data.telegram.botToken}
+                  onChange={(e) =>
+                    setData((prev) =>
+                      prev ? { ...prev, telegram: { ...prev.telegram, botToken: e.target.value } } : prev
+                    )
+                  }
+                  placeholder="123456:AA..."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Chat ID</Label>
+                <Input
+                  value={data.telegram.chatId}
+                  onChange={(e) =>
+                    setData((prev) =>
+                      prev ? { ...prev, telegram: { ...prev.telegram, chatId: e.target.value } } : prev
+                    )
+                  }
+                  placeholder="-1001234567890"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Thread ID (ixtiyoriy)</Label>
+                <Input
+                  value={data.telegram.threadId ?? ''}
+                  onChange={(e) =>
+                    setData((prev) =>
+                      prev ? { ...prev, telegram: { ...prev.telegram, threadId: e.target.value || undefined } } : prev
+                    )
+                  }
+                  placeholder="42"
+                />
+              </div>
+              <div className="flex justify-end">
+                <Button type="button" onClick={handleSaveTelegram} disabled={savingTelegram}>
+                  Saqlash
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-destructive/40 bg-destructive/5">
+            <CardHeader>
+              <CardTitle className="text-base text-destructive">Danger zone: Client uzatish boshqaruvi</CardTitle>
+              <CardDescription>Faqat client saytga ta'sir qiladi. Admin dashboard ishlashda davom etadi. Faqat CEO o&apos;zgartira oladi.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label>Rejim</Label>
+                <Select
+                  value={data.clientDelivery.mode}
+                  onValueChange={(value) =>
                     setData((prev) =>
                       prev
                         ? {
                             ...prev,
                             clientDelivery: {
                               ...prev.clientDelivery,
-                              models: { ...prev.clientDelivery.models, [key]: checked },
+                              mode: value as SiteSettingsPayload['clientDelivery']['mode'],
                             },
                           }
                         : prev
                     )
                   }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="normal">normal</SelectItem>
+                    <SelectItem value="nothing">nothing</SelectItem>
+                    <SelectItem value="server-off">server-off</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Title</Label>
+                <Input
+                  value={data.clientDelivery.title}
+                  onChange={(e) =>
+                    setData((prev) =>
+                      prev ? { ...prev, clientDelivery: { ...prev.clientDelivery, title: e.target.value } } : prev
+                    )
+                  }
+                  placeholder="Texnik ishlar"
                 />
               </div>
-            ))}
-          </div>
-          <div className="flex justify-end">
-            <Button type="button" onClick={handleSaveDelivery} disabled={savingDelivery}>
-              Saqlash
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Input
+                  value={data.clientDelivery.description}
+                  onChange={(e) =>
+                    setData((prev) =>
+                      prev
+                        ? { ...prev, clientDelivery: { ...prev.clientDelivery, description: e.target.value } }
+                        : prev
+                    )
+                  }
+                  placeholder="Qisqacha tushuntirish"
+                />
+              </div>
+              <div className="grid gap-3 sm:grid-cols-3">
+                {(['news', 'categories', 'tags', 'comments', 'reactions', 'ads', 'team', 'users'] as const).map((key) => (
+                  <div key={key} className="flex items-center justify-between rounded-md border p-3">
+                    <Label className="capitalize">{key}</Label>
+                    <Switch
+                      checked={data.clientDelivery.models[key] ?? true}
+                      onCheckedChange={(checked) =>
+                        setData((prev) =>
+                          prev
+                            ? {
+                                ...prev,
+                                clientDelivery: {
+                                  ...prev.clientDelivery,
+                                  models: { ...prev.clientDelivery.models, [key]: checked },
+                                },
+                              }
+                            : prev
+                        )
+                      }
+                    />
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-end">
+                <Button type="button" onClick={handleSaveDelivery} disabled={savingDelivery}>
+                  Saqlash
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </>
+      ) : (
+        <Card className="border-muted">
+          <CardHeader>
+            <CardTitle className="text-base">Credentiallar va content delivery</CardTitle>
+            <CardDescription>Ushbu bo&apos;limni faqat CEO o&apos;zgartira oladi. Siz faqat ma&apos;lumotlar, headline, tavsif, ijtimoiy tarmoqlar va sayt konfiguratsiyasini tahrirlashingiz mumkin.</CardDescription>
+          </CardHeader>
+        </Card>
+      )}
     </div>
   )
 }

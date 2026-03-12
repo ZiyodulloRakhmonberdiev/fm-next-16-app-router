@@ -1,0 +1,129 @@
+[{
+  "_id": "9bc35202-3205-4029-affa-4b785499ebb4",
+  "slug": "sharq-taronalari-2025-eng-yaxshi-lahazlar",
+  "title": {
+    "uz": "Sharq Taronalari 2025: eng yaxshi lahazlar",
+    "uzb": "Шарқ Тароналари 2025: енг яхши лаҳазлар"
+  },
+  "description": {
+    "uz": "Sirdaryo dalalarida yangi kombayn va traktorlar namoyishi.",
+    "uzb": "Сирдарё далаларида янги комбайн ва тракторлар намойиши."
+  },
+  "categorySlug": "uzbekistan",
+  "tagSlugs": [
+    "sport"
+  ],
+  "images": [
+    "https://i.pinimg.com/736x/43/ae/e2/43aee20aac5bf12b9cf188c5b258e1b7.jpg"
+  ],
+  "author": "Moderator",
+  "minutes": 3,
+  "views": 4,
+  "status": "published",
+  "type": "video",
+  "authorsChoice": false,
+  "isTrending": false,
+  "isLatest": false,
+  "isPopular": false,
+  "isTop": false,
+  "isBreaking": false,
+  "pushedToTelegram": false,
+  "publishedAt": {
+    "$date": "2025-12-11T10:12:28.028Z"
+  },
+  "createdAt": {
+    "$date": "2026-03-12T10:12:28.029Z"
+  },
+  "updatedAt": {
+    "$date": "2026-03-12T10:17:29.484Z"
+  },
+  "__v": 0,
+  "content": {},
+  "videoSource": "youtube",
+  "videoUrl": "https://www.youtube.com/watch?v=wNBUrU946RI"
+},
+{
+  "_id": "edad54ad-c21f-4a69-9b74-3c6951338d60",
+  "slug": "toshkent-xalqaro-investitsiya-forumi-2025-jonli-efir",
+  "title": {
+    "uz": "Toshkent Xalqaro Investitsiya Forumi 2025 (Jonli efir)",
+    "uzb": "Тошкент Халқаро Инвестиция Форуми 2025 (Жонли ефир)"
+  },
+  "description": {
+    "uz": "Qoraqalpog'istondagi ekologik muammolar va moslashish haqida hujjatli film.",
+    "uzb": "Қорақалпоғистондаги екологик муаммолар ва мослашиш ҳақида ҳужжатли филм."
+  },
+  "categorySlug": "uzbekistan",
+  "tagSlugs": [],
+  "images": [
+    "/uploads/images/image-9-a221d310-c1d2-4f93-bcb6-db010789ef11.png"
+  ],
+  "author": "Moderator",
+  "minutes": 3,
+  "views": 1,
+  "status": "published",
+  "type": "image",
+  "authorsChoice": true,
+  "isTrending": false,
+  "isLatest": false,
+  "isPopular": false,
+  "isTop": true,
+  "isBreaking": false,
+  "pushedToTelegram": true,
+  "publishedAt": {
+    "$date": "2026-03-12T10:19:03.923Z"
+  },
+  "createdAt": {
+    "$date": "2026-03-12T10:19:03.925Z"
+  },
+  "updatedAt": {
+    "$date": "2026-03-12T10:51:36.244Z"
+  },
+  "__v": 0,
+  "content": {},
+  "telegramLastAttemptAt": {
+    "$date": "2026-03-12T10:49:31.757Z"
+  },
+  "telegramPushReason": "Bad Request: inline keyboard button URL 'http://localhost:3000/news/toshkent-xalqaro-investitsiya-forumi-2025-jonli-efir' is invalid: Wrong HTTP URL",
+  "telegramPushStatus": "failed"
+},
+{
+  "_id": "b9d79d22-1721-4a22-ab78-57e19f4a9375",
+  "slug": "yangi",
+  "title": {
+    "uz": "Yangi",
+    "uzb": "Янги"
+  },
+  "description": {
+    "uz": "new",
+    "uzb": "неw"
+  },
+  "categorySlug": "uzbekistan",
+  "tagSlugs": [],
+  "images": [
+    "image-7.png"
+  ],
+  "author": "Moderator",
+  "minutes": 3,
+  "views": 0,
+  "status": "published",
+  "type": "image",
+  "authorsChoice": false,
+  "isTrending": false,
+  "isLatest": false,
+  "isPopular": false,
+  "isTop": false,
+  "isBreaking": false,
+  "pushedToTelegram": false,
+  "publishedAt": {
+    "$date": "2026-03-12T10:41:09.815Z"
+  },
+  "createdAt": {
+    "$date": "2026-03-12T10:41:09.816Z"
+  },
+  "updatedAt": {
+    "$date": "2026-03-12T10:41:14.511Z"
+  },
+  "__v": 0,
+  "content": {}
+}]

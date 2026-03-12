@@ -34,6 +34,11 @@ export type ClientModelSwitches = {
   news: boolean
   categories: boolean
   tags: boolean
+  comments: boolean
+  reactions: boolean
+  ads: boolean
+  team: boolean
+  users: boolean
 }
 
 export type ClientDeliveryControl = {

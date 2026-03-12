@@ -280,7 +280,7 @@ export function CreateNewsForm({ categories, tags, authors, existingSlugs = [], 
         content,
         categorySlug,
         tagSlugs,
-        images: [...imageUrls, ...imageFiles.map((f) => f.name)],
+        images: imageUrls,
         author: author.trim(),
         minutes: resolvedMinutes,
         ...(isEditMode ? {} : { views: 0 }),
@@ -594,15 +594,36 @@ export function CreateNewsForm({ categories, tags, authors, existingSlugs = [], 
     setImageUrls((prev) => prev.filter((_, i) => i !== index))
   }
 
-  const addImageFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const addImageFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.currentTarget
     const fileList = input.files
     if (!fileList || fileList.length === 0) return
-    const newFiles = Array.from(fileList)
-    setImageFiles((prev) => [...prev, ...newFiles])
-    requestAnimationFrame(() => {
-      input.value = ''
-    })
+    const files = Array.from(fileList)
+
+    const uploadedUrls: string[] = []
+    for (const file of files) {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('kind', 'image')
+      try {
+        const res = await fetch('/api/uploads', { method: 'POST', body: formData })
+        const data = (await res.json().catch(() => null)) as { url?: string; error?: string } | null
+        if (!res.ok || !data?.url) {
+          toast.error(data?.error || "Rasmni yuklab bo'lmadi")
+          continue
+        }
+        uploadedUrls.push(data.url)
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Rasmni yuklab bo'lmadi")
+      }
+    }
+
+    if (uploadedUrls.length) {
+      setImageUrls((prev) => [...prev, ...uploadedUrls])
+    }
+
+    // Fayl inputini tozalash
+    input.value = ''
   }
 
   const removeImageFile = (index: number) => {
@@ -637,13 +658,10 @@ export function CreateNewsForm({ categories, tags, authors, existingSlugs = [], 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-2 text-sm">
-        <button
+        <Button
           type="button"
           onClick={() => goToStep(1)}
-          className={cn(
-            'flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium',
-            step === 1 ? 'bg-primary text-primary-foreground border-primary' : 'bg-muted text-muted-foreground hover:bg-muted/80'
-          )}
+          variant={step === 1 ? 'default' : 'outline'}
         >
           <span
             className={cn(
@@ -651,16 +669,13 @@ export function CreateNewsForm({ categories, tags, authors, existingSlugs = [], 
               step === 1 ? 'bg-primary-foreground' : 'bg-muted-foreground/70'
             )}
           />
-          Bosqich 1: Ma&apos;lumotlar
-        </button>
+          Bosqich 1: Ma'lumotlar
+        </Button>
         <ArrowRight className="size-4 text-muted-foreground shrink-0" />
-        <button
+        <Button
           type="button"
           onClick={() => goToStep(2)}
-          className={cn(
-            'flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium',
-            step === 2 ? 'bg-primary text-primary-foreground border-primary' : 'bg-muted text-muted-foreground hover:bg-muted/80'
-          )}
+          variant={step === 2 ? 'default' : 'outline'}
         >
           <span
             className={cn(
@@ -669,15 +684,12 @@ export function CreateNewsForm({ categories, tags, authors, existingSlugs = [], 
             )}
           />
           Bosqich 2: Kontent
-        </button>
+        </Button>
         <ArrowRight className="size-4 text-muted-foreground shrink-0" />
-        <button
+        <Button
           type="button"
           onClick={() => goToStep(3)}
-          className={cn(
-            'flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium',
-            step === 3 ? 'bg-primary text-primary-foreground border-primary' : 'bg-muted text-muted-foreground hover:bg-muted/80'
-          )}
+          variant={step === 3 ? 'default' : 'outline'}
         >
           <span
             className={cn(
@@ -686,7 +698,7 @@ export function CreateNewsForm({ categories, tags, authors, existingSlugs = [], 
             )}
           />
           Bosqich 3: Sozlamalar
-        </button>
+        </Button>
       </div>
 
       {step === 1 && (

@@ -1,15 +1,21 @@
 import { NextRequest } from "next/server"
 import { dbConnect } from "@/shared/common/lib/db"
+import { isClientDeliveryEnabled } from "@/shared/common/lib/server-client-delivery"
 import { AdModel } from "@/features/ads/model/ads.model"
 import { createAdSchema } from "@/features/ads/model/schemas"
 import { requireAdminSession } from "@/shared/common/lib/require-admin-session"
 
 export async function GET(req: NextRequest) {
-  await dbConnect()
   const { searchParams } = new URL(req.url)
   const isPublic = searchParams.get("public") === "1"
   const placement = searchParams.get("placement")
 
+  if (isPublic) {
+    const allowed = await isClientDeliveryEnabled("ads")
+    if (!allowed) return Response.json([])
+  }
+
+  await dbConnect()
   if (isPublic) {
     const now = new Date()
     const filter: Record<string, unknown> = {

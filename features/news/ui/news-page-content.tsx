@@ -18,7 +18,7 @@ import {
   CarouselPrevious,
 } from "@/shared/common/components/ui/carousel"
 import { getYoutubeEmbedUrl } from "@/shared/common/lib/youtube"
-import type { NewsItem, NewsContent } from "@/features/news/model"
+import type { NewsItem } from "@/features/news/model"
 import { isRichContent, parseRichContentString } from "@/features/news/model"
 import { RichContentBlocks } from "@/features/news/ui/rich-content-blocks"
 import { TextContentRenderer } from "@/features/news/ui/text-content-renderer"
@@ -41,6 +41,20 @@ export function NewsPageContent({ news }: NewsPageContentProps) {
     typeof news.content === "string" ? parseRichContentString(news.content) : null
   const { data: settings } = usePublicSiteSettingsQuery()
   const tagsEnabled = settings?.clientDelivery.models.tags ?? true
+
+  const getSafeImageSrc = (raw?: string) => {
+    if (!raw) return ""
+    const candidate =
+      raw.startsWith("http://") || raw.startsWith("https://") || raw.startsWith("/")
+        ? raw
+        : `/uploads/images/${raw}`
+    try {
+      new URL(candidate, "http://localhost")
+      return candidate
+    } catch {
+      return ""
+    }
+  }
 
   React.useEffect(() => {
     if (typeof window === "undefined") return
@@ -129,13 +143,19 @@ export function NewsPageContent({ news }: NewsPageContentProps) {
 
       {!news.videoSource && news.images?.length === 1 && (
         <div className="relative mb-6 aspect-video w-full overflow-hidden rounded-lg bg-muted">
-          <Image
-            src={news.images[0]}
-            alt={news.title}
-            fill
-            className="object-cover"
-            priority
-          />
+          {getSafeImageSrc(news.images[0]) ? (
+            <Image
+              src={getSafeImageSrc(news.images[0])}
+              alt={news.title}
+              fill
+              className="object-cover"
+              priority
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center px-2 text-sm text-muted-foreground text-center">
+              Rasmni yuklab bo&apos;lmadi
+            </div>
+          )}
           <div className="absolute right-3 top-3 z-10">
             <SavedNewsActions slug={news.slug} overlay />
           </div>
@@ -148,13 +168,19 @@ export function NewsPageContent({ news }: NewsPageContentProps) {
               {news.images.map((src, i) => (
                 <CarouselItem key={src} className="pl-0">
                   <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-muted">
-                    <Image
-                      src={src}
-                      alt={`${news.title} — ${i + 1}`}
-                      fill
-                      className="object-cover"
-                      priority={i === 0}
-                    />
+                    {getSafeImageSrc(src) ? (
+                      <Image
+                        src={getSafeImageSrc(src)}
+                        alt={`${news.title} — ${i + 1}`}
+                        fill
+                        className="object-cover"
+                        priority={i === 0}
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center px-2 text-xs text-muted-foreground text-center">
+                        Rasmni yuklab bo&apos;lmadi
+                      </div>
+                    )}
                     {i === 0 ? (
                       <div className="absolute right-3 top-3 z-10">
                         <SavedNewsActions slug={news.slug} overlay />
@@ -184,12 +210,18 @@ export function NewsPageContent({ news }: NewsPageContentProps) {
           {news.images.length === 1 ? (
             <div className="flex justify-center">
               <div className="relative w-full aspect-video overflow-hidden rounded-lg bg-muted">
-                <Image
-                  src={news.images[0]}
-                  alt={`${news.title} — 1`}
-                  fill
-                  className="object-cover"
-                />
+                {getSafeImageSrc(news.images[0]) ? (
+                  <Image
+                    src={getSafeImageSrc(news.images[0])}
+                    alt={`${news.title} — 1`}
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center px-2 text-sm text-muted-foreground text-center">
+                    Rasmni yuklab bo&apos;lmadi
+                  </div>
+                )}
               </div>
             </div>
           ) : (
@@ -200,12 +232,18 @@ export function NewsPageContent({ news }: NewsPageContentProps) {
                     {news.images.map((src, i) => (
                       <CarouselItem key={src} className="pl-0">
                         <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-muted">
-                          <Image
-                            src={src}
-                            alt={`${news.title} — ${i + 1}`}
-                            fill
-                            className="object-cover"
-                          />
+                          {getSafeImageSrc(src) ? (
+                            <Image
+                              src={getSafeImageSrc(src)}
+                              alt={`${news.title} — ${i + 1}`}
+                              fill
+                              className="object-cover"
+                            />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center px-2 text-xs text-muted-foreground text-center">
+                              Rasmni yuklab bo&apos;lmadi
+                            </div>
+                          )}
                         </div>
                       </CarouselItem>
                     ))}
@@ -224,12 +262,18 @@ export function NewsPageContent({ news }: NewsPageContentProps) {
                         key={src}
                         className="relative aspect-video overflow-hidden rounded-lg bg-muted"
                       >
-                        <Image
-                          src={src}
-                          alt={`${news.title} — ${i + 1}`}
-                          fill
-                          className="object-cover"
-                        />
+                        {getSafeImageSrc(src) ? (
+                          <Image
+                            src={getSafeImageSrc(src)}
+                            alt={`${news.title} — ${i + 1}`}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center px-2 text-xs text-muted-foreground text-center">
+                            Rasmni yuklab bo&apos;lmadi
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -241,12 +285,18 @@ export function NewsPageContent({ news }: NewsPageContentProps) {
                       key={src}
                       className="relative aspect-video overflow-hidden rounded-lg bg-muted"
                     >
-                      <Image
-                        src={src}
-                        alt={`${news.title} — ${i + 1}`}
-                        fill
-                        className="object-cover"
-                      />
+                      {getSafeImageSrc(src) ? (
+                        <Image
+                          src={getSafeImageSrc(src)}
+                          alt={`${news.title} — ${i + 1}`}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center px-2 text-xs text-muted-foreground text-center">
+                          Rasmni yuklab bo&apos;lmadi
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

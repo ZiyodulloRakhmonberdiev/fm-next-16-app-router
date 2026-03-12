@@ -85,7 +85,10 @@
     "views": "views",
     "images": "Images",
     "comments": "Comments",
-    "reactions": "Reactions"
+    "reactions": "Reactions",
+    "page_not_found": "Page not found",
+    "page_not_found_desc": "The page or news you are looking for does not exist.",
+    "go_back_to_home_page": "Go back to the home page"
   },
   "stayConnected": {
     "title": "Stay Connected",

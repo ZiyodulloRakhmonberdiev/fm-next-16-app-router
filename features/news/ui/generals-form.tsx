@@ -55,12 +55,12 @@ export function GeneralsForm({
   onMinutesChange,
 }: GeneralsFormProps) {
   return (
-    <Card>
-      <CardHeader>
+    <Card className='pt-0 md:pt-4 border-none md:border-border'>
+      <CardHeader className='px-0 md:px-4'>
         <CardTitle>Umumiy maydonlar</CardTitle>
         <CardDescription>Kategoriya, teglar va boshqalarni tanlang.</CardDescription>
       </CardHeader>
-      <CardContent className="grid gap-4 sm:grid-cols-2">
+      <CardContent className="grid gap-4 sm:grid-cols-2 px-0 md:px-4">
         <div className="space-y-2">
           <Label>Kategoriya</Label>
           <DropdownMenu>

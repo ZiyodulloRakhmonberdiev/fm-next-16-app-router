@@ -21,9 +21,9 @@ const navItems = [
   { href: '/dashboard/news', label: 'Yangiliklar', icon: Newspaper, roles: ['ceo', 'administrator', 'moderator'] as NormalizedRole[] },
   { href: '/dashboard/news/create', label: 'Yangi', icon: PlusCircle, roles: ['ceo', 'administrator', 'moderator'] as NormalizedRole[] },
   { href: '/dashboard/users', label: 'Foydalanuvchilar', icon: Users, roles: ['ceo', 'administrator'] as NormalizedRole[] },
-  { href: '/dashboard/configs', label: 'Ma\'lumotlar', icon: Settings2, roles: ['ceo'] as NormalizedRole[] },
-  { href: '/dashboard/comments', label: 'Izohlar', icon: MessageSquare, roles: ['ceo', 'administrator', 'moderator'] as NormalizedRole[] },
-  { href: '/dashboard/ads', label: 'Reklama', icon: Megaphone, roles: ['ceo', 'administrator', 'ads_manager'] as NormalizedRole[] },
+  { href: '/dashboard/configs', label: 'Maxfiylik', icon: Settings2, roles: ['ceo'] as NormalizedRole[] },
+  // { href: '/dashboard/comments', label: 'Izohlar', icon: MessageSquare, roles: ['ceo', 'administrator', 'moderator'] as NormalizedRole[] },
+  // { href: '/dashboard/ads', label: 'Reklama', icon: Megaphone, roles: ['ceo', 'administrator', 'ads_manager'] as NormalizedRole[] },
 ]
 
 export function AdminNavMobile() {

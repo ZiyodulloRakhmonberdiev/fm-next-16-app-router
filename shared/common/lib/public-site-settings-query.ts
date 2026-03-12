@@ -35,6 +35,11 @@ export function getSeedSiteSettings(): SiteSettingsPayload {
         news: seed.clientDelivery.models.news,
         categories: seed.clientDelivery.models.categories,
         tags: seed.clientDelivery.models.tags,
+        comments: seed.clientDelivery.models.comments,
+        reactions: seed.clientDelivery.models.reactions,
+        ads: seed.clientDelivery.models.ads,
+        team: seed.clientDelivery.models.team,
+        users: seed.clientDelivery.models.users,
       },
     },
   }

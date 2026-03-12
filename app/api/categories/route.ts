@@ -1,11 +1,15 @@
 import { NextRequest } from 'next/server'
 import { dbConnect } from '@/shared/common/lib/db'
 import { requireAdminSession } from '@/shared/common/lib/require-admin-session'
+import { isClientDeliveryEnabled } from '@/shared/common/lib/server-client-delivery'
 import { CategoryModel } from '@/features/category/model/category.model'
 import { createCategorySchema } from '@/features/category/model/schemas'
 
 export async function GET() {
   try {
+    const allowed = await isClientDeliveryEnabled('categories')
+    if (!allowed) return Response.json([])
+
     await dbConnect()
     const categories = await CategoryModel.find().sort({ priority: -1, createdAt: -1 }).lean()
     return Response.json(categories)

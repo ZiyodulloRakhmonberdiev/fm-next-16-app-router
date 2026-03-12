@@ -5,7 +5,7 @@ import { usePublicSiteSettingsQuery } from "@/shared/common/lib/public-site-sett
 
 type Props = {
   children: ReactNode
-  model?: "news" | "categories" | "tags"
+  model?: "news" | "categories" | "tags" | "comments" | "reactions" | "ads" | "team" | "users"
 }
 
 export default function ClientServerOffGate({ children, model }: Props) {

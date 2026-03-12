@@ -259,6 +259,20 @@ export function DashboardNewsListPage({
   const currentPage = Math.min(page, totalPages)
   const slice = filtered.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE)
 
+  const getImageSrc = (raw?: string) => {
+    if (!raw) return ''
+    const candidate =
+      raw.startsWith('http://') || raw.startsWith('https://') || raw.startsWith('/')
+        ? raw
+        : `/uploads/images/${raw}`
+    try {
+      new URL(candidate, 'http://localhost')
+      return candidate
+    } catch {
+      return ''
+    }
+  }
+
   const clearFilters = () => {
     setSearch('')
     setStatusFilter('')
@@ -275,13 +289,13 @@ export function DashboardNewsListPage({
     variant === 'full'
       ? "Barcha yangiliklar ro'yxati. Yangi yangilik qo'shish uchun quyidagi tugmani bosing."
       : isTrashView
-      ? "Savatga o'tkazilgan yangiliklar."
-      : 'Filtrlangan yangiliklar ro\'yxati.'
+        ? "Savatga o'tkazilgan yangiliklar."
+        : 'Filtrlangan yangiliklar ro\'yxati.'
 
   return (
     <div className="space-y-6 min-w-0 overflow-hidden scrollbar-hide">
-      <Card className="border-primary/30 bg-primary/5">
-        <CardHeader className="flex flex-col md:flex-row items-center justify-between gap-4">
+      <Card className="border-primary/30 bg-primary/5 p-4 md:p-6">
+        <CardHeader className="flex flex-col md:flex-row items-center justify-between gap-4 px-0 md:px-4">
           <div>
             <CardTitle className="text-xl flex items-center gap-2">
               <Newspaper className="size-6" />
@@ -304,13 +318,13 @@ export function DashboardNewsListPage({
         <>
           <div className="grid gap-4 grid-cols-2 sm:grid-cols-3">
             <Link href="/dashboard/news" className="block">
-              <Card className="hover:border-primary/60 transition-colors cursor-pointer h-full">
-                <CardHeader className="py-3 flex flex-row items-center gap-3">
+              <Card className="hover:border-primary/60 transition-colors cursor-pointer h-full p-2 md:p-4">
+                <CardHeader className="py-3 flex flex-row items-center gap-3 px-0 md:px-4">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
                     <Newspaper className="size-5 text-primary" />
                   </div>
                   <div className="min-w-0">
-                    <CardTitle className="text-sm font-medium">Barcha yangiliklar</CardTitle>
+                    <CardTitle className="text-sm font-medium">Barchasi</CardTitle>
                     <CardDescription>{news.length} ta yangilik</CardDescription>
                   </div>
                 </CardHeader>
@@ -322,8 +336,8 @@ export function DashboardNewsListPage({
               const Icon = STATUS_ICONS[value]
               return (
                 <Link key={value} href={`/dashboard/news/status/${value}`} className="block">
-                  <Card className="hover:border-primary/60 transition-colors cursor-pointer h-full">
-                    <CardHeader className="py-3 flex flex-row items-center gap-3">
+                  <Card className="hover:border-primary/60 transition-colors cursor-pointer h-full p-2 md:p-4">
+                    <div className="py-3 flex flex-row items-center gap-3 px-0 md:px-4">
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
                         <Icon className="size-5 text-primary" />
                       </div>
@@ -331,20 +345,20 @@ export function DashboardNewsListPage({
                         <CardTitle className="text-sm font-medium">{option.label}</CardTitle>
                         <CardDescription>{count} ta yangilik</CardDescription>
                       </div>
-                    </CardHeader>
+                    </div>
                   </Card>
                 </Link>
               )
             })}
           </div>
 
-          <Card>
-            <CardHeader>
+          <Card className='py-0 md:py-6'>
+            <CardHeader className='hidden md:block'>
               <CardTitle className="text-base">Filterlar</CardTitle>
               <CardDescription>Status, Top, tur va sana bo'yicha filtrlash</CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+            <CardContent className='p-4'>
+              <div className="grid gap-2 md:gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
                 <FilterSelect label="Status" value={statusFilter} options={STATUS_OPTIONS} onSelect={setStatusFilter} />
                 <FilterSelect label="Top" value={isTopFilter} options={TOP_OPTIONS} onSelect={setIsTopFilter} />
                 <FilterSelect label="Turi" value={typeFilter} options={TYPE_OPTIONS_FULL} onSelect={setTypeFilter} />
@@ -357,8 +371,8 @@ export function DashboardNewsListPage({
                   <Input id="date-to" type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="h-9" />
                 </div>
                 <div className="flex flex-col justify-end gap-2">
-                  <p className="text-xs text-muted-foreground opacity-0 pointer-events-none">.</p>
-                  <Button variant="outline" size="sm" onClick={clearFilters}>Filterlarni tozalash</Button>
+                  <p className="hidden md:block text-xs text-muted-foreground opacity-0 pointer-events-none">.</p>
+                  <Button variant="outline" size="sm" className="mt-2 md:mt-0" onClick={clearFilters}>Filterlarni tozalash</Button>
                 </div>
               </div>
             </CardContent>
@@ -366,9 +380,9 @@ export function DashboardNewsListPage({
         </>
       )}
 
-      <Card className="min-w-0">
+      <Card className="py-4 md:py-6">
         <CardHeader>
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between px-0">
             <CardTitle className="text-base">Barcha yangiliklar ({filtered.length})</CardTitle>
             <div className="relative w-full sm:w-auto sm:min-w-[400px]">
               <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -426,13 +440,16 @@ export function DashboardNewsListPage({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {slice.map((item) => (
-                      <TableRow key={item.slug}>
+                    {slice.map((item) => {
+                      const firstImage = item.images?.[0]
+                      const thumbSrc = getImageSrc(firstImage)
+                      return (
+                    <TableRow key={item.slug}>
                         {columnVisibility.rasm !== false && (
                           <TableCell>
                             <div className="relative h-12 w-16 overflow-hidden rounded bg-muted">
-                              {item.images[0] ? (
-                                <Image src={item.images[0]} alt="" fill className="object-cover" sizes="64px" />
+                              {thumbSrc ? (
+                              <Image src={thumbSrc} alt="" fill className="object-cover" sizes="64px" />
                               ) : (
                                 <div className="flex h-full w-full items-center justify-center">
                                   <Newspaper className="size-6 text-muted-foreground" />
@@ -520,7 +537,7 @@ export function DashboardNewsListPage({
                           </TableCell>
                         )}
                       </TableRow>
-                    ))}
+                    )})}
                   </TableBody>
                 </Table>
               </div>

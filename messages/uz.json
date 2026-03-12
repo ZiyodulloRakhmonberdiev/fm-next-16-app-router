@@ -85,7 +85,10 @@
   "views": "ko'rishlar",
   "images": "Rasmlar",
   "comments": "Izohlar",
-  "reactions": "Reaksiyalar"
+  "reactions": "Reaksiyalar",
+  "page_not_found": "Sahifa topilmadi",
+  "page_not_found_desc": "Siz qidirgan sahifa yoki yangilik topilmadi.",
+  "go_back_to_home_page": "Asosiy sahifaga qaytish"
   },
   "stayConnected": {
     "title": "Bizga qo'shiling",

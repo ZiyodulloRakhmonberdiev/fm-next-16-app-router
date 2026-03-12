@@ -72,8 +72,12 @@ export function NewsEngagement({ slug }: { slug: string }) {
     setCommentOffset(offset)
   }
   async function loadReactions() {
-    const anonId = getAnonId()
-    const res = await fetch(`/api/news/${slug}/reactions?anonId=${encodeURIComponent(anonId)}`, { cache: "no-store" })
+    const isAuthed = Boolean(session?.user?.id)
+    const anonId = isAuthed ? "" : getAnonId()
+    const url = isAuthed
+      ? `/api/news/${slug}/reactions`
+      : `/api/news/${slug}/reactions?anonId=${encodeURIComponent(anonId)}`
+    const res = await fetch(url, { cache: "no-store" })
     if (!res.ok) return
     const data = await res.json()
     setCounts(data.counts ?? counts)
@@ -136,12 +140,13 @@ export function NewsEngagement({ slug }: { slug: string }) {
   }
 
   async function setReaction(type: ReactionType) {
-    const anonId = getAnonId()
+    const isAuthed = Boolean(session?.user?.id)
+    const anonId = isAuthed ? "" : getAnonId()
     const res = await fetch(`/api/news/${slug}/reactions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-anon-id": anonId,
+        ...(isAuthed ? {} as Record<string, string> : { "x-anon-id": anonId }),
       },
       body: JSON.stringify({ type }),
     })

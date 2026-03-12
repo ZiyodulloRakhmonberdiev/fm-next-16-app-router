@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/shared/common/components/ui/switch"
 import { Textarea } from "@/shared/common/components/ui/textarea"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/common/components/ui/table"
-import { Pencil, Plus, Trash2, Upload } from "lucide-react"
+import { Loader2, Pencil, Plus, Trash2, Upload } from "lucide-react"
 
 type AdItem = {
   _id: string
@@ -59,6 +59,7 @@ export default function DashboardAdsPage() {
   const [form, setForm] = useState(emptyForm)
   const [editId, setEditId] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
   const [mediaUploading, setMediaUploading] = useState(false)
   const mediaFileRef = useRef<HTMLInputElement>(null)
   const logoFileRef = useRef<HTMLInputElement>(null)
@@ -181,13 +182,18 @@ export default function DashboardAdsPage() {
   }
 
   async function removeAd(id: string) {
-    const res = await fetch(`/api/ads/${id}`, { method: "DELETE" })
-    if (!res.ok) {
-      toast.error("O'chirib bo'lmadi")
-      return
+    setDeletingId(id)
+    try {
+      const res = await fetch(`/api/ads/${id}`, { method: "DELETE" })
+      if (!res.ok) {
+        toast.error("O'chirib bo'lmadi")
+        return
+      }
+      toast.success("Reklama o'chirildi")
+      void loadAds()
+    } finally {
+      setDeletingId(null)
     }
-    toast.success("Reklama o'chirildi")
-    void loadAds()
   }
 
   return (
@@ -324,7 +330,10 @@ export default function DashboardAdsPage() {
             <Switch checked={form.active} onCheckedChange={(v) => setForm((p) => ({ ...p, active: v }))} />
           </div>
           <div className="md:col-span-2 flex gap-2">
-            <Button onClick={() => void saveAd()} disabled={loading}>{editId ? "Tahrirlash" : "Qo'shish"}</Button>
+            <Button onClick={() => void saveAd()} disabled={loading} className="gap-2">
+              {loading ? <Loader2 className="size-4 animate-spin" /> : null}
+              {editId ? "Tahrirlash" : "Qo'shish"}
+            </Button>
             {editId ? <Button variant="outline" onClick={() => { setEditId(null); setForm(emptyForm) }}>Bekor qilish</Button> : null}
           </div>
         </CardContent>
@@ -383,7 +392,14 @@ export default function DashboardAdsPage() {
                     >
                       <Pencil className="size-4" />
                     </Button>
-                    <Button size="sm" variant="outline" onClick={() => void removeAd(item._id)}><Trash2 className="size-4" /></Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={deletingId === item._id}
+                      onClick={() => void removeAd(item._id)}
+                    >
+                      {deletingId === item._id ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}

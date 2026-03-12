@@ -20,12 +20,12 @@ export function VideoForm({
   onVideoFileChange,
 }: VideoFormProps) {
   return (
-    <Card>
-      <CardHeader>
+    <Card className='pt-0 md:pt-4 border-none md:border-border'>
+      <CardHeader className='px-0 md:px-4'>
         <CardTitle>Video</CardTitle>
         <CardDescription>URL yoki qurilmangizdan dan kiriting. Video kiritilsa yangilik turi «video» deb saqlanadi.</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 px-0 md:px-4">
         <div className="grid sm:grid-cols-2 gap-4">
           <div className="space-y-2 flex-1 min-w-[200px]">
             <Label>Video URL</Label>

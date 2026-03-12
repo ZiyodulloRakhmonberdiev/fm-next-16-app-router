@@ -52,6 +52,10 @@ export const newsStatusSchema = z.enum([
   'archived',
 ])
 
+const imageUrlSchema = z
+  .string()
+  .min(1, "Rasm URL noto'g'ri")
+
 export const createNewsSchema = z.object({
   slug: z
     .string()
@@ -63,7 +67,7 @@ export const createNewsSchema = z.object({
   content: newsOptionalLocaleContentSchema,
   categorySlug: z.string().min(1, 'Kategoriya majburiy'),
   tagSlugs: z.array(z.string()).default([]),
-  images: z.array(z.string().url('Rasm URL noto\'g\'ri')).default([]),
+  images: z.array(imageUrlSchema).default([]),
   author: z.string().min(1, 'Muallif majburiy'),
   minutes: z.number().int().min(0).default(3),
   views: z.number().int().min(0).default(0),
