@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/shared/common/components/ui/switch"
 import { Textarea } from "@/shared/common/components/ui/textarea"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/common/components/ui/table"
-import { Plus, Trash2, Upload } from "lucide-react"
+import { Pencil, Plus, Trash2, Upload } from "lucide-react"
 
 type AdItem = {
   _id: string
@@ -49,7 +49,7 @@ const emptyForm = {
   adInfoUrl: "",
   advertiseWithUsUrl: "",
   active: true,
-  priority: 0,
+  priority: 1,
   displaySeconds: 12,
 }
 
@@ -151,6 +151,8 @@ export default function DashboardAdsPage() {
         ...form,
         priority: Number(form.priority) || 0,
         displaySeconds: Number(form.displaySeconds) || 12,
+        type: form.type ?? "content",
+        placement: form.placement ?? "header_top_full",
         links: form.links.filter((item) => item.label.trim() && item.href.trim()),
       }),
     })
@@ -192,18 +194,18 @@ export default function DashboardAdsPage() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>{t("title")}</CardTitle>
-          <CardDescription>{t("description")}</CardDescription>
+          <CardTitle>Reklama qo'shish</CardTitle>
+          <CardDescription>Reklama ma'lumotlarini kiriting</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
           {/* 1. Media (majburiy) - URL yoki lokaldan */}
           <div className="space-y-2 md:col-span-2">
-            <Label>{t("media")} *</Label>
+            <Label>Reklama media *</Label>
             <div className="flex gap-2">
               <Input
                 value={form.media}
                 onChange={(e) => setForm((p) => ({ ...p, media: e.target.value }))}
-                placeholder={t("media_placeholder_url")}
+                placeholder="Reklama media URL yoki lokaldan"
                 className="flex-1"
               />
               <input
@@ -220,17 +222,26 @@ export default function DashboardAdsPage() {
                 onClick={() => mediaFileRef.current?.click()}
               >
                 <Upload className="mr-2 size-4" />
-                {t("media_select_local")}
+                Reklama media lokalda tanlash
               </Button>
             </div>
           </div>
-          {/* 2. Reklama URL (majburiy) */}
           <div className="space-y-2">
-            <Label>{t("ad_url")} *</Label>
+            <Label>Reklama URL *</Label>
             <Input value={form.adUrl} onChange={(e) => setForm((p) => ({ ...p, adUrl: e.target.value }))} placeholder="https://..." />
           </div>
-          {/* 3. Reklama turi (majburiy) */}
           <div className="space-y-2">
+            <Label>Reklama logo *</Label>
+            <div className="flex gap-2">
+              <Input value={form.logo} onChange={(e) => setForm((p) => ({ ...p, logo: e.target.value }))} placeholder="URL yoki lokaldan" className="flex-1" />
+              <input ref={logoFileRef} type="file" accept="image/*" className="hidden" onChange={handleLogoFileChange} />
+              <Button type="button" variant="outline" onClick={() => logoFileRef.current?.click()}>
+                <Upload className="size-4" />
+              </Button>
+            </div>
+          </div>
+          {/* 3. Reklama turi (majburiy) */}
+          {/* <div className="space-y-2">
             <Label>{t("ad_type")} *</Label>
             <Select value={form.type} onValueChange={(v) => setForm((p) => ({ ...p, type: v as AdItem["type"] }))}>
               <SelectTrigger><SelectValue /></SelectTrigger>
@@ -238,9 +249,8 @@ export default function DashboardAdsPage() {
                 {adTypes.map((type) => <SelectItem key={type} value={type}>{type}</SelectItem>)}
               </SelectContent>
             </Select>
-          </div>
-          {/* 4. Placement (majburiy) - nomi tilda */}
-          <div className="space-y-2">
+          </div> */}
+          {/* <div className="space-y-2">
             <Label>{t("placement")} *</Label>
             <Select
               value={form.placement}
@@ -253,47 +263,36 @@ export default function DashboardAdsPage() {
                 ))}
               </SelectContent>
             </Select>
-          </div>
-          {/* 5. Priority (majburiy) */}
+          </div> */}
           <div className="space-y-2">
-            <Label>{t("priority")} *</Label>
-            <Input type="number" value={form.priority} onChange={(e) => setForm((p) => ({ ...p, priority: Number(e.target.value) }))} />
-          </div>
-          {/* 6. Davomiylik (majburiy) */}
-          <div className="space-y-2">
-            <Label>{t("duration")} *</Label>
-            <Input type="number" value={form.displaySeconds} onChange={(e) => setForm((p) => ({ ...p, displaySeconds: Number(e.target.value) }))} min={3} max={120} />
-          </div>
-          {/* Har qanday tur uchun majburiy: title, description, logo, site name */}
-          <div className="space-y-2">
-            <Label>{t("title_label")} *</Label>
+            <Label>Reklama nomi *</Label>
             <Input value={form.title} onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))} />
           </div>
           <div className="space-y-2">
-            <Label>{t("description_label")} *</Label>
-            <Textarea value={form.description} onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))} />
-          </div>
-          <div className="space-y-2">
-            <Label>{t("logo")} *</Label>
-            <div className="flex gap-2">
-              <Input value={form.logo} onChange={(e) => setForm((p) => ({ ...p, logo: e.target.value }))} placeholder="URL yoki lokaldan" className="flex-1" />
-              <input ref={logoFileRef} type="file" accept="image/*" className="hidden" onChange={handleLogoFileChange} />
-              <Button type="button" variant="outline" onClick={() => logoFileRef.current?.click()}>
-                <Upload className="size-4" />
-              </Button>
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label>{t("site_name")} *</Label>
+            <Label>Reklama sayt nomi *</Label>
             <Input value={form.siteName} onChange={(e) => setForm((p) => ({ ...p, siteName: e.target.value }))} />
           </div>
-          {/* Ixtiyoriy: links, reklama beruvchi haqida, reklama haqida, reklama berish */}
+
+          <div className="space-y-2">
+            <Label>Ustuvorlik *</Label>
+            <Input type="number" value={form.priority} onChange={(e) => setForm((p) => ({ ...p, priority: Number(e.target.value) }))} />
+          </div>
+          <div className="space-y-2">
+            <Label>Davomiylik *</Label>
+            <Input type="number" value={form.displaySeconds} onChange={(e) => setForm((p) => ({ ...p, displaySeconds: Number(e.target.value) }))} min={3} max={120} />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Reklama tavsifi *</Label>
+            <Textarea value={form.description} onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))} />
+          </div>
+
           <div className="space-y-2 md:col-span-2">
-            <Label>{t("links")} ({t("optional")})</Label>
-            <div className="flex justify-end">
+            <div className="flex justify-between items-center">
+            <Label>Reklama havolalar (Ixtiyoriy)</Label>
               <Button type="button" size="sm" variant="outline" onClick={() => setForm((p) => ({ ...p, links: [...p.links, { label: "", href: "" }] }))}>
                 <Plus className="mr-2 size-4" />
-                {t("link_add")}
+                Havola qo'shish
               </Button>
             </div>
             <div className="space-y-3">
@@ -309,52 +308,52 @@ export default function DashboardAdsPage() {
             </div>
           </div>
           <div className="space-y-2">
-            <Label>{t("advertiser_about")} ({t("optional")})</Label>
+            <Label>Reklama beruvchi haqida (Ixtiyoriy)</Label>
             <Input value={form.advertiserUrl} onChange={(e) => setForm((p) => ({ ...p, advertiserUrl: e.target.value }))} />
           </div>
           <div className="space-y-2">
-            <Label>{t("ad_about")} ({t("optional")})</Label>
+            <Label>Reklama haqida (Ixtiyoriy)</Label>
             <Input value={form.adInfoUrl} onChange={(e) => setForm((p) => ({ ...p, adInfoUrl: e.target.value }))} />
           </div>
           <div className="space-y-2">
-            <Label>{t("advertise_with_us")} ({t("optional")})</Label>
+            <Label>Bizga reklam berish (Ixtiyoriy)</Label>
             <Input value={form.advertiseWithUsUrl} onChange={(e) => setForm((p) => ({ ...p, advertiseWithUsUrl: e.target.value }))} />
           </div>
           <div className="flex items-center justify-between rounded-md border px-3 py-2">
-            <Label>{t("active")}</Label>
+            <Label>Faol</Label>
             <Switch checked={form.active} onCheckedChange={(v) => setForm((p) => ({ ...p, active: v }))} />
           </div>
           <div className="md:col-span-2 flex gap-2">
-            <Button onClick={() => void saveAd()} disabled={loading}>{editId ? t("update") : t("create")}</Button>
-            {editId ? <Button variant="outline" onClick={() => { setEditId(null); setForm(emptyForm) }}>{t("cancel")}</Button> : null}
+            <Button onClick={() => void saveAd()} disabled={loading}>{editId ? "Tahrirlash" : "Qo'shish"}</Button>
+            {editId ? <Button variant="outline" onClick={() => { setEditId(null); setForm(emptyForm) }}>Bekor qilish</Button> : null}
           </div>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>{t("list_title")}</CardTitle>
+          <CardTitle>Reklamlar ro'yxati</CardTitle>
         </CardHeader>
         <CardContent className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Sarlavha</TableHead>
-                <TableHead>Turi</TableHead>
+                <TableHead>Reklama nomi</TableHead>
+                {/* <TableHead>Turi</TableHead> */}
                 <TableHead>Sayt</TableHead>
-                <TableHead>{t("placement")}</TableHead>
+                {/* <TableHead>{t("placement")}</TableHead> */}
                 <TableHead>Faol</TableHead>
-                <TableHead>Priority</TableHead>
-                <TableHead>Amal</TableHead>
+                <TableHead>Ustuvorlik</TableHead>
+                <TableHead>Amallar</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {items.map((item) => (
                 <TableRow key={item._id}>
                   <TableCell>{item.title}</TableCell>
-                  <TableCell>{item.type}</TableCell>
+                  {/* <TableCell>{item.type}</TableCell> */}
                   <TableCell>{item.siteName}</TableCell>
-                  <TableCell>{t(`placement_${item.placement}`)}</TableCell>
+                  {/* <TableCell>{t(`placement_${item.placement}`)}</TableCell> */}
                   <TableCell>{item.active ? "Ha" : "Yo'q"}</TableCell>
                   <TableCell>{item.priority}</TableCell>
                   <TableCell className="space-x-2">
@@ -365,11 +364,11 @@ export default function DashboardAdsPage() {
                         setEditId(item._id)
                         setForm({
                           type: item.type ?? "content",
-                          placement: item.placement,
+                          placement: item.placement ?? "header_top_full",
                           media: item.media ?? "",
                           logo: item.logo ?? "",
                           siteName: item.siteName ?? "",
-                          title: item.title,
+                          title: item.title ?? "",
                           description: item.description ?? "",
                           links: item.links?.length ? item.links : [{ label: "", href: "" }],
                           adUrl: item.adUrl ?? "",
@@ -377,14 +376,14 @@ export default function DashboardAdsPage() {
                           adInfoUrl: item.adInfoUrl ?? "",
                           advertiseWithUsUrl: item.advertiseWithUsUrl ?? "",
                           active: item.active,
-                          priority: item.priority,
+                          priority: item.priority ?? 0,
                           displaySeconds: item.displaySeconds ?? 12,
                         })
                       }}
                     >
-                      Edit
+                      <Pencil className="size-4" />
                     </Button>
-                    <Button size="sm" variant="destructive" onClick={() => void removeAd(item._id)}>Delete</Button>
+                    <Button size="sm" variant="outline" onClick={() => void removeAd(item._id)}><Trash2 className="size-4" /></Button>
                   </TableCell>
                 </TableRow>
               ))}

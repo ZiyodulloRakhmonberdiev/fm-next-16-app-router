@@ -3,9 +3,10 @@
 import { useEffect, useMemo, useState } from "react"
 import { usePublicAdsQuery } from "@/shared/common/lib/public-ads-query"
 import { Button } from "@/shared/common/components/ui/button"
-import { ExternalLink, MoreVertical, ShieldAlert, X } from "lucide-react"
+import { ExternalLink, MoreVertical, ShieldAlert, X, XIcon } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/shared/common/lib/utils"
+import { Link } from "@/i18n/navigation"
 
 type Props = {
   placement: "header_top_full" | "sidebar_widget" | "home_bottom_full" | "article_bottom_full"
@@ -81,69 +82,62 @@ export function AdSlot({ placement }: Props) {
       <div className={cn("relative overflow-hidden rounded-xl border bg-card shadow-sm", "h-[210px]")}>
         {panelOpen ? (
           <div className="h-full p-4">
-            <div>
-              <p className="text-sm font-semibold text-foreground/80">Reklama e&apos;lonlari</p>
-              <p className="mt-1 text-xs text-muted-foreground">{ad.siteName}</p>
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm font-semibold text-foreground/80">Reklama e&apos;lonlari</p>
+                <p className="mt-1 text-xs text-muted-foreground">{ad.siteName}</p>
+              </div>
+              <Button type="button" variant="ghost" onClick={() => {
+                setPanelOpen(false)
+                setReasonMode(null)
+              }} aria-label="Yopish">
+                <XIcon className="size-4" />
+              </Button>
             </div>
-            <div className="mt-3 flex items-start justify-between gap-3">
-              <p className="text-sm font-medium">
+            <div className="mt-3 flex items-end justify-end gap-3">
+              {/* <p className="text-sm font-medium">
                 {reasonMode === "report" ? "Nima uchun arz qilmoqchisiz?" : "Nima uchun yashirmoqchisiz?"}
-              </p>
-              <button
-                type="button"
-                className="text-muted-foreground hover:text-foreground"
-                onClick={() => {
-                  setPanelOpen(false)
-                  setReasonMode(null)
-                }}
-                aria-label="Yopish"
-              >
-                <X className="size-4" />
-              </button>
+              </p> */}
+
             </div>
             {reasonMode ? (
-              <div className="mt-3 space-y-2">
-              {reasons.map((reason) => (
-                <button
-                  key={reason}
-                  type="button"
-                  className="flex w-full items-center justify-between rounded-md px-2 py-2 text-left text-sm hover:bg-muted"
-                  onClick={() => void sendFeedback(reasonMode, reason)}
-                >
-                  <span>{reason}</span>
-                  <ShieldAlert className="size-4 text-muted-foreground" />
-                </button>
-              ))}
+              <div className="mt-3 flex gap-4 space-y-2">
+                {reasons.map((reason) => (
+                  <Button type="button" variant="outline" key={reason} onClick={() => void sendFeedback(reasonMode, reason)}>
+                    <span>{reason}</span>
+                    {/* <ShieldAlert className="size-4 text-muted-foreground" /> */}
+                  </Button>
+                ))}
               </div>
             ) : (
-              <div className="mt-3 space-y-1">
-                <button type="button" className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm hover:bg-muted" onClick={() => setReasonMode("hide")}>
+              <div className="mt-3 flex gap-4 justify-start items-center space-y-1">
+                <Button type="button" variant="outline" className="" onClick={() => setReasonMode("hide")}>
                   <span>Yashirish</span>
-                </button>
-                <button type="button" className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm hover:bg-muted" onClick={() => setReasonMode("report")}>
+                </Button>
+                <Button type="button" variant="outline" onClick={() => setReasonMode("report")}>
                   <span>Arz qilish</span>
-                </button>
+                </Button>
                 {ad.advertiserUrl ? (
-                  <a href={ad.advertiserUrl} target="_blank" rel="noopener noreferrer sponsored nofollow" className="flex items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-muted">
+                  <Link href={ad.advertiserUrl} target="_blank" rel="noopener noreferrer sponsored nofollow" className="flex items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-muted">
                     <span>Reklama beruvchi haqida</span>
                     <ExternalLink className="size-4 text-muted-foreground" />
-                  </a>
+                  </Link>
                 ) : null}
                 {ad.adInfoUrl ? (
-                  <a href={ad.adInfoUrl} target="_blank" rel="noopener noreferrer sponsored nofollow" className="flex items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-muted">
+                  <Link href={ad.adInfoUrl} target="_blank" rel="noopener noreferrer sponsored nofollow" className="flex items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-muted">
                     <span>Reklama haqida</span>
                     <ExternalLink className="size-4 text-muted-foreground" />
-                  </a>
+                  </Link>
                 ) : null}
                 {ad.advertiseWithUsUrl ? (
-                  <a href={ad.advertiseWithUsUrl} target="_blank" rel="noopener noreferrer sponsored nofollow" className="flex items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-muted">
+                  <Link href={ad.advertiseWithUsUrl} target="_blank" rel="noopener noreferrer sponsored nofollow" className="flex items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-muted">
                     <span>Reklama berish uchun</span>
                     <ExternalLink className="size-4 text-muted-foreground" />
-                  </a>
+                  </Link>
                 ) : null}
-                <button type="button" className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm hover:bg-muted" onClick={copyLink}>
+                <Button type="button" variant="outline" onClick={copyLink}>
                   <span>Nusxa olish</span>
-                </button>
+                </Button>
               </div>
             )}
           </div>
