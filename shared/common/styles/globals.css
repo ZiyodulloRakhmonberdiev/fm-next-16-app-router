@@ -131,3 +131,20 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes top-news-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-top-news-scroll {
+  animation: top-news-scroll 40s linear infinite;
+}
+
+.top-news-scroll-area:hover .animate-top-news-scroll {
+  animation-play-state: paused;
+}

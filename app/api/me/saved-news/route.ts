@@ -17,16 +17,31 @@ export async function GET(req: NextRequest) {
     SavedNewsModel.find({ userId: session.user.id }).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
     SavedNewsModel.countDocuments({ userId: session.user.id }),
   ])
-  const slugs = Array.from(new Set(rows.map((item) => item.newsSlug)))
-  const newsList = slugs.length
-    ? await NewsModel.find({ slug: { $in: slugs }, status: "published" })
-      .select("slug title images publishedAt")
-      .lean()
-    : []
-  const newsMap = new Map(newsList.map((n) => [n.slug, n]))
+  const ids = Array.from(new Set(rows.map((r) => r.newsId).filter(Boolean) as string[]))
+  const slugsLegacy = Array.from(new Set(rows.map((r) => r.newsSlug).filter(Boolean) as string[]))
+  const [byId, bySlug] = await Promise.all([
+    ids.length > 0
+      ? NewsModel.find({ _id: { $in: ids }, status: "published" })
+          .select("slug title images publishedAt")
+          .lean()
+      : [],
+    slugsLegacy.length > 0
+      ? NewsModel.find({ slug: { $in: slugsLegacy }, status: "published" })
+          .select("slug title images publishedAt")
+          .lean()
+      : [],
+  ])
+  const newsById = new Map(byId.map((n) => [String((n as { _id: unknown })._id), n]))
+  const newsBySlug = new Map(bySlug.map((n) => [n.slug, n]))
 
   return Response.json({
-    data: rows.map((row) => ({ ...row, news: newsMap.get(row.newsSlug) })),
+    data: rows.map((row) => {
+      const news =
+        (row.newsId && newsById.get(row.newsId)) ??
+        (row.newsSlug && newsBySlug.get(row.newsSlug)) ??
+        null
+      return { ...row, news }
+    }),
     meta: { page, limit, total, totalPages: Math.max(1, Math.ceil(total / limit)) },
   })
 }
@@ -34,17 +49,34 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) return Response.json({ error: "Unauthorized" }, { status: 401 })
-  const body = (await req.json().catch(() => null)) as { newsSlug?: string } | null
+  const body = (await req.json().catch(() => null)) as { newsSlug?: string; newsId?: string } | null
+  let newsId = body?.newsId?.trim()
   const newsSlug = body?.newsSlug?.trim()
-  if (!newsSlug) {
-    return Response.json({ error: "Noto'g'ri payload" }, { status: 400 })
+  if (!newsId && newsSlug) {
+    await dbConnect()
+    const news = await NewsModel.findOne({ slug: newsSlug, status: "published" }).select("_id slug").lean()
+    if (news && (news as { _id?: unknown })._id != null) {
+      newsId = String((news as { _id: unknown })._id)
+    }
+  }
+  if (!newsId) {
+    return Response.json({ error: "newsId yoki newsSlug talab qilinadi" }, { status: 400 })
   }
   await dbConnect()
-  const existing = await SavedNewsModel.findOne({ userId: session.user.id, newsSlug })
+  const existing = await SavedNewsModel.findOne({ userId: session.user.id, newsId })
   if (existing) {
     await existing.deleteOne()
     return Response.json({ ok: true, saved: false })
   }
-  await SavedNewsModel.create({ userId: session.user.id, newsSlug })
+  let slugForDoc = newsSlug
+  if (!slugForDoc) {
+    const news = await NewsModel.findById(newsId).select("slug").lean()
+    if (news) slugForDoc = news.slug
+  }
+  await SavedNewsModel.create({
+    userId: session.user.id,
+    newsId,
+    ...(slugForDoc ? { newsSlug: slugForDoc } : {}),
+  })
   return Response.json({ ok: true, saved: true })
 }

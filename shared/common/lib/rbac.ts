@@ -1,4 +1,4 @@
-export type AppUserRole = "ceo" | "administrator" | "moderator" | "ads_manager" | "user" | "ads-manager"
+export type AppUserRole = "ceo" | "administrator" | "moderator" | "ads_manager" | "user"
 export type NormalizedRole = "ceo" | "administrator" | "moderator" | "ads_manager" | "user"
 
 export function normalizeRole(role?: string | null): NormalizedRole {
@@ -7,7 +7,7 @@ export function normalizeRole(role?: string | null): NormalizedRole {
   if (r === "ceo") return "ceo"
   if (r === "administrator") return "administrator"
   if (r === "moderator") return "moderator"
-  if (r === "ads_manager" || r === "ads-manager") return "ads_manager"
+  if (r === "ads_manager") return "ads_manager"
   return "user"
 }
 

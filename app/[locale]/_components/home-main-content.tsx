@@ -13,6 +13,7 @@ import { AdSlot, ServerLoading, ServerUnavailable, StayConnected } from "@/share
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
 import { isVisualRawNews, type RawNewsItem } from "@/features/news/model"
 import { usePublicCategoriesQuery } from "@/features/category/model/public-categories-query"
+import TopNewsSlider from "@/shared/common/components/molecules/top-news-slider"
 
 function isVideoNewsItem(item: RawNewsItem): boolean {
   const hasVideo = !!(item.videoSource && item.videoUrl)
@@ -57,6 +58,7 @@ export default function HomeMainContent() {
 
   return (
     <>
+      <TopNewsSlider />
       <TopBanner />
       <CategoryWithSlide categorySlug={firstCategorySlug} />
       <CategoryWithBanner categorySlug={secondCategorySlug} />

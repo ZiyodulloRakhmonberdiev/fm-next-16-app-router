@@ -81,22 +81,22 @@ export default function TopNews() {
   )
 
   return (
-    <div className="w-full">
+    <div className="w-full min-h-[420px] md:min-h-[480px] lg:min-h-[520px]">
       <Carousel
         setApi={setApi}
         opts={{ loop: true }}
         plugins={[plugin.current]}
-        className="w-full"
+        className="w-full h-full"
         onMouseEnter={plugin.current.stop}
         onMouseLeave={plugin.current.reset}
       >
-        <div className="relative">
-          <CarouselContent className="ml-0">
+        <div className="relative h-full">
+          <CarouselContent className="ml-0 h-full">
             {news.map((item: NewsItem) => (
-              <CarouselItem key={item.slug} className="pl-0">
-                <Card className="overflow-hidden mx-1 p-0 rounded-sm">
-                  <div className="grid grid-cols-1 md:grid-cols-5">
-                    <div className="flex flex-col justify-between order-1 md:order-0 gap-2 p-4 md:gap-3 md:p-8 bg-background border-none md:col-span-2">
+              <CarouselItem key={item.slug} className="pl-0 h-full">
+                <Card className="overflow-hidden mx-1 p-0 rounded-sm h-full min-h-[420px] md:min-h-[480px] lg:min-h-[520px]">
+                  <div className="grid grid-cols-1 md:grid-cols-5 h-full min-h-[420px] md:min-h-[480px] lg:min-h-[520px]">
+                    <div className="flex flex-col justify-between order-1 md:order-0 gap-2 p-4 md:gap-3 md:p-8 bg-background border-none md:col-span-2 min-h-0">
                       <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                         {item.category}
                       </span>
@@ -116,13 +116,14 @@ export default function TopNews() {
                     </div>
                     <Link
                       href={`/news/${item.slug}`}
-                      className="relative block aspect-video w-full md:col-span-3"
+                      className="relative block w-full md:col-span-3 min-h-[200px] aspect-video md:aspect-auto md:h-full"
                     >
                       <Image
                         src={item.images[0]}
                         alt={item.title}
                         fill
                         className="object-cover"
+                        sizes="(max-width: 768px) 100vw, 60vw"
                       />
                       <div className="absolute inset-0 bg-black/30" aria-hidden />
                       <span className="absolute left-3 top-3 z-10 bg-primary rounded-xs px-1.5 py-0.5 text-xs font-semibold text-primary-foreground">

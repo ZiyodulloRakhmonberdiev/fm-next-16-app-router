@@ -3,12 +3,12 @@
 import { useEffect, useState } from "react"
 import { Link } from "@/i18n/navigation"
 import Image from "next/image"
-import { CalendarDays } from "lucide-react"
 import { SavedNewsActions } from "@/features/news/ui/saved-news-actions"
-import { formatDate } from "@/shared/common/lib/formatter"
+import { formatDateISO, formatDateTimeLocale } from "@/shared/common/lib/formatter"
 import type { AppLocale } from "@/shared/common/lib/formatter"
 import { useLocale } from "next-intl"
 import { Button } from "@/shared/common/components/ui/button"
+import { Card } from "@/shared/common/components/ui/card"
 
 type Props = { title: string }
 
@@ -17,7 +17,8 @@ export function SavedNewsPageContent({ title }: Props) {
   const [items, setItems] = useState<
     Array<{
       _id: string
-      newsSlug: string
+      newsId?: string
+      newsSlug?: string
       news?: {
         slug: string
         title?: Record<string, string>
@@ -35,7 +36,8 @@ export function SavedNewsPageContent({ title }: Props) {
     const payload = (await res.json()) as {
       data?: Array<{
         _id: string
-        newsSlug: string
+        newsId?: string
+        newsSlug?: string
         news?: {
           slug: string
           title?: Record<string, string>
@@ -56,28 +58,68 @@ export function SavedNewsPageContent({ title }: Props) {
     })()
   }, [])
 
+  const getSafeImageSrc = (raw?: string) => {
+    if (!raw) return ""
+    const candidate =
+      raw.startsWith("http://") || raw.startsWith("https://") || raw.startsWith("/")
+        ? raw
+        : `/uploads/images/${raw}`
+    try {
+      new URL(candidate, "http://localhost")
+      return candidate
+    } catch {
+      return ""
+    }
+  }
+
+  const slugOrEmpty = (item: (typeof items)[0]) => item.news?.slug ?? item.newsSlug ?? ""
+  const titleText = (item: (typeof items)[0]) =>
+    item.news?.title?.[locale] ?? item.news?.title?.uz ?? item.newsSlug ?? ""
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 px-4 md:px-6">
       <h1 className="text-2xl font-semibold">{title}</h1>
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {items.map((item) => (
-          <div key={item._id} className="rounded-md border p-3 hover:bg-muted/40">
-            <div className="relative mb-2 aspect-video overflow-hidden rounded bg-muted">
-              {item.news?.images?.[0] ? <Image src={item.news.images[0]} alt={item.newsSlug} fill className="object-cover" /> : null}
-              <div className="absolute right-2 top-2">
-                <SavedNewsActions slug={item.newsSlug} overlay />
-              </div>
-            </div>
-            <Link href={`/news/${item.newsSlug}`} className="font-medium line-clamp-2 hover:underline">
-              {item.news?.title?.[locale] ?? item.news?.title?.uz ?? item.newsSlug}
-            </Link>
-            <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
-              <CalendarDays className="size-3" />
-              <span>{item.news?.publishedAt ? formatDate(item.news.publishedAt, locale) : "-"}</span>
-            </div>
-          </div>
-        ))}
-      </div>
+      <ul className="grid grid-cols-1 justify-items-start gap-3 md:grid-cols-2 xl:grid-cols-3">
+        {items.map((item) => {
+          const thumbSrc = getSafeImageSrc(item.news?.images?.[0])
+          const href = `/news/${slugOrEmpty(item)}`
+          return (
+            <li key={item._id} className="w-full max-w-xl">
+              <Card className="overflow-hidden p-0 rounded-sm shadow-none">
+                <div className="flex gap-3">
+                  <Link href={href} className="relative block h-20 w-28 shrink-0 overflow-hidden rounded-xs md:h-24 md:w-32">
+                    {thumbSrc ? (
+                      <Image
+                        src={thumbSrc}
+                        alt={titleText(item)}
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center px-1 text-[10px] text-muted-foreground text-center">
+                        Rasmni yuklab bo&apos;lmadi
+                      </div>
+                    )}
+                    <div className="absolute right-1 top-1">
+                      <SavedNewsActions slug={slugOrEmpty(item)} newsId={item.newsId} overlay />
+                    </div>
+                  </Link>
+                  <div className="flex min-w-0 py-2 px-1 flex-col flex-1 justify-center gap-3">
+                    <div className="flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground">
+                      <time dateTime={item.news?.publishedAt ? formatDateISO(item.news.publishedAt) : undefined}>
+                        {item.news?.publishedAt ? formatDateTimeLocale(item.news.publishedAt, locale) : "-"}
+                      </time>
+                    </div>
+                    <Link href={href} className="line-clamp-2 text-sm font-medium leading-tight hover:underline">
+                      {titleText(item)}
+                    </Link>
+                  </div>
+                </div>
+              </Card>
+            </li>
+          )
+        })}
+      </ul>
       {items.length === 0 ? <p className="text-sm text-muted-foreground">Hozircha saqlangan yangiliklar yo&apos;q.</p> : null}
       {totalPages > 1 ? (
         <div className="flex items-center justify-center gap-2 pt-2">

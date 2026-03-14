@@ -15,7 +15,7 @@ export default function HomePage() {
       </div>
       <div className="flex w-full flex-1 flex-col">
         <Header />
-        <main className="flex-1 py-4">
+        <main className="flex-1 pb-4">
           <ClientServerOffGate model="news">
             <div className="max-w-7xl mx-auto">
               <HomeMainContent />

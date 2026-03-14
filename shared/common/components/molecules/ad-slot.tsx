@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { usePublicAdsQuery } from "@/shared/common/lib/public-ads-query"
 import { Button } from "@/shared/common/components/ui/button"
-import { ExternalLink, MoreVertical, ShieldAlert, X, XIcon } from "lucide-react"
+import { ExternalLink, MoreVertical, XIcon } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/shared/common/lib/utils"
 import { Link } from "@/i18n/navigation"

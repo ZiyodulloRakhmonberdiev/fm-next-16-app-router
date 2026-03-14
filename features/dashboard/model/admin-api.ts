@@ -25,7 +25,7 @@ export type AdminTag = {
   name: LocaleMap
 }
 
-export type AdminUserRole = 'ceo' | 'administrator' | 'moderator' | 'ads-manager' | 'ads_manager' | 'user'
+export type AdminUserRole = 'ceo' | 'administrator' | 'moderator' | 'ads_manager' | 'user'
 
 export type AdminUser = {
   _id: string
@@ -201,4 +201,43 @@ export function getNews(status?: NewsStatus) {
   })
   if (status) qs.set('status', status)
   return apiFetch<ApiNewsListResponse>(`/api/news?${qs.toString()}`)
+}
+
+// ——— Reaksiyalar (dashboard) ———
+export type ReactionType = 'like' | 'love' | 'laugh' | 'sad' | 'angry'
+
+export type ReactionRow = {
+  _id: string
+  newsSlug: string
+  userId?: string
+  anonId?: string
+  userName: string
+  type: ReactionType
+  createdAt: string
+}
+
+export type ReactionsResponse = {
+  data: ReactionRow[]
+  meta: { total: number; page: number; limit: number; totalPages: number }
+  count: number
+}
+
+export type ReactionsParams = {
+  page?: number
+  limit?: number
+  type?: string
+  q?: string
+}
+
+export function getReactions(params: ReactionsParams = {}) {
+  const qs = new URLSearchParams()
+  qs.set('page', String(params.page ?? 1))
+  qs.set('limit', String(params.limit ?? 30))
+  if (params.type && params.type !== 'all') qs.set('type', params.type)
+  if (params.q?.trim()) qs.set('q', params.q.trim())
+  return apiFetch<ReactionsResponse>(`/api/reactions?${qs.toString()}`)
+}
+
+export function deleteReaction(id: string) {
+  return apiFetch<{ ok: true }>(`/api/reactions/${id}`, { method: 'DELETE' })
 }

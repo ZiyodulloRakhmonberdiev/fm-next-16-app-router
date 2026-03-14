@@ -4,10 +4,12 @@ import {
   createTag,
   createUser,
   deleteCategory,
+  deleteReaction,
   deleteTag,
   deleteUser,
   getCategories,
   getNews,
+  getReactions,
   getTags,
   getUsers,
   updateCategory,
@@ -16,6 +18,7 @@ import {
   type CreateCategoryPayload,
   type CreateTagPayload,
   type CreateUserPayload,
+  type ReactionsParams,
 } from './admin-api'
 import type { NewsStatus } from '@/features/news/model'
 
@@ -24,6 +27,7 @@ export const adminQueryKeys = {
   tags: ['admin', 'tags'] as const,
   users: ['admin', 'users'] as const,
   news: (status?: NewsStatus) => ['admin', 'news', status ?? 'all'] as const,
+  reactions: (params: ReactionsParams) => ['admin', 'reactions', params] as const,
 }
 
 export function useCategoriesQuery() {
@@ -116,5 +120,22 @@ export function useNewsQuery(status?: NewsStatus) {
   return useQuery({
     queryKey: adminQueryKeys.news(status),
     queryFn: () => getNews(status),
+  })
+}
+
+export function useReactionsQuery(params: ReactionsParams = {}) {
+  return useQuery({
+    queryKey: adminQueryKeys.reactions(params),
+    queryFn: () => getReactions(params),
+  })
+}
+
+export function useDeleteReactionMutation() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => deleteReaction(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'reactions'] })
+    },
   })
 }

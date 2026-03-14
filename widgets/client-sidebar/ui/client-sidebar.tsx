@@ -3,7 +3,7 @@ import Image from 'next/image'
 import { useTranslations } from 'next-intl'
 import { CategoryListForSidebar } from '@/entities/category'
 import { Sidebar, SidebarHeader, SidebarContent, SidebarFooter } from '@/shared/common/components/ui/sidebar'
-import { SocialMediaButtons } from '@/shared/common/components/ui/social-media-buttons'
+import { StayConnectedSidebar } from '@/shared/common/components/molecules'
 import { LanguageSwitcherForSidebar } from '@/widgets/language-switcher'
 import { ThemeSwitcherForSidebar } from '@/widgets/theme-switcher'
 import { seed } from '@/scripts/seed'
@@ -41,13 +41,7 @@ export default function ClientSidebar() {
         </div>
 
 
-        <div className='flex items-start px-4 w-full gap-2 flex-col border-t border-border pt-2'>
-          <span className='text-sm font-medium'>{t("follow_us")}:</span>
-          <SocialMediaButtons
-            variant="icon-only"
-            className="flex items-center justify-end flex-wrap gap-2"
-          />
-        </div>
+        <StayConnectedSidebar />
       </SidebarContent>
       <SidebarFooter>
         <p className="text-sm text-foreground/70 max-w-sm border-t border-border py-4 text-center">{seed.copyright[locale]}</p>

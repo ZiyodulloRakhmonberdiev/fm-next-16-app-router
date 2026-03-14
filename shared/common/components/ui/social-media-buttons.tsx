@@ -83,7 +83,7 @@ export function getSocialStyle(name: string) {
 type SocialMediaLink = { slug: string; name: string; href: string };
 
 type SocialMediaButtonsProps = {
-  variant?: "button" | "icon-only";
+  variant?: "button" | "icon-only" | "icon-box";
   links?: readonly SocialMediaLink[] | SocialMediaLink[];
   className?: string;
   linkClassName?: string;
@@ -108,20 +108,25 @@ export function SocialMediaButtons({
   linkClassName,
 }: SocialMediaButtonsProps) {
   const { data: settings } = usePublicSiteSettingsQuery()
-  const isIconOnly = variant === "icon-only";
+  const isIconOnly = variant === "icon-only"
+  const isIconBox = variant === "icon-box"
   const resolvedLinks = links?.length ? links : (settings?.socialMedia ?? seed.socialMedia)
 
   return (
-    <div className={cn("flex flex-wrap items-center gap-2", className)}>
+    <div className={cn("flex flex-wrap items-center gap-1", className)}>
       {resolvedLinks.map(({ slug, name, href }) => {
-        const style = getSocialStyle(slug);
-        const isExternal = href.startsWith("http");
-        const label = resolveSocialLabel(name);
-        const baseLinkClass =
-          "inline-flex items-center justify-center gap-2 text-white shadow-sm transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
-        const variantClass = isIconOnly
-          ? "size-7 p-0 rounded-full [&_svg]:size-3.5"
-          : "rounded-lg px-3 py-2.5 text-sm font-medium [&_svg]:size-5";
+        const style = getSocialStyle(slug)
+        const isExternal = href.startsWith("http")
+        const label = resolveSocialLabel(name)
+        const baseLinkClass = isIconBox
+          ? "inline-flex items-center justify-center gap-2 shadow-sm transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded border border-border"
+          : "inline-flex items-center justify-center gap-2 shadow-sm transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 px-4 border border-border rounded-lg"
+        const variantClass = isIconBox
+          ? "aspect-square size-16 p-2.5 bg-background text-foreground hover:bg-muted/50 [&_svg]:size-5"
+          : isIconOnly
+            ? "size-7 p-0 rounded-full text-white [&_svg]:size-3.5"
+            : "rounded-lg px-3 py-2.5 text-sm font-medium text-white [&_svg]:size-5"
+        const colorClass = isIconBox ? "" : style.bgColor
 
         return (
           <Link
@@ -132,16 +137,16 @@ export function SocialMediaButtons({
             className={cn(
               baseLinkClass,
               variantClass,
-              style.bgColor,
+              colorClass,
               linkClassName
             )}
             aria-label={label}
           >
             {style.icon}
-            {!isIconOnly && <span>{label}</span>}
+            {!isIconOnly && !isIconBox && <span>{label}</span>}
           </Link>
-        );
+        )
       })}
     </div>
-  );
+  )
 }

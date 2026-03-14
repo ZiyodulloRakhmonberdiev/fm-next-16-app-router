@@ -1,7 +1,7 @@
 import { Schema, models, model } from 'mongoose'
 import { v4 as uuidv4 } from 'uuid'
 
-export type UserRole = 'ceo' | 'administrator' | 'moderator' | 'ads-manager' | 'ads_manager' | 'user'
+export type UserRole = 'ceo' | 'administrator' | 'moderator' | 'ads_manager' | 'user'
 
 export interface IUser {
   _id: string

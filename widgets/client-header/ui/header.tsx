@@ -5,7 +5,7 @@ import { SearchIcon } from 'lucide-react'
 import { Link } from '@/i18n/navigation'
 import { useTheme } from 'next-themes'
 import Headline from './headline'
-import { ThemeSwitcher } from '@/widgets/theme-switcher'
+import { ThemeSwitcher, ThemeSwitcherForHeader } from '@/widgets/theme-switcher'
 import CategoryList from '@/entities/category/ui/category-list'
 import { SidebarTrigger } from '@/shared/common/components/ui/sidebar'
 import { CategoryListForMobile } from '@/entities/category'
@@ -95,7 +95,8 @@ export default function Header() {
           <div className="flex items-center gap-4">
             <SearchIcon className="w-4 h-4" onClick={() => setSearchOpen(true)} />
             <div className="hidden md:block">
-              <ThemeSwitcher />
+              {/* <ThemeSwitcher /> */}
+              <ThemeSwitcherForHeader />
             </div>
             <div className="block md:hidden">
               <SidebarTrigger />

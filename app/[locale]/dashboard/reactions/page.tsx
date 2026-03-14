@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/common/components/ui/card"
 import { Button } from "@/shared/common/components/ui/button"
 import { Input } from "@/shared/common/components/ui/input"
@@ -9,67 +9,52 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
 import { Link } from "@/i18n/navigation"
-
-type ReactionType = "like" | "love" | "laugh" | "sad" | "angry"
-
-type ReactionRow = {
-  _id: string
-  newsSlug: string
-  userId?: string
-  anonId?: string
-  userName: string
-  type: ReactionType
-  createdAt: string
-}
-
-type ApiResponse = {
-  data: ReactionRow[]
-  meta: { total: number; page: number; limit: number; totalPages: number }
-  count: number
-}
+import { useReactionsQuery, useDeleteReactionMutation } from "@/features/dashboard/model/admin-hooks"
+import type { ReactionType, ReactionRow } from "@/features/dashboard/model/admin-api"
 
 const reactionOptions: ReactionType[] = ["like", "love", "laugh", "sad", "angry"]
 
 export default function DashboardReactionsPage() {
-  const [items, setItems] = useState<ReactionRow[]>([])
   const [page, setPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
   const [type, setType] = useState<ReactionType | "all">("all")
   const [search, setSearch] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [appliedType, setAppliedType] = useState<ReactionType | "all">("all")
+  const [appliedSearch, setAppliedSearch] = useState("")
 
-  async function load(nextPage = 1) {
-    setLoading(true)
-    const params = new URLSearchParams()
-    params.set("page", String(nextPage))
-    params.set("limit", "30")
-    if (type !== "all") params.set("type", type)
-    if (search.trim()) params.set("q", search.trim())
-    const res = await fetch(`/api/reactions?${params.toString()}`, { cache: "no-store" })
-    setLoading(false)
-    if (!res.ok) {
-      return toast.error("Reaksiyalarni yuklab bo'lmadi")
-    }
-    const data = (await res.json()) as ApiResponse
-    setItems(data.data)
-    setPage(data.meta.page)
-    setTotalPages(Math.max(1, data.meta.totalPages))
+  const { data, isLoading, isError } = useReactionsQuery({
+    page,
+    limit: 100,
+    type: appliedType,
+    q: appliedSearch || undefined,
+  })
+  const deleteMutation = useDeleteReactionMutation()
+
+  const items: ReactionRow[] = data?.data ?? []
+  const totalPages = Math.max(1, data?.meta?.totalPages ?? 1)
+
+  const handleFilter = () => {
+    setAppliedType(type)
+    setAppliedSearch(search.trim())
+    setPage(1)
+  }
+  const handleReset = () => {
+    setType("all")
+    setSearch("")
+    setAppliedType("all")
+    setAppliedSearch("")
+    setPage(1)
+  }
+
+  const remove = (id: string) => {
+    deleteMutation.mutate(id, {
+      onSuccess: () => toast.success("Reaksiya o'chirildi"),
+      onError: () => toast.error("O'chirib bo'lmadi"),
+    })
   }
 
   useEffect(() => {
-    void load(1)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  async function remove(id: string) {
-    setDeletingId(id)
-    const res = await fetch(`/api/reactions/${id}`, { method: "DELETE" })
-    setDeletingId(null)
-    if (!res.ok) return toast.error("O'chirib bo'lmadi")
-    toast.success("Reaksiya o'chirildi")
-    void load(page)
-  }
+    if (isError) toast.error("Reaksiyalarni yuklab bo'lmadi")
+  }, [isError])
 
   return (
     <Card className="p-0 py-4 md:py-6">
@@ -100,18 +85,14 @@ export default function DashboardReactionsPage() {
             />
           </div>
           <div className="flex items-center gap-2">
-            <Button size="sm" onClick={() => void load(1)} disabled={loading}>
-              {loading ? <Loader2 className="size-4 animate-spin" /> : "Filtrlash"}
+            <Button size="sm" onClick={handleFilter} disabled={isLoading}>
+              {isLoading ? <Loader2 className="size-4 animate-spin" /> : "Filtrlash"}
             </Button>
             <Button
               size="sm"
               variant="outline"
-              disabled={loading && !search && type === "all"}
-              onClick={() => {
-                setType("all")
-                setSearch("")
-                void load(1)
-              }}
+              disabled={isLoading && !search && type === "all"}
+              onClick={handleReset}
             >
               Tozalash
             </Button>
@@ -153,10 +134,14 @@ export default function DashboardReactionsPage() {
                     <Button
                       size="sm"
                       variant="destructive"
-                      disabled={deletingId === item._id}
-                      onClick={() => void remove(item._id)}
+                      disabled={deleteMutation.isPending && deleteMutation.variables === item._id}
+                      onClick={() => remove(item._id)}
                     >
-                      {deletingId === item._id ? <Loader2 className="size-4 animate-spin" /> : "O'chirish"}
+                      {deleteMutation.isPending && deleteMutation.variables === item._id ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        "O'chirish"
+                      )}
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -164,7 +149,7 @@ export default function DashboardReactionsPage() {
             </TableBody>
           </Table>
         </div>
-        {items.length === 0 ? (
+        {items.length === 0 && !isLoading ? (
           <p className="mt-4 text-sm text-muted-foreground">Reaksiyalar yo&apos;q.</p>
         ) : null}
         {totalPages > 1 ? (
@@ -172,8 +157,8 @@ export default function DashboardReactionsPage() {
             <Button
               size="sm"
               variant="outline"
-              disabled={page <= 1 || loading}
-              onClick={() => void load(page - 1)}
+              disabled={page <= 1 || isLoading}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
             >
               Oldingi
             </Button>
@@ -183,8 +168,8 @@ export default function DashboardReactionsPage() {
             <Button
               size="sm"
               variant="outline"
-              disabled={page >= totalPages || loading}
-              onClick={() => void load(page + 1)}
+              disabled={page >= totalPages || isLoading}
+              onClick={() => setPage((p) => p + 1)}
             >
               Keyingi
             </Button>
@@ -194,4 +179,3 @@ export default function DashboardReactionsPage() {
     </Card>
   )
 }
-

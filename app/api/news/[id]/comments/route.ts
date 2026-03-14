@@ -4,7 +4,12 @@ import { authOptions } from "@/shared/common/lib/auth-options"
 import { dbConnect } from "@/shared/common/lib/db"
 import { NewsCommentModel } from "@/features/news/model/comment.model"
 import { UserModel } from "@/features/users/model/user.model"
+import { NewsModel } from "@/features/news/model/news.model"
 import { normalizeRole } from "@/shared/common/lib/rbac"
+
+const newsFilter = (id: string) => ({
+  $or: [{ newsId: id }, { newsSlug: id }] as const,
+})
 
 export async function GET(
   req: NextRequest,
@@ -13,21 +18,23 @@ export async function GET(
   await dbConnect()
   const session = await getServerSession(authOptions)
   const userId = session?.user?.id
-  const slug = (await params).id
+  const id = (await params).id
 
   const { searchParams } = new URL(req.url)
   const limit = Math.min(50, Math.max(1, Number(searchParams.get("limit") ?? 5)))
   const offset = Math.max(0, Number(searchParams.get("offset") ?? 0))
 
+  const filter = newsFilter(id)
+
   let minePending: unknown[] = []
   if (userId) {
-    minePending = await NewsCommentModel.find({ newsSlug: slug, userId, status: "pending" })
+    minePending = await NewsCommentModel.find({ ...filter, userId, status: "pending" })
       .sort({ createdAt: -1 })
       .lean()
   }
 
   const visiblePublic = await NewsCommentModel.find({
-    newsSlug: slug,
+    ...filter,
     status: { $in: ["confirmed", "approved"] },
   })
     .sort({ createdAt: 1 })
@@ -35,7 +42,7 @@ export async function GET(
     .limit(limit)
     .lean()
   const totalPublic = await NewsCommentModel.countDocuments({
-    newsSlug: slug,
+    ...filter,
     status: { $in: ["confirmed", "approved"] },
   })
 
@@ -65,12 +72,18 @@ export async function POST(
 
   await dbConnect()
   const me = await UserModel.findById(session.user.id).lean()
+  const newsId = (await params).id
+
+  const news = await NewsModel.findById(newsId).select("slug").lean()
+  if (!news) return Response.json({ error: "Yangilik topilmadi" }, { status: 404 })
+  const newsSlug = news.slug
 
   let replyToUserLogin: string | undefined
-  const newsSlug = (await params).id
   if (body?.replyToCommentId) {
     const parent = await NewsCommentModel.findById(body.replyToCommentId).lean()
-    if (!parent || parent.newsSlug !== newsSlug) {
+    const parentBelongsToNews =
+      parent && (parent.newsId === newsId || parent.newsSlug === newsSlug)
+    if (!parent || !parentBelongsToNews) {
       return Response.json({ error: "Javob beriladigan izoh topilmadi" }, { status: 404 })
     }
     if (parent.replyToCommentId) {
@@ -87,6 +100,7 @@ export async function POST(
 
   const comment = await NewsCommentModel.create({
     newsSlug,
+    newsId: String(newsId),
     userId: session.user.id,
     userName: session.user.name || session.user.login || "User",
     userLogin: session.user.login || undefined,
@@ -97,5 +111,6 @@ export async function POST(
     replyToCommentId: body?.replyToCommentId || undefined,
     replyToUserLogin,
   })
-  return Response.json(comment, { status: 201 })
+  const plain = comment.toObject ? comment.toObject() : (comment as unknown as Record<string, unknown>)
+  return Response.json(plain, { status: 201 })
 }

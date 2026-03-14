@@ -6,6 +6,7 @@ export type ReactionType = "like" | "love" | "laugh" | "sad" | "angry"
 export interface INewsReaction {
   _id: string
   newsSlug: string
+  newsId?: string
   userId?: string
   anonId?: string
   userKey: string
@@ -19,6 +20,7 @@ const NewsReactionSchema = new Schema<INewsReaction>(
   {
     _id: { type: String, required: true, unique: true, default: () => uuidv4() },
     newsSlug: { type: String, required: true, index: true },
+    newsId: { type: String, index: true },
     userId: { type: String, index: true },
     anonId: { type: String, index: true },
     userKey: { type: String, required: true, index: true },

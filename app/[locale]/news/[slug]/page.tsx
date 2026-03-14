@@ -4,7 +4,7 @@ import { Header } from "@/widgets/client-header"
 import ClientSidebar from "@/widgets/client-sidebar/ui/client-sidebar"
 import { NewsPageContent } from "@/features/news/ui/news-page-content"
 import { pickNewsForLocale, type RawNewsItem } from "@/features/news/model"
-import { StayConnected, LatestNews, AdSlot } from "@/shared/common/components/molecules"
+import { StayConnected, StayConnectedSidebar, LatestNews } from "@/shared/common/components/molecules"
 import { isAppLocale } from "@/shared/common/lib/locale-api"
 import { dbConnect } from "@/shared/common/lib/db"
 import { NewsModel } from "@/features/news/model/news.model"
@@ -20,10 +20,16 @@ export default async function NewsPage({ params }: Props) {
   const currentLocale = isAppLocale(locale) ? locale : "uz"
 
   await dbConnect()
-  const raw = (await NewsModel.findOne({ slug, status: "published" }).lean()) as RawNewsItem | null
+  const raw = await NewsModel.findOne({ slug, status: "published" }).lean()
   if (!raw) notFound()
-  const news = pickNewsForLocale(raw, currentLocale)
+  const news = pickNewsForLocale(raw as RawNewsItem, currentLocale)
   if (!news) notFound()
+
+  const rawObj = raw as Record<string, unknown>
+  const newsId =
+    rawObj._id != null && rawObj._id !== ""
+      ? String(rawObj._id)
+      : undefined
 
   return (
     <ClientSiteNothingGate>
@@ -36,10 +42,10 @@ export default async function NewsPage({ params }: Props) {
           <ClientServerOffGate model="news">
             <div className="mx-auto max-w-7xl grid grid-cols-1 gap-6 lg:grid-cols-4">
               <div className="min-w-0 lg:col-span-3">
-                <NewsPageContent news={news} />
+                <NewsPageContent news={news} newsId={newsId} />
               </div>
-              <aside className="hidden lg:flex flex-col gap-6 lg:col-span-1">
-                <StayConnected />
+              <aside className="flex-col gap-6 lg:col-span-1">
+                <StayConnectedSidebar />
                 <LatestNews excludeSlug={news.slug} />
               </aside>
             </div>

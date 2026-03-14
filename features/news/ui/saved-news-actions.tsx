@@ -8,7 +8,15 @@ import { Link } from "@/i18n/navigation"
 import { Bookmark } from "lucide-react"
 import { cn } from "@/shared/common/lib/utils"
 
-export function SavedNewsActions({ slug, overlay = false }: { slug: string; overlay?: boolean }) {
+export function SavedNewsActions({
+  slug,
+  newsId,
+  overlay = false,
+}: {
+  slug: string
+  newsId?: string
+  overlay?: boolean
+}) {
   const { data: session } = useSession()
   const [saved, setSaved] = useState(false)
 
@@ -17,11 +25,13 @@ export function SavedNewsActions({ slug, overlay = false }: { slug: string; over
     void (async () => {
       const res = await fetch("/api/me/saved-news", { cache: "no-store" })
       if (!res.ok) return
-      const payload = (await res.json()) as { data?: Array<{ newsSlug: string }> }
+      const payload = (await res.json()) as { data?: Array<{ newsId?: string; newsSlug?: string }> }
       const rows = payload.data ?? []
-      setSaved(rows.some((r) => r.newsSlug === slug))
+      setSaved(
+        rows.some((r) => (newsId && r.newsId === newsId) || r.newsSlug === slug)
+      )
     })()
-  }, [session?.user?.id, slug])
+  }, [session?.user?.id, slug, newsId])
 
   async function toggle() {
     if (!session?.user?.id) {
@@ -31,7 +41,7 @@ export function SavedNewsActions({ slug, overlay = false }: { slug: string; over
     const res = await fetch("/api/me/saved-news", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ newsSlug: slug }),
+      body: JSON.stringify(newsId ? { newsId, newsSlug: slug } : { newsSlug: slug }),
     })
     if (!res.ok) return toast.error("Saqlab bo'lmadi")
     const data = await res.json()

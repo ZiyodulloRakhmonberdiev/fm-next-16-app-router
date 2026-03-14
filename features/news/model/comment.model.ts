@@ -6,6 +6,7 @@ export type CommentStatus = "pending" | "confirmed" | "rejected" | "approved"
 export interface INewsComment {
   _id: string
   newsSlug: string
+  newsId?: string
   userId: string
   userName: string
   userLogin?: string
@@ -24,6 +25,7 @@ const NewsCommentSchema = new Schema<INewsComment>(
   {
     _id: { type: String, required: true, unique: true, default: () => uuidv4() },
     newsSlug: { type: String, required: true, index: true },
+    newsId: { type: String, index: true },
     userId: { type: String, required: true, index: true },
     userName: { type: String, required: true },
     userLogin: String,
