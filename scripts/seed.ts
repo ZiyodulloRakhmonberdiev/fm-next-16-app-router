@@ -131,7 +131,7 @@ export const seed = {
 
   links: [
     {
-      href: "/about-us",
+      href: "/team",
       name: { uz: "Biz haqimizda", uzb: "Биз ҳақимизда", ru: "О нас", en: "About us" } satisfies LocaleMap,
     },
     {

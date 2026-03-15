@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Fergana Media",
-  description: "Fergana Media is a news website that provides news and information about the latest events in Fergana. Fergana Media is a news website that provides news and information about the latest events in Fergana.",
+  description: "Fergana Media - O‘zbekiston va Jahon yangiliklari",
   icons: {
     icon: "/favicon.ico",
   },
@@ -31,13 +31,6 @@ export default async function RootLayout({
     <html lang={locale} suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        style={{
-          backgroundImage: `
-            linear-gradient(to right, rgba(0,0,0,.03) 1px, transparent 1px),
-            linear-gradient(to bottom, rgba(0,0,0,.03) 1px, transparent 1px)
-          `,
-          backgroundSize: "20px 20px",
-        }}
       >
         <Providers>{children}</Providers>
       </body>

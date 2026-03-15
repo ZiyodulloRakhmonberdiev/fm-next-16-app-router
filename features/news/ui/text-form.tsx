@@ -37,7 +37,7 @@ export function TextForm({
   onChangeSlug,
 }: TextFormProps) {
   return (
-    <Card className='pt-0 md:pt-4 border-none md:border-border'>
+    <Card className='pt-0 md:pt-4 border-none md:border-border shadow-none md:shadow-sm'>
       <CardHeader className='px-0 md:px-4'>
         <CardTitle>Tarjimali maydonlar</CardTitle>
         <CardDescription>

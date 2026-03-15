@@ -1,7 +1,7 @@
 'use client'
 import { ThemeSwitcher } from '@/widgets/theme-switcher'
 import { useSession } from 'next-auth/react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import {
   Card,
@@ -13,7 +13,7 @@ import {
 import { Input } from '@/shared/common/components/ui/input'
 import { Label } from '@/shared/common/components/ui/label'
 import { Button } from '@/shared/common/components/ui/button'
-import { Settings } from 'lucide-react'
+import { Settings, Upload } from 'lucide-react'
 import { normalizeRole } from '@/shared/common/lib/rbac'
 
 export function DashboardUserSettingsPage() {
@@ -26,6 +26,8 @@ export function DashboardUserSettingsPage() {
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [imageUploading, setImageUploading] = useState(false)
+  const imageFileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (!canEditProfile) return
@@ -38,6 +40,28 @@ export function DashboardUserSettingsPage() {
       setImage(data.image ?? '')
     })()
   }, [canEditProfile])
+
+  async function uploadProfileImage(file: File) {
+    setImageUploading(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('kind', 'image')
+      const res = await fetch('/api/uploads', { method: 'POST', credentials: 'include', body: formData })
+      const data = (await res.json().catch(() => null)) as { url?: string; error?: string } | null
+      if (!res.ok || !data?.url) {
+        toast.error(data?.error ?? 'Rasm yuklab bo\'lmadi')
+        return
+      }
+      setImage(data.url)
+      toast.success('Rasm Cloudinaryga yuklandi')
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Rasm yuklab bo\'lmadi')
+    } finally {
+      setImageUploading(false)
+      if (imageFileRef.current) imageFileRef.current.value = ''
+    }
+  }
 
   async function saveProfile() {
     setLoading(true)
@@ -114,8 +138,40 @@ export function DashboardUserSettingsPage() {
               <Input value={position} onChange={(e) => setPosition(e.target.value)} />
             </div>
             <div className="space-y-2">
-              <Label>Image URL</Label>
-              <Input value={image} onChange={(e) => setImage(e.target.value)} />
+              <Label>Profil rasmi</Label>
+              <div className="flex gap-2 items-center">
+                <Input
+                  value={image}
+                  onChange={(e) => setImage(e.target.value)}
+                  placeholder="URL yoki yuklash tugmasi orqali"
+                  className="flex-1"
+                />
+                <input
+                  ref={imageFileRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0]
+                    if (f) void uploadProfileImage(f)
+                  }}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  disabled={imageUploading}
+                  onClick={() => imageFileRef.current?.click()}
+                  title="Cloudinaryga yuklash"
+                >
+                  <Upload className="size-4" />
+                </Button>
+              </div>
+              {image ? (
+                <div className="h-16 w-16 rounded-md overflow-hidden border bg-muted">
+                  <img src={image} alt="" className="h-full w-full object-cover" />
+                </div>
+              ) : null}
             </div>
             <div className="grid gap-3 md:grid-cols-2">
               <div className="space-y-2">

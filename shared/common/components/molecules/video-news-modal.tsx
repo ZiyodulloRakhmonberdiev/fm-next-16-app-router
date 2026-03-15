@@ -51,7 +51,7 @@ export default function VideoNewsModal({ item, open, onOpenChange }: VideoNewsMo
         onOpenChange(next)
       }}
     >
-      <DialogContent className="max-w-3xl w-full p-0 overflow-hidden">
+      <DialogContent className="max-w-[100vw - 2rem]  w-full p-0 overflow-hidden mx-auto my-4 sm:mx-auto sm:my-6">
         {hasVideo && item && (() => {
           const youtubeEmbed = getYoutubeEmbedUrl(item.videoUrl ?? "")
           return (
@@ -82,9 +82,9 @@ export default function VideoNewsModal({ item, open, onOpenChange }: VideoNewsMo
             </div>
             <div className="space-y-3 p-4">
               <DialogHeader>
-                <DialogTitle className="text-start line-clamp-3">{item.title}</DialogTitle>
+                <DialogTitle className="text-start line-clamp-2 md:line-clamp-3">{item.title}</DialogTitle>
                 {item.description && (
-                  <DialogDescription className="mt-1 text-start line-clamp-3">
+                  <DialogDescription className="mt-1 text-start line-clamp-2 md:line-clamp-3">
                     {item.description}
                   </DialogDescription>
                 )}

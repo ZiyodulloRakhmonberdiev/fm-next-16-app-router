@@ -6,7 +6,7 @@ import { requireAdminSession } from "@/shared/common/lib/require-admin-session"
 // import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3"
 import { v2 as cloudinary } from "cloudinary"
 
-// Contabo (comment): bucket policy — pnpm run contabo:public
+// Contabo (comment): pnpm run contabo:public
 
 const IMAGE_EXTENSIONS = new Set([".jpg", ".jpeg", ".png", ".webp", ".gif", ".svg"])
 const VIDEO_EXTENSIONS = new Set([".mp4", ".webm", ".ogg", ".mov", ".m4v"])
@@ -96,8 +96,8 @@ export async function POST(req: NextRequest) {
     //   const publicBase = process.env.NEXT_PUBLIC_STORAGE_PUBLIC_URL!.replace(/\/$/, "")
     //   const subfolder = kind === "image" ? "images" : "videos"
     //   const key = `uploads/${subfolder}/${filename}`
-    //   const client = new S3Client({ ... })
-    //   await client.send(new PutObjectCommand({ ... }))
+    //   const client = new S3Client({ endpoint, region, credentials, forcePathStyle: true })
+    //   await client.send(new PutObjectCommand({ Bucket, Key: key, Body, ContentType, ACL: "public-read" }))
     //   return Response.json({ url: `${publicBase}/${key}` })
     // }
 
