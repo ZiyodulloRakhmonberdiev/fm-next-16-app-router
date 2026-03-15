@@ -5,11 +5,13 @@ import { Analytics } from "@vercel/analytics/next"
 import HomeMainContent from "./_components/home-main-content";
 import ClientSiteNothingGate from "./_components/client-site-nothing-gate";
 import ClientServerOffGate from "./_components/client-server-off-gate";
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 export default function HomePage() {
   return (
     <ClientSiteNothingGate>
       <Analytics />
+      <SpeedInsights />
       <div className="block md:hidden">
         <ClientSidebar />
       </div>

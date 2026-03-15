@@ -65,6 +65,18 @@ export async function POST(req: NextRequest) {
     const base = sanitizeBaseName(path.basename(file.name, ext)) || "media"
     const filename = `${base}-${randomUUID()}${ext}`
 
+    // Production / serverless (Vercel va b.) da fayl tizimi read-only — faqat Cloudinary
+    const isProduction = process.env.NODE_ENV === "production" || !!process.env.VERCEL
+    if (isProduction && !isCloudinaryConfigured()) {
+      return Response.json(
+        {
+          error:
+            "Production da rasm va video yuklash uchun Cloudinary sozlang: NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME, NEXT_PUBLIC_CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET",
+        },
+        { status: 503 }
+      )
+    }
+
     if (isCloudinaryConfigured()) {
       cloudinary.config({
         cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
@@ -78,17 +90,37 @@ export async function POST(req: NextRequest) {
       const publicId = `${folder}/${kind === "image" ? "images" : "videos"}/${base}-${uniqueId}`
 
       const resourceType = kind === "image" ? "image" : "video"
-      const result = await new Promise<{ secure_url?: string; url?: string }>((resolve, reject) => {
-        cloudinary.uploader.upload(
-          dataUri,
+      const uploadOptions: Record<string, unknown> = {
+        resource_type: resourceType,
+        public_id: publicId,
+      }
+      // Rasmlarni yuklashda: katta fayllarni Cloudinary o'zida scale + quality_auto + format_auto qiladi
+      if (kind === "image") {
+        uploadOptions.eager = [
           {
-            resource_type: resourceType,
-            public_id: publicId,
+            width: 1200,
+            crop: "scale",
+            quality: "auto",
+            fetch_format: "auto",
           },
-          (err, res) => (err ? reject(err) : resolve(res as { secure_url?: string; url?: string }))
+        ]
+        uploadOptions.eager_async = false
+      }
+      type UploadResult = {
+        secure_url?: string
+        url?: string
+        eager?: Array<{ secure_url?: string; url?: string }>
+      }
+      const result = await new Promise<UploadResult>((resolve, reject) => {
+        cloudinary.uploader.upload(dataUri, uploadOptions, (err, res) =>
+          err ? reject(err) : resolve(res as UploadResult)
         )
       })
-      const url = result?.secure_url ?? result?.url ?? ""
+      // Rasm bo'lsa va eager (optimized) versiya yaratilgan bo'lsa — shu URL ni qaytaramiz (kichikroq, tezroq)
+      const url =
+        kind === "image" && result?.eager?.[0]?.secure_url
+          ? result.eager[0].secure_url
+          : result?.secure_url ?? result?.url ?? ""
       if (!url) return Response.json({ error: "Cloudinary javob bermadi" }, { status: 500 })
       return Response.json({ url })
     }

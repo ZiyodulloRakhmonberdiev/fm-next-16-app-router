@@ -1,6 +1,5 @@
 "use client"
 
-import Image from "next/image"
 import Link from "next/link"
 import type { RichContentBlock } from "@/features/news/model"
 import { getYoutubeEmbedUrl } from "@/shared/common/lib/youtube"
@@ -26,15 +25,11 @@ function Block({ block }: { block: RichContentBlock }) {
     case "image":
       return (
         <figure className="my-4 w-full">
-          <div className="relative w-full min-h-[50vh] overflow-hidden rounded-lg bg-muted">
-            <Image
-              src={block.src}
-              alt={block.alt ?? ""}
-              fill
-              className="object-contain"
-              sizes="100vw"
-            />
-          </div>
+          <img
+            src={block.src}
+            alt={block.alt ?? ""}
+            className="block w-full h-auto rounded-lg"
+          />
         </figure>
       )
     case "video": {

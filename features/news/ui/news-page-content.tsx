@@ -164,23 +164,23 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
         })()}
 
         {!hasVideo && displayImages.length === 1 && (
-          <div className="relative mb-6 w-full overflow-hidden rounded-lg min-h-[80vh]">
+          <div className="relative mb-6 w-full">
             {getSafeImageSrc(displayImages[0]) ? (
-              <Image
-                src={getSafeImageSrc(displayImages[0])}
-                alt={news.title}
-                fill
-                className="object-cover"
-                priority
-              />
+              <>
+                <img
+                  src={getSafeImageSrc(displayImages[0])}
+                  alt={news.title}
+                  className="block w-full h-auto rounded-lg"
+                />
+                <div className="absolute right-3 top-3 z-10">
+                  <SavedNewsActions slug={news.slug} newsId={newsId} overlay />
+                </div>
+              </>
             ) : (
-              <div className="flex h-full w-full items-center justify-center px-2 text-sm text-muted-foreground text-center">
+              <div className="flex min-h-[200px] w-full items-center justify-center rounded-lg bg-muted px-2 text-sm text-muted-foreground text-center">
                 Rasmni yuklab bo&apos;lmadi
               </div>
             )}
-            <div className="absolute right-3 top-3 z-10">
-              <SavedNewsActions slug={news.slug} newsId={newsId} overlay />
-            </div>
           </div>
         )}
         {!hasVideo && displayImages.length > 1 && (
@@ -262,21 +262,17 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
           <div className="mb-6 w-full">
             <p className="mb-3 text-sm font-medium text-muted-foreground">{t("images")}</p>
             {displayImages.length === 1 ? (
-              <div className="relative w-full min-h-[50vh] overflow-hidden rounded-lg">
-                {getSafeImageSrc(displayImages[0]) ? (
-                  <Image
-                    src={getSafeImageSrc(displayImages[0])}
-                    alt={`${news.title} — 1`}
-                    fill
-                    className="object-contain"
-                    sizes="100vw"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center px-2 text-sm text-muted-foreground text-center">
-                    Rasmni yuklab bo&apos;lmadi
-                  </div>
-                )}
-              </div>
+              getSafeImageSrc(displayImages[0]) ? (
+                <img
+                  src={getSafeImageSrc(displayImages[0])}
+                  alt={`${news.title} — 1`}
+                  className="block w-full h-auto rounded-lg"
+                />
+              ) : (
+                <div className="flex min-h-[200px] w-full items-center justify-center rounded-lg bg-muted px-2 text-sm text-muted-foreground text-center">
+                  Rasmni yuklab bo&apos;lmadi
+                </div>
+              )
             ) : (
               <div className="grid grid-cols-2 gap-3 w-full">
                 {displayImages.map((src, i) => (
