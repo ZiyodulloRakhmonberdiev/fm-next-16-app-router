@@ -9,7 +9,7 @@ const REACTIONS = ["like", "love", "laugh", "sad", "angry"] as const
 type ReactionType = (typeof REACTIONS)[number]
 
 const newsFilter = (id: string) => ({
-  $or: [{ newsId: id }, { newsSlug: id }] as const,
+  $or: [{ newsId: id }, { newsSlug: id }],
 })
 
 let oldIndexDropped = false
