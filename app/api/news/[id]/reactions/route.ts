@@ -81,7 +81,7 @@ export async function POST(
     $or: [
       { newsSlug, userKey },
       { newsId: String(newsId), userKey },
-    ] as const,
+    ],
   }
   const current = await NewsReactionModel.findOne(userReactionFilter).lean()
 
