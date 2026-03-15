@@ -17,7 +17,6 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/shared/common/components/ui/carousel"
-import { getMediaUrl } from "@/shared/common/lib/media-url"
 import { getYoutubeEmbedUrl } from "@/shared/common/lib/youtube"
 import type { NewsItem } from "@/features/news/model"
 import { isRichContent, parseRichContentString } from "@/features/news/model"
@@ -52,7 +51,7 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
         : `/uploads/images/${raw}`
     try {
       new URL(candidate, "http://localhost")
-      return getMediaUrl(candidate)
+      return candidate
     } catch {
       return ""
     }
@@ -127,7 +126,7 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
               })()
             ) : (
               <video
-                src={getMediaUrl(news.videoUrl)}
+                src={news.videoUrl}
                 controls
                 controlsList="nodownload"
                 disablePictureInPicture

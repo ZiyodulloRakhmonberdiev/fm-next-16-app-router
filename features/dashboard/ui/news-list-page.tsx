@@ -12,7 +12,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/shared/common/components/ui/card'
-import { getMediaUrl } from '@/shared/common/lib/media-url'
 import { Button } from '@/shared/common/components/ui/button'
 import { Input } from '@/shared/common/components/ui/input'
 import { Label } from '@/shared/common/components/ui/label'
@@ -268,7 +267,7 @@ export function DashboardNewsListPage({
         : `/uploads/images/${raw}`
     try {
       new URL(candidate, 'http://localhost')
-      return getMediaUrl(candidate)
+      return candidate
     } catch {
       return ''
     }

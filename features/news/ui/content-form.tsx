@@ -70,7 +70,6 @@ export function ContentForm({
 
     const res = await fetch("/api/uploads", {
       method: "POST",
-      credentials: "include",
       body: formData,
     })
     const data = (await res.json().catch(() => null)) as { url?: string; error?: string } | null

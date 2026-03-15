@@ -11,7 +11,6 @@ import {
 } from "@/shared/common/components/ui/dialog"
 import { Link } from "@/i18n/navigation"
 import type { NewsItem } from "@/features/news/model"
-import { getMediaUrl } from "@/shared/common/lib/media-url"
 import { getYoutubeEmbedUrl } from "@/shared/common/lib/youtube"
 import { useTranslations } from "next-intl"
 
@@ -52,13 +51,13 @@ export default function VideoNewsModal({ item, open, onOpenChange }: VideoNewsMo
                 })()
               ) : (
                 <video
-                  src={getMediaUrl(item.videoUrl!)}
+                  src={item.videoUrl!}
                   controls
                   controlsList="nodownload"
                   disablePictureInPicture
                   onContextMenu={(e) => e.preventDefault()}
                   className="h-full w-full object-contain"
-                  poster={getMediaUrl(item.images?.[0]) || undefined}
+                  poster={item.images?.[0]}
                 >
                   {t("your_browser_does_not_support_the_video_tag")}
                 </video>

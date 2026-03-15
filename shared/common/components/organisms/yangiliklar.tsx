@@ -6,7 +6,6 @@ import { Card } from "@/shared/common/components/ui/card"
 import { formatDateISO, formatDateTimeLocale, type AppLocale } from "@/shared/common/lib/formatter"
 import { Link } from "@/i18n/navigation"
 import Image from "next/image"
-import { getMediaUrl } from "@/shared/common/lib/media-url"
 import { useLocale } from "next-intl"
 
 function isVideoOrImageNews(item: { type?: string; images?: string[]; videoSource?: string; videoUrl?: string }) {
@@ -36,7 +35,7 @@ export default function Yangiliklar() {
         : `/uploads/images/${raw}`
     try {
       new URL(candidate, "http://localhost")
-      return getMediaUrl(candidate)
+      return candidate
     } catch {
       return ""
     }
