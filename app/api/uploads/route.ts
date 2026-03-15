@@ -3,7 +3,10 @@ import { mkdir, writeFile } from "node:fs/promises"
 import path from "node:path"
 import { NextRequest } from "next/server"
 import { requireAdminSession } from "@/shared/common/lib/require-admin-session"
+// import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3"
 import { v2 as cloudinary } from "cloudinary"
+
+// Contabo (comment): bucket policy — pnpm run contabo:public
 
 const IMAGE_EXTENSIONS = new Set([".jpg", ".jpeg", ".png", ".webp", ".gif", ".svg"])
 const VIDEO_EXTENSIONS = new Set([".mp4", ".webm", ".ogg", ".mov", ".m4v"])
@@ -38,6 +41,16 @@ function isCloudinaryConfigured(): boolean {
   )
 }
 
+// function isContaboConfigured(): boolean {
+//   return !!(
+//     process.env.CONTABO_ENDPOINT &&
+//     process.env.CONTABO_BUCKET &&
+//     process.env.CONTABO_ACCESS_KEY &&
+//     process.env.CONTABO_SECRET_KEY &&
+//     process.env.NEXT_PUBLIC_STORAGE_PUBLIC_URL
+//   )
+// }
+
 export async function POST(req: NextRequest) {
   const unauthorized = await requireAdminSession(['ceo', 'administrator', 'moderator', 'ads_manager'])
   if (unauthorized) return unauthorized
@@ -65,7 +78,7 @@ export async function POST(req: NextRequest) {
     const base = sanitizeBaseName(path.basename(file.name, ext)) || "media"
     const filename = `${base}-${randomUUID()}${ext}`
 
-    // Production / serverless (Vercel va b.) da fayl tizimi read-only — faqat Cloudinary
+    // Production / serverless da fayl tizimi read-only — Cloudinary kerak
     const isProduction = process.env.NODE_ENV === "production" || !!process.env.VERCEL
     if (isProduction && !isCloudinaryConfigured()) {
       return Response.json(
@@ -76,6 +89,17 @@ export async function POST(req: NextRequest) {
         { status: 503 }
       )
     }
+
+    // if (isContaboConfigured()) {
+    //   const endpoint = process.env.CONTABO_ENDPOINT!
+    //   const bucket = process.env.CONTABO_BUCKET!
+    //   const publicBase = process.env.NEXT_PUBLIC_STORAGE_PUBLIC_URL!.replace(/\/$/, "")
+    //   const subfolder = kind === "image" ? "images" : "videos"
+    //   const key = `uploads/${subfolder}/${filename}`
+    //   const client = new S3Client({ ... })
+    //   await client.send(new PutObjectCommand({ ... }))
+    //   return Response.json({ url: `${publicBase}/${key}` })
+    // }
 
     if (isCloudinaryConfigured()) {
       cloudinary.config({
@@ -88,21 +112,14 @@ export async function POST(req: NextRequest) {
       const folder = process.env.CLOUDINARY_UPLOAD_FOLDER?.replace(/\/$/, "") || "uploads"
       const uniqueId = randomUUID()
       const publicId = `${folder}/${kind === "image" ? "images" : "videos"}/${base}-${uniqueId}`
-
       const resourceType = kind === "image" ? "image" : "video"
       const uploadOptions: Record<string, unknown> = {
         resource_type: resourceType,
         public_id: publicId,
       }
-      // Rasmlarni yuklashda: katta fayllarni Cloudinary o'zida scale + quality_auto + format_auto qiladi
       if (kind === "image") {
         uploadOptions.eager = [
-          {
-            width: 1200,
-            crop: "scale",
-            quality: "auto",
-            fetch_format: "auto",
-          },
+          { width: 1200, crop: "scale", quality: "auto", fetch_format: "auto" },
         ]
         uploadOptions.eager_async = false
       }
@@ -116,7 +133,6 @@ export async function POST(req: NextRequest) {
           err ? reject(err) : resolve(res as UploadResult)
         )
       })
-      // Rasm bo'lsa va eager (optimized) versiya yaratilgan bo'lsa — shu URL ni qaytaramiz (kichikroq, tezroq)
       const url =
         kind === "image" && result?.eager?.[0]?.secure_url
           ? result.eager[0].secure_url
@@ -127,8 +143,7 @@ export async function POST(req: NextRequest) {
 
     const folder = path.join(process.cwd(), "public", "uploads", kind === "image" ? "images" : "videos")
     await mkdir(folder, { recursive: true })
-    const fullPath = path.join(folder, filename)
-    await writeFile(fullPath, buffer)
+    await writeFile(path.join(folder, filename), buffer)
     const url = `/uploads/${kind === "image" ? "images" : "videos"}/${filename}`
     return Response.json({ url })
   } catch (error) {

@@ -6,9 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "contabo:public": "node scripts/contabo-set-public-policy.mjs"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1009.0",
     "@lexical/code": "^0.41.0",
     "@lexical/link": "^0.41.0",
     "@lexical/list": "^0.41.0",

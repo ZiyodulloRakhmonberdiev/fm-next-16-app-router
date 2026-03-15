@@ -1,7 +1,7 @@
 /**
- * Cloudinary video URL dan poster (birinchi kadr) uchun rasm URL qaytaradi.
- * Format: .../video/upload/ -> .../video/upload/so_0/ va .mp4 -> .jpg
+ * Cloudinary video poster helper.
  */
+
 export function getCloudinaryVideoPosterUrl(videoUrl: string | undefined | null): string {
   const u = videoUrl?.trim()
   if (!u) return ""
