@@ -146,3 +146,12 @@ export function isTextOnlyRawNews(item: RawNewsItem): boolean {
 export function isVisualRawNews(item: RawNewsItem): boolean {
   return !isTextOnlyRawNews(item)
 }
+
+/** Faqat rasmli yangiliklar — top/latest/related kabi joylarda ko'rsatish uchun. Type video va text ko'rinmasin. */
+export function isImageTypeRawNews(item: RawNewsItem): boolean {
+  if (item.type !== "image") return false
+  const hasValidImage =
+    Array.isArray(item.images) &&
+    item.images.some((s) => typeof s === "string" && s.trim() !== "")
+  return hasValidImage
+}

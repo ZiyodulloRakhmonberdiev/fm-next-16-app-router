@@ -248,12 +248,34 @@ export function CreateNewsForm({ categories, tags, authors, existingSlugs = [], 
     mutationFn: async ({
       status,
       pushedToTelegramOverride,
+      videoFile: videoFileArg,
+      videoUrl: videoUrlArg,
     }: {
       status: NewsStatus
       pushedToTelegramOverride?: boolean
+      videoFile?: File | null
+      videoUrl?: string
     }) => {
       const slug = (slugs.uz || slugs.uzb || slugs.ru || slugs.en || '').trim().toLowerCase()
       if (!slug) throw new Error('Slug majburiy')
+
+      let finalVideoUrl: string | null = null
+      let finalVideoSource: 'youtube' | 'local' | null = null
+      if (videoFileArg) {
+        const formData = new FormData()
+        formData.append('file', videoFileArg)
+        formData.append('kind', 'video')
+        const uploadRes = await fetch('/api/uploads', { method: 'POST', credentials: 'include', body: formData })
+        const uploadData = (await uploadRes.json().catch(() => null)) as { url?: string; error?: string } | null
+        if (!uploadRes.ok || !uploadData?.url) {
+          throw new Error(uploadData?.error ?? "Videoni yuklab bo'lmadi")
+        }
+        finalVideoUrl = uploadData.url
+        finalVideoSource = 'local'
+      } else if (videoUrlArg?.trim()) {
+        finalVideoUrl = videoUrlArg.trim()
+        finalVideoSource = 'youtube'
+      }
 
       const title = {
         uz: translations.uz.title.trim(),
@@ -297,8 +319,8 @@ export function CreateNewsForm({ categories, tags, authors, existingSlugs = [], 
         isTop,
         isBreaking,
         pushedToTelegram: pushedToTelegramOverride ?? pushedToTelegram,
-        videoSource: videoUrl.trim() ? 'youtube' : null,
-        videoUrl: videoUrl.trim() || null,
+        videoSource: finalVideoSource,
+        videoUrl: finalVideoUrl,
       }
 
       const targetId = savedNewsId
@@ -439,7 +461,14 @@ export function CreateNewsForm({ categories, tags, authors, existingSlugs = [], 
       const saved = await saveNews.mutateAsync({
         status,
         pushedToTelegramOverride,
+        videoFile,
+        videoUrl,
       })
+      if (videoFile) {
+        setVideoFile(null)
+        const savedDoc = saved as { videoUrl?: string }
+        if (savedDoc?.videoUrl) setVideoUrl(savedDoc.videoUrl)
+      }
       if (!savedNewsId && saved?._id) {
         setSavedNewsId(saved._id)
       }
@@ -523,7 +552,12 @@ export function CreateNewsForm({ categories, tags, authors, existingSlugs = [], 
 
   const handleSave = async (status: 'pending' | 'published', redirectOnSuccess: boolean) => {
     try {
-      const saved = await saveNews.mutateAsync({ status })
+      const saved = await saveNews.mutateAsync({ status, videoFile, videoUrl })
+      if (videoFile) {
+        setVideoFile(null)
+        const savedDoc = saved as { videoUrl?: string }
+        if (savedDoc?.videoUrl) setVideoUrl(savedDoc.videoUrl)
+      }
       if (!savedNewsId && saved?._id) {
         setSavedNewsId(saved._id)
       }
@@ -903,7 +937,7 @@ export function CreateNewsForm({ categories, tags, authors, existingSlugs = [], 
               ? async (newStatus) => {
                   setEditStatus(newStatus)
                   try {
-                    const saved = await saveNews.mutateAsync({ status: newStatus }) as {
+                    const saved = await saveNews.mutateAsync({ status: newStatus, videoFile, videoUrl }) as {
                       _id?: string
                       publishedAt?: string | Date
                       telegramMessageId?: number
@@ -912,6 +946,11 @@ export function CreateNewsForm({ categories, tags, authors, existingSlugs = [], 
                       telegramPushReason?: string
                       telegramLastAttemptAt?: string | Date
                       pushedToTelegramAt?: string | Date
+                      videoUrl?: string
+                    }
+                    if (videoFile) {
+                      setVideoFile(null)
+                      if (saved?.videoUrl) setVideoUrl(saved.videoUrl)
                     }
                     if (!savedNewsId && saved?._id) {
                       setSavedNewsId(saved._id)

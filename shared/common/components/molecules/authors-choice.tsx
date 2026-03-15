@@ -1,6 +1,6 @@
 "use client"
 
-import { getNewsListForLocale, isVisualRawNews, type NewsItem } from "@/features/news/model"
+import { getNewsListForLocale, isImageTypeRawNews, type NewsItem } from "@/features/news/model"
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
 import { Card } from "@/shared/common/components/ui/card"
 import {
@@ -20,7 +20,7 @@ export default function AuthorsChoice() {
   const { data: publicNews = [] } = usePublicNewsQuery()
 
   const rawFiltered = [...publicNews]
-    .filter(isVisualRawNews)
+    .filter(isImageTypeRawNews)
     .filter((item) => (item as { authorsChoice?: boolean }).authorsChoice)
     .sort(
       (a, b) =>

@@ -1,6 +1,6 @@
 "use client"
 
-import { getNewsListForLocale, type NewsItem } from "@/features/news/model"
+import { getNewsListForLocale, isImageTypeRawNews, type NewsItem } from "@/features/news/model"
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
 import { Card } from "@/shared/common/components/ui/card"
 import { formatDateISO, formatDateTimeLocale, type AppLocale } from "@/shared/common/lib/formatter"
@@ -8,19 +8,12 @@ import { Link } from "@/i18n/navigation"
 import Image from "next/image"
 import { useLocale } from "next-intl"
 
-function isVideoOrImageNews(item: { type?: string; images?: string[]; videoSource?: string; videoUrl?: string }) {
-  const hasImage = Array.isArray(item.images) && item.images.length > 0
-  if (item.type === "image" && hasImage) return true
-  if (item.type === "video" && hasImage) return true
-  return false
-}
-
 export default function Yangiliklar() {
   const locale = useLocale() as AppLocale
   const { data: publicNews = [] } = usePublicNewsQuery()
 
   const raw = [...publicNews]
-    .filter(isVideoOrImageNews)
+    .filter(isImageTypeRawNews)
     .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
     .slice(0, 30)
   const items = getNewsListForLocale(raw, locale)

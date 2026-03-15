@@ -11,7 +11,7 @@ import {
 } from "@/shared/common/components/organisms"
 import { AdSlot, ServerLoading, ServerUnavailable, StayConnected } from "@/shared/common/components/molecules"
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
-import { isVisualRawNews, type RawNewsItem } from "@/features/news/model"
+import { isImageTypeRawNews, type RawNewsItem } from "@/features/news/model"
 import { usePublicCategoriesQuery } from "@/features/category/model/public-categories-query"
 import TopNewsSlider from "@/shared/common/components/molecules/top-news-slider"
 
@@ -31,7 +31,7 @@ export default function HomeMainContent() {
   } = usePublicCategoriesQuery()
   const firstCategorySlug = categories[0]?.slug ?? "sports"
   const secondCategorySlug = categories[1]?.slug ?? categories[0]?.slug ?? "business"
-  const visualNews = publicNews.filter(isVisualRawNews)
+  const visualNews = publicNews.filter(isImageTypeRawNews)
   const topNewsCount = visualNews.filter((item) => (item as { isTop?: boolean }).isTop).length
   const latestNewsCount = visualNews.length
   const authorsChoiceCount = visualNews.filter((item) => (item as { authorsChoice?: boolean }).authorsChoice).length

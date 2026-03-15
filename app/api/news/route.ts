@@ -62,6 +62,9 @@ export async function POST(req: NextRequest) {
     const createData = { ...parsed.data }
     if (createData.videoSource === null) delete createData.videoSource
     if (createData.videoUrl === null) delete createData.videoUrl
+    if (Array.isArray(createData.images)) {
+      createData.images = createData.images.filter((u): u is string => typeof u === 'string' && u.trim() !== '')
+    }
 
     const news = await NewsModel.create(createData)
     if (news.pushedToTelegram && news.status === 'published') {

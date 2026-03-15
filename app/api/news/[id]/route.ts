@@ -86,6 +86,9 @@ export async function PUT(
         delete update.videoSource
         delete update.videoUrl
       }
+      if (Array.isArray(update.images)) {
+        update.images = update.images.filter((u: unknown): u is string => typeof u === 'string' && u.trim() !== '')
+      }
       return update
     })(),
     { new: true, runValidators: true }
@@ -131,6 +134,9 @@ export async function PATCH(
         }
         delete update.videoSource
         delete update.videoUrl
+      }
+      if (Array.isArray(update.images)) {
+        update.images = update.images.filter((u: unknown): u is string => typeof u === 'string' && u.trim() !== '')
       }
       return update
     })(),

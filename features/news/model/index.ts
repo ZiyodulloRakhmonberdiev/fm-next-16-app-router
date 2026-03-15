@@ -8,6 +8,7 @@ export {
   getPublishedNewsListForLocale,
   isTextOnlyRawNews,
   isVisualRawNews,
+  isImageTypeRawNews,
 } from "./types"
 export { createNewsSchema, newsStatusSchema } from "./schemas"
 export type { CreateNewsInput } from "./schemas"

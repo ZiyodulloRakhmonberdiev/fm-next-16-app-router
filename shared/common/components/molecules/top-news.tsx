@@ -11,7 +11,7 @@ import {
 } from "@/shared/common/components/ui/carousel"
 import type { CarouselApi } from "@/shared/common/components/ui/carousel"
 import Autoplay from "embla-carousel-autoplay"
-import { getNewsListForLocale, isVisualRawNews, type NewsItem } from "@/features/news/model"
+import { getNewsListForLocale, isImageTypeRawNews, type NewsItem } from "@/features/news/model"
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
 import Image from "next/image"
 import { cn } from "@/shared/common/lib/utils"
@@ -65,7 +65,7 @@ export default function TopNews() {
   }, [api])
 
   const rawTop = [...publicNews]
-    .filter(isVisualRawNews)
+    .filter(isImageTypeRawNews)
     .filter((item) => (item as { isTop?: boolean }).isTop)
     .sort(
       (a, b) =>
@@ -74,6 +74,20 @@ export default function TopNews() {
     .slice(0, 10)
   const news = getNewsListForLocale(rawTop, locale)
   if (news.length === 0) return null
+
+  const getSafeImageSrc = (raw?: string) => {
+    if (!raw?.trim()) return ""
+    const candidate =
+      raw.startsWith("http://") || raw.startsWith("https://") || raw.startsWith("/")
+        ? raw
+        : `/uploads/images/${raw}`
+    try {
+      new URL(candidate, "http://localhost")
+      return candidate
+    } catch {
+      return ""
+    }
+  }
 
   const handleDotSelect = React.useCallback(
     (index: number) => api?.scrollTo(index),
@@ -118,13 +132,17 @@ export default function TopNews() {
                       href={`/news/${item.slug}`}
                       className="relative block w-full md:col-span-3 min-h-[200px] aspect-video md:aspect-auto md:h-full"
                     >
-                      <Image
-                        src={item.images[0]}
-                        alt={item.title}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 768px) 100vw, 60vw"
-                      />
+                      {getSafeImageSrc(item.images?.[0]) ? (
+                        <Image
+                          src={getSafeImageSrc(item.images[0])}
+                          alt={item.title ?? ""}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw, 60vw"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 bg-muted" aria-hidden />
+                      )}
                       <div className="absolute inset-0 bg-black/30" aria-hidden />
                       <span className="absolute left-3 top-3 z-10 bg-primary rounded-xs px-1.5 py-0.5 text-xs font-semibold text-primary-foreground">
                         Top

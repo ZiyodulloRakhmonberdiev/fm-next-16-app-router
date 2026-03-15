@@ -2,11 +2,11 @@
 
 import { AuthorsChoice, LatestNews, TopNews } from "../molecules";
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query";
-import { isVisualRawNews } from "@/features/news/model";
+import { isImageTypeRawNews } from "@/features/news/model";
 
 export default function TopBanner() {
   const { data: publicNews = [] } = usePublicNewsQuery()
-  const hasVisualNews = publicNews.some(isVisualRawNews)
+  const hasVisualNews = publicNews.some(isImageTypeRawNews)
   if (!hasVisualNews) return null
 
   return (

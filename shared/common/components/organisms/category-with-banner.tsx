@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { getNewsListForLocale, isVisualRawNews, type NewsItem } from "@/features/news/model"
+import { getNewsListForLocale, isImageTypeRawNews, type NewsItem } from "@/features/news/model"
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
 import { getCategoryNameFromApi, usePublicCategoriesQuery } from "@/features/category/model/public-categories-query"
 import { Card } from "@/shared/common/components/ui/card"
@@ -66,7 +66,7 @@ export default function CategoryWithBanner({
   const rawSorted = React.useMemo(
     () =>
       [...publicNews]
-        .filter(isVisualRawNews)
+        .filter(isImageTypeRawNews)
         .filter((n) => n.categorySlug === categorySlug)
         .sort(
           (a, b) =>

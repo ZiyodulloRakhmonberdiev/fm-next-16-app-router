@@ -4,7 +4,7 @@ import * as React from "react"
 import Image from "next/image"
 import { Link } from "@/i18n/navigation"
 import { useLocale } from "next-intl"
-import { getNewsListForLocale, isVisualRawNews, type NewsItem } from "@/features/news/model"
+import { getNewsListForLocale, isImageTypeRawNews, type NewsItem } from "@/features/news/model"
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
 import type { AppLocale } from "@/shared/common/lib/formatter"
 import { cn } from "@/shared/common/lib/utils"
@@ -26,7 +26,7 @@ export default function TopNewsSlider() {
 
   const items = React.useMemo(() => {
     const raw = [...publicNews]
-      .filter(isVisualRawNews)
+      .filter(isImageTypeRawNews)
       .filter((n) => Array.isArray(n.images) && n.images.length > 0)
       .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
       .slice(0, 10)

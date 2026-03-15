@@ -88,7 +88,16 @@ export const createNewsSchema = z.object({
   telegramPushReason: z.string().optional(),
   telegramLastAttemptAt: z.coerce.date().optional(),
   videoSource: z.enum(['youtube', 'local']).optional().nullable(),
-  videoUrl: z.string().url('Video URL noto\'g\'ri').optional().nullable(),
+  // To'liq URL (Cloudinary, YouTube) yoki relative yo'l (/uploads/videos/...)
+  videoUrl: z
+    .string()
+    .min(1, "Video URL bo'sh bo'lmasligi kerak")
+    .refine(
+      (v) => v.startsWith("/") || v.startsWith("http://") || v.startsWith("https://"),
+      "Video URL to'liq (http/https) yoki / bilan boshlanuvchi yo'l bo'lishi kerak"
+    )
+    .optional()
+    .nullable(),
 })
 
 export type CreateNewsInput = z.infer<typeof createNewsSchema>

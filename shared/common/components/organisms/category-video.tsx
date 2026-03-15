@@ -22,6 +22,13 @@ function isVideoNewsItem(item: RawNewsItem): boolean {
   return item.type === "video" || (hasVideo && hasImages)
 }
 
+function getSafeImageSrc(raw?: string): string {
+  if (!raw?.trim()) return ""
+  return raw.startsWith("http://") || raw.startsWith("https://") || raw.startsWith("/")
+    ? raw
+    : `/uploads/images/${raw}`
+}
+
 export default function CategoryVideo() {
   const locale = useLocale() as AppLocale
   const t = useTranslations("common")
@@ -60,7 +67,7 @@ export default function CategoryVideo() {
   }
 
   if (!featured && leftItems.length === 0 && rightItems.length === 0) return null
-  if (1 + leftItems.length + rightItems.length < 7) return null
+  if (1 + leftItems.length + rightItems.length < 0) return null
 
   return (
     <section className="w-full space-y-4 px-4 md:px-6 pt-4">
@@ -88,12 +95,16 @@ export default function CategoryVideo() {
                   <Card className="overflow-hidden p-0 rounded-sm shadow-none transition-shadow hover:shadow-md bg-background">
                     <div className="flex gap-3">
                       <div className="relative block h-20 w-28 shrink-0 overflow-hidden rounded-xs md:h-24 md:w-32">
-                        <Image
-                          src={item.images[0]}
-                          alt={item.title}
-                          fill
-                          className="object-cover"
-                        />
+                        {getSafeImageSrc(item.images?.[0]) ? (
+                          <Image
+                            src={getSafeImageSrc(item.images[0])}
+                            alt={item.title}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="absolute inset-0 bg-muted" aria-hidden />
+                        )}
                         <span className="absolute inset-0 flex items-center justify-center bg-black/40">
                           <span className="flex size-10 items-center justify-center rounded-full bg-background text-primary">
                             <Play className="size-5 fill-current" />
@@ -126,12 +137,16 @@ export default function CategoryVideo() {
             >
               <Card className="relative w-full h-full overflow-hidden rounded-sm border-none p-0 shadow-none transition-shadow hover:shadow-md">
                 <div className="relative w-full aspect-video md:h-full md:aspect-auto">
-                  <Image
-                    src={featured.images[0]}
-                    alt={featured.title}
-                    fill
-                    className="object-cover"
-                  />
+                  {getSafeImageSrc(featured.images?.[0]) ? (
+                    <Image
+                      src={getSafeImageSrc(featured.images[0])}
+                      alt={featured.title}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-muted" aria-hidden />
+                  )}
                   <span className="absolute inset-0 flex items-center justify-center bg-black/30">
                     <span className="flex size-16 items-center justify-center rounded-full bg-background text-primary md:size-20">
                       <Play className="size-8 fill-current md:size-10" />
@@ -166,12 +181,16 @@ export default function CategoryVideo() {
                   <Card className="overflow-hidden p-0 rounded-sm shadow-none transition-shadow hover:shadow-md">
                     <div className="flex gap-3">
                       <div className="relative block h-20 w-28 shrink-0 overflow-hidden rounded-xs md:h-24 md:w-32">
-                        <Image
-                          src={item.images[0]}
-                          alt={item.title}
-                          fill
-                          className="object-cover"
-                        />
+                        {getSafeImageSrc(item.images?.[0]) ? (
+                          <Image
+                            src={getSafeImageSrc(item.images[0])}
+                            alt={item.title}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="absolute inset-0 bg-muted" aria-hidden />
+                        )}
                         <span className="absolute inset-0 flex items-center justify-center bg-black/40">
                           <span className="flex size-10 items-center justify-center rounded-full bg-background text-primary">
                             <Play className="size-5 fill-current" />

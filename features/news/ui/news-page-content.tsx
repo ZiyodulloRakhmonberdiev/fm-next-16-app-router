@@ -44,7 +44,7 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
   const tagsEnabled = settings?.clientDelivery.models.tags ?? true
 
   const getSafeImageSrc = (raw?: string) => {
-    if (!raw) return ""
+    if (!raw?.trim()) return ""
     const candidate =
       raw.startsWith("http://") || raw.startsWith("https://") || raw.startsWith("/")
         ? raw
@@ -56,6 +56,27 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
       return ""
     }
   }
+
+  const getVideoSrc = (url?: string | null) => {
+    const u = url?.trim()
+    if (!u) return ""
+    if (u.startsWith("http://") || u.startsWith("https://")) return u
+    if (u.startsWith("/")) return u
+    return `/${u}`
+  }
+
+  const isExternalVideoUrl = (url?: string | null) =>
+    Boolean(url?.trim()?.startsWith("http://") || url?.trim()?.startsWith("https://"))
+
+  const displayImages = React.useMemo(
+    () => (news.images?.filter((s): s is string => typeof s === "string" && s.trim() !== "") ?? []),
+    [news.images]
+  )
+
+  const hasVideo = Boolean(
+    news.videoUrl?.trim() &&
+      (news.videoSource || news.type === "video")
+  )
 
   React.useEffect(() => {
     if (typeof window === "undefined") return
@@ -108,11 +129,11 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
         <h1 className="mb-4 text-2xl font-bold leading-tight md:text-3xl">
           {news.title}
         </h1>
-        {news.videoSource && news.videoUrl && (
+        {hasVideo && (
           <div className="relative mb-6 aspect-video w-full overflow-hidden rounded-lg bg-muted">
             {news.videoSource === "youtube" ? (
               (() => {
-                const embedUrl = getYoutubeEmbedUrl(news.videoUrl)
+                const embedUrl = getYoutubeEmbedUrl(news.videoUrl ?? "")
                 if (!embedUrl) return null
                 return (
                   <iframe
@@ -126,13 +147,14 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
               })()
             ) : (
               <video
-                src={news.videoUrl}
+                src={getVideoSrc(news.videoUrl)}
+                crossOrigin={isExternalVideoUrl(news.videoUrl) ? "anonymous" : undefined}
                 controls
                 controlsList="nodownload"
                 disablePictureInPicture
                 onContextMenu={(e) => e.preventDefault()}
                 className="h-full w-full object-contain"
-                poster={news.images?.[0]}
+                poster={getSafeImageSrc(news.images?.[0]) || undefined}
               >
                 {t("your_browser_does_not_support_the_video_tag")}
               </video>
@@ -143,15 +165,16 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
           </div>
         )}
 
-        {!news.videoSource && news.images?.length === 1 && (
-          <div className="relative mb-6 aspect-video w-full overflow-hidden rounded-lg bg-muted">
-            {getSafeImageSrc(news.images[0]) ? (
+        {!hasVideo && displayImages.length === 1 && (
+          <div className="relative mb-6 w-full overflow-hidden rounded-lg bg-muted min-h-[50vh]">
+            {getSafeImageSrc(displayImages[0]) ? (
               <Image
-                src={getSafeImageSrc(news.images[0])}
+                src={getSafeImageSrc(displayImages[0])}
                 alt={news.title}
                 fill
-                className="object-cover"
+                className="object-contain"
                 priority
+                sizes="100vw"
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center px-2 text-sm text-muted-foreground text-center">
@@ -163,40 +186,72 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
             </div>
           </div>
         )}
-        {!news.videoSource && news.images && news.images.length > 1 && (
+        {!hasVideo && displayImages.length > 1 && (
           <div className="relative mb-6 w-full">
-            <Carousel opts={{ align: "start", loop: true }} className="w-full">
-              <CarouselContent className="ml-0">
-                {news.images.map((src, i) => (
-                  <CarouselItem key={src} className="pl-0">
-                    <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-muted">
-                      {getSafeImageSrc(src) ? (
-                        <Image
-                          src={getSafeImageSrc(src)}
-                          alt={`${news.title} — ${i + 1}`}
-                          fill
-                          className="object-cover"
-                          priority={i === 0}
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center px-2 text-xs text-muted-foreground text-center">
-                          Rasmni yuklab bo&apos;lmadi
-                        </div>
-                      )}
-                      {i === 0 ? (
-                        <div className="absolute right-3 top-3 z-10">
-                          <SavedNewsActions slug={news.slug} newsId={newsId} overlay />
-                        </div>
-                      ) : null}
+            {/* Mobile: carousel */}
+            <div className="md:hidden">
+              <Carousel opts={{ align: "start", loop: true }} className="w-full">
+                <CarouselContent className="ml-0">
+                  {displayImages.map((src, i) => (
+                    <CarouselItem key={src} className="pl-0">
+                      <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-muted">
+                        {getSafeImageSrc(src) ? (
+                          <Image
+                            src={getSafeImageSrc(src)}
+                            alt={`${news.title} — ${i + 1}`}
+                            fill
+                            className="object-cover"
+                            priority={i === 0}
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center px-2 text-xs text-muted-foreground text-center">
+                            Rasmni yuklab bo&apos;lmadi
+                          </div>
+                        )}
+                        {i === 0 ? (
+                          <div className="absolute right-3 top-3 z-10">
+                            <SavedNewsActions slug={news.slug} newsId={newsId} overlay />
+                          </div>
+                        ) : null}
+                      </div>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <div className="absolute right-2 top-2 z-10 flex translate-y-0 gap-2">
+                  <CarouselPrevious className="static size-10 translate-x-0 translate-y-0 rounded-sm border-none bg-background/90 hover:bg-background" />
+                  <CarouselNext className="static size-10 translate-x-0 translate-y-0 rounded-sm border-none bg-background/90 hover:bg-background" />
+                </div>
+              </Carousel>
+            </div>
+            {/* Desktop: 2 ustun */}
+            <div className="hidden md:grid md:grid-cols-2 gap-3">
+              {displayImages.map((src, i) => (
+                <div
+                  key={src || i}
+                  className="relative aspect-video w-full overflow-hidden rounded-lg bg-muted"
+                >
+                  {getSafeImageSrc(src) ? (
+                    <Image
+                      src={getSafeImageSrc(src)}
+                      alt={`${news.title} — ${i + 1}`}
+                      fill
+                      className="object-cover"
+                      priority={i === 0}
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center px-2 text-xs text-muted-foreground text-center">
+                      Rasmni yuklab bo&apos;lmadi
                     </div>
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-              <div className="absolute right-2 top-2 z-10 flex translate-y-0 gap-2">
-                <CarouselPrevious className="static size-10 translate-x-0 translate-y-0 rounded-sm border-none bg-background/90 hover:bg-background" />
-                <CarouselNext className="static size-10 translate-x-0 translate-y-0 rounded-sm border-none bg-background/90 hover:bg-background" />
-              </div>
-            </Carousel>
+                  )}
+                  {i === 0 ? (
+                    <div className="absolute right-3 top-3 z-10">
+                      <SavedNewsActions slug={news.slug} newsId={newsId} overlay />
+                    </div>
+                  ) : null}
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
@@ -206,18 +261,19 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
           </p>
         )}
 
-        {news.videoSource && news.videoUrl && news.images && news.images.length > 0 && (
+        {hasVideo && displayImages.length > 0 && (
           <div className="mb-6">
             <p className="mb-3 text-sm font-medium text-muted-foreground">{t("images")}</p>
-            {news.images.length === 1 ? (
+            {displayImages.length === 1 ? (
               <div className="flex justify-center">
-                <div className="relative w-full aspect-video overflow-hidden rounded-lg bg-muted">
-                  {getSafeImageSrc(news.images[0]) ? (
+                <div className="relative w-full min-h-[40vh] overflow-hidden rounded-lg bg-muted">
+                  {getSafeImageSrc(displayImages[0]) ? (
                     <Image
-                      src={getSafeImageSrc(news.images[0])}
+                      src={getSafeImageSrc(displayImages[0])}
                       alt={`${news.title} — 1`}
                       fill
-                      className="object-cover"
+                      className="object-contain"
+                      sizes="100vw"
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center px-2 text-sm text-muted-foreground text-center">
@@ -231,7 +287,7 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
                 <div className="relative w-full md:hidden">
                   <Carousel opts={{ align: "start", loop: true }} className="w-full">
                     <CarouselContent className="ml-0">
-                      {news.images.map((src, i) => (
+                      {displayImages.map((src, i) => (
                         <CarouselItem key={src} className="pl-0">
                           <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-muted">
                             {getSafeImageSrc(src) ? (
@@ -256,53 +312,28 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
                     </div>
                   </Carousel>
                 </div>
-                {news.images.length === 2 ? (
-                  <div className="hidden justify-center md:flex">
-                    <div className="grid w-full max-w-[50%] grid-cols-2 gap-3">
-                      {news.images.map((src, i) => (
-                        <div
-                          key={src}
-                          className="relative aspect-video overflow-hidden rounded-lg bg-muted"
-                        >
-                          {getSafeImageSrc(src) ? (
-                            <Image
-                              src={getSafeImageSrc(src)}
-                              alt={`${news.title} — ${i + 1}`}
-                              fill
-                              className="object-cover"
-                            />
-                          ) : (
-                            <div className="flex h-full w-full items-center justify-center px-2 text-xs text-muted-foreground text-center">
-                              Rasmni yuklab bo&apos;lmadi
-                            </div>
-                          )}
+                <div className="hidden md:grid md:grid-cols-2 gap-3">
+                  {displayImages.map((src, i) => (
+                    <div
+                      key={src || i}
+                      className="relative aspect-video overflow-hidden rounded-lg bg-muted"
+                    >
+                      {getSafeImageSrc(src) ? (
+                        <Image
+                          src={getSafeImageSrc(src)}
+                          alt={`${news.title} — ${i + 1}`}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw, 50vw"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center px-2 text-xs text-muted-foreground text-center">
+                          Rasmni yuklab bo&apos;lmadi
                         </div>
-                      ))}
+                      )}
                     </div>
-                  </div>
-                ) : (
-                  <div className="hidden grid-cols-3 gap-3 md:grid">
-                    {news.images.map((src, i) => (
-                      <div
-                        key={src}
-                        className="relative aspect-video overflow-hidden rounded-lg bg-muted"
-                      >
-                        {getSafeImageSrc(src) ? (
-                          <Image
-                            src={getSafeImageSrc(src)}
-                            alt={`${news.title} — ${i + 1}`}
-                            fill
-                            className="object-cover"
-                          />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center px-2 text-xs text-muted-foreground text-center">
-                            Rasmni yuklab bo&apos;lmadi
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
+                  ))}
+                </div>
               </>
             )}
           </div>

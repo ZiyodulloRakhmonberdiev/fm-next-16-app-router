@@ -1,6 +1,6 @@
 "use client"
 
-import { getNewsListForLocale, isVisualRawNews, type NewsItem } from "@/features/news/model"
+import { getNewsListForLocale, isImageTypeRawNews, type NewsItem } from "@/features/news/model"
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
 import { Card } from "@/shared/common/components/ui/card"
 import { formatDate, formatDateISO, formatDateTimeLocale } from "@/shared/common/lib/formatter"
@@ -20,7 +20,7 @@ export default function LatestNews({ excludeSlug }: LatestNewsProps = {}) {
   const { data: publicNews = [] } = usePublicNewsQuery()
 
   const rawSorted = [...publicNews]
-    .filter(isVisualRawNews)
+    .filter(isImageTypeRawNews)
     .filter((n) => !excludeSlug || n.slug !== excludeSlug)
     .sort(
       (a, b) =>

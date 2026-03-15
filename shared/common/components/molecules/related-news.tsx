@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { getNewsListForLocale, isVisualRawNews, type NewsItem } from "@/features/news/model"
+import { getNewsListForLocale, isImageTypeRawNews, type NewsItem } from "@/features/news/model"
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
 import { Card } from "@/shared/common/components/ui/card"
 import { formatDate, formatDateISO } from "@/shared/common/lib/formatter"
@@ -28,7 +28,7 @@ export default function RelatedNews(props: RelatedNewsProps) {
 
   const items = React.useMemo(() => {
     const raw = [...publicNews]
-      .filter(isVisualRawNews)
+      .filter(isImageTypeRawNews)
       .filter((n) =>
         isLatestMode
           ? true
@@ -44,6 +44,11 @@ export default function RelatedNews(props: RelatedNewsProps) {
   }, [categorySlug, excludeSlug, locale, publicNews, isLatestMode, latestLimit])
 
   if (items.length === 0) return null
+
+  const getSafeImageSrc = (raw?: string) => {
+    if (!raw?.trim()) return ""
+    return raw.startsWith("http") || raw.startsWith("/") ? raw : `/uploads/images/${raw}`
+  }
 
   return (
     <section className="mt-10 border-t border-border pt-8">
@@ -66,12 +71,16 @@ export default function RelatedNews(props: RelatedNewsProps) {
             <Card className="overflow-hidden p-0 rounded-sm shadow-none transition-shadow hover:shadow-md bg-background">
               <div className="flex gap-3">
                 <div className="relative block h-20 w-28 shrink-0 overflow-hidden rounded-xs md:h-24 md:w-32">
-                  <Image
-                    src={item.images[0]}
-                    alt={item.title}
-                    fill
-                    className="object-cover"
-                  />
+                  {getSafeImageSrc(item.images?.[0]) ? (
+                    <Image
+                      src={getSafeImageSrc(item.images[0])}
+                      alt={item.title ?? ""}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-muted" />
+                  )}
                   {item.videoSource && item.videoUrl && (
                     <span className="absolute inset-0 flex items-center justify-center bg-black/30">
                       <span className="flex size-8 items-center justify-center rounded-full bg-background text-primary">
