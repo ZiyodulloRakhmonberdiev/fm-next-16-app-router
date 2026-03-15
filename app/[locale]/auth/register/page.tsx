@@ -6,18 +6,13 @@ export default function RegisterPage() {
   const t = useTranslations("auth");
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-col items-center text-center gap-1">
-        <p className="font-bold text-lg">{t("register")}</p>
-        <p className="text-sm text-foreground/50">Yangi foydalanuvchi sifatida ro&apos;yxatdan o&apos;ting.</p>
-      </div>
       <RegisterForm />
-      <p className="text-center text-sm text-foreground/50">
+      <p className="text-center text-sm text-muted-foreground">
         Hisobingiz bormi?{" "}
-        <Link href="/auth/login" className="font-medium text-foreground hover:underline">
+        <Link href="/auth/login" className="font-medium text-primary underline hover:no-underline">
           {t("login")}
         </Link>
       </p>
     </div>
   );
 }
-  

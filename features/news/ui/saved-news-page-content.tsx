@@ -9,6 +9,7 @@ import type { AppLocale } from "@/shared/common/lib/formatter"
 import { useLocale } from "next-intl"
 import { Button } from "@/shared/common/components/ui/button"
 import { Card } from "@/shared/common/components/ui/card"
+import { RelatedNews } from "@/shared/common/components/molecules"
 
 type Props = { title: string }
 
@@ -132,6 +133,8 @@ export function SavedNewsPageContent({ title }: Props) {
           </Button>
         </div>
       ) : null}
+
+      <RelatedNews latestLimit={12} />
     </div>
   )
 }

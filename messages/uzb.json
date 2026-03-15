@@ -40,7 +40,13 @@
     "login_success": "Кириш муваффақиятли",
     "login_success_desc": "Муваффақиятли кирдингиз. Энди ҳисобингизга киришингиз мумкин.",
     "by_signing_in_you_agree_to_our": "Кириш орқали сиз қуйидагиларга розисиз",
-    "by_signing_up_you_agree_to_our": "Рўйхатдан ўтиш орқали сиз қуйидагиларга розисиз"
+    "by_signing_up_you_agree_to_our": "Рўйхатдан ўтиш орқали сиз қуйидагиларга розисиз",
+    "sign_in_with_email": "Email орқали кириш",
+    "get_started": "Бошлаш",
+    "or_sign_in_with": "Ёки қуйидагилар билан кириш",
+    "telegram": "Telegram",
+    "username": "Логин",
+    "email_or_username_placeholder": "Email ёки логин киритинг"
   },
   "common": {
   "results": "Натижалар",
@@ -80,6 +86,7 @@
   "your_browser_does_not_support_the_video_tag": "Сиз фойдаланаётган браузер видео тегини қўллаб-қувватламайди.",
   "read_article": "Мақолани ўқиш",
   "related_news": "Мавзуга оид янгиликлар",
+  "latest_news": "Сўнгги янгиликлар",
   "back": "Орқага",
   "min_read": "дақиқада о'қилади",
   "views": "ко'ришлар",
@@ -123,6 +130,12 @@
     "update": "Янгилаш",
     "cancel": "Бекор қилиш",
     "list_title": "Рекламалар рўйхати",
-    "optional": "ихтиёрий"
+    "optional": "ихтиёрий",
+    "placeholder_slot_text": "Бу ерда сизнинг рекламангиз бўлиши мумкин эди",
+    "placeholder_contact": "Боғланиш",
+    "placeholder_cta": "Реклама бериш",
+    "placeholder_telegram_title": "Бизнинг Telegram каналимиз",
+    "placeholder_slot_label": "Реклама жойи",
+    "placeholder_slot_size": "1400×200"
   }
 }

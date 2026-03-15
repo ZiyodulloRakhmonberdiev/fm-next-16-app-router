@@ -17,7 +17,8 @@ type AdItem = {
   _id: string
   type: "content" | "image"
   placement: "header_top_full" | "sidebar_widget" | "home_bottom_full" | "article_bottom_full"
-  media?: string
+  media?: string | string[]
+  mediaMobile?: string | string[]
   logo?: string
   siteName: string
   title: string
@@ -38,7 +39,7 @@ const adTypes: AdItem["type"][] = ["content", "image"]
 const emptyForm = {
   type: "content" as AdItem["type"],
   placement: "header_top_full" as AdItem["placement"],
-  media: "",
+  media: [""] as string[],
   logo: "",
   siteName: "",
   title: "",
@@ -74,15 +75,34 @@ export default function DashboardAdsPage() {
     return data.url
   }
 
-  async function handleMediaFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
+  async function handleMediaFileChange(e: React.ChangeEvent<HTMLInputElement>, atIndex?: number) {
+    const files = e.target.files
+    if (!files?.length) return
+    const maxNew = 10 - (form.media.length - (form.media.filter(Boolean).length ? 0 : 1))
+    if (maxNew <= 0) {
+      toast.error("Maksimum 10 ta media")
+      return
+    }
     setMediaUploading(true)
     try {
-      const ext = (file.name?.split(".").pop() ?? "").toLowerCase()
-      const kind = ["mp4", "webm", "ogg", "mov", "m4v"].includes(ext) ? "video" : "image"
-      const url = await uploadMedia(file, kind)
-      setForm((p) => ({ ...p, media: url }))
+      const urls: string[] = []
+      for (let i = 0; i < Math.min(files.length, maxNew); i++) {
+        const file = files[i]
+        const ext = (file.name?.split(".").pop() ?? "").toLowerCase()
+        const kind = ["mp4", "webm", "ogg", "mov", "m4v"].includes(ext) ? "video" : "image"
+        const url = await uploadMedia(file, kind)
+        urls.push(url)
+      }
+      setForm((p) => {
+        const list = [...p.media]
+        const filled = list.filter(Boolean)
+        if (atIndex !== undefined && atIndex >= 0 && atIndex < list.length) {
+          list[atIndex] = urls[0] ?? ""
+          return { ...p, media: list }
+        }
+        const newList = filled.length ? [...filled, ...urls] : [urls[0] ?? "", ...urls.slice(1)]
+        return { ...p, media: newList.slice(0, 10) }
+      })
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Media yuklab bo'lmadi")
     } finally {
@@ -118,8 +138,13 @@ export default function DashboardAdsPage() {
   }, [])
 
   async function saveAd() {
-    if (!form.media.trim()) {
-      toast.error("Media majburiy")
+    const mediaList = form.media.filter(Boolean)
+    if (!mediaList.length) {
+      toast.error("Kamida bitta media majburiy")
+      return
+    }
+    if (mediaList.length > 10) {
+      toast.error("Maksimum 10 ta media")
       return
     }
     if (!form.adUrl?.trim()) {
@@ -150,6 +175,7 @@ export default function DashboardAdsPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         ...form,
+        media: mediaList,
         priority: Number(form.priority) || 0,
         displaySeconds: Number(form.displaySeconds) || 12,
         type: form.type ?? "content",
@@ -159,20 +185,20 @@ export default function DashboardAdsPage() {
     })
     setLoading(false)
     if (!res.ok) {
-      const err = await res.json().catch(() => null) as {
+      const err = (await res.json().catch(() => null)) as {
         error?: string
         issues?: {
           fieldErrors?: Record<string, string[]>
           formErrors?: string[]
         }
       } | null
-      const fieldMessages = Object.entries(err?.issues?.fieldErrors ?? {})
-        .flatMap(([field, msgs]) => msgs.map((m) => `${field}: ${m}`))
+      const fieldMessages = Object.entries(err?.issues?.fieldErrors ?? {}).flatMap(([field, msgs]) =>
+        (msgs ?? []).map((m) => `${field}: ${m}`)
+      )
       const formMessages = err?.issues?.formErrors ?? []
       const allMessages = [...fieldMessages, ...formMessages]
-      toast.error(err?.error ?? "Saqlab bo'lmadi", {
-        description: allMessages.length ? allMessages.join(" | ") : undefined,
-      })
+      const description = allMessages.length ? allMessages.join(" | ") : err?.error
+      toast.error(err?.error ?? "Saqlab bo'lmadi", { description: description || undefined })
       return
     }
     toast.success(editId ? "Reklama yangilandi" : "Reklama yaratildi")
@@ -204,32 +230,98 @@ export default function DashboardAdsPage() {
           <CardDescription>Reklama ma'lumotlarini kiriting</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
-          {/* 1. Media (majburiy) - URL yoki lokaldan */}
+          {/* 1. Media (1–10 ta) - URL yoki lokaldan; davomiylik ular orasida teng taqsimlanadi */}
           <div className="space-y-2 md:col-span-2">
-            <Label>Reklama media *</Label>
-            <div className="flex gap-2">
-              <Input
-                value={form.media}
-                onChange={(e) => setForm((p) => ({ ...p, media: e.target.value }))}
-                placeholder="Reklama media URL yoki lokaldan"
-                className="flex-1"
-              />
-              <input
-                ref={mediaFileRef}
-                type="file"
-                accept="image/*,video/*"
-                className="hidden"
-                onChange={handleMediaFileChange}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                disabled={mediaUploading}
-                onClick={() => mediaFileRef.current?.click()}
-              >
-                <Upload className="mr-2 size-4" />
-                Reklama media lokalda tanlash
-              </Button>
+            <Label>Reklama media (1–10 ta) *</Label>
+            <p className="text-xs text-muted-foreground">
+              Davomiylik barcha rasmlar/videolar orasida teng bo&#39;lib taqsimlanadi.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Tavsiya: banner 728×90 px yoki 16:9 nisbat; rasm/video sloyda <strong>object-cover</strong> bilan kesiladi (o&#39;lcham moslashtiriladi).
+            </p>
+            <div className="space-y-3">
+              {form.media.map((url, index) => (
+                <div key={index} className="space-y-1.5">
+                  <div className="flex gap-2 items-center">
+                    <Input
+                      value={url}
+                      onChange={(e) => setForm((p) => ({ ...p, media: p.media.map((u, i) => (i === index ? e.target.value : u)) }))}
+                      placeholder={`Media ${index + 1} URL`}
+                      className="flex-1"
+                    />
+                    <input
+                    ref={index === 0 ? mediaFileRef : null}
+                    type="file"
+                    accept="image/*,video/*"
+                    className="hidden"
+                    onChange={(ev) => handleMediaFileChange(ev, index)}
+                    data-media-index={index}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    disabled={mediaUploading}
+                    onClick={() => {
+                      const input = index === 0 ? mediaFileRef.current : document.querySelector<HTMLInputElement>(`input[data-media-index="${index}"]`)
+                      input?.click()
+                    }}
+                    title="Yuklash"
+                  >
+                    <Upload className="size-4" />
+                  </Button>
+                  {form.media.length > 1 ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setForm((p) => ({ ...p, media: p.media.filter((_, i) => i !== index) }))}
+                      title="O'chirish"
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                  ) : null}
+                  </div>
+                  {url.trim() ? (
+                    <div className="h-20 w-full max-w-[320px] overflow-hidden rounded-md border bg-muted">
+                      {/\.(mp4|webm|ogg|mov|m4v)(\?|#|$)/i.test(url.trim()) ? (
+                        <video src={url.trim()} className="h-full w-full object-cover" muted playsInline />
+                      ) : (
+                        <img src={url.trim()} alt="" className="h-full w-full object-cover" />
+                      )}
+                    </div>
+                  ) : null}
+                </div>
+              ))}
+              {form.media.length < 10 ? (
+                <div className="flex gap-2">
+                  <input
+                    type="file"
+                    accept="image/*,video/*"
+                    className="hidden"
+                    id="add-media-file"
+                    multiple
+                    onChange={(e) => handleMediaFileChange(e)}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={mediaUploading}
+                    onClick={() => document.getElementById("add-media-file")?.click()}
+                  >
+                    <Plus className="mr-2 size-4" />
+                    Media qo&#39;shish (lokal)
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setForm((p) => ({ ...p, media: [...p.media, ""] }))}
+                  >
+                    <Plus className="mr-2 size-4" />
+                    URL qo&#39;shish
+                  </Button>
+                </div>
+              ) : null}
             </div>
           </div>
           <div className="space-y-2">
@@ -374,7 +466,7 @@ export default function DashboardAdsPage() {
                         setForm({
                           type: item.type ?? "content",
                           placement: item.placement ?? "header_top_full",
-                          media: item.media ?? "",
+                          media: Array.isArray(item.media) ? item.media : (item.media ? [item.media] : [""]),
                           logo: item.logo ?? "",
                           siteName: item.siteName ?? "",
                           title: item.title ?? "",

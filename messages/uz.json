@@ -40,7 +40,13 @@
     "login_success": "Kirish muvaffaqiyatli",
     "login_success_desc": "Muvaffaqiyatli kirdingiz. Endi hisobingizga kirishingiz mumkin.",
     "by_signing_in_you_agree_to_our": "Kirish orqali siz quyidagilarga rozisiz",
-    "by_signing_up_you_agree_to_our": "Ro'yxatdan o'tish orqali siz quyidagilarga rozisiz"
+    "by_signing_up_you_agree_to_our": "Ro'yxatdan o'tish orqali siz quyidagilarga rozisiz",
+    "sign_in_with_email": "Email orqali kirish",
+    "get_started": "Boshlash",
+    "or_sign_in_with": "Yoki quyidagilar bilan kirish",
+    "telegram": "Telegram",
+    "username": "Login",
+    "email_or_username_placeholder": "Email yoki username kiriting"
   },
   "common": {
   "results": "Natijalar",
@@ -80,6 +86,7 @@
   "your_browser_does_not_support_the_video_tag": "Brauzeringiz video tegini qo'llab-quvvatlamaydi.",
   "read_article": "Maqolani o'qish",
   "related_news": "O'xshash yangiliklar",
+  "latest_news": "So'nggi yangiliklar",
   "back": "Orqaga",
   "min_read": "daqiqada o'qiladi",
   "views": "ko'rishlar",
@@ -123,6 +130,12 @@
     "update": "Yangilash",
     "cancel": "Bekor qilish",
     "list_title": "Reklamalar ro'yxati",
-    "optional": "ixtiyoriy"
+    "optional": "ixtiyoriy",
+    "placeholder_slot_text": "Bu yerda sizning reklamangiz bo'lishi mumkin edi",
+    "placeholder_contact": "Bog'lanish",
+    "placeholder_cta": "Reklama berish",
+    "placeholder_telegram_title": "Bizning Telegram kanalimiz",
+    "placeholder_slot_label": "Reklama joyi",
+    "placeholder_slot_size": "1400×200"
   }
 }

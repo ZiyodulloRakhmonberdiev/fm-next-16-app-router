@@ -44,21 +44,34 @@ export async function POST(req: NextRequest) {
   if (unauthorized) return unauthorized
 
   await dbConnect()
-  const json = await req.json()
+  let json: unknown
+  try {
+    json = await req.json()
+  } catch {
+    return Response.json({ error: "JSON o'qib bo'lmadi", issues: { fieldErrors: {}, formErrors: ["Body JSON bo'lishi kerak"] } }, { status: 400 })
+  }
   const parsed = createAdSchema.safeParse(json)
   if (!parsed.success) {
-    return Response.json({ error: "Validation error", issues: parsed.error.flatten() }, { status: 400 })
+    const issues = parsed.error.flatten()
+    const msg = Object.values(issues.fieldErrors).flat().join("; ") || issues.formErrors?.join("; ") || "Validatsiya xatosi"
+    return Response.json({ error: msg, issues }, { status: 400 })
   }
-  const ad = await AdModel.create({
-    ...parsed.data,
-    media: parsed.data.media || undefined,
-    logo: parsed.data.logo || undefined,
-    description: parsed.data.description || undefined,
-    adUrl: parsed.data.adUrl || undefined,
-    advertiserUrl: parsed.data.advertiserUrl || undefined,
-    adInfoUrl: parsed.data.adInfoUrl || undefined,
-    advertiseWithUsUrl: parsed.data.advertiseWithUsUrl || undefined,
-    links: (parsed.data.links ?? []).filter((item) => item.label.trim() && item.href.trim()),
-  })
-  return Response.json(ad, { status: 201 })
+  try {
+    const ad = await AdModel.create({
+      ...parsed.data,
+      media: parsed.data.media?.length ? parsed.data.media : undefined,
+      mediaMobile: parsed.data.mediaMobile?.length ? parsed.data.mediaMobile : undefined,
+      logo: parsed.data.logo || undefined,
+      description: parsed.data.description || undefined,
+      adUrl: parsed.data.adUrl || undefined,
+      advertiserUrl: parsed.data.advertiserUrl || undefined,
+      adInfoUrl: parsed.data.adInfoUrl || undefined,
+      advertiseWithUsUrl: parsed.data.advertiseWithUsUrl || undefined,
+      links: parsed.data.links ?? [],
+    })
+    return Response.json(ad, { status: 201 })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Reklama yaratib bo'lmadi"
+    return Response.json({ error: message, issues: { fieldErrors: {}, formErrors: [message] } }, { status: 500 })
+  }
 }

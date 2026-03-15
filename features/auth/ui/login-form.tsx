@@ -3,11 +3,10 @@
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/shared/common/components/ui/button";
 import { Input } from "@/shared/common/components/ui/input";
+import { Label } from "@/shared/common/components/ui/label";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
-import { Field, FieldGroup, FieldLabel } from "@/shared/common/components/ui/field";
-import { Checkbox } from "@/shared/common/components/ui/checkbox";
+import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { toast } from "sonner";
 
@@ -23,60 +22,88 @@ export const LoginForm = () => {
     e.preventDefault();
     setIsSubmitting(true);
     const result = await signIn("credentials", {
-      login,
+      login: login.trim(),
       password,
       redirect: false,
     });
     setIsSubmitting(false);
 
     if (!result || result.error) {
-      toast.error("Login yoki parol noto'g'ri");
+      toast.error(t("login_error") ?? "Login yoki parol noto'g'ri");
       return;
     }
     toast.success("Muvaffaqiyatli kirdingiz");
     router.push("/dashboard");
   };
 
+  const title = t("sign_in_with_email") as string;
+  const subtitle = t("login_subtitle");
+
   return (
-    <div>
-      <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-        <Input
-          id="login"
-          type="text"
-          placeholder="Username"
-          required
-          value={login}
-          onChange={(e) => setLogin(e.target.value)}
-          maxLength={128} minLength={3}
-        />
-        <div className="flex gap-1">
-          <Input
-            id="password"
-            type={showPassword ? "text" : "password"}
-            placeholder={t("password")}
-            required maxLength={128} minLength={6}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <Button
-            type="button"
-            onClick={() => setShowPassword((prev) => !prev)}
-            aria-label={showPassword ? "Hide password" : "Show password"}
-            variant="outline"
-          >
-            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-          </Button>
+    <div className="flex flex-col gap-4">
+      <div className="space-y-1 text-center">
+        <h1 className="text-xl font-semibold">{title}</h1>
+        <p className="text-sm text-muted-foreground">{subtitle}</p>
+      </div>
+
+      <form className="space-y-4" onSubmit={handleSubmit}>
+        <div className="space-y-2">
+          <Label htmlFor="login-email">{t("email_placeholder")}</Label>
+          <div className="relative">
+            <Mail className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              id="login-email"
+              type="text"
+              placeholder={t("email_placeholder")}
+              value={login}
+              onChange={(e) => setLogin(e.target.value)}
+              className="pl-9"
+              required
+              maxLength={128}
+              minLength={3}
+            />
+          </div>
         </div>
-        <FieldGroup>
-          <Field orientation="horizontal" className="w-full gap-2">
-            <Checkbox id="remember" name="remember" defaultChecked />
-            <FieldLabel htmlFor="remember" className="font-normal">{t("remember_me")}</FieldLabel>
-          </Field>
-        </FieldGroup>
-          <Button type="submit" className="flex-1" disabled={isSubmitting}>
-            {t("login")}
-          </Button>
+
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="login-password">{t("password")}</Label>
+            <button type="button" className="text-xs text-primary hover:underline">
+              {t("forgot_password")}
+            </button>
+          </div>
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              id="login-password"
+              type={showPassword ? "text" : "password"}
+              placeholder={t("password")}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="pl-9 pr-9"
+              required
+              maxLength={128}
+              minLength={6}
+            />
+            <button
+              type="button"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              onClick={() => setShowPassword((p) => !p)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+            </button>
+          </div>
+        </div>
+
+        <Button
+          type="submit"
+          className="w-full rounded-lg bg-neutral-800 hover:bg-neutral-900 dark:bg-neutral-200 dark:hover:bg-neutral-100 dark:text-neutral-900"
+          disabled={isSubmitting}
+        >
+          {t("get_started")}
+        </Button>
       </form>
     </div>
   );
-}
+};

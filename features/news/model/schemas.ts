@@ -87,8 +87,8 @@ export const createNewsSchema = z.object({
   telegramPushStatus: z.enum(['sent', 'failed']).optional(),
   telegramPushReason: z.string().optional(),
   telegramLastAttemptAt: z.coerce.date().optional(),
-  videoSource: z.enum(['youtube', 'local']).optional(),
-  videoUrl: z.string().url('Video URL noto\'g\'ri').optional(),
+  videoSource: z.enum(['youtube', 'local']).optional().nullable(),
+  videoUrl: z.string().url('Video URL noto\'g\'ri').optional().nullable(),
 })
 
 export type CreateNewsInput = z.infer<typeof createNewsSchema>

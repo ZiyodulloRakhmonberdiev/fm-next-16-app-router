@@ -11,36 +11,43 @@ import { useLocale, useTranslations } from "next-intl"
 import { Play } from "lucide-react"
 import { VideoNewsModal } from "@/shared/common/components/molecules"
 
-type RelatedNewsProps = {
-  categorySlug: string
-  excludeSlug: string
-}
+type RelatedNewsProps =
+  | { categorySlug: string; excludeSlug: string; latestLimit?: never }
+  | { categorySlug?: never; excludeSlug?: never; latestLimit: number }
 
-export default function RelatedNews({ categorySlug, excludeSlug }: RelatedNewsProps) {
+export default function RelatedNews(props: RelatedNewsProps) {
+  const { categorySlug, excludeSlug, latestLimit } = props
   const locale = useLocale() as AppLocale
   const t = useTranslations("common")
   const { data: publicNews = [] } = usePublicNewsQuery()
   const [selected, setSelected] = React.useState<NewsItem | null>(null)
   const [isOpen, setIsOpen] = React.useState(false)
 
+  const isLatestMode = latestLimit != null && latestLimit > 0
+  const sectionTitle = isLatestMode ? t("latest_news") : t("related_news")
+
   const items = React.useMemo(() => {
     const raw = [...publicNews]
       .filter(isVisualRawNews)
-      .filter((n) => n.categorySlug === categorySlug && n.slug !== excludeSlug)
+      .filter((n) =>
+        isLatestMode
+          ? true
+          : n.categorySlug === categorySlug && n.slug !== excludeSlug
+      )
       .sort(
         (a, b) =>
           new Date(b.publishedAt).getTime() -
           new Date(a.publishedAt).getTime()
       )
-      .slice(0, 9)
+      .slice(0, isLatestMode ? latestLimit : 9)
     return getNewsListForLocale(raw, locale)
-  }, [categorySlug, excludeSlug, locale, publicNews])
+  }, [categorySlug, excludeSlug, locale, publicNews, isLatestMode, latestLimit])
 
   if (items.length === 0) return null
 
   return (
     <section className="mt-10 border-t border-border pt-8">
-      <h2 className="mb-4 text-lg font-semibold">{t("related_news")}</h2>
+      <h2 className="mb-4 text-lg font-semibold">{sectionTitle}</h2>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {items.map((item: NewsItem) => (
           <button

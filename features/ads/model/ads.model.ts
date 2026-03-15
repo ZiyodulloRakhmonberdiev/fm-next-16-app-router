@@ -13,7 +13,8 @@ export interface IAd {
   _id: string
   type: AdType
   placement: AdPlacement
-  media?: string
+  media?: string | string[]
+  mediaMobile?: string | string[]
   logo?: string
   siteName?: string
   title?: string
@@ -44,7 +45,8 @@ const AdSchema = new Schema<IAd>(
       enum: ["header_top_full", "sidebar_widget", "home_bottom_full", "article_bottom_full"],
       required: true,
     },
-    media: String,
+    media: [String],
+    mediaMobile: [String],
     logo: String,
     siteName: String,
     title: String,

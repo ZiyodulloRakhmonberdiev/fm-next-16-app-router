@@ -11,10 +11,12 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   await dbConnect()
   const parsed = createAdSchema.safeParse(await req.json())
   if (!parsed.success) {
-    return Response.json({ error: "Validation error", issues: parsed.error.flatten() }, { status: 400 })
+    const issues = parsed.error.flatten()
+    const msg = Object.values(issues.fieldErrors).flat().join("; ") || issues.formErrors?.join("; ") || "Validatsiya xatosi"
+    return Response.json({ error: msg, issues }, { status: 400 })
   }
   const { type, placement, siteName, title, active, priority, displaySeconds } = parsed.data
-  const links = (parsed.data.links ?? []).filter((item) => item.label.trim() && item.href.trim())
+  const links = parsed.data.links ?? []
   const update: Record<string, unknown> = {
     type,
     placement,
@@ -22,7 +24,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     title,
     description: parsed.data.description || undefined,
     logo: parsed.data.logo || undefined,
-    media: parsed.data.media || undefined,
+    media: parsed.data.media?.length ? parsed.data.media : undefined,
+    mediaMobile: parsed.data.mediaMobile?.length ? parsed.data.mediaMobile : undefined,
     adUrl: parsed.data.adUrl || undefined,
     advertiserUrl: parsed.data.advertiserUrl || undefined,
     adInfoUrl: parsed.data.adInfoUrl || undefined,

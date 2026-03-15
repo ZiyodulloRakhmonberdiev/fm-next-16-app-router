@@ -8,7 +8,7 @@ import { NewsModel } from "@/features/news/model/news.model"
 import { normalizeRole } from "@/shared/common/lib/rbac"
 
 const newsFilter = (id: string) => ({
-  $or: [{ newsId: id }, { newsSlug: id }] as const,
+  $or: [{ newsId: id }, { newsSlug: id }],
 })
 
 export async function GET(

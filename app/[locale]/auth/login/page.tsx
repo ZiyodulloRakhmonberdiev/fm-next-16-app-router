@@ -6,19 +6,19 @@ export default function LoginPage() {
   const t = useTranslations("auth");
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-col items-center text-center gap-1">
-          <p className="font-bold text-lg">{t("login_title")}</p>
-          <p className="text-sm text-foreground/50">{t("login_subtitle")}</p>
-      </div>
       <LoginForm />
-      <div className="flex flex-col space-y-2">
-        <p className="text-center text-sm text-foreground/50">
-          {t("by_signing_in_you_agree_to_our")}{" "}
-          <Link href="/terms" className="underline text-primary">
-            {t("terms_of_service")}
-          </Link>
-        </p>
-      </div>
+      <p className="text-center text-sm text-muted-foreground">
+        {t("if_no_account")}{" "}
+        <Link href="/auth/register" className="font-medium text-primary underline hover:no-underline">
+          {t("register")}
+        </Link>
+      </p>
+      {/* <p className="text-center text-sm text-muted-foreground">
+        {t("by_signing_in_you_agree_to_our")}{" "}
+        <Link href="/terms" className="font-medium text-primary underline hover:no-underline">
+          {t("terms_of_service")}
+        </Link>
+      </p> */}
     </div>
   );
 }

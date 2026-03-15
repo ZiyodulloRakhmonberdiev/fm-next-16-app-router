@@ -297,8 +297,8 @@ export function CreateNewsForm({ categories, tags, authors, existingSlugs = [], 
         isTop,
         isBreaking,
         pushedToTelegram: pushedToTelegramOverride ?? pushedToTelegram,
-        videoSource: videoUrl.trim() ? 'youtube' : undefined,
-        videoUrl: videoUrl.trim() || undefined,
+        videoSource: videoUrl.trim() ? 'youtube' : null,
+        videoUrl: videoUrl.trim() || null,
       }
 
       const targetId = savedNewsId

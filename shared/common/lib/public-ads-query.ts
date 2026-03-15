@@ -6,7 +6,8 @@ export type PublicAd = {
   _id: string
   type: "content" | "image"
   placement: "header_top_full" | "sidebar_widget" | "home_bottom_full" | "article_bottom_full"
-  media?: string
+  media?: string | string[]
+  mediaMobile?: string | string[]
   logo?: string
   siteName?: string
   title?: string

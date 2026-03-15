@@ -40,7 +40,13 @@
     "login_success": "Вход выполнен",
     "login_success_desc": "Вы успешно вошли. Теперь вам доступен ваш аккаунт.",
     "by_signing_in_you_agree_to_our": "Входя в аккаунт, вы соглашаетесь с нашими",
-    "by_signing_up_you_agree_to_our": "Регистрируясь, вы соглашаетесь с нашими"
+    "by_signing_up_you_agree_to_our": "Регистрируясь, вы соглашаетесь с нашими",
+    "sign_in_with_email": "Войти по email",
+    "get_started": "Начать",
+    "or_sign_in_with": "Или войти с помощью",
+    "telegram": "Telegram",
+    "username": "Логин",
+    "email_or_username_placeholder": "Введите email или логин"
   },
   "common": {
   "results": "Результаты",
@@ -80,6 +86,7 @@
   "your_browser_does_not_support_the_video_tag": "Ваш браузер не поддерживает тег video.",
   "read_article": "Читать статью",
   "related_news": "Связанные новости",
+  "latest_news": "Последние новости",
   "back": "Назад",
   "min_read": "мин",
   "views": "просмотров",
@@ -123,6 +130,12 @@
     "update": "Обновить",
     "cancel": "Отмена",
     "list_title": "Список рекламы",
-    "optional": "необязательно"
+    "optional": "необязательно",
+    "placeholder_slot_text": "Здесь могла быть ваша реклама",
+    "placeholder_contact": "Связаться с нами",
+    "placeholder_cta": "Разместить рекламу",
+    "placeholder_telegram_title": "Наш канал в Telegram",
+    "placeholder_slot_label": "Рекламное место",
+    "placeholder_slot_size": "1400×200"
   }
 }

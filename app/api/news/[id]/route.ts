@@ -77,7 +77,16 @@ export async function PUT(
     (() => {
       const safeData = { ...parsed.data }
       delete (safeData as { views?: number }).views
-      return safeData
+      const update: Record<string, unknown> = { ...safeData }
+      if (update.videoSource === null || update.videoUrl === null) {
+        update.$unset = {
+          ...(update.videoSource === null && { videoSource: 1 }),
+          ...(update.videoUrl === null && { videoUrl: 1 }),
+        }
+        delete update.videoSource
+        delete update.videoUrl
+      }
+      return update
     })(),
     { new: true, runValidators: true }
   )
@@ -114,7 +123,16 @@ export async function PATCH(
     (() => {
       const safeData = { ...parsed.data }
       delete (safeData as { views?: number }).views
-      return safeData
+      const update: Record<string, unknown> = { ...safeData }
+      if (update.videoSource === null || update.videoUrl === null) {
+        update.$unset = {
+          ...(update.videoSource === null && { videoSource: 1 }),
+          ...(update.videoUrl === null && { videoUrl: 1 }),
+        }
+        delete update.videoSource
+        delete update.videoUrl
+      }
+      return update
     })(),
     { new: true, runValidators: true }
   )

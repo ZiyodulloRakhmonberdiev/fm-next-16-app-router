@@ -40,7 +40,13 @@
     "login_success": "Login successful",
     "login_success_desc": "You have successfully logged in. You can now access your account.",
     "by_signing_in_you_agree_to_our": "By signing in, you agree to our",
-    "by_signing_up_you_agree_to_our": "By signing up, you agree to our"
+    "by_signing_up_you_agree_to_our": "By signing up, you agree to our",
+    "sign_in_with_email": "Sign in with email",
+    "get_started": "Get Started",
+    "or_sign_in_with": "Or sign in with",
+    "telegram": "Telegram",
+    "username": "Login",
+    "email_or_username_placeholder": "Enter email or username"
   },
   "common": {
     "results": "Results",
@@ -80,6 +86,7 @@
     "your_browser_does_not_support_the_video_tag": "Your browser does not support the video tag.",
     "read_article": "Read the article",
     "related_news": "Related news",
+    "latest_news": "Latest news",
     "back": "Back",
     "min_read": "min read",
     "views": "views",
@@ -123,6 +130,12 @@
     "update": "Update",
     "cancel": "Cancel",
     "list_title": "Ads list",
-    "optional": "optional"
+    "optional": "optional",
+    "placeholder_slot_text": "Your ad could be here",
+    "placeholder_contact": "Contact us",
+    "placeholder_cta": "Advertise with us",
+    "placeholder_telegram_title": "Our Telegram channel",
+    "placeholder_slot_label": "Ad slot",
+    "placeholder_slot_size": "1400×200"
   }
 }

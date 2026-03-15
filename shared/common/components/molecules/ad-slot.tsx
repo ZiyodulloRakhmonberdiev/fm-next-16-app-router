@@ -2,11 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { usePublicAdsQuery } from "@/shared/common/lib/public-ads-query"
+import { usePublicSiteSettingsQuery } from "@/shared/common/lib/public-site-settings-query"
+import { useIsMobile } from "@/shared/hooks/use-mobile"
 import { Button } from "@/shared/common/components/ui/button"
-import { ExternalLink, MoreVertical, XIcon } from "lucide-react"
-import { toast } from "sonner"
+import { MoreVertical } from "lucide-react"
 import { cn } from "@/shared/common/lib/utils"
-import { Link } from "@/i18n/navigation"
+import { AdSlotPlaceholder } from "@/shared/common/components/molecules/ad-slot-placeholder"
+import { AdSlotHide } from "@/shared/common/components/molecules/ad-slot-hide"
 
 type Props = {
   placement: "header_top_full" | "sidebar_widget" | "home_bottom_full" | "article_bottom_full"
@@ -21,12 +23,26 @@ function detectMediaKind(src?: string): "video" | "image" {
 let adsHiddenUntilRefresh = false
 
 export function AdSlot({ placement }: Props) {
+  const { data: settings } = usePublicSiteSettingsQuery()
   const { data: ads = [] } = usePublicAdsQuery(placement)
   const [adIndex, setAdIndex] = useState(0)
+  const [mediaIndex, setMediaIndex] = useState(0)
   const [allHidden, setAllHidden] = useState(adsHiddenUntilRefresh)
   const [panelOpen, setPanelOpen] = useState(false)
-  const [reasonMode, setReasonMode] = useState<null | "hide" | "report">(null)
+  const isMobile = useIsMobile()
   const ad = useMemo(() => ads[adIndex] ?? null, [ads, adIndex])
+  const mediaList = useMemo(() => {
+    if (!ad?.media) return []
+    return Array.isArray(ad.media) ? ad.media : [ad.media]
+  }, [ad?.media])
+  const mediaMobileList = useMemo(() => {
+    if (!ad?.mediaMobile) return []
+    return Array.isArray(ad.mediaMobile) ? ad.mediaMobile : [ad.mediaMobile]
+  }, [ad?.mediaMobile])
+  const effectiveMediaList = isMobile && mediaMobileList.length > 0 ? mediaMobileList : mediaList
+  const currentMedia = effectiveMediaList[mediaIndex] ?? effectiveMediaList[0] ?? ""
+
+  const adsExplicitlyDisabled = settings?.clientDelivery?.models?.ads === false
 
   useEffect(() => {
     if (!ads.length) return
@@ -43,121 +59,74 @@ export function AdSlot({ placement }: Props) {
     return () => window.clearTimeout(timer)
   }, [ads, adIndex, ad?.displaySeconds])
 
-  if (!ad || allHidden) return null
+  useEffect(() => {
+    setMediaIndex(0)
+  }, [ad?._id])
 
-  async function sendFeedback(action: "hide" | "report", reason: string) {
-    const res = await fetch("/api/ads/feedback", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ adId: ad._id, action, reason, placement }),
-    })
-    if (!res.ok) {
-      toast.error("So'rov yuborilmadi")
-      return
+  useEffect(() => {
+    if (effectiveMediaList.length > 0 && mediaIndex >= effectiveMediaList.length) {
+      setMediaIndex(0)
     }
-    toast.success("Rahmat, arizangiz yuborildi. Uni ko'rib chiqamiz.")
-    if (action === "hide") {
-      adsHiddenUntilRefresh = true
-      setAllHidden(true)
-    }
-    setReasonMode(null)
-    setPanelOpen(false)
+  }, [effectiveMediaList.length, mediaIndex])
+
+  // Bir reklama ichida ko'p media: displaySeconds media lar orasida teng taqsimlanadi
+  useEffect(() => {
+    if (effectiveMediaList.length <= 1) return
+    const totalSeconds = Math.max(3, Number(ad?.displaySeconds ?? 12))
+    const perMediaMs = (totalSeconds * 1000) / effectiveMediaList.length
+    const timer = window.setTimeout(() => {
+      setMediaIndex((prev) => (prev + 1) % effectiveMediaList.length)
+    }, perMediaMs)
+    return () => window.clearTimeout(timer)
+  }, [ad?._id, ad?.displaySeconds, mediaIndex, effectiveMediaList.length])
+
+  if (adsExplicitlyDisabled) return null
+  const shouldShowPlaceholder = ads.length < 1 || allHidden
+  if (shouldShowPlaceholder) {
+    return <AdSlotPlaceholder />
   }
 
-  function copyLink() {
-    if (!ad.adUrl) return
-    void navigator.clipboard.writeText(ad.adUrl)
-    toast.success("Reklama havolasi nusxalandi")
+  const mediaKind = detectMediaKind(currentMedia)
+  const openPanel = () => {
+    setPanelOpen(true)
+  }
+  const closePanel = () => {
     setPanelOpen(false)
   }
-
-  const mediaKind = detectMediaKind(ad.media)
-  const reasons =
-    reasonMode === "report"
-      ? ["Siyosat", "Firibgarlik", "Noqonuniy"]
-      : ["Qiziq emas", "Halaqit qilmoqda", "Harid qildim"]
+  const handleHideSuccess = () => {
+    adsHiddenUntilRefresh = true
+    setAllHidden(true)
+  }
 
   return (
     <div className="relative w-full">
-      <div className={cn("relative overflow-hidden rounded-xl border bg-card shadow-sm", "h-[210px]")}>
+      <div className={cn("relative w-full overflow-hidden rounded-xl border bg-card shadow-sm aspect-video max-h-[120px] md:max-h-[140px] lg:max-h-[200px]")}>
+        <span className="absolute left-2 top-2 z-10 rounded bg-black/60 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-white/95" aria-hidden>
+          Reklama
+        </span>
         {panelOpen ? (
-          <div className="h-full p-4">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-sm font-semibold text-foreground/80">Reklama e&apos;lonlari</p>
-                <p className="mt-1 text-xs text-muted-foreground">{ad.siteName}</p>
-              </div>
-              <Button type="button" variant="ghost" onClick={() => {
-                setPanelOpen(false)
-                setReasonMode(null)
-              }} aria-label="Yopish">
-                <XIcon className="size-4" />
-              </Button>
-            </div>
-            <div className="mt-3 flex items-end justify-end gap-3">
-              {/* <p className="text-sm font-medium">
-                {reasonMode === "report" ? "Nima uchun arz qilmoqchisiz?" : "Nima uchun yashirmoqchisiz?"}
-              </p> */}
-
-            </div>
-            {reasonMode ? (
-              <div className="mt-3 flex gap-4 space-y-2">
-                {reasons.map((reason) => (
-                  <Button type="button" variant="outline" key={reason} onClick={() => void sendFeedback(reasonMode, reason)}>
-                    <span>{reason}</span>
-                    {/* <ShieldAlert className="size-4 text-muted-foreground" /> */}
-                  </Button>
-                ))}
-              </div>
-            ) : (
-              <div className="mt-3 flex gap-4 justify-start items-center space-y-1">
-                <Button type="button" variant="outline" className="" onClick={() => setReasonMode("hide")}>
-                  <span>Yashirish</span>
-                </Button>
-                <Button type="button" variant="outline" onClick={() => setReasonMode("report")}>
-                  <span>Arz qilish</span>
-                </Button>
-                {ad.advertiserUrl ? (
-                  <Link href={ad.advertiserUrl} target="_blank" rel="noopener noreferrer sponsored nofollow" className="flex items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-muted">
-                    <span>Reklama beruvchi haqida</span>
-                    <ExternalLink className="size-4 text-muted-foreground" />
-                  </Link>
-                ) : null}
-                {ad.adInfoUrl ? (
-                  <Link href={ad.adInfoUrl} target="_blank" rel="noopener noreferrer sponsored nofollow" className="flex items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-muted">
-                    <span>Reklama haqida</span>
-                    <ExternalLink className="size-4 text-muted-foreground" />
-                  </Link>
-                ) : null}
-                {ad.advertiseWithUsUrl ? (
-                  <Link href={ad.advertiseWithUsUrl} target="_blank" rel="noopener noreferrer sponsored nofollow" className="flex items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-muted">
-                    <span>Reklama berish uchun</span>
-                    <ExternalLink className="size-4 text-muted-foreground" />
-                  </Link>
-                ) : null}
-                <Button type="button" variant="outline" onClick={copyLink}>
-                  <span>Nusxa olish</span>
-                </Button>
-              </div>
-            )}
-          </div>
+          <AdSlotHide
+            ad={ad}
+            placement={placement}
+            onClose={closePanel}
+            onHideSuccess={handleHideSuccess}
+          />
         ) : ad.type === "image" ? (
           <div className="relative h-full w-full bg-muted">
-            {ad.media ? (
+            {currentMedia ? (
               mediaKind === "video" ? (
-                <video src={ad.media} className="absolute inset-0 h-full w-full object-cover" autoPlay muted loop playsInline />
+                <video key={currentMedia} src={currentMedia} className="absolute inset-0 h-full w-full object-cover"
+ style={{ objectPosition: "center center" }} autoPlay muted loop playsInline />
               ) : (
-                <img src={ad.media} alt={ad.title ?? "Reklama"} className="absolute inset-0 h-full w-full object-cover" />
+                <img key={currentMedia} src={currentMedia} alt={ad.title ?? "Reklama"} className="absolute inset-0 h-full w-full object-cover"
+ style={{ objectPosition: "center center" }} />
               )
             ) : null}
             <Button
               size="icon"
               variant="secondary"
               className="absolute right-2 top-2 z-10 size-7"
-              onClick={() => {
-                setPanelOpen(true)
-                setReasonMode(null)
-              }}
+              onClick={openPanel}
               aria-label="Reklama menyusi"
             >
               <MoreVertical className="size-4" />
@@ -167,21 +136,51 @@ export function AdSlot({ placement }: Props) {
             ) : null}
           </div>
         ) : (
-          <div className="grid h-full grid-cols-[42%_58%]">
+          <>
+            {/* Mobil: faqat media (content yashirin) */}
+            <div className="relative h-full w-full bg-muted md:hidden">
+              {currentMedia ? (
+                mediaKind === "video" ? (
+                  <video key={currentMedia} src={currentMedia} className="absolute inset-0 h-full w-full object-cover"
+ style={{ objectPosition: "center center" }} autoPlay muted loop playsInline />
+                ) : (
+                  <img key={currentMedia} src={currentMedia} alt={ad.title ?? "Reklama"} className="absolute inset-0 h-full w-full object-cover"
+ style={{ objectPosition: "center center" }} />
+                )
+              ) : null}
+              <Button
+                size="icon"
+                variant="secondary"
+                className="absolute right-2 top-2 z-10 size-7"
+                onClick={openPanel}
+                aria-label="Reklama menyusi"
+              >
+                <MoreVertical className="size-4" />
+              </Button>
+              {ad.adUrl ? (
+                <a href={ad.adUrl} target="_blank" rel="noopener noreferrer sponsored nofollow" className="absolute inset-0" aria-label={ad.title ?? "Reklama"} />
+              ) : null}
+            </div>
+            {/* Desktop: media + content */}
+            <div className="hidden h-full grid-cols-[42%_58%] md:grid">
             <div className="relative h-full bg-muted">
-              {ad.media ? (
+              {currentMedia ? (
                 ad.adUrl ? (
                   <a href={ad.adUrl} target="_blank" rel="noopener noreferrer sponsored nofollow" className="block h-full w-full">
                     {mediaKind === "video" ? (
-                      <video src={ad.media} className="h-full w-full object-cover" autoPlay muted loop playsInline />
+                      <video key={currentMedia} src={currentMedia} className="h-full w-full object-cover"
+ style={{ objectPosition: "center center" }} autoPlay muted loop playsInline />
                     ) : (
-                      <img src={ad.media} alt={ad.title ?? "Reklama"} className="h-full w-full object-cover" />
+                      <img key={currentMedia} src={currentMedia} alt={ad.title ?? "Reklama"} className="h-full w-full object-cover"
+ style={{ objectPosition: "center center" }} />
                     )}
                   </a>
                 ) : mediaKind === "video" ? (
-                  <video src={ad.media} className="h-full w-full object-cover" autoPlay muted loop playsInline />
+                  <video key={currentMedia} src={currentMedia} className="h-full w-full object-cover"
+ style={{ objectPosition: "center center" }} autoPlay muted loop playsInline />
                 ) : (
-                  <img src={ad.media} alt={ad.title ?? "Reklama"} className="h-full w-full object-cover" />
+                  <img key={currentMedia} src={currentMedia} alt={ad.title ?? "Reklama"} className="h-full w-full object-cover"
+ style={{ objectPosition: "center center" }} />
                 )
               ) : null}
             </div>
@@ -201,10 +200,7 @@ export function AdSlot({ placement }: Props) {
                     size="icon"
                     variant="ghost"
                     className="size-7 shrink-0"
-                    onClick={() => {
-                      setPanelOpen(true)
-                      setReasonMode(null)
-                    }}
+                    onClick={openPanel}
                     aria-label="Reklama menyusi"
                   >
                     <MoreVertical className="size-4" />
@@ -219,17 +215,19 @@ export function AdSlot({ placement }: Props) {
                     <h3 className="line-clamp-2 text-lg font-semibold leading-tight">{ad.title}</h3>
                   )}
                   {ad.description ? (
-                    ad.adUrl ? (
-                      <a href={ad.adUrl} target="_blank" rel="noopener noreferrer sponsored nofollow" className="block hover:underline">
+                    <div className="hidden md:block">
+                      {ad.adUrl ? (
+                        <a href={ad.adUrl} target="_blank" rel="noopener noreferrer sponsored nofollow" className="block hover:underline">
+                          <p className="line-clamp-2 text-sm text-muted-foreground">{ad.description}</p>
+                        </a>
+                      ) : (
                         <p className="line-clamp-2 text-sm text-muted-foreground">{ad.description}</p>
-                      </a>
-                    ) : (
-                      <p className="line-clamp-2 text-sm text-muted-foreground">{ad.description}</p>
-                    )
+                      )}
+                    </div>
                   ) : null}
                 </div>
                 {ad.links?.length ? (
-                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-foreground/80">
+                  <div className="hidden flex-wrap gap-x-4 gap-y-1 text-sm text-foreground/80 md:flex">
                     {ad.links.map((item, index) => (
                       <a key={`${item.href}-${index}`} href={item.href} target="_blank" rel="noopener noreferrer sponsored nofollow" className="hover:underline">
                         {item.label}
@@ -238,20 +236,9 @@ export function AdSlot({ placement }: Props) {
                   </div>
                 ) : null}
               </div>
-              {ad.adUrl ? (
-                <div>
-                  <a
-                    href={ad.adUrl}
-                    target="_blank"
-                    rel="noopener noreferrer sponsored nofollow"
-                    className="inline-flex rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
-                  >
-                    Batafsil
-                  </a>
-                </div>
-              ) : null}
             </div>
           </div>
+          </>
         )}
       </div>
     </div>

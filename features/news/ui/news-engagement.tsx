@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { useSession, signIn } from "next-auth/react"
+import { useSession } from "next-auth/react"
 import { Button } from "@/shared/common/components/ui/button"
 import { Textarea } from "@/shared/common/components/ui/textarea"
 import { toast } from "sonner"
@@ -9,14 +9,9 @@ import { formatDateTimeLocale } from "@/shared/common/lib/formatter"
 import type { AppLocale } from "@/shared/common/lib/formatter"
 import { useTranslations } from "next-intl"
 import { useLocale } from "next-intl"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/shared/common/components/ui/dialog"
 import { Input } from "@/shared/common/components/ui/input"
 import { Label } from "@/shared/common/components/ui/label"
+import { AuthModal } from "@/features/auth/ui/auth-modal"
 
 type ReactionType = "like" | "love" | "laugh" | "sad" | "angry"
 type CommentItem = {
@@ -62,11 +57,6 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
 
   const [authModalOpen, setAuthModalOpen] = useState(false)
   const [authMode, setAuthMode] = useState<"login" | "register">("login")
-  const [authFullName, setAuthFullName] = useState("")
-  const [authLogin, setAuthLogin] = useState("")
-  const [authPassword, setAuthPassword] = useState("")
-  const [authConfirmPassword, setAuthConfirmPassword] = useState("")
-  const [authSubmitting, setAuthSubmitting] = useState(false)
 
   function getAnonId() {
     if (typeof window === "undefined") return ""
@@ -172,49 +162,6 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
     }
     toast.success("Izoh o'chirildi")
     void loadComments()
-  }
-
-  async function submitAuthModal() {
-    setAuthSubmitting(true)
-    if (authMode === "login") {
-      const result = await signIn("credentials", {
-        login: authLogin,
-        password: authPassword,
-        redirect: false,
-      })
-      setAuthSubmitting(false)
-      if (!result?.ok) {
-        toast.error("Login yoki parol noto'g'ri")
-        return
-      }
-      toast.success("Muvaffaqiyatli kirdingiz")
-      setAuthModalOpen(false)
-      return
-    }
-    if (authPassword !== authConfirmPassword) {
-      setAuthSubmitting(false)
-      toast.error("Parollar mos emas")
-      return
-    }
-    const res = await fetch("/api/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        full_name: authFullName,
-        login: authLogin,
-        password: authPassword,
-        confirmPassword: authConfirmPassword,
-      }),
-    })
-    setAuthSubmitting(false)
-    if (!res.ok) {
-      const err = await res.json().catch(() => null)
-      toast.error(err?.error ?? "Ro'yxatdan o'tishda xatolik")
-      return
-    }
-    toast.success("Ro'yxatdan o'tdingiz")
-    await signIn("credentials", { login: authLogin, password: authPassword, callbackUrl: "/" })
-    setAuthModalOpen(false)
   }
 
   async function setReaction(type: ReactionType) {
@@ -423,85 +370,12 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
         </div>
       </div>
 
-      <Dialog open={authModalOpen} onOpenChange={setAuthModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{authMode === "login" ? "Kirish" : "Ro'yxatdan o'tish"}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3">
-            {authMode === "register" ? (
-              <div className="space-y-1">
-                <Label htmlFor="auth-fullname">To'liq ism</Label>
-                <Input
-                  id="auth-fullname"
-                  value={authFullName}
-                  onChange={(e) => setAuthFullName(e.target.value)}
-                  placeholder="To'liq ism"
-                />
-              </div>
-            ) : null}
-            <div className="space-y-1">
-              <Label htmlFor="auth-login">Login</Label>
-              <Input
-                id="auth-login"
-                value={authLogin}
-                onChange={(e) => setAuthLogin(e.target.value)}
-                placeholder="Username"
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="auth-password">Parol</Label>
-              <Input
-                id="auth-password"
-                type="password"
-                value={authPassword}
-                onChange={(e) => setAuthPassword(e.target.value)}
-                placeholder="Parol"
-              />
-            </div>
-            {authMode === "register" ? (
-              <div className="space-y-1">
-                <Label htmlFor="auth-confirm">Parolni tasdiqlang</Label>
-                <Input
-                  id="auth-confirm"
-                  type="password"
-                  value={authConfirmPassword}
-                  onChange={(e) => setAuthConfirmPassword(e.target.value)}
-                  placeholder="Parolni tasdiqlang"
-                />
-              </div>
-            ) : null}
-            <Button onClick={() => void submitAuthModal()} disabled={authSubmitting} className="w-full">
-              {authMode === "login" ? "Kirish" : "Ro'yxatdan o'tish"}
-            </Button>
-            <p className="text-center text-sm text-muted-foreground">
-              {authMode === "login" ? (
-                <>
-                  Hisobingiz yo&apos;qmi?{" "}
-                  <button
-                    type="button"
-                    className="font-medium text-primary underline hover:no-underline"
-                    onClick={() => setAuthMode("register")}
-                  >
-                    Ro&apos;yxatdan o&apos;ting
-                  </button>
-                </>
-              ) : (
-                <>
-                  Allaqachon hisobingiz bormi?{" "}
-                  <button
-                    type="button"
-                    className="font-medium text-primary underline hover:no-underline"
-                    onClick={() => setAuthMode("login")}
-                  >
-                    Kirish
-                  </button>
-                </>
-              )}
-            </p>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <AuthModal
+        open={authModalOpen}
+        onOpenChange={setAuthModalOpen}
+        defaultMode={authMode}
+        onSuccess={() => setAuthModalOpen(false)}
+      />
     </section>
   )
 }

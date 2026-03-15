@@ -59,7 +59,11 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const news = await NewsModel.create(parsed.data)
+    const createData = { ...parsed.data }
+    if (createData.videoSource === null) delete createData.videoSource
+    if (createData.videoUrl === null) delete createData.videoUrl
+
+    const news = await NewsModel.create(createData)
     if (news.pushedToTelegram && news.status === 'published') {
       const tgResult = await sendNewsToTelegram({
         titleUzb: news.title?.uzb || news.title?.uz || news.slug,

@@ -5,20 +5,19 @@ import { SearchIcon } from 'lucide-react'
 import { Link } from '@/i18n/navigation'
 import { useTheme } from 'next-themes'
 import Headline from './headline'
-import { ThemeSwitcher, ThemeSwitcherForHeader } from '@/widgets/theme-switcher'
+import { ThemeSwitcherForHeader } from '@/widgets/theme-switcher'
 import CategoryList from '@/entities/category/ui/category-list'
 import { SidebarTrigger } from '@/shared/common/components/ui/sidebar'
 import { CategoryListForMobile } from '@/entities/category'
 import { SearchBar } from '@/widgets/client-searchbar'
 import { AdSlot } from '@/shared/common/components/molecules'
+import { ClientUserMenu } from '@/widgets/client-header/ui/client-user-menu'
 import { cn } from '@/shared/common/lib/utils'
-import { usePublicAdsQuery } from '@/shared/common/lib/public-ads-query'
+import { Button } from '@/shared/common/components/ui/button'
 
 function AdSlotHeader() {
-  const { data: ads = [] } = usePublicAdsQuery('header_top_full')
-  if (!ads.length) return null
   return (
-    <div className="hidden md:block border-b border-border bg-background">
+    <div className="border-b border-border bg-background">
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-2">
         <AdSlot placement="header_top_full" />
       </div>
@@ -92,11 +91,16 @@ export default function Header() {
               <CategoryList />
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <SearchIcon className="w-4 h-4" onClick={() => setSearchOpen(true)} />
-            <div className="hidden md:block">
-              {/* <ThemeSwitcher /> */}
-              <ThemeSwitcherForHeader />
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="icon" className="" onClick={() => setSearchOpen(true)} aria-label="Qidiruv">
+                <SearchIcon className="w-4 h-4" />
+              </Button>
+              <ClientUserMenu />
+              <div className="hidden md:block">
+                {/* <ThemeSwitcher /> */}
+                <ThemeSwitcherForHeader />
+              </div>
             </div>
             <div className="block md:hidden">
               <SidebarTrigger />
