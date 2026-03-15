@@ -22,12 +22,12 @@ export async function GET(req: NextRequest) {
   const [byId, bySlug] = await Promise.all([
     ids.length > 0
       ? NewsModel.find({ _id: { $in: ids }, status: "published" })
-          .select("slug title images publishedAt")
+          .select("slug title images publishedAt videoUrl videoSource")
           .lean()
       : [],
     slugsLegacy.length > 0
       ? NewsModel.find({ slug: { $in: slugsLegacy }, status: "published" })
-          .select("slug title images publishedAt")
+          .select("slug title images publishedAt videoUrl videoSource")
           .lean()
       : [],
   ])

@@ -12,7 +12,27 @@ import {
 import { Link } from "@/i18n/navigation"
 import type { NewsItem } from "@/features/news/model"
 import { getYoutubeEmbedUrl } from "@/shared/common/lib/youtube"
+import { getCloudinaryVideoPosterUrl } from "@/shared/common/lib/cloudinary"
+import { getYoutubeThumbnailUrl } from "@/shared/common/lib/youtube"
 import { useTranslations } from "next-intl"
+
+function getSafeImageSrc(raw?: string): string {
+  if (!raw?.trim()) return ""
+  return raw.startsWith("http") || raw.startsWith("/") ? raw : `/uploads/images/${raw}`
+}
+
+function getVideoPoster(item: NewsItem): string {
+  const img = getSafeImageSrc(item.images?.[0])
+  if (img) return img
+  if (getYoutubeEmbedUrl(item.videoUrl ?? "")) return getYoutubeThumbnailUrl(item.videoUrl) || ""
+  return getCloudinaryVideoPosterUrl(item.videoUrl) || ""
+}
+
+function getVideoSrc(url?: string | null): string {
+  const u = url?.trim()
+  if (!u) return ""
+  return u.startsWith("http") || u.startsWith("/") ? u : `/${u}`
+}
 
 type VideoNewsModalProps = {
   item: NewsItem | null
@@ -32,32 +52,29 @@ export default function VideoNewsModal({ item, open, onOpenChange }: VideoNewsMo
       }}
     >
       <DialogContent className="max-w-3xl w-full p-0 overflow-hidden">
-        {hasVideo && item && (
+        {hasVideo && item && (() => {
+          const youtubeEmbed = getYoutubeEmbedUrl(item.videoUrl ?? "")
+          return (
           <>
             <div className="relative aspect-video w-full bg-muted">
-              {item.videoSource === "youtube" ? (
-                (() => {
-                  const embedUrl = getYoutubeEmbedUrl(item.videoUrl!)
-                  if (!embedUrl) return null
-                  return (
-                    <iframe
-                      src={embedUrl}
-                      title={item.title}
-                      className="absolute inset-0 h-full w-full"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                    />
-                  )
-                })()
+              {youtubeEmbed ? (
+                <iframe
+                  src={youtubeEmbed}
+                  title={item.title}
+                  className="absolute inset-0 h-full w-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
               ) : (
                 <video
-                  src={item.videoUrl!}
+                  key={item.videoUrl}
+                  src={getVideoSrc(item.videoUrl)}
                   controls
                   controlsList="nodownload"
                   disablePictureInPicture
                   onContextMenu={(e) => e.preventDefault()}
                   className="h-full w-full object-contain"
-                  poster={item.images?.[0]}
+                  poster={getVideoPoster(item) || undefined}
                 >
                   {t("your_browser_does_not_support_the_video_tag")}
                 </video>
@@ -65,9 +82,9 @@ export default function VideoNewsModal({ item, open, onOpenChange }: VideoNewsMo
             </div>
             <div className="space-y-3 p-4">
               <DialogHeader>
-                <DialogTitle className="text-start">{item.title}</DialogTitle>
+                <DialogTitle className="text-start line-clamp-3">{item.title}</DialogTitle>
                 {item.description && (
-                  <DialogDescription className="mt-1 text-start">
+                  <DialogDescription className="mt-1 text-start line-clamp-3">
                     {item.description}
                   </DialogDescription>
                 )}
@@ -79,7 +96,8 @@ export default function VideoNewsModal({ item, open, onOpenChange }: VideoNewsMo
               </div>
             </div>
           </>
-        )}
+          )
+        })()}
       </DialogContent>
     </Dialog>
   )

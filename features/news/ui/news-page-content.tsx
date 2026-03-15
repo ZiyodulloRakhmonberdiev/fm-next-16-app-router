@@ -18,6 +18,8 @@ import {
   CarouselPrevious,
 } from "@/shared/common/components/ui/carousel"
 import { getYoutubeEmbedUrl } from "@/shared/common/lib/youtube"
+import { getCloudinaryVideoPosterUrl } from "@/shared/common/lib/cloudinary"
+import { getYoutubeThumbnailUrl } from "@/shared/common/lib/youtube"
 import type { NewsItem } from "@/features/news/model"
 import { isRichContent, parseRichContentString } from "@/features/news/model"
 import { RichContentBlocks } from "@/features/news/ui/rich-content-blocks"
@@ -65,18 +67,17 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
     return `/${u}`
   }
 
-  const isExternalVideoUrl = (url?: string | null) =>
-    Boolean(url?.trim()?.startsWith("http://") || url?.trim()?.startsWith("https://"))
+  const videoPoster =
+    getSafeImageSrc(news.images?.[0]) ||
+    (getYoutubeEmbedUrl(news.videoUrl ?? "") ? getYoutubeThumbnailUrl(news.videoUrl) : getCloudinaryVideoPosterUrl(news.videoUrl)) ||
+    undefined
 
   const displayImages = React.useMemo(
     () => (news.images?.filter((s): s is string => typeof s === "string" && s.trim() !== "") ?? []),
     [news.images]
   )
 
-  const hasVideo = Boolean(
-    news.videoUrl?.trim() &&
-      (news.videoSource || news.type === "video")
-  )
+  const hasVideo = Boolean(news.videoUrl?.trim())
 
   React.useEffect(() => {
     if (typeof window === "undefined") return
@@ -129,32 +130,28 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
         <h1 className="mb-4 text-2xl font-bold leading-tight md:text-3xl">
           {news.title}
         </h1>
-        {hasVideo && (
+        {hasVideo && (() => {
+          const youtubeEmbed = getYoutubeEmbedUrl(news.videoUrl ?? "")
+          return (
           <div className="relative mb-6 aspect-video w-full overflow-hidden rounded-lg bg-muted">
-            {news.videoSource === "youtube" ? (
-              (() => {
-                const embedUrl = getYoutubeEmbedUrl(news.videoUrl ?? "")
-                if (!embedUrl) return null
-                return (
-                  <iframe
-                    src={embedUrl}
-                    title={news.title}
-                    className="absolute inset-0 h-full w-full"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                )
-              })()
+            {youtubeEmbed ? (
+              <iframe
+                src={youtubeEmbed}
+                title={news.title}
+                className="absolute inset-0 h-full w-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
             ) : (
               <video
+                key={news.videoUrl ?? "video"}
                 src={getVideoSrc(news.videoUrl)}
-                crossOrigin={isExternalVideoUrl(news.videoUrl) ? "anonymous" : undefined}
                 controls
                 controlsList="nodownload"
                 disablePictureInPicture
                 onContextMenu={(e) => e.preventDefault()}
                 className="h-full w-full object-contain"
-                poster={getSafeImageSrc(news.images?.[0]) || undefined}
+                poster={videoPoster}
               >
                 {t("your_browser_does_not_support_the_video_tag")}
               </video>
@@ -163,18 +160,18 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
               <SavedNewsActions slug={news.slug} newsId={newsId} overlay />
             </div>
           </div>
-        )}
+          )
+        })()}
 
         {!hasVideo && displayImages.length === 1 && (
-          <div className="relative mb-6 w-full overflow-hidden rounded-lg bg-muted min-h-[50vh]">
+          <div className="relative mb-6 w-full overflow-hidden rounded-lg min-h-[80vh]">
             {getSafeImageSrc(displayImages[0]) ? (
               <Image
                 src={getSafeImageSrc(displayImages[0])}
                 alt={news.title}
                 fill
-                className="object-contain"
+                className="object-cover"
                 priority
-                sizes="100vw"
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center px-2 text-sm text-muted-foreground text-center">
@@ -194,7 +191,7 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
                 <CarouselContent className="ml-0">
                   {displayImages.map((src, i) => (
                     <CarouselItem key={src} className="pl-0">
-                      <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-muted">
+                      <div className="relative aspect-video w-full overflow-hidden rounded-lg">
                         {getSafeImageSrc(src) ? (
                           <Image
                             src={getSafeImageSrc(src)}
@@ -237,7 +234,7 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
                       fill
                       className="object-cover"
                       priority={i === 0}
-                      sizes="(max-width: 768px) 100vw, 50vw"
+                      sizes="(max-width: 1024px) 100vw, 50vw"
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center px-2 text-xs text-muted-foreground text-center">
@@ -262,79 +259,47 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
         )}
 
         {hasVideo && displayImages.length > 0 && (
-          <div className="mb-6">
+          <div className="mb-6 w-full">
             <p className="mb-3 text-sm font-medium text-muted-foreground">{t("images")}</p>
             {displayImages.length === 1 ? (
-              <div className="flex justify-center">
-                <div className="relative w-full min-h-[40vh] overflow-hidden rounded-lg bg-muted">
-                  {getSafeImageSrc(displayImages[0]) ? (
-                    <Image
-                      src={getSafeImageSrc(displayImages[0])}
-                      alt={`${news.title} — 1`}
-                      fill
-                      className="object-contain"
-                      sizes="100vw"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center px-2 text-sm text-muted-foreground text-center">
-                      Rasmni yuklab bo&apos;lmadi
-                    </div>
-                  )}
-                </div>
+              <div className="relative w-full min-h-[50vh] overflow-hidden rounded-lg">
+                {getSafeImageSrc(displayImages[0]) ? (
+                  <Image
+                    src={getSafeImageSrc(displayImages[0])}
+                    alt={`${news.title} — 1`}
+                    fill
+                    className="object-contain"
+                    sizes="100vw"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center px-2 text-sm text-muted-foreground text-center">
+                    Rasmni yuklab bo&apos;lmadi
+                  </div>
+                )}
               </div>
             ) : (
-              <>
-                <div className="relative w-full md:hidden">
-                  <Carousel opts={{ align: "start", loop: true }} className="w-full">
-                    <CarouselContent className="ml-0">
-                      {displayImages.map((src, i) => (
-                        <CarouselItem key={src} className="pl-0">
-                          <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-muted">
-                            {getSafeImageSrc(src) ? (
-                              <Image
-                                src={getSafeImageSrc(src)}
-                                alt={`${news.title} — ${i + 1}`}
-                                fill
-                                className="object-cover"
-                              />
-                            ) : (
-                              <div className="flex h-full w-full items-center justify-center px-2 text-xs text-muted-foreground text-center">
-                                Rasmni yuklab bo&apos;lmadi
-                              </div>
-                            )}
-                          </div>
-                        </CarouselItem>
-                      ))}
-                    </CarouselContent>
-                    <div className="absolute right-2 top-2 z-10 flex translate-y-0 gap-2">
-                      <CarouselPrevious className="static size-10 translate-x-0 translate-y-0 rounded-sm border-none bg-background/90 hover:bg-background" />
-                      <CarouselNext className="static size-10 translate-x-0 translate-y-0 rounded-sm border-none bg-background/90 hover:bg-background" />
-                    </div>
-                  </Carousel>
-                </div>
-                <div className="hidden md:grid md:grid-cols-2 gap-3">
-                  {displayImages.map((src, i) => (
-                    <div
-                      key={src || i}
-                      className="relative aspect-video overflow-hidden rounded-lg bg-muted"
-                    >
-                      {getSafeImageSrc(src) ? (
-                        <Image
-                          src={getSafeImageSrc(src)}
-                          alt={`${news.title} — ${i + 1}`}
-                          fill
-                          className="object-cover"
-                          sizes="(max-width: 768px) 100vw, 50vw"
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center px-2 text-xs text-muted-foreground text-center">
-                          Rasmni yuklab bo&apos;lmadi
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </>
+              <div className="grid grid-cols-2 gap-3 w-full">
+                {displayImages.map((src, i) => (
+                  <div
+                    key={src || i}
+                    className="relative aspect-video w-full overflow-hidden rounded-lg bg-muted"
+                  >
+                    {getSafeImageSrc(src) ? (
+                      <Image
+                        src={getSafeImageSrc(src)}
+                        alt={`${news.title} — ${i + 1}`}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 50vw, 50vw"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center px-2 text-xs text-muted-foreground text-center">
+                        Rasmni yuklab bo&apos;lmadi
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         )}

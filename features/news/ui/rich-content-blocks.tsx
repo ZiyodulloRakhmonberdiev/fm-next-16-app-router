@@ -25,13 +25,14 @@ function Block({ block }: { block: RichContentBlock }) {
       return <p className="leading-7 not-first:mt-4">{block.text}</p>
     case "image":
       return (
-        <figure className="my-4 mx-auto w-full max-w-3xl">
-          <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-muted">
+        <figure className="my-4 w-full">
+          <div className="relative w-full min-h-[50vh] overflow-hidden rounded-lg bg-muted">
             <Image
               src={block.src}
               alt={block.alt ?? ""}
               fill
-              className="object-cover"
+              className="object-contain"
+              sizes="100vw"
             />
           </div>
         </figure>

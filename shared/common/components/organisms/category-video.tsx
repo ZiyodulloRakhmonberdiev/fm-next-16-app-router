@@ -15,6 +15,8 @@ import Image from "next/image"
 import { useLocale, useTranslations } from "next-intl"
 import { Play } from "lucide-react"
 import { VideoNewsModal } from "@/shared/common/components/molecules"
+import { getCloudinaryVideoPosterUrl } from "@/shared/common/lib/cloudinary"
+import { getYoutubeThumbnailUrl, getYoutubeEmbedUrl } from "@/shared/common/lib/youtube"
 
 function isVideoNewsItem(item: RawNewsItem): boolean {
   const hasVideo = !!(item.videoSource && item.videoUrl)
@@ -27,6 +29,18 @@ function getSafeImageSrc(raw?: string): string {
   return raw.startsWith("http://") || raw.startsWith("https://") || raw.startsWith("/")
     ? raw
     : `/uploads/images/${raw}`
+}
+
+/** Kartochka uchun rasm: avval images[0], keyin YouTube thumbnail, keyin Cloudinary poster */
+function getCardImageSrc(item: {
+  images?: string[]
+  videoUrl?: string | null
+  videoSource?: string | null
+}): string {
+  const img = getSafeImageSrc(item.images?.[0])
+  if (img) return img
+  if (getYoutubeEmbedUrl(item.videoUrl ?? "")) return getYoutubeThumbnailUrl(item.videoUrl) || ""
+  return getCloudinaryVideoPosterUrl(item.videoUrl) || ""
 }
 
 export default function CategoryVideo() {
@@ -95,9 +109,9 @@ export default function CategoryVideo() {
                   <Card className="overflow-hidden p-0 rounded-sm shadow-none transition-shadow hover:shadow-md bg-background">
                     <div className="flex gap-3">
                       <div className="relative block h-20 w-28 shrink-0 overflow-hidden rounded-xs md:h-24 md:w-32">
-                        {getSafeImageSrc(item.images?.[0]) ? (
+                        {getCardImageSrc(item) ? (
                           <Image
-                            src={getSafeImageSrc(item.images[0])}
+                            src={getCardImageSrc(item)}
                             alt={item.title}
                             fill
                             className="object-cover"
@@ -137,9 +151,9 @@ export default function CategoryVideo() {
             >
               <Card className="relative w-full h-full overflow-hidden rounded-sm border-none p-0 shadow-none transition-shadow hover:shadow-md">
                 <div className="relative w-full aspect-video md:h-full md:aspect-auto">
-                  {getSafeImageSrc(featured.images?.[0]) ? (
+                  {getCardImageSrc(featured) ? (
                     <Image
-                      src={getSafeImageSrc(featured.images[0])}
+                      src={getCardImageSrc(featured)}
                       alt={featured.title}
                       fill
                       className="object-cover"
@@ -159,10 +173,10 @@ export default function CategoryVideo() {
                     >
                       {formatDate(featured.publishedAt, locale)}
                     </time>
-                    <h3 className="mt-1 line-clamp-2 text-base font-semibold leading-tight text-white md:text-lg">
+                    <h3 className="mt-1 line-clamp-4 text-base font-semibold leading-tight text-white md:text-lg">
                       {featured.title}
                     </h3>
-                    <span className="line-clamp-3 hidden md:block font-medium leading-tight text-muted-foreground">{featured.description}</span>
+                    {/* <span className="line-clamp-3 hidden md:block font-medium leading-tight text-muted-foreground">{featured.description}</span> */}
                   </div>
                 </div>
               </Card>
@@ -181,9 +195,9 @@ export default function CategoryVideo() {
                   <Card className="overflow-hidden p-0 rounded-sm shadow-none transition-shadow hover:shadow-md">
                     <div className="flex gap-3">
                       <div className="relative block h-20 w-28 shrink-0 overflow-hidden rounded-xs md:h-24 md:w-32">
-                        {getSafeImageSrc(item.images?.[0]) ? (
+                        {getCardImageSrc(item) ? (
                           <Image
-                            src={getSafeImageSrc(item.images[0])}
+                            src={getCardImageSrc(item)}
                             alt={item.title}
                             fill
                             className="object-cover"

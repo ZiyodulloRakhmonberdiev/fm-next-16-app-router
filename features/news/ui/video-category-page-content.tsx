@@ -20,8 +20,26 @@ import { useLocale, useTranslations } from "next-intl"
 import { TruncateExpand } from "@/shared/common/components/ui/truncate-expand"
 import { Play } from "lucide-react"
 import { ServerLoading, ServerUnavailable, VideoNewsModal } from "@/shared/common/components/molecules"
+import { getCloudinaryVideoPosterUrl } from "@/shared/common/lib/cloudinary"
+import { getYoutubeThumbnailUrl } from "@/shared/common/lib/youtube"
 
 const PAGE_SIZE = 30
+
+function getSafeImageSrc(raw?: string): string {
+  if (!raw?.trim()) return ""
+  return raw.startsWith("http") || raw.startsWith("/") ? raw : `/uploads/images/${raw}`
+}
+
+function getCardImageSrc(item: {
+  images?: string[]
+  videoUrl?: string | null
+  videoSource?: string | null
+}): string {
+  const img = getSafeImageSrc(item.images?.[0])
+  if (img) return img
+  if (item.videoSource === "youtube") return getYoutubeThumbnailUrl(item.videoUrl) || ""
+  return getCloudinaryVideoPosterUrl(item.videoUrl) || ""
+}
 
 function isVideoNewsItem(item: RawNewsItem): boolean {
   const hasVideo = !!(item.videoSource && item.videoUrl)
@@ -90,12 +108,16 @@ export function VideoCategoryPageContent() {
           >
             <Card className="h-full overflow-hidden rounded-sm border-border p-0 shadow-none transition-shadow hover:shadow-md">
               <div className="relative aspect-video w-full">
-                <Image
-                  src={item.images[0]}
-                  alt={item.title}
-                  fill
-                  className="object-cover"
-                />
+                {getCardImageSrc(item) ? (
+                  <Image
+                    src={getCardImageSrc(item)}
+                    alt={item.title}
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-muted" aria-hidden />
+                )}
                 <span className="absolute inset-0 flex items-center justify-center bg-black/30">
                   <span className="flex size-14 items-center justify-center rounded-full bg-background text-primary md:size-16">
                     <Play className="size-7 fill-current md:size-8" />
@@ -142,12 +164,16 @@ export function VideoCategoryPageContent() {
                 <Card className="overflow-hidden rounded-sm border-border p-0 shadow-none transition-shadow hover:shadow-md">
                   <div className="flex gap-3 p-2">
                     <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-sm">
-                      <Image
-                        src={item.images[0]}
-                        alt={item.title}
-                        fill
-                        className="object-cover"
-                      />
+                      {getCardImageSrc(item) ? (
+                        <Image
+                          src={getCardImageSrc(item)}
+                          alt={item.title}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 bg-muted" aria-hidden />
+                      )}
                       <span className="absolute inset-0 flex items-center justify-center bg-black/30">
                         <span className="flex size-8 items-center justify-center rounded-full bg-background text-primary">
                           <Play className="size-4 fill-current" />

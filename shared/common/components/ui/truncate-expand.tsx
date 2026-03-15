@@ -41,15 +41,22 @@ export function TruncateExpand({
   return (
     <Wrapper className={cn("inline", className)}>
       {visible}
-      <button
-        type="button"
+      <span
+        role="button"
+        tabIndex={0}
         onClick={handleExpand}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault()
+            setExpanded(true)
+          }
+        }}
         onMouseDown={(e) => e.stopPropagation()}
         className="ml-0.5 inline-flex cursor-pointer items-center rounded border border-current px-1 py-0 align-baseline text-inherit opacity-80 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1"
         aria-label="Show full text"
       >
         ...
-      </button>
+      </span>
     </Wrapper>
   )
 }

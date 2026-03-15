@@ -18,3 +18,9 @@ export function getYoutubeEmbedUrl(url: string): string | null {
   const id = getYoutubeVideoId(url)
   return id ? `https://www.youtube.com/embed/${id}` : null
 }
+
+/** YouTube video uchun thumbnail rasm URL (hqdefault). */
+export function getYoutubeThumbnailUrl(url: string | undefined | null): string {
+  const id = getYoutubeVideoId(url ?? "")
+  return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : ""
+}
