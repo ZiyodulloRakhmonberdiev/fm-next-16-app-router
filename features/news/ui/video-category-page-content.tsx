@@ -19,6 +19,7 @@ import Image from "next/image"
 import { useLocale, useTranslations } from "next-intl"
 import { TruncateExpand } from "@/shared/common/components/ui/truncate-expand"
 import { Play } from "lucide-react"
+import { getMediaUrl } from "@/shared/common/lib/media-url"
 import { ServerLoading, ServerUnavailable, VideoNewsModal } from "@/shared/common/components/molecules"
 
 const PAGE_SIZE = 30
@@ -91,7 +92,7 @@ export function VideoCategoryPageContent() {
             <Card className="h-full overflow-hidden rounded-sm border-border p-0 shadow-none transition-shadow hover:shadow-md">
               <div className="relative aspect-video w-full">
                 <Image
-                  src={item.images[0]}
+                  src={getMediaUrl(item.images[0])}
                   alt={item.title}
                   fill
                   className="object-cover"
@@ -143,7 +144,7 @@ export function VideoCategoryPageContent() {
                   <div className="flex gap-3 p-2">
                     <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-sm">
                       <Image
-                        src={item.images[0]}
+                        src={getMediaUrl(item.images[0])}
                         alt={item.title}
                         fill
                         className="object-cover"

@@ -606,7 +606,7 @@ export function CreateNewsForm({ categories, tags, authors, existingSlugs = [], 
       formData.append('file', file)
       formData.append('kind', 'image')
       try {
-        const res = await fetch('/api/uploads', { method: 'POST', body: formData })
+        const res = await fetch('/api/uploads', { method: 'POST', credentials: 'include', body: formData })
         const data = (await res.json().catch(() => null)) as { url?: string; error?: string } | null
         if (!res.ok || !data?.url) {
           toast.error(data?.error || "Rasmni yuklab bo'lmadi")

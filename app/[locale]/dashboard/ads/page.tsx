@@ -69,7 +69,7 @@ export default function DashboardAdsPage() {
     const formData = new FormData()
     formData.append("file", file)
     formData.append("kind", kind)
-    const res = await fetch("/api/uploads", { method: "POST", body: formData })
+    const res = await fetch("/api/uploads", { method: "POST", credentials: "include", body: formData })
     const data = (await res.json().catch(() => null)) as { url?: string; error?: string } | null
     if (!res.ok || !data?.url) throw new Error(data?.error || "Yuklab bo'lmadi")
     return data.url

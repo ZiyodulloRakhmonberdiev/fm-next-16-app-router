@@ -7,6 +7,7 @@ import { formatDate, formatDateISO, formatDateTimeLocale } from "@/shared/common
 import type { AppLocale } from "@/shared/common/lib/formatter"
 import { Link } from "@/i18n/navigation"
 import Image from "next/image"
+import { getMediaUrl } from "@/shared/common/lib/media-url"
 import { useLocale, useTranslations } from "next-intl"
 
 type LatestNewsProps = {
@@ -38,9 +39,8 @@ export default function LatestNews({ excludeSlug }: LatestNewsProps = {}) {
         ? raw
         : `/uploads/images/${raw}`
     try {
-      // Bu yerda URL obyektini qurib ko'ramiz; agar xato bo'lsa, fallback ishlaydi
       new URL(candidate, "http://localhost")
-      return candidate
+      return getMediaUrl(candidate)
     } catch {
       return ""
     }

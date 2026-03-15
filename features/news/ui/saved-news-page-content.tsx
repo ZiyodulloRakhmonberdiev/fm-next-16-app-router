@@ -9,6 +9,7 @@ import type { AppLocale } from "@/shared/common/lib/formatter"
 import { useLocale } from "next-intl"
 import { Button } from "@/shared/common/components/ui/button"
 import { Card } from "@/shared/common/components/ui/card"
+import { getMediaUrl } from "@/shared/common/lib/media-url"
 import { RelatedNews } from "@/shared/common/components/molecules"
 
 type Props = { title: string }
@@ -67,7 +68,7 @@ export function SavedNewsPageContent({ title }: Props) {
         : `/uploads/images/${raw}`
     try {
       new URL(candidate, "http://localhost")
-      return candidate
+      return getMediaUrl(candidate)
     } catch {
       return ""
     }

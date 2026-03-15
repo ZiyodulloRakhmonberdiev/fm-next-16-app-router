@@ -37,16 +37,44 @@ export async function POST(req: NextRequest) {
       return Response.json({ error: "Fayl turi qo'llab-quvvatlanmaydi" }, { status: 400 })
     }
 
+    const apiBase = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "")
+
+    if (apiBase) {
+      const vpsFormData = new FormData()
+      vpsFormData.set("file", file)
+      vpsFormData.set("kind", kind)
+      const headers: HeadersInit = {}
+      const secret = process.env.UPLOAD_VPS_SECRET
+      if (secret) headers["X-Upload-Secret"] = secret
+      const res = await fetch(`${apiBase}/api/uploads`, {
+        method: "POST",
+        headers,
+        body: vpsFormData,
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        const msg = (err as { error?: string })?.error || `VPS upload: ${res.status}`
+        const userMsg =
+          res.status === 401
+            ? "VPS ruxsat rad etdi. .env da UPLOAD_VPS_SECRET va VPS da UPLOAD_SECRET bir xil bo‘lishi kerak."
+            : msg
+        return Response.json({ error: userMsg }, { status: res.status })
+      }
+      const data = (await res.json()) as { url?: string }
+      const pathUrl = data?.url ?? ""
+      const fullUrl = pathUrl.startsWith("http") ? pathUrl : apiBase + (pathUrl.startsWith("/") ? pathUrl : `/${pathUrl}`)
+      return Response.json({ url: fullUrl })
+    }
+
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
-    const folder = path.join(process.cwd(), "public", "uploads", kind === "image" ? "images" : "videos")
-    await mkdir(folder, { recursive: true })
-
     const base = sanitizeBaseName(path.basename(file.name, ext)) || "media"
     const filename = `${base}-${randomUUID()}${ext}`
+
+    const folder = path.join(process.cwd(), "public", "uploads", kind === "image" ? "images" : "videos")
+    await mkdir(folder, { recursive: true })
     const fullPath = path.join(folder, filename)
     await writeFile(fullPath, buffer)
-
     const url = `/uploads/${kind === "image" ? "images" : "videos"}/${filename}`
     return Response.json({ url })
   } catch (error) {

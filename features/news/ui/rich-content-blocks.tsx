@@ -3,6 +3,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import type { RichContentBlock } from "@/features/news/model"
+import { getMediaUrl } from "@/shared/common/lib/media-url"
 import { getYoutubeEmbedUrl } from "@/shared/common/lib/youtube"
 
 export type RichContentBlocksProps = {
@@ -28,7 +29,7 @@ function Block({ block }: { block: RichContentBlock }) {
         <figure className="my-4 mx-auto w-full max-w-3xl">
           <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-muted">
             <Image
-              src={block.src}
+              src={getMediaUrl(block.src)}
               alt={block.alt ?? ""}
               fill
               className="object-cover"
@@ -51,7 +52,7 @@ function Block({ block }: { block: RichContentBlock }) {
             />
           ) : (
             <video
-              src={block.url}
+              src={getMediaUrl(block.url)}
               controls
               controlsList="nodownload"
               disablePictureInPicture
