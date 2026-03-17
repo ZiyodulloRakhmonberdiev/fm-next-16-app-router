@@ -95,11 +95,11 @@ export default function AuthorsChoice() {
                   href={`/news/${item.slug}`}
                   className="hover:underline"
                 >
-                  <TruncateExpand text={item.title ?? ""} as="span" className="line-clamp-3" />
+                  <span className="line-clamp-2 md:line-clamp-3">{item.title ?? ""}</span>
                 </Link>
               </h4>
               <p className="text-sm text-muted-foreground">
-                <TruncateExpand text={item.description ?? ""} className="line-clamp-3" as="span" />
+                <span className="line-clamp-2 md:line-clamp-3">{item.description ?? ""}</span>
               </p>
             </Card>
           ))}

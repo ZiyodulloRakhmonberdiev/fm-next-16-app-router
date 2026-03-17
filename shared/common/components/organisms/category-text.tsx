@@ -6,7 +6,6 @@ import { useLocale, useTranslations } from "next-intl"
 import { Card } from "@/shared/common/components/ui/card"
 import { Button } from "@/shared/common/components/ui/button"
 import { formatDateISO, formatDateTimeLocale, type AppLocale } from "@/shared/common/lib/formatter"
-import { TruncateExpand } from "@/shared/common/components/ui/truncate-expand"
 import {
   getNewsListForLocale,
   isTextOnlyRawNews,
@@ -64,10 +63,10 @@ export default function CategoryText({ categorySlug = "business" }: CategoryText
                   href={`/news/${item.slug}`}
                   className="text-sm font-semibold leading-tight hover:underline"
                 >
-                  <TruncateExpand text={item.title ?? ""} as="span" className="line-clamp-3" />
+                  <span className="line-clamp-2 md:line-clamp-3">{item.title ?? ""}</span>
                 </Link>
                 <p className="text-sm text-muted-foreground">
-                  <TruncateExpand text={item.description ?? ""} className="line-clamp-3" as="span" />
+                  <span className="line-clamp-2 md:line-clamp-3">{item.description ?? ""}</span>  
                 </p>
               </div>
             </Card>

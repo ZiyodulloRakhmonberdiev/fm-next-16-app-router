@@ -1,11 +1,11 @@
 "use client";
 
-import { useTheme } from "next-themes";
-import { MoonIcon, SunIcon } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTheme } from "next-themes";
+import { useTranslations } from "next-intl";
+import { MoonIcon, SunIcon } from "lucide-react";
 import { Switch } from "@/shared/common/components/ui/switch";
 import { Label } from "@/shared/common/components/ui/label";
-import { useTranslations } from "next-intl";
 
 export default function ThemeSwitcher() {
   const { resolvedTheme, setTheme } = useTheme();
@@ -90,7 +90,7 @@ export function ThemeSwitcherForHeader() {
       aria-checked={isDark}
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       onClick={handleToggle}
-      className="relative inline-flex h-7 w-14 shrink-0 cursor-pointer items-center rounded-full overflow-hidden bg-background border border-border py-0.5 transition-colors"
+      className="relative inline-flex h-7 w-14 shrink-0 cursor-pointer items-center rounded-full overflow-hidden bg-brand py-0.5 transition-colors"
     >
       <span
         className={`absolute top-1/2 -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded-full  shadow-sm transition-[left] duration-300 ease-in-out ${
@@ -99,9 +99,9 @@ export function ThemeSwitcherForHeader() {
         aria-hidden
       >
         {isDark ? (
-          <MoonIcon className="size-4 text-primary shrink-0" strokeWidth={2} />
+          <MoonIcon className="size-4 text-white shrink-0" strokeWidth={2} />
         ) : (
-          <SunIcon className="size-4 text-primary shrink-0" strokeWidth={2} />
+          <SunIcon className="size-4 text-white shrink-0" strokeWidth={2} />
         )}
       </span>
     </button>

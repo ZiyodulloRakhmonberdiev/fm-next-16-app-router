@@ -15,7 +15,6 @@ import type { AppLocale } from "@/shared/common/lib/formatter"
 import { Link } from "@/i18n/navigation"
 import Image from "next/image"
 import { useLocale, useTranslations } from "next-intl"
-import { TruncateExpand } from "@/shared/common/components/ui/truncate-expand"
 import { ServerLoading, ServerUnavailable } from "@/shared/common/components/molecules"
 
 const PAGE_SIZE = 99
@@ -93,10 +92,10 @@ export function CategoryPageContent({ slug }: CategoryPageContentProps) {
                   {formatDateTimeLocale(item.publishedAt, locale)}
                 </time>
                 <h2 className="text-base font-semibold leading-tight">
-                  <TruncateExpand text={item.title ?? ""} as="span" maxLength={120} />
+                  <span className="line-clamp-2 md:line-clamp-3">{item.title ?? ""}</span>
                 </h2>
                 <p className="line-clamp-3 text-sm text-muted-foreground">
-                  <TruncateExpand text={item.description ?? ""} as="span" maxLength={160} />
+                  <span className="line-clamp-2 md:line-clamp-3">{item.description ?? ""}</span>
                 </p>
               </div>
             </Card>

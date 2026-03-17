@@ -1,7 +1,11 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
-import { SearchIcon } from 'lucide-react'
+import { FiSearch } from "react-icons/fi";
+
+// import { SearchIcon } from 'lucide-react'
+import { CiSearch } from "react-icons/ci";
+
 import { Link } from '@/i18n/navigation'
 import { useTheme } from 'next-themes'
 import Headline from './headline'
@@ -14,6 +18,7 @@ import { AdSlot } from '@/shared/common/components/molecules'
 import { ClientUserMenu } from '@/widgets/client-header/ui/client-user-menu'
 import { cn } from '@/shared/common/lib/utils'
 import { Button } from '@/shared/common/components/ui/button'
+import { Search } from 'lucide-react';
 
 function AdSlotHeader() {
   return (
@@ -94,7 +99,7 @@ export default function Header() {
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-2">
               <Button variant="ghost" size="icon" className="" onClick={() => setSearchOpen(true)} aria-label="Qidiruv">
-                <SearchIcon className="w-4 h-4" />
+                <Search className="w-4 h-4"/>
               </Button>
               <ClientUserMenu />
               <div className="hidden md:block">

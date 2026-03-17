@@ -61,14 +61,14 @@ export default function HomeMainContent() {
       <TopNewsSlider />
       <TopBanner />
       <CategoryWithSlide categorySlug={firstCategorySlug} />
-      <CategoryWithBanner categorySlug={secondCategorySlug} />
+      <CategoryWithBanner categorySlug={secondCategorySlug} featuredPosition="left" />
       <CategoryVideo />
       {shouldShowYangiliklar && <Yangiliklar />}
       <TextNews />
       <StayConnected />
-      <CategoryWithBanner categorySlug={firstCategorySlug} featuredPosition="left" />
+      <CategoryWithBanner categorySlug={firstCategorySlug} featuredPosition="right" />
       <CategoryWithSlide categorySlug={secondCategorySlug} />
-      <CategoryWithColumns categorySlug={secondCategorySlug} featuredPosition="right" />
+      <CategoryWithColumns categorySlug={secondCategorySlug} featuredPosition="left" />
     </>
   )
 }

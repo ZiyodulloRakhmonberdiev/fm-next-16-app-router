@@ -65,17 +65,9 @@ export function AuthModal({
   const [showPassword, setShowPassword] = useState(false)
   const [submitting, setSubmitting] = useState(false)
 
-  const { resolvedTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => setMounted(true), [])
-
   const isLogin = mode === "login"
   const title = isLogin ? t("login") : t("register_title")
   const subtitle = isLogin ? t("login_subtitle") : t("register_subtitle")
-  const logoSrc =
-    mounted && resolvedTheme === "light"
-      ? "/images/fm-logo-dark.svg"
-      : "/images/fm-logo.svg"
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -140,19 +132,6 @@ export function AuthModal({
       >
         <div className="flex flex-col gap-4 pt-1 p-5 overflow-y-auto min-h-0 overscroll-contain">
           <DialogHeader className="space-y-1 text-center sm:text-left">
-            {/* <div className="flex justify-center sm:justify-start">
-              {mounted ? (
-                <Image
-                  src={logoSrc}
-                  alt="Logo"
-                  width={80}
-                  height={28}
-                  className="h-7 w-auto object-contain object-left"
-                />
-              ) : (
-                <div className="h-7 w-20 bg-muted rounded" />
-              )}
-            </div> */}
             <DialogTitle className="text-xl font-semibold">{title}</DialogTitle>
             <p className="text-sm text-muted-foreground">{subtitle}</p>
           </DialogHeader>

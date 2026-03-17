@@ -5,7 +5,6 @@ import { Link } from "@/i18n/navigation"
 import { useLocale } from "next-intl"
 import { Card } from "@/shared/common/components/ui/card"
 import { formatDateISO, formatDateTimeLocale, type AppLocale } from "@/shared/common/lib/formatter"
-import { TruncateExpand } from "@/shared/common/components/ui/truncate-expand"
 import { getNewsListForLocale, isTextOnlyRawNews, type NewsItem } from "@/features/news/model"
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
 
@@ -40,10 +39,10 @@ export default function TextNews() {
                     </time>
                   </div>
                   <Link href={`/news/${item.slug}`} className="text-sm font-semibold leading-tight hover:underline">
-                    <TruncateExpand text={item.title ?? ""} as="span" className="line-clamp-3" />
+                    <span className="line-clamp-2 md:line-clamp-3">{item.title ?? ""}</span>
                   </Link>
                   <p className="text-sm text-muted-foreground">
-                    <TruncateExpand text={item.description ?? ""} as="span" className="line-clamp-3" />
+                    <span className="line-clamp-2 md:line-clamp-3">{item.description ?? ""}</span>
                   </p>
                 </div>
               </Card>

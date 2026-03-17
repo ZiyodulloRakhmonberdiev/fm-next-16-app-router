@@ -46,7 +46,15 @@
     "or_sign_in_with": "Yoki quyidagilar bilan kirish",
     "telegram": "Telegram",
     "username": "Login",
-    "email_or_username_placeholder": "Email yoki username kiriting"
+    "email_or_username_placeholder": "Email yoki username kiriting",
+    "edit_profile": "Profilni tahrirlash",
+    "my_comments": "Mening izohlarim",
+    "my_reactions": "Mening reaksiyalarim",
+    "login_error": "Login yoki parol noto'g'ri",
+    "register_error": "Ro'yxatdan o'tib bo'lmadi",
+    "edit_profile_description": "Ism, rasm va parolni yangilang",
+    "image_url": "Rasm manzili"
+    
   },
   "common": {
   "results": "Natijalar",

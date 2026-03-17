@@ -1,22 +1,22 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import Image from "next/image"
 import { signOut, useSession } from "next-auth/react"
-import { useTheme } from "next-themes"
 import { Link } from "@/i18n/navigation"
+import { LiaUserEditSolid } from "react-icons/lia";
+import { CiBookmark } from "react-icons/ci";
 import {
-  Bookmark,
-  Edit,
   ImageIcon,
   Lock,
   LogIn,
-  LogOut,
   MessageCircle,
   Smile,
   User,
   UserPlus,
 } from "lucide-react"
+import { PiUserPlus, PiUser } from "react-icons/pi";
+import { AiOutlineLogin, AiOutlineLogout } from "react-icons/ai";
+
 import { Button } from "@/shared/common/components/ui/button"
 import {
   Dialog,
@@ -39,11 +39,11 @@ import {
   clientModalOverlayClass,
 } from "@/features/auth/ui/auth-modal"
 import { cn } from "@/shared/common/lib/utils"
+import { useTranslations } from "next-intl"
 
 export function ClientUserMenu() {
   const { data: session } = useSession()
-  const { resolvedTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
+  const t = useTranslations("auth")
   const [savedCount, setSavedCount] = useState(0)
   const [profileOpen, setProfileOpen] = useState(false)
   const [authOpen, setAuthOpen] = useState(false)
@@ -53,7 +53,6 @@ export function ClientUserMenu() {
   const [currentPassword, setCurrentPassword] = useState("")
   const [newPassword, setNewPassword] = useState("")
 
-  useEffect(() => setMounted(true), [])
   useEffect(() => {
     void (async () => {
       if (!session?.user?.id) {
@@ -112,17 +111,17 @@ export function ClientUserMenu() {
       {session?.user ? (
         <>
           <Button size="icon" variant="ghost" aria-label="Saved news">
-          <Link
-            href="/news/saved"
-            className="relative inline-flex items-center rounded-md px-2 py-1 text-xs"
-          >
-            <Bookmark className="size-4" />
-            {savedCount > 0 ? (
-              <span className="absolute -right-1 -top-1 py-0.5 rounded-full bg-primary px-1.5 text-[10px] text-primary-foreground">
-                {savedCount}
-              </span>
-            ) : null}
-          </Link>
+            <Link
+              href="/news/saved"
+              className="relative inline-flex items-center rounded-md px-2 py-1 text-xs"
+            >
+              <CiBookmark strokeWidth={0.5} className="size-4" />
+              {savedCount > 0 ? (
+                <span className="absolute -right-1 -top-1 py-0.5 rounded-full bg-brand px-1.5 text-[10px] text-primary-foreground">
+                  {savedCount}
+                </span>
+              ) : null}
+            </Link>
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -132,7 +131,8 @@ export function ClientUserMenu() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => void openProfileDialog()}>
-                <Edit className="size-4" />Profilni tahrirlash
+                <LiaUserEditSolid className="size-5" />
+                Profilni tahrirlash
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href="/user/comments" className="flex items-center gap-2">
@@ -145,7 +145,7 @@ export function ClientUserMenu() {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => void signOut({ callbackUrl: "/" })}>
-                <LogOut className="size-4" />Chiqish
+                <AiOutlineLogout className="size-4" />Chiqish
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -165,7 +165,7 @@ export function ClientUserMenu() {
               }}
             >
               <span className="flex items-center gap-2">
-                <LogIn className="size-4" />Kirish
+                <LogIn  className="size-4" />{t("login")}
               </span>
             </DropdownMenuItem>
             <DropdownMenuItem
@@ -175,8 +175,7 @@ export function ClientUserMenu() {
               }}
             >
               <span className="flex items-center gap-2">
-                <UserPlus className="size-4" />Ro&apos;yxatdan o&apos;tish
-              </span>
+                <UserPlus className="size-4" />{t("register")}</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -189,29 +188,16 @@ export function ClientUserMenu() {
         >
           <div className="flex flex-col gap-4 pt-1 p-5 overflow-y-auto min-h-0 overscroll-contain">
             <DialogHeader className="space-y-1 text-center sm:text-left">
-              {/* <div className="flex justify-center sm:justify-start">
-                {mounted ? (
-                  <Image
-                    src={resolvedTheme === "light" ? "/images/fm-logo-dark.svg" : "/images/fm-logo.svg"}
-                    alt="Logo"
-                    width={80}
-                    height={28}
-                    className="h-7 w-auto object-contain object-left"
-                  />
-                ) : (
-                  <div className="h-7 w-20 bg-muted rounded" />
-                )}
-              </div> */}
               <DialogTitle className="text-lg font-semibold">
-                Profil ma&apos;lumotlari
+                {t("edit_profile")}
               </DialogTitle>
               <p className="text-xs text-muted-foreground">
-                Ism, rasm va parolni yangilang
+                {t("edit_profile_description")}
               </p>
             </DialogHeader>
             <div className="space-y-3">
               <div className="space-y-1.5">
-                <Label htmlFor="profile-fullname">To&apos;liq ism</Label>
+                <Label htmlFor="profile-fullname">{t("full_name")}</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
@@ -223,7 +209,7 @@ export function ClientUserMenu() {
                 </div>
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="profile-image">Rasm URL</Label>
+                <Label htmlFor="profile-image">{t("image_url")}</Label>
                 <div className="relative">
                   <ImageIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                   <Input

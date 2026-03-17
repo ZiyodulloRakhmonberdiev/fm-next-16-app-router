@@ -13,7 +13,6 @@ import type { AppLocale } from "@/shared/common/lib/formatter"
 import { Link } from "@/i18n/navigation"
 import Image from "next/image"
 import { useLocale, useTranslations } from "next-intl"
-import { TruncateExpand } from "@/shared/common/components/ui/truncate-expand"
 import { Button } from "../ui/button"
 
 type CategoryWithColumnsProps = {
@@ -80,11 +79,11 @@ export default function CategoryWithColumns({
                     href={`/news/${item.slug}`}
                     className="hover:underline"
                   >
-                    <TruncateExpand text={item.title ?? ""} as="span" className="line-clamp-3" />
+                    <span className="line-clamp-2 md:line-clamp-3">{item.title ?? ""}</span>
                   </Link>
                 </h4>
                 <p className="text-sm text-muted-foreground">
-                  <TruncateExpand text={item.description ?? ""} className="line-clamp-3" as="span" />
+                  <span className="line-clamp-2 md:line-clamp-3">{item.description ?? ""}</span>
                 </p>
               </Card>
             ))}
