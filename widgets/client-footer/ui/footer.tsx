@@ -62,8 +62,9 @@ export default function Footer() {
           {/* Social and links */}
           <div className="flex items-center gap-x-4 gap-y-1 text-sm py-4 md:pt-0 md:py-0 text-foreground/70 border-b md:border-none border-border flex-wrap">
             <span className='font-bold'>{t("quick_links")}: </span>{seed.links.map((item) => {
+              const isExternal = /^https?:\/\//i.test(item.href)
               return (
-                <Link key={item.href} href={item.href} target='_blank'>
+                <Link key={item.href} href={item.href} target={isExternal ? '_blank' : undefined}>
                   {item.name[locale]}
                 </Link>
               )

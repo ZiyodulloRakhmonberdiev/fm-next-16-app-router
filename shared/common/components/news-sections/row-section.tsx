@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import Image from "next/image"
-import { Eye } from "lucide-react"
+import { ArrowRight, Eye } from "lucide-react"
 import { Link } from "@/i18n/navigation"
 import { useLocale, useTranslations } from "next-intl"
 import type { AppLocale } from "@/shared/common/lib/formatter"
@@ -56,9 +56,9 @@ export default function RowSection({ categorySlug }: RowSectionProps) {
       <div className="rounded-lg border bg-background">
         <div className="flex items-center justify-between gap-3 px-4 py-3">
           <h2 className="text-base font-semibold text-brand">{categoryName}</h2>
-          <Button variant="ghost" size="sm" asChild className="text-brand">
-            <Link href={`/category/${categorySlug}`} className="text-xs md:text-sm">
-              {t("view_all")} {"→"}
+          <Button variant="ghost" size="sm" asChild className="">
+            <Link href={`/category/${categorySlug}`} className="text-xs text-brand hover:text-brand hover:underline md:text-sm">
+              {t("view_all")} <ArrowRight className="w-4 h-4" />
             </Link>
           </Button>
         </div>
@@ -88,19 +88,21 @@ export default function RowSection({ categorySlug }: RowSectionProps) {
                           <span className="uppercase text-brand italic">
                             {item.category}
                           </span>
-                          <span className="inline-flex items-center gap-1">
-                            <Eye className="h-3.5 w-3.5" />
-                            {item.views}
-                          </span>
                         </span>
-                        <time dateTime={formatDate(item.publishedAt)} className="shrink-0">
-                          {formatDateTimeLocale(item.publishedAt, locale)}
-                        </time>
                       </div>
                       <div className="text-sm font-medium line-clamp-2 group-hover:underline">
                         {item.title}
                       </div>
-
+                      <div className="flex items-center justify-start gap-3 text-xs text-muted-foreground">
+                        <time dateTime={formatDate(item.publishedAt)} className="shrink-0">
+                          {formatDateTimeLocale(item.publishedAt, locale)}
+                        </time>
+                        /
+                        <span className="inline-flex items-center gap-1">
+                          <Eye className="h-3.5 w-3.5" />
+                          {item.views}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </Card>

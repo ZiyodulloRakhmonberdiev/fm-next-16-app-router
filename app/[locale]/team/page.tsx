@@ -1,13 +1,13 @@
 import { getLocale } from "next-intl/server"
 import type { AppLocale } from "@/shared/common/lib/formatter"
 import { Card, CardContent } from "@/shared/common/components/ui/card"
-import Image from "next/image"
 import { getServerApiUrl } from "@/shared/common/lib/server-api-url"
 import ClientServerOffGate from "../_components/client-server-off-gate"
 import { Footer } from "@/widgets/client-footer"
 import ClientSiteNothingGate from "../_components/client-site-nothing-gate"
 import { ClientSidebar } from "@/widgets/client-sidebar"
 import { Header } from "@/widgets/client-header"
+import { getTranslations } from "next-intl/server"
 
 type TeamRow = {
   _id: string
@@ -21,6 +21,7 @@ type TeamRow = {
 
 export default async function TeamPage() {
   const locale = (await getLocale()) as AppLocale
+  const t = await getTranslations("common")
   const url = await getServerApiUrl("/api/team?public=1")
   const res = await fetch(url, { cache: "no-store" })
   if (!res.ok) {
@@ -39,19 +40,19 @@ export default async function TeamPage() {
           <ClientServerOffGate model="categories">
             <div className="max-w-7xl mx-auto">
               <div className="container mx-auto px-4 py-8 space-y-6">
+                <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">
+                  {t("team_title")}
+                </h1>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {items.map((m) => (
                     <Card key={m._id} className="overflow-hidden flex items-center justify-center">
-                      <CardContent className="flex items-center justify-center">
+                      <CardContent className="flex items-center justify-center p-0">
                         {m.badgeImage && (
-                          <div className="relative min-h-[320px] min-w-[200px] h-[320px] w-[200px]">
-                            <Image
-                              src={m.badgeImage}
-                              alt={m.fullName}
-                              fill
-                              className="object-contain"
-                            />
-                          </div>
+                          <img
+                            src={m.badgeImage}
+                            alt={m.fullName}
+                            className="block h-auto w-auto"
+                          />
                         )}
                       </CardContent>
                     </Card>

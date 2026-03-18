@@ -13,8 +13,8 @@ import { Link } from "@/i18n/navigation"
 import { CategoryListForNewsPage } from "@/entities/category/ui/category-list"
 import ClientSiteNothingGate from "../../_components/client-site-nothing-gate"
 import ClientServerOffGate from "../../_components/client-server-off-gate"
-import { HomeIcon, Lightbulb, TrendingUpIcon, Zap } from "lucide-react"
-import { VideoIcon } from "lucide-react"
+import { Flame, History, HomeIcon, Lightbulb, TrendingUpIcon, VideoIcon } from "lucide-react"
+import { getTranslations } from "next-intl/server"
 
 type Props = {
   params: Promise<{ locale: string; slug: string }>
@@ -23,6 +23,7 @@ type Props = {
 export default async function NewsPage({ params }: Props) {
   const { locale, slug } = await params
   const currentLocale = isAppLocale(locale) ? locale : "uz"
+  const t = await getTranslations("common")
 
   await dbConnect()
   const raw = await NewsModel.findOne({ slug, status: "published" }).lean()
@@ -50,16 +51,16 @@ export default async function NewsPage({ params }: Props) {
                 <div className="px-4 text-lg">
                   <nav className="flex flex-col gap-4">
                     <Link href="/" className="flex items-center gap-3">
-                     <HomeIcon className="w-5 h-5" /> <span className="text-lg">Bosh sahifa</span>
+                     <HomeIcon className="w-5 h-5" /> <span className="text-lg">{t("nav_home")}</span>
                     </Link>
-                    <Link href="/" className="flex items-center gap-3">
-                      <Zap className="w-5 h-5" /> <span className="text-lg">Mashhur</span>
+                    <Link href="/news/trending" className="flex items-center gap-3">
+                      <Flame className="w-5 h-5" /> <span className="text-lg">{t("nav_trending")}</span>
+                    </Link>
+                    <Link href="/news/latest" className="flex items-center gap-3">
+                      <History className="w-5 h-5" /> <span className="text-lg">{t("nav_latest")}</span>
                     </Link>
                     <Link href="/news/video" className="flex items-center gap-3">
-                      <VideoIcon className="w-5 h-5" /> <span className="text-lg">So'nggi </span>
-                    </Link>
-                    <Link href="/news/video" className="flex items-center gap-3">
-                      <VideoIcon className="w-5 h-5" /> <span className="text-lg">Video </span>
+                      <VideoIcon className="w-5 h-5" /> <span className="text-lg">{t("nav_video")}</span>
                     </Link>
                   </nav>
                 </div>

@@ -14,6 +14,7 @@ import { Link } from "@/i18n/navigation"
 import Image from "next/image"
 import { useLocale, useTranslations } from "next-intl"
 import { Button } from "../ui/button"
+import { ArrowRight } from "lucide-react"
 
 type ColumnSectionProps = {
   categorySlug?: string
@@ -49,11 +50,11 @@ export default function ColumnSection({
 
   return (
     <div className="w-full px-4 md:px-6 mt-4">
-      <div className=" border-t-2 border-border py-4">
-        <div className="flex items-center justify-between gap-2 mb-4">
+      <div className="py-4">
+        <div className="flex items-center text-brand border-b-2 border-brand justify-between gap-2 pb-2 mb-4">
           <h2 className="text-lg font-semibold">{categoryName}</h2>
           <Button variant="ghost" size="sm" asChild className="text-brand">
-            <Link href={`/category/${categorySlug}`} className="text-xs md:text-sm">{t("view_all")} {">>"}</Link>
+            <Link href={`/category/${categorySlug}`} className="text-xs md:text-sm hover:text-brand hover:underline">{t("view_all")} <ArrowRight className="w-4 h-4" /></Link>
           </Button>
         </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

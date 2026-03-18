@@ -23,7 +23,7 @@ export default function ClientSidebar() {
         </div>
       </SidebarHeader>
       <SidebarContent>
-        <div className='flex justify-center gap-6 items-center p-2 pb-4 border-b border-border'>
+        <div className='flex justify-center gap-6 scroll-auto items-center p-2 pb-4 border-b border-border'>
           <Label htmlFor="theme-switcher">{t("dark_mode")}</Label>
           <ThemeSwitcherForHeader />
         </div>

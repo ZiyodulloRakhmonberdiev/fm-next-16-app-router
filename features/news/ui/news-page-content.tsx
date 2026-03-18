@@ -627,16 +627,18 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
             <div className="flex items-center gap-3">
               <Image src="/images/icons/telegram.png" alt="Telegram" width={48} height={48} />
               <p className="text-sm md:text-base leading-snug">
-                So&apos;nggi yangiliklarni o&apos;tkazib yubormaslik uchun bizning{" "}
-                <a
-                  href={settings?.socialMedia?.find((s) => s.slug === "telegram")?.href ?? ""}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="font-semibold  text-[#229ED9] underline-offset-2"
-                >
-                  Telegram
-                </a>{" "}
-                kanalga a&apos;zo bo&apos;ling.
+                {t.rich("news_telegram_card_text", {
+                  telegram: (chunks) => (
+                    <a
+                      href={settings?.socialMedia?.find((s) => s.slug === "telegram")?.href ?? ""}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="font-semibold text-[#229ED9] underline-offset-2"
+                    >
+                      {chunks}
+                    </a>
+                  ),
+                })}
               </p>
             </div>
             <div className="flex justify-start md:justify-end">

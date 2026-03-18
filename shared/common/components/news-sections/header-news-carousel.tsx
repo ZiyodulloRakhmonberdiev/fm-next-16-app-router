@@ -41,7 +41,7 @@ export default function HeaderNewsCarousel() {
         <div className="flex items-stretch gap-4 md:gap-6">
           <div className="flex shrink-0 items-center gap-2 border-r border-border pr-4 md:pr-6">
             <LiveIndicator />
-            <h2 className="text-base font-semibold tracking-tight text-foreground md:text-lg">
+            <h2 className="hidden md:block text-base font-semibold tracking-tight text-foreground md:text-lg">
               {t("top_news")}
             </h2>
           </div>

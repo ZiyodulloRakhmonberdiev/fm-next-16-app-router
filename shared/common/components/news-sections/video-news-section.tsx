@@ -13,7 +13,7 @@ import type { AppLocale } from "@/shared/common/lib/formatter"
 import { Link } from "@/i18n/navigation"
 import Image from "next/image"
 import { useLocale, useTranslations } from "next-intl"
-import { Eye, Play } from "lucide-react"
+import { ArrowRight, Eye, Play } from "lucide-react"
 import { VideoNewsModal } from "@/shared/common/components/molecules"
 import { getCloudinaryVideoPosterUrl } from "@/shared/common/lib/cloudinary"
 import { getYoutubeThumbnailUrl, getYoutubeEmbedUrl } from "@/shared/common/lib/youtube"
@@ -74,14 +74,14 @@ export default function VideoNewsSection() {
 
   return (
     <section className="w-full space-y-4 px-4 md:px-6 pt-4">
-      <div className="py-4 border-t-2 mt-4 border-border">
-        <div className="flex items-center justify-between gap-2 mb-4">
+      <div className="py-4 pt-4 pb-2">
+        <div className="flex text-brand border-b-2 border-brand pb-2 items-center justify-between gap-2 mb-4">
           <h2 className="text-lg font-semibold">{t("video_news")}</h2>
           <Link
             href="/news/video"
-            className="text-xs md:text-sm font-medium text-brand hover:underline"
+            className="text-xs hover:text-brand hover:underline md:text-sm font-medium flex items-center gap-1"
           >
-            {t("view_all")} {">>"}
+            {t("view_all")} <ArrowRight className="w-4 h-4" /> 
           </Link>
         </div>
 
@@ -113,7 +113,7 @@ export default function VideoNewsSection() {
                     </span>
                   </span>
 
-                  <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/50 to-transparent p-4 bg-black/50">
+                  <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/50 to-transparent py-2 px-4 bg-black/50">
                     <div className="mb-2 flex items-center justify-end text-[11px] text-white/90 gap-2">
                       <time dateTime={formatDateISO(item.publishedAt)}>
                         {formatDate(item.publishedAt, locale)}

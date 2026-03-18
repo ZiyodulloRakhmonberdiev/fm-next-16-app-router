@@ -8,7 +8,7 @@ import { formatDate, formatDateISO } from "@/shared/common/lib/formatter"
 import type { AppLocale } from "@/shared/common/lib/formatter"
 import Image from "next/image"
 import { useLocale, useTranslations } from "next-intl"
-import { Play, RotateCcw, RotateCw } from "lucide-react"
+import { ChevronRight, Play, RotateCcw, RotateCw } from "lucide-react"
 import { VideoNewsModal } from "@/shared/common/components/molecules"
 import { Button } from "../ui/button"
 import { Link } from "@/i18n/navigation"
@@ -138,7 +138,7 @@ export default function RelatedNews(props: RelatedNewsProps) {
             className="mt-2 md:mt-4 rounded-sm md:text-lg md:py-6 md:px-8 text-white bg-brand hover:bg-brand/90 cursor-pointer"
             onClick={() => setVisibleCount((prev) => prev + 4)}
           >
-            {t("load_more")} <RotateCw className="w-4 h-4" />
+            {t("load_more")} <ChevronRight className="w-4 h-4" />
           </Button>
         </div>
       )}

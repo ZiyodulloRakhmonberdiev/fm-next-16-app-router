@@ -11,6 +11,7 @@ import { Link } from "@/i18n/navigation"
 import Image from "next/image"
 import { useLocale, useTranslations } from "next-intl"
 import { Button } from "@/shared/common/components/ui/button"
+import { ArrowRight } from "lucide-react"
 
 type BannerSectionProps = {
   categorySlug?: string
@@ -83,16 +84,15 @@ export default function BannerSection({
 
   return (
     <section className="w-full space-y-4 pt-4 px-4 md:px-6">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-brand  pt-4 pb-2 text-brand">
         <h2 className="text-lg font-semibold">{categoryName}</h2>
-        <Button variant="ghost" size="sm" asChild className="text-brand">
-          <Link href={`/category/${categorySlug}`} className="text-xs md:text-sm">{t("view_all")} {">>"}</Link>
+        <Button variant="ghost" size="sm" asChild className="">
+          <Link href={`/category/${categorySlug}`} className="text-xs md:text-sm">{t("view_all")} <ArrowRight className="w-4 h-4" /></Link>
         </Button>
       </div>
 
     
       <div className="grid grid-cols-1 gap-3 md:grid-cols-3 md:gap-4">
-        {/* Left column */}
         <div className="hidden md:flex md:flex-col gap-2">
           {leftItems.map((item: NewsItem) => (
             <Link key={item.slug} href={`/news/${item.slug}`} className="block">

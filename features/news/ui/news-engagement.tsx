@@ -40,6 +40,7 @@ const reactionButtons: { type: ReactionType; label: string }[] = [
 
 export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string }) {
   const t = useTranslations("common")
+  const ta = useTranslations("auth")
   const locale = useLocale()
   const { data: session } = useSession()
   const newsRef = newsId ?? slug
@@ -102,13 +103,6 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
     [comments, myUserId]
   )
 
-  function fallbackPositionLabel() {
-    if (locale === "ru") return "Пользователь"
-    if (locale === "uzb") return "Фойдаланувчи"
-    if (locale === "en") return "User"
-    return "Foydalanuvchi"
-  }
-
   function getInitials(name: string): string {
     const parts = name.trim().split(/\s+/).filter(Boolean)
     if (parts.length >= 2) {
@@ -128,11 +122,11 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
   }
 
   async function submitComment(rawContent: string, replyToCommentId?: string) {
-    if (!session?.user?.id) return toast.error("Izoh qoldirish uchun login qiling")
+    if (!session?.user?.id) return toast.error(t("comment_login_required"))
     const trimmed = rawContent.trim()
     if (!trimmed) return
     if (trimmed.length > 512) {
-      toast.error("Izoh 512 belgidan oshmasligi kerak")
+      toast.error(t("comment_too_long"))
       return
     }
     const res = await fetch(`/api/news/${newsRef}/comments`, {
@@ -142,10 +136,10 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
     })
     if (!res.ok) {
       const payload = (await res.json().catch(() => null)) as { error?: string } | null
-      toast.error(payload?.error ?? "Izoh yuborib bo'lmadi")
+      toast.error(payload?.error ?? t("comment_submit_failed"))
       return
     }
-    toast.success("Izoh yuborildi")
+    toast.success(t("comment_submitted"))
     if (replyToCommentId) {
       setReplyContent("")
       setReplyTo(null)
@@ -158,10 +152,10 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
   async function removeMyComment(id: string) {
     const res = await fetch(`/api/comments/${id}`, { method: "DELETE" })
     if (!res.ok) {
-      toast.error("Izohni o'chirib bo'lmadi")
+      toast.error(t("comment_delete_failed"))
       return
     }
-    toast.success("Izoh o'chirildi")
+    toast.success(t("comment_deleted"))
     void loadComments()
   }
 
@@ -178,7 +172,7 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
     })
     const data = (await res.json().catch(() => null)) as { error?: string; type?: ReactionType; removed?: boolean } | null
     if (!res.ok) {
-      return toast.error(data?.error ?? "Reaksiya saqlanmadi")
+      return toast.error(data?.error ?? t("reaction_save_failed"))
     }
     setCounts((prev) => {
       const next = { ...prev }
@@ -265,7 +259,7 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
                       setReplyContent("")
                     }}
                   >
-                    Javob berish
+                    {t("reply")}
                   </button>
                 ) : null}
                 {myUserId && c.userId === myUserId ? (
@@ -274,11 +268,11 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
                     className="text-xs text-muted-foreground hover:text-destructive hover:underline"
                     onClick={() => void removeMyComment(c._id)}
                   >
-                    O'chirish
+                    {t("delete")}
                   </button>
                 ) : null}
                 {c.status === "pending" ? (
-                  <span className="text-xs text-amber-600">(pending)</span>
+                  <span className="text-xs text-amber-600">({t("pending")})</span>
                 ) : null}
               </div>
               {repliesByParentId.get(c._id)?.length ? (
@@ -313,12 +307,12 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
               {replyTo?.id === c._id ? (
                 <div className="mt-2 space-y-2 rounded-md border bg-muted/30 p-3">
                   <p className="text-xs text-muted-foreground">
-                    {replyTo.userLogin ? `@${replyTo.userLogin}` : "foydalanuvchi"} izohiga javob
+                    {t("replying_to", { user: replyTo.userLogin ? `@${replyTo.userLogin}` : t("user") })}
                   </p>
                   <Textarea
                     value={replyContent}
                     onChange={(e) => setReplyContent(e.target.value)}
-                    placeholder="Javob yozing..."
+                    placeholder={t("reply_placeholder")}
                     maxLength={512}
                     rows={2}
                     className="resize-none"
@@ -327,10 +321,10 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
                     <p className="text-xs text-muted-foreground">{replyContent.length}/512</p>
                     <div className="flex gap-2">
                       <Button variant="outline" size="sm" onClick={() => setReplyTo(null)}>
-                        Bekor qilish
+                        {ta("cancel")}
                       </Button>
                       <Button size="sm" onClick={() => void submitComment(replyContent, c._id)}>
-                        Yuborish
+                        {t("send")}
                       </Button>
                     </div>
                   </div>
@@ -339,10 +333,10 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
             </div>
           </div>
         ))}
-        {rootComments.length === 0 ? <p className="text-sm text-muted-foreground">Izohlar yo&apos;q.</p> : null}
+        {rootComments.length === 0 ? <p className="text-sm text-muted-foreground">{t("comments_empty")}</p> : null}
         {hasMore ? (
           <Button variant="outline" size="sm" onClick={() => void loadComments(commentOffset + 5, true)}>
-            Ko'proq
+            {t("load_more")}
           </Button>
         ) : null}
       </div>
@@ -352,13 +346,13 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
             <Textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="Typing..."
+              placeholder={t("comment_placeholder")}
               maxLength={512}
               rows={6}
               className="outline-none bg-accent min-h-[160px] resize-none"
             />
             <div className="flex items-center justify-between mt-4">
-              <Button onClick={() => void submitComment(content)}>Yuborish</Button>
+              <Button onClick={() => void submitComment(content)}>{t("send")}</Button>
               <p className="text-xs text-muted-foreground">{content.length}/512</p>
             </div>
           </div>
@@ -366,13 +360,13 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
           <div className="space-y-3">
             <Textarea
               disabled
-              placeholder="Siz avtorizatsiya qilmagansiz. Izoh yozish uchun saytga kiring yoki ro'yxatdan o'ting"
+              placeholder={t("unauth_comment_placeholder")}
               rows={6}
               className="resize-none bg-muted/50 border-muted-foreground/20 cursor-not-allowed outline-none"
             />
             <div className="flex justify-st">
               <Button onClick={() => setAuthModalOpen(true)} size="default" className="min-w-[120px]">
-                Kirish
+                {ta("login")}
               </Button>
             </div>
           </div>
