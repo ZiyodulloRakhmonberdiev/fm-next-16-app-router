@@ -24,7 +24,7 @@ export default function CategoryList() {
           <span>{category.name[locale] ?? category.name.uz ?? category.slug}</span>
         </Link>
       ))}
-      <Link href="/news?filter=video" className="text-sm">
+      <Link href="/news/video" className="text-sm">
         <span>{t("video")}</span>
       </Link>
     </div>
@@ -49,7 +49,7 @@ export function CategoryListForSidebar() {
           <span className="text-xl font-medium">{category.name[locale] ?? category.name.uz ?? category.slug}</span>
         </Link>
       ))}
-      <Link href="/news?filter=video" className="text-sm">
+      <Link href="/news/video" className="text-sm">
         <span className="text-xl font-medium">{t("video")}</span>
       </Link>
     </div>
@@ -74,7 +74,7 @@ export function CategoryListForMobile() {
           <span>{category.name[locale] ?? category.name.uz ?? category.slug}</span>
         </Link>
       ))}
-      <Link href="/news?filter=video" className="text-sm">
+      <Link href="/news/video" className="text-sm">
         <span>{t("video")}</span>
       </Link>
     </div>
@@ -99,7 +99,7 @@ export function CategoryListForNewsPage() {
           <span className="text-lg font-medium">{category.name[locale] ?? category.name.uz ?? category.slug}</span>
         </Link>
       ))}
-      <Link href="/news?filter=video" className="text-sm">
+      <Link href="/news/video" className="text-sm">
         <span className="text-lg font-medium">{t("video")}</span>
       </Link>
     </div>

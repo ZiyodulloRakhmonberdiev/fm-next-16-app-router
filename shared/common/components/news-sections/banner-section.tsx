@@ -56,7 +56,6 @@ function FeaturedBlock({
 
 export default function BannerSection({
   categorySlug = "business",
-  featuredPosition = "left",
 }: BannerSectionProps) {
   const locale = useLocale() as AppLocale
   const t = useTranslations("common")
@@ -77,7 +76,8 @@ export default function BannerSection({
   )
   const sorted = getNewsListForLocale(rawSorted, locale)
   const [featured, ...rest] = sorted
-  const rightItems = rest.slice(0, 6)
+  const leftItems = rest.slice(0, 4)
+  const rightItems = rest.slice(4, 8)
 
   if (sorted.length < 6) return null
 
@@ -90,45 +90,74 @@ export default function BannerSection({
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 gap-2 md:grid-cols-[1fr_1fr]">
-        <div
-          className={`border-border rounded-sm ${
-            featuredPosition === "left" ? "pr-0" : "order-2 md:pl-4"
-          }`}
-        >
-          {featured && (
-            <FeaturedBlock featured={featured} locale={locale} />
-          )}
+    
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-3 md:gap-4">
+        {/* Left column */}
+        <div className="hidden md:flex md:flex-col gap-2">
+          {leftItems.map((item: NewsItem) => (
+            <Link key={item.slug} href={`/news/${item.slug}`} className="block">
+              <Card className="overflow-hidden p-0 rounded-sm shadow-none border border-border transition-shadow hover:shadow-md bg-background">
+                <div className="flex gap-3">
+                  <div className="relative block h-20 w-20 shrink-0 overflow-hidden rounded-xs md:h-20 md:w-24">
+                    <Image src={item.images[0]} alt={item.title} fill className="object-cover" />
+                  </div>
+                  <div className="flex min-w-0 flex-1 flex-col justify-center gap-1 py-3 pr-4">
+                    <time dateTime={formatDateISO(item.publishedAt)} className="text-xs text-muted-foreground">
+                      {formatDate(item.publishedAt, locale)}
+                    </time>
+                    <h4 className="text-sm font-medium leading-tight">
+                      <span className="line-clamp-3 hover:underline">{item.title}</span>
+                    </h4>
+                  </div>
+                </div>
+              </Card>
+            </Link>
+          ))}
         </div>
 
-        <div
-          className={`grid md:grid-cols-2 gap-2 justify-start items-start ${
-            featuredPosition === "left" ? "md:pl-4" : "order-1 md:pr-4"
-          }`}
-        >
+        {/* Featured (desktop only) */}
+        <div className="hidden md:block">
+          {featured ? <FeaturedBlock featured={featured} locale={locale} /> : null}
+        </div>
+
+        {/* Right column */}
+        <div className="hidden md:flex md:flex-col gap-2">
           {rightItems.map((item: NewsItem) => (
             <Link key={item.slug} href={`/news/${item.slug}`} className="block">
               <Card className="overflow-hidden p-0 rounded-sm shadow-none border border-border transition-shadow hover:shadow-md bg-background">
                 <div className="flex gap-3">
-                  <div className="relative block h-20 w-28 shrink-0 overflow-hidden rounded-xs md:h-24 md:w-32">
-                    <Image
-                      src={item.images[0]}
-                      alt={item.title}
-                      fill
-                      className="object-cover"
-                    />
+                  <div className="relative block h-20 w-20 shrink-0 overflow-hidden rounded-xs md:h-20 md:w-24">
+                    <Image src={item.images[0]} alt={item.title} fill className="object-cover" />
                   </div>
-                  <div className="flex min-w-0 flex-1 flex-col justify-center gap-1 py-1 pr-2">
-                    <time
-                      dateTime={formatDateISO(item.publishedAt)}
-                      className="text-xs text-muted-foreground"
-                    >
+                  <div className="flex min-w-0 flex-1 flex-col justify-center gap-1 py-3 pr-4">
+                    <time dateTime={formatDateISO(item.publishedAt)} className="text-xs text-muted-foreground">
                       {formatDate(item.publishedAt, locale)}
                     </time>
                     <h4 className="text-sm font-medium leading-tight">
-                      <span className="line-clamp-3 hover:underline">
-                        {item.title}
-                      </span>
+                      <span className="line-clamp-3 hover:underline">{item.title}</span>
+                    </h4>
+                  </div>
+                </div>
+              </Card>
+            </Link>
+          ))}
+        </div>
+
+        {/* Mobile: featured ham list bilan birga */}
+        <div className="grid grid-cols-1 gap-2 md:hidden">
+          {([featured, ...leftItems, ...rightItems].filter(Boolean) as NewsItem[]).slice(0, 12).map((item) => (
+            <Link key={item.slug} href={`/news/${item.slug}`} className="block">
+              <Card className="overflow-hidden p-0 rounded-sm shadow-none border border-border transition-shadow hover:shadow-md bg-background">
+                <div className="flex gap-3">
+                  <div className="relative block h-20 w-20 shrink-0 overflow-hidden rounded-xs">
+                    <Image src={item.images[0]} alt={item.title} fill className="object-cover" />
+                  </div>
+                  <div className="flex min-w-0 flex-1 flex-col justify-center gap-1 py-3 pr-4">
+                    <time dateTime={formatDateISO(item.publishedAt)} className="text-xs text-muted-foreground">
+                      {formatDate(item.publishedAt, locale)}
+                    </time>
+                    <h4 className="text-sm font-medium leading-tight">
+                      <span className="line-clamp-3 hover:underline">{item.title}</span>
                     </h4>
                   </div>
                 </div>

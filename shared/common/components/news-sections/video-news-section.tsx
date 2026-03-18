@@ -19,9 +19,8 @@ import { getCloudinaryVideoPosterUrl } from "@/shared/common/lib/cloudinary"
 import { getYoutubeThumbnailUrl, getYoutubeEmbedUrl } from "@/shared/common/lib/youtube"
 
 function isVideoNewsItem(item: RawNewsItem): boolean {
-  const hasVideo = !!(item.videoSource && item.videoUrl)
-  const hasImages = !!(item.images && item.images.length > 0)
-  return item.type === "video" || (hasVideo && hasImages)
+  const hasVideo = Boolean(item.videoSource && item.videoUrl)
+  return item.type === "video" || hasVideo
 }
 
 function getSafeImageSrc(raw?: string): string {
@@ -50,7 +49,7 @@ export default function VideoNewsSection() {
   const [selected, setSelected] = React.useState<NewsItem | null>(null)
   const [isOpen, setIsOpen] = React.useState(false)
 
-  const { featured, leftItems, rightItems } = React.useMemo(() => {
+  const items = React.useMemo(() => {
     const raw = [...publicNews]
       .filter(isVideoNewsItem)
       .sort(
@@ -58,20 +57,8 @@ export default function VideoNewsSection() {
           new Date(b.publishedAt).getTime() -
           new Date(a.publishedAt).getTime()
       )
-      .slice(0, 9)
-    const list = getNewsListForLocale(raw, locale)
-    if (list.length === 0) {
-      return { featured: null, leftItems: [], rightItems: [] }
-    }
-    const featuredItem = list.reduce((best, cur) =>
-      cur.views > best.views ? cur : best
-    )
-    const rest = list.filter((n) => n.slug !== featuredItem.slug)
-    return {
-      featured: featuredItem,
-      leftItems: rest.slice(0, 4),
-      rightItems: rest.slice(4, 8),
-    }
+      .slice(0, 12)
+    return getNewsListForLocale(raw, locale)
   }, [locale, publicNews])
 
   const handleOpenVideo = (item: NewsItem) => {
@@ -80,8 +67,10 @@ export default function VideoNewsSection() {
     setIsOpen(true)
   }
 
-  if (!featured && leftItems.length === 0 && rightItems.length === 0) return null
-  if (1 + leftItems.length + rightItems.length < 0) return null
+  if (items.length === 0) return null
+
+  const featured = items.slice(0, 3)
+  const rest = items.slice(3)
 
   return (
     <section className="w-full space-y-4 px-4 md:px-6 pt-4">
@@ -96,139 +85,97 @@ export default function VideoNewsSection() {
           </Link>
         </div>
 
-        <div className="grid w-full grid-cols-1 items-stretch gap-4 md:grid-cols-4">
-          <div className="flex w-full min-w-0 flex-col order-2 md:order-1">
-            <div className="flex flex-col gap-3">
-              {leftItems.map((item) => (
-                <button
-                  key={item.slug}
-                  type="button"
-                  className="block w-full text-left"
-                  onClick={() => handleOpenVideo(item)}
-                >
-                  <Card className="overflow-hidden p-0 rounded-sm shadow-none transition-shadow hover:shadow-md bg-background">
-                    <div className="flex gap-3">
-                      <div className="relative block h-20 w-28 shrink-0 overflow-hidden rounded-xs md:h-24 md:w-32">
-                        {getCardImageSrc(item) ? (
-                          <Image
-                            src={getCardImageSrc(item)}
-                            alt={item.title}
-                            fill
-                            className="object-cover"
-                          />
-                        ) : (
-                          <div className="absolute inset-0 bg-muted" aria-hidden />
-                        )}
-                        <span className="absolute inset-0 flex items-center justify-center bg-black/40">
-                          <span className="flex size-10 items-center justify-center rounded-full bg-background text-primary">
-                            <Play className="size-5 fill-current" />
-                          </span>
-                        </span>
-                      </div>
-                      <div className="flex min-w-0 flex-1 flex-col justify-center gap-1 py-2 px-1">
-                        <time
-                          dateTime={formatDateISO(item.publishedAt)}
-                          className="text-xs text-muted-foreground"
-                        >
-                          {formatDate(item.publishedAt, locale)}
-                        </time>
-                        <span className="line-clamp-2 text-sm font-medium leading-tight">
-                          {item.title}
-                        </span>
-                      </div>
-                    </div>
-                  </Card>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {featured && (
-            <button
-              type="button"
-              className="block w-full order-1 md:order-2 md:col-span-2 text-left"
-              onClick={() => handleOpenVideo(featured)}
-            >
-              <Card className="relative w-full h-full overflow-hidden rounded-sm border-none p-0 shadow-none transition-shadow hover:shadow-md">
-                <div className="relative w-full aspect-video md:h-full md:aspect-auto">
-                  {getCardImageSrc(featured) ? (
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          {featured.map((item) => {
+            const poster = getCardImageSrc(item)
+            return (
+              <button
+                key={item.slug}
+                type="button"
+                className="group relative block w-full text-left overflow-hidden rounded-lg"
+                onClick={() => handleOpenVideo(item)}
+              >
+                <div className="relative aspect-video w-full bg-muted overflow-hidden">
+                  {poster ? (
                     <Image
-                      src={getCardImageSrc(featured)}
-                      alt={featured.title}
+                      src={poster}
+                      alt={item.title}
                       fill
-                      className="object-cover"
+                      className="object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                   ) : (
                     <div className="absolute inset-0 bg-muted" aria-hidden />
                   )}
-                  <span className="absolute inset-0 flex items-center justify-center bg-black/30">
-                    <span className="flex size-16 items-center justify-center rounded-full bg-background text-primary md:size-20">
-                      <Play className="size-8 fill-current md:size-10" />
+
+                  <span className="absolute inset-0 flex items-center justify-center">
+                    <span className="flex size-12 items-center justify-center rounded-full bg-black/35 text-white backdrop-blur-sm">
+                      <Play className="size-6 fill-current" />
                     </span>
                   </span>
-                  <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/80 to-transparent p-4 space-y-4">
-                    <time
-                      dateTime={formatDateISO(featured.publishedAt)}
-                      className="text-xs text-white/90"
-                    >
-                      {formatDate(featured.publishedAt, locale)}
-                    </time>
-                    <h3 className="mt-1 line-clamp-4 text-base font-semibold leading-tight text-white md:text-lg">
-                      {featured.title}
-                    </h3>
-                    {/* <span className="line-clamp-3 hidden md:block font-medium leading-tight text-muted-foreground">{featured.description}</span> */}
+
+                  <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/75 to-transparent p-4">
+                    <p className="line-clamp-2 text-sm font-semibold leading-snug text-white">
+                      {item.title}
+                    </p>
+                    <div className="mt-2 flex items-center justify-end text-[11px] text-white/90">
+                      <time dateTime={formatDateISO(item.publishedAt)}>
+                        {formatDate(item.publishedAt, locale)}
+                      </time>
+                    </div>
                   </div>
                 </div>
-              </Card>
-            </button>
-          )}
+              </button>
+            )
+          })}
+        </div>
 
-          <div className="flex w-full min-w-0 flex-col order-3">
-            <div className="flex flex-col gap-3">
-              {rightItems.map((item) => (
+        {rest.length > 0 ? (
+          <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {rest.map((item) => {
+              const poster = getCardImageSrc(item)
+              return (
                 <button
                   key={item.slug}
                   type="button"
-                  className="block w-full text-left"
+                  className="group block w-full text-left"
                   onClick={() => handleOpenVideo(item)}
                 >
-                  <Card className="overflow-hidden p-0 rounded-sm shadow-none transition-shadow hover:shadow-md">
+                  <Card className="overflow-hidden p-0 rounded-sm shadow-none transition-shadow hover:shadow-md bg-background gap-0 py-0">
                     <div className="flex gap-3">
-                      <div className="relative block h-20 w-28 shrink-0 overflow-hidden rounded-xs md:h-24 md:w-32">
-                        {getCardImageSrc(item) ? (
-                          <Image
-                            src={getCardImageSrc(item)}
-                            alt={item.title}
-                            fill
-                            className="object-cover"
-                          />
+                      <div className="relative block h-20 w-28 shrink-0 overflow-hidden rounded-xs md:h-24 md:w-32 bg-muted">
+                        {poster ? (
+                          <Image src={poster} alt={item.title} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
                         ) : (
                           <div className="absolute inset-0 bg-muted" aria-hidden />
                         )}
-                        <span className="absolute inset-0 flex items-center justify-center bg-black/40">
-                          <span className="flex size-10 items-center justify-center rounded-full bg-background text-primary">
-                            <Play className="size-5 fill-current" />
+                        <span className="absolute inset-0 flex items-center justify-center bg-black/25">
+                          <span className="flex size-9 items-center justify-center rounded-full bg-background/90 text-primary">
+                            <Play className="size-4 fill-current" />
                           </span>
                         </span>
                       </div>
-                      <div className="flex min-w-0 flex-1 flex-col justify-center gap-1 py-2 px-1">
-                        <time
-                          dateTime={formatDateISO(item.publishedAt)}
-                          className="text-xs text-muted-foreground"
-                        >
-                          {formatDate(item.publishedAt, locale)}
-                        </time>
+
+                      <div className="flex min-w-0 flex-1 flex-col justify-center gap-2 py-2 pr-2">
                         <span className="line-clamp-2 text-sm font-medium leading-tight">
                           {item.title}
                         </span>
+                        <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
+                          <span className="inline-flex items-center gap-1">
+                            <span className="inline-block size-1.5 rounded-full bg-red-500" aria-hidden />
+                            <span className="uppercase">{item.category}</span>
+                          </span>
+                          <time dateTime={formatDateISO(item.publishedAt)} className="shrink-0">
+                            {formatDate(item.publishedAt, locale)}
+                          </time>
+                        </div>
                       </div>
                     </div>
                   </Card>
                 </button>
-              ))}
-            </div>
+              )
+            })}
           </div>
-        </div>
+        ) : null}
       </div>
       <VideoNewsModal
         item={selected}

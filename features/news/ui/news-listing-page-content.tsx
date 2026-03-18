@@ -68,6 +68,7 @@ function getVideoPoster(url?: string) {
 
 export type NewsListingVariant = "latest" | "trending"
 type FilterType = "latest" | "popular" | "top" | "authors_choice" | "breaking" | "video"
+type LayoutType = "list" | "videoGrid"
 
 function sortByForFilter(filter: FilterType) {
   return filter === "popular" ? "views" : "publishedAt"
@@ -85,17 +86,27 @@ function flagsForFilter(filter: FilterType) {
 export function NewsListingPageContent({
   variant = "latest",
   initial,
+  initialFilter,
+  layout = "list",
+  showAuthorsChoice = true,
+  forceVideoOnly = false,
+  pageSize = 4,
 }: {
   variant?: NewsListingVariant
   initial: { items: NewsItem[]; page: number; totalPages: number }
+  initialFilter?: FilterType
+  layout?: LayoutType
+  showAuthorsChoice?: boolean
+  forceVideoOnly?: boolean
+  pageSize?: number
 }) {
   const locale = useLocale() as AppLocale
   const t = useTranslations("common")
   const { data: categories = [] } = usePublicCategoriesQuery()
   const searchParams = useSearchParams()
 
-  const initialFilter: FilterType = variant === "trending" ? "popular" : "latest"
-  const [activeFilter, setActiveFilter] = React.useState<FilterType>(initialFilter)
+  const initialFilterResolved: FilterType = initialFilter ?? (variant === "trending" ? "popular" : "latest")
+  const [activeFilter, setActiveFilter] = React.useState<FilterType>(initialFilterResolved)
   const [selectedCategorySlugs, setSelectedCategorySlugs] = React.useState<string[]>([])
   const [items, setItems] = React.useState<NewsItem[]>(initial.items)
   const [page, setPage] = React.useState(initial.page)
@@ -113,19 +124,19 @@ export function NewsListingPageContent({
       params.set("status", "published")
       params.set("recentMonths", "6")
       params.set("page", String(nextPage))
-      params.set("limit", "4")
+      params.set("limit", String(pageSize))
       params.set("sortBy", sortByForFilter(filter))
       const flags = flagsForFilter(filter)
       if (flags.top) params.set("top", "1")
       if (flags.authorsChoice) params.set("authorsChoice", "1")
       if (flags.breaking) params.set("breaking", "1")
-      if (flags.video) params.set("video", "1")
+      if (flags.video || forceVideoOnly) params.set("video", "1")
       for (const slug of slugs) {
         params.append("category", slug)
       }
       return `/api/news?${params.toString()}`
     },
-    []
+    [pageSize, forceVideoOnly]
   )
 
   const fetchFirstPage = React.useCallback(async (filter: FilterType, slugs: string[]) => {
@@ -161,8 +172,9 @@ export function NewsListingPageContent({
   }, [locale])
 
   React.useEffect(() => {
+    if (!showAuthorsChoice) return
     void fetchAuthorsChoice()
-  }, [fetchAuthorsChoice])
+  }, [fetchAuthorsChoice, showAuthorsChoice])
 
   // URL orqali filter init: /news?filter=video
   const urlInitDoneRef = React.useRef(false)
@@ -236,8 +248,8 @@ export function NewsListingPageContent({
   return (
     <section className="w-full px-4 md:px-6 py-6">
       <div className="mx-auto w-full">
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2">
+        <div className={showAuthorsChoice ? "grid grid-cols-1 gap-6 lg:grid-cols-3" : "w-full relative"}>
+          <div className={showAuthorsChoice ? "lg:col-span-2" : "w-full"}>
             <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <h1 className="text-xl font-semibold">{t("news")}</h1>
               <div className="flex items-center gap-2">
@@ -249,7 +261,7 @@ export function NewsListingPageContent({
                       // { key: "top", label: t("filter_top") },
                       // { key: "authors_choice", label: t("filter_authors_choice") },
                       // { key: "breaking", label: t("filter_breaking") },
-                      { key: "video", label: t("filter_video") },
+                      // { key: "video", label: t("filter_video") },
                     ].map((btn) => (
                       <Button
                         key={btn.key}
@@ -306,22 +318,21 @@ export function NewsListingPageContent({
                       )
                     })}
                     <DropdownMenuSeparator />
-                    <div className="flex w-full flex-col gap-2 p-2">
+                    <div className="flex w-full flex-row gap-2 p-2">
                       <Button
                         type="button"
                         size="sm"
                         variant="ghost"
-                        className="h-8 w-full justify-start gap-2 text-brand"
+                        className="h-8 justify-start bg-foreground text-background gap-2"
                         onClick={() => void fetchFirstPage(activeFilter, selectedCategorySlugs)}
                       >
-                        <Check className="h-4 w-4" />
                         {t("apply")}
                       </Button>
                       <Button
                         type="button"
                         size="sm"
-                        variant="ghost"
-                        className="h-8 w-full justify-start gap-2"
+                        variant="outline"
+                        className="h-8 justify-start gap-2"
                         onClick={() => {
                           setSelectedCategorySlugs([])
                         }}
@@ -336,7 +347,7 @@ export function NewsListingPageContent({
 
             <div className="grid grid-cols-1 gap-4">
               {loading && page === 1 ? (
-                Array.from({ length: 4 }).map((_, i) => (
+                Array.from({ length: pageSize }).map((_, i) => (
                   <div key={i} className="animate-pulse rounded-lg border bg-background p-3">
                     <div className="flex flex-col gap-3 sm:flex-row">
                       <div className="h-44 w-full rounded-md bg-muted sm:h-28 sm:basis-1/3" />
@@ -351,152 +362,215 @@ export function NewsListingPageContent({
                   </div>
                 ))
               ) : (
-                items.map((item) => {
-                  const thumbSrc = getSafeImageSrc(item.images?.[0])
-                  const videoPoster = !thumbSrc ? getSafeImageSrc(getVideoPoster(item.videoUrl)) : ""
-                  const showVideo = !thumbSrc && Boolean(item.videoUrl?.trim())
-                  const mediaSrc = thumbSrc || videoPoster
-                  const stats = statsBySlug[item.slug]
-                  return (
-                    <Link
-                      key={item.slug}
-                      href={`/news/${item.slug}`}
-                      className="group block"
-                    >
-                      <Card className="overflow-hidden rounded-lg shadow-none transition-colors hover:bg-muted/30 p-0">
-                        <div className="flex flex-col gap-3 p-0 sm:flex-row">
-                          <div className="relative h-44 w-full overflow-hidden rounded-md bg-muted sm:h-48 sm:basis-1/3">
-                            {mediaSrc ? (
-                              <Image
-                                src={mediaSrc}
-                                alt={item.title}
-                                fill
-                                className="object-cover transition-transform duration-300 group-hover:scale-105"
-                              />
-                            ) : (
-                              <div className="flex h-full w-full items-center justify-center px-1 text-[10px] text-muted-foreground text-center">
-                                {t("images")}
+                layout === "videoGrid" ? (
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {items.length === 0 ? (
+                      <div className="col-span-full rounded-lg border bg-background p-6 text-center text-sm text-muted-foreground">
+                        {t("news_not_found")}
+                      </div>
+                    ) : items.map((item) => {
+                      const thumbSrc = getSafeImageSrc(item.images?.[0])
+                      const videoPoster = !thumbSrc ? getSafeImageSrc(getVideoPoster(item.videoUrl)) : ""
+                      const showVideo = Boolean(item.videoUrl?.trim())
+                      const mediaSrc = thumbSrc || videoPoster
+                      return (
+                        <Link key={item.slug} href={`/news/${item.slug}`} className="group block">
+                          <Card className="overflow-hidden rounded-lg shadow-none transition-colors hover:bg-muted/30 gap-0 py-0">
+                            <div className="relative aspect-video w-full overflow-hidden bg-muted">
+                              {mediaSrc ? (
+                                <Image
+                                  src={mediaSrc}
+                                  alt={item.title}
+                                  fill
+                                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                                />
+                              ) : null}
+                              {showVideo ? (
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                  <span className="inline-flex size-12 items-center justify-center rounded-full bg-black/50">
+                                    <Play className="h-6 w-6 text-white" />
+                                  </span>
+                                </div>
+                              ) : null}
+                            </div>
+                            <div className="p-3 space-y-2">
+                              <div className="text-sm font-semibold leading-snug">
+                                <span className="line-clamp-2">{item.title ?? ""}</span>
                               </div>
-                            )}
-                            {showVideo ? (
-                              <div className="absolute inset-0 flex items-center justify-center">
-                                <span className="inline-flex size-10 items-center justify-center rounded-full bg-black/50">
-                                  <Play className="h-5 w-5 text-white" />
+                              <div className="flex flex-wrap items-center gap-x-2 text-xs text-muted-foreground">
+                                <span className="uppercase font-medium text-brand italic">{item.category}</span>
+                                <span aria-hidden className="select-none">|</span>
+                                <time dateTime={formatDateISO(item.publishedAt)}>
+                                  {formatDateTimeLocale(item.publishedAt, locale)}
+                                </time>
+                                <span aria-hidden className="select-none">|</span>
+                                <span className="inline-flex items-center gap-1">
+                                  <Eye className="h-3.5 w-3.5" />
+                                  {item.views}
                                 </span>
                               </div>
-                            ) : null}
-                          </div>
-
-                          <div className="min-w-0 flex-1 space-y-2 sm:basis-2/3 p-4">
-                            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted-foreground">
-                              <span className="uppercase font-medium text-brand italic">{item.category}</span>
-                              <span aria-hidden className="select-none">·</span>
-                              <time dateTime={formatDateISO(item.publishedAt)} className="inline-flex items-center gap-1">
-                                <Calendar className="h-3.5 w-3.5" />
-                                {formatDateTimeLocale(item.publishedAt, locale)}
-                              </time>
-                              <span aria-hidden className="select-none">·</span>
-                              <span className="inline-flex items-center gap-1">
-                                <Clock className="h-3.5 w-3.5" />
-                                {item.minutes}
-                              </span>
-                              <span aria-hidden className="select-none">·</span>
-                              <span className="inline-flex items-center gap-1">
-                                <Eye className="h-3.5 w-3.5" />
-                                {item.views}
-                              </span>
-                              <span aria-hidden className="select-none">·</span>
-                              <span className="inline-flex items-center gap-1">
-                                <MessageSquare className="h-3.5 w-3.5" />
-                                {stats?.comments ?? 0}
-                              </span>
-                              <span aria-hidden className="select-none">·</span>
-                              <span className="inline-flex items-center gap-1">
-                                <Heart className="h-3.5 w-3.5" />
-                                {stats?.reactions ?? 0}
-                              </span>
                             </div>
+                          </Card>
+                        </Link>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  items.length === 0 ? (
+                    <div className="rounded-lg border bg-background p-6 text-center text-sm text-muted-foreground">
+                      {t("news_not_found")}
+                    </div>
+                  ) : (
+                    items.map((item) => {
+                      const thumbSrc = getSafeImageSrc(item.images?.[0])
+                      const videoPoster = !thumbSrc ? getSafeImageSrc(getVideoPoster(item.videoUrl)) : ""
+                      const showVideo = !thumbSrc && Boolean(item.videoUrl?.trim())
+                      const mediaSrc = thumbSrc || videoPoster
+                      const stats = statsBySlug[item.slug]
+                      return (
+                        <Link
+                          key={item.slug}
+                          href={`/news/${item.slug}`}
+                          className="group block"
+                        >
+                          <Card className="overflow-hidden rounded-lg shadow-none transition-colors hover:bg-muted/30 p-0 gap-0 py-0">
+                            <div className="flex flex-col gap-3 p-0 sm:flex-row">
+                              <div className="relative h-44 w-full overflow-hidden rounded-md bg-muted sm:h-48 sm:basis-1/3">
+                                {mediaSrc ? (
+                                  <Image
+                                    src={mediaSrc}
+                                    alt={item.title}
+                                    fill
+                                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                                  />
+                                ) : (
+                                  <div className="flex h-full w-full items-center justify-center px-1 text-[10px] text-muted-foreground text-center">
+                                    {t("images")}
+                                  </div>
+                                )}
+                                {showVideo ? (
+                                  <div className="absolute inset-0 flex items-center justify-center">
+                                    <span className="inline-flex size-10 items-center justify-center rounded-full bg-black/50">
+                                      <Play className="h-5 w-5 text-white" />
+                                    </span>
+                                  </div>
+                                ) : null}
+                              </div>
 
-                            <div className="text-sm font-semibold leading-snug">
-                              <span className="line-clamp-2">{item.title ?? ""}</span>
+                              <div className="min-w-0 flex-1 space-y-2 sm:basis-2/3 p-4">
+                                <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted-foreground">
+                                  <span className="uppercase font-medium text-brand italic">{item.category}</span>
+                                  <span aria-hidden className="select-none">·</span>
+                                  <time dateTime={formatDateISO(item.publishedAt)} className="inline-flex items-center gap-1">
+                                    <Calendar className="h-3.5 w-3.5" />
+                                    {formatDateTimeLocale(item.publishedAt, locale)}
+                                  </time>
+                                  <span aria-hidden className="select-none">·</span>
+                                  <span className="inline-flex items-center gap-1">
+                                    <Clock className="h-3.5 w-3.5" />
+                                    {item.minutes}
+                                  </span>
+                                  <span aria-hidden className="select-none">·</span>
+                                  <span className="inline-flex items-center gap-1">
+                                    <Eye className="h-3.5 w-3.5" />
+                                    {item.views}
+                                  </span>
+                                  <span aria-hidden className="select-none">·</span>
+                                  <span className="inline-flex items-center gap-1">
+                                    <MessageSquare className="h-3.5 w-3.5" />
+                                    {stats?.comments ?? 0}
+                                  </span>
+                                  <span aria-hidden className="select-none">·</span>
+                                  <span className="inline-flex items-center gap-1">
+                                    <Heart className="h-3.5 w-3.5" />
+                                    {stats?.reactions ?? 0}
+                                  </span>
+                                </div>
+
+                                <div className="text-sm font-semibold leading-snug">
+                                  <span className="line-clamp-2">{item.title ?? ""}</span>
+                                </div>
+
+                                {item.description ? (
+                                  <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
+                                    {item.description}
+                                  </p>
+                                ) : null}
+                              </div>
                             </div>
-
-                            {item.description ? (
-                              <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
-                                {item.description}
-                              </p>
-                            ) : null}
-                          </div>
-                        </div>
-                      </Card>
-                    </Link>
+                          </Card>
+                        </Link>
+                      )
+                    })
                   )
-                })
+                )
               )}
             </div>
 
-            <div className="mt-5 flex justify-center">
+            <div className="mt-5 flex justify-start">
               {hasMore ? (
-                <Button variant="outline" onClick={() => void loadMore()} disabled={loading} className="min-w-40">
+                <Button variant="outline" onClick={() => void loadMore()} disabled={loading} className="min-w-40 bg-brand hover:bg-brand/90 text-white hover:text-white w-full">
                   {loading ? t("loading") : t("load_more")}
                 </Button>
               ) : null}
             </div>
           </div>
 
-          <aside className="hidden lg:block lg:col-span-1">
-            <div className="flex w-full flex-col gap-4">
-              <h2 className="inline-flex items-center text-lg font-semibold">
-                {t("authors_choice")}
-              </h2>
-              {authorsChoiceLoading ? (
-                <p className="text-sm text-muted-foreground">{t("loading")}</p>
-              ) : authorsChoiceItems.length === 0 ? (
-                <p className="text-sm text-muted-foreground">{t("search_results_empty")}</p>
-              ) : (
-                <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1">
-                  {authorsChoiceItems.map((n) => {
-                    const img = getSafeImageSrc(n.images?.[0]) || getSafeImageSrc(getVideoPoster(n.videoUrl))
-                    return (
-                      <li key={n.slug}>
-                        <Card className="overflow-hidden p-0 rounded-sm shadow-none">
-                          <div className="flex gap-3">
-                            <Link
-                              href={`/news/${n.slug}`}
-                              className="relative block h-20 w-28 shrink-0 overflow-hidden rounded-xs md:h-24 md:w-32 bg-muted"
-                            >
-                              {img ? (
-                                <Image src={img} alt={n.title} fill className="object-cover" />
-                              ) : (
-                                <div className="flex h-full w-full items-center justify-center px-1 text-[10px] text-muted-foreground text-center">
-                                  {t("images")}
-                                </div>
-                              )}
-                            </Link>
-                            <div className="flex min-w-0 py-2 px-1 flex-col flex-1 justify-center gap-4">
-                              <div className="flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground">
-                                <span className="uppercase font-medium text-brand italic">{n.category}</span>
-                                <span aria-hidden>/</span>
-                                <time dateTime={formatDateISO(n.publishedAt)}>
-                                  {formatDateTimeLocale(n.publishedAt, locale)}
-                                </time>
-                              </div>
+          {showAuthorsChoice ? (
+            <aside className="hidden lg:block lg:col-span-1 lg:sticky lg:top-20 lg:self-start">
+              <div className="flex w-full flex-col gap-4">
+                <h2 className="inline-flex items-center text-lg font-semibold">
+                  {t("authors_choice")}
+                </h2>
+                {authorsChoiceLoading ? (
+                  <p className="text-sm text-muted-foreground">{t("loading")}</p>
+                ) : authorsChoiceItems.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">{t("search_results_empty")}</p>
+                ) : (
+                  <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1">
+                    {authorsChoiceItems.map((n) => {
+                      const img = getSafeImageSrc(n.images?.[0]) || getSafeImageSrc(getVideoPoster(n.videoUrl))
+                      return (
+                        <li key={n.slug}>
+                          <Card className="overflow-hidden p-0 rounded-sm shadow-none">
+                            <div className="flex gap-3">
                               <Link
                                 href={`/news/${n.slug}`}
-                                className="line-clamp-2 text-sm font-medium leading-tight hover:underline"
+                                className="relative block h-20 w-28 shrink-0 overflow-hidden rounded-xs md:h-24 md:w-32 bg-muted"
                               >
-                                {n.title}
+                                {img ? (
+                                  <Image src={img} alt={n.title} fill className="object-cover" />
+                                ) : (
+                                  <div className="flex h-full w-full items-center justify-center px-1 text-[10px] text-muted-foreground text-center">
+                                    {t("images")}
+                                  </div>
+                                )}
                               </Link>
+                              <div className="flex min-w-0 py-2 px-1 flex-col flex-1 justify-center gap-4">
+                                <div className="flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground">
+                                  <span className="uppercase font-medium text-brand italic">{n.category}</span>
+                                  <span aria-hidden>/</span>
+                                  <time dateTime={formatDateISO(n.publishedAt)}>
+                                    {formatDateTimeLocale(n.publishedAt, locale)}
+                                  </time>
+                                </div>
+                                <Link
+                                  href={`/news/${n.slug}`}
+                                  className="line-clamp-2 text-sm font-medium leading-tight hover:underline"
+                                >
+                                  {n.title}
+                                </Link>
+                              </div>
                             </div>
-                          </div>
-                        </Card>
-                      </li>
-                    )
-                  })}
-                </ul>
-              )}
-            </div>
-          </aside>
+                          </Card>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                )}
+              </div>
+            </aside>
+          ) : null}
         </div>
       </div>
     </section>

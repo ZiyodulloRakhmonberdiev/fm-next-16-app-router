@@ -4,6 +4,7 @@ import { NewsModel } from '@/features/news/model/news.model'
 import { createNewsSchema } from '@/features/news/model/schemas'
 import { sendNewsToTelegram } from '@/shared/common/lib/telegram'
 import { requireAdminSession } from '@/shared/common/lib/require-admin-session'
+import type { SortOrder } from 'mongoose'
 
 export async function GET(req: NextRequest) {
   try {
@@ -39,6 +40,7 @@ export async function GET(req: NextRequest) {
     if (authorsChoice === "1" || authorsChoice === "true") filter.authorsChoice = true
     if (breaking === "1" || breaking === "true") filter.isBreaking = true
     if (video === "1" || video === "true") {
+      filter.type = "video"
       filter.videoUrl = { $exists: true, $ne: "" }
     }
     if (Number.isFinite(recentMonths) && recentMonths > 0) {
@@ -48,10 +50,8 @@ export async function GET(req: NextRequest) {
       filter.publishedAt = { $gte: from }
     }
 
-    const sort =
-      sortBy === "views"
-        ? ({ views: -1, publishedAt: -1 } as const)
-        : ({ publishedAt: -1 } as const)
+    const sort: Record<string, SortOrder> = { publishedAt: -1 }
+    if (sortBy === 'views') sort.views = -1
 
     const [news, total] = await Promise.all([
       NewsModel.find(filter)

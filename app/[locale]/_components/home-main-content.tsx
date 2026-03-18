@@ -9,6 +9,7 @@ import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
 import { isImageTypeRawNews, type RawNewsItem } from "@/features/news/model"
 import { usePublicCategoriesQuery } from "@/features/category/model/public-categories-query"
 import {AllNews, BannerSection, ColumnSection, HeaderNewsCarousel, SlideNewsSection, TextNewsSection, VideoNewsSection} from "@/shared/common/components/news-sections"
+import RowSection from "@/shared/common/components/news-sections/row-section"
 
 function isVideoNewsItem(item: RawNewsItem): boolean {
   const hasVideo = !!(item.videoSource && item.videoUrl)
@@ -55,15 +56,16 @@ export default function HomeMainContent() {
     <>
       <HeaderNewsCarousel />
       <TopBanner />
-      <SlideNewsSection categorySlug={firstCategorySlug} />
+      {/* <SlideNewsSection categorySlug={firstCategorySlug} /> */}
       <BannerSection categorySlug={secondCategorySlug} featuredPosition="left" />
       <VideoNewsSection />
-      {shouldShowYangiliklar && <AllNews />}
+      {/* {shouldShowYangiliklar && <AllNews />} */}
       <TextNewsSection />
       <StayConnected />
       <BannerSection categorySlug={firstCategorySlug} featuredPosition="right" />
-      <SlideNewsSection categorySlug={secondCategorySlug} />
+      {/* <SlideNewsSection categorySlug={secondCategorySlug} /> */}
       <ColumnSection categorySlug={secondCategorySlug} featuredPosition="left" />
+      <RowSection categorySlug={secondCategorySlug} />
     </>
   )
 }

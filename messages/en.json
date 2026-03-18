@@ -60,6 +60,7 @@
     "filter_breaking": "Breaking",
     "filter_video": "Video",
     "video": "Video",
+    "news_not_found": "No news found",
     "apply": "Apply",
     "clear": "Clear",
     "search_placeholder": "Search for news...",
