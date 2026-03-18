@@ -52,11 +52,10 @@ export default function LanguageSwitcher() {
   return (
     <div>
       <DropdownMenu>
-        <DropdownMenuTrigger className="flex items-center gap-2 px-2 py-0.5 outline-0 rounded-sm border border-gray-400">
-          {/* <LanguagesIcon className="w-4 h-4" /> */}
-          {/* <span className="text-base leading-none">{meta?.flag}</span> */}
-          <span>{meta?.label}</span>
-          <ChevronDownIcon className="w-4 h-4" />
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon">
+            <span>{meta?.short}</span>
+          </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           <DropdownMenuItem className="flex items-center gap-2" onClick={() => handleSetLocale('uz')}>

@@ -9,7 +9,7 @@ import type { AppLocale } from "@/shared/common/lib/formatter"
 import { useLocale } from "next-intl"
 import { Button } from "@/shared/common/components/ui/button"
 import { Card } from "@/shared/common/components/ui/card"
-import { RelatedNews } from "@/shared/common/components/molecules"
+import { RelatedNews } from "@/shared/common/components/news-sections"
 import { getCloudinaryVideoPosterUrl } from "@/shared/common/lib/cloudinary"
 import { getYoutubeThumbnailUrl, getYoutubeEmbedUrl } from "@/shared/common/lib/youtube"
 

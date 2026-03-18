@@ -12,17 +12,50 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url)
     const status = searchParams.get('status')
     const category = searchParams.get('category')
+    const categoryList = searchParams.getAll("category")
     const page = Math.max(1, Number(searchParams.get('page') ?? 1))
     const limit = Math.min(100, Math.max(1, Number(searchParams.get('limit') ?? 20)))
+    const sortBy = (searchParams.get("sortBy") ?? "publishedAt").toLowerCase()
+    const recentMonths = Number(searchParams.get("recentMonths") ?? 0)
+    const top = searchParams.get("top")
+    const authorsChoice = searchParams.get("authorsChoice") ?? searchParams.get("authors_choice")
+    const breaking = searchParams.get("breaking") ?? searchParams.get("isBreaking")
+    const video = searchParams.get("video") ?? searchParams.get("hasVideo") ?? searchParams.get("has_video")
     const skip = (page - 1) * limit
 
     const filter: Record<string, unknown> = {}
     if (status) filter.status = status
-    if (category) filter.categorySlug = category
+    const categorySlugs = [
+      ...categoryList.flatMap((v) => String(v).split(",").map((s) => s.trim()).filter(Boolean)),
+      ...(category ? String(category).split(",").map((s) => s.trim()).filter(Boolean) : []),
+    ]
+    const uniqueCategorySlugs = Array.from(new Set(categorySlugs))
+    if (uniqueCategorySlugs.length === 1) {
+      filter.categorySlug = uniqueCategorySlugs[0]
+    } else if (uniqueCategorySlugs.length > 1) {
+      filter.categorySlug = { $in: uniqueCategorySlugs }
+    }
+    if (top === "1" || top === "true") filter.isTop = true
+    if (authorsChoice === "1" || authorsChoice === "true") filter.authorsChoice = true
+    if (breaking === "1" || breaking === "true") filter.isBreaking = true
+    if (video === "1" || video === "true") {
+      filter.videoUrl = { $exists: true, $ne: "" }
+    }
+    if (Number.isFinite(recentMonths) && recentMonths > 0) {
+      const now = new Date()
+      const from = new Date(now)
+      from.setMonth(from.getMonth() - Math.floor(recentMonths))
+      filter.publishedAt = { $gte: from }
+    }
+
+    const sort =
+      sortBy === "views"
+        ? ({ views: -1, publishedAt: -1 } as const)
+        : ({ publishedAt: -1 } as const)
 
     const [news, total] = await Promise.all([
       NewsModel.find(filter)
-        .sort({ publishedAt: -1 })
+        .sort(sort)
         .skip(skip)
         .limit(limit)
         .lean(),

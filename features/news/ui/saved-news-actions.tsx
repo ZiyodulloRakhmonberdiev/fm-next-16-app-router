@@ -7,17 +7,32 @@ import { toast } from "sonner"
 import { Link } from "@/i18n/navigation"
 import { Bookmark } from "lucide-react"
 import { cn } from "@/shared/common/lib/utils"
+import { useTranslations } from "next-intl"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/shared/common/components/ui/tooltip"
 
 export function SavedNewsActions({
   slug,
   newsId,
   overlay = false,
+  unauthAction = overlay ? "link" : "message",
+  size,
+  variant,
+  className,
 }: {
   slug: string
   newsId?: string
   overlay?: boolean
+  unauthAction?: "link" | "message" | "toast"
+  size?: React.ComponentProps<typeof Button>["size"]
+  variant?: React.ComponentProps<typeof Button>["variant"]
+  className?: string
 }) {
   const { data: session } = useSession()
+  const t = useTranslations("common")
   const [saved, setSaved] = useState(false)
 
   useEffect(() => {
@@ -35,7 +50,7 @@ export function SavedNewsActions({
 
   async function toggle() {
     if (!session?.user?.id) {
-      toast.error("Bu funksiya uchun login qiling")
+      toast.error(t("save_requires_auth"))
       return
     }
     const res = await fetch("/api/me/saved-news", {
@@ -43,43 +58,96 @@ export function SavedNewsActions({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newsId ? { newsId, newsSlug: slug } : { newsSlug: slug }),
     })
-    if (!res.ok) return toast.error("Saqlab bo'lmadi")
+    if (!res.ok) return toast.error(t("save_failed"))
     const data = await res.json()
-    setSaved(Boolean(data.saved))
+    const isSaved = Boolean(data.saved)
+    setSaved(isSaved)
+    if (isSaved) {
+      toast.success(t("saved"))
+    }
   }
 
   if (!session?.user?.id) {
-    if (overlay) {
+    if (unauthAction === "toast") {
       return (
-        <Link
-          href="/auth/login"
-          className={cn(buttonVariants({ size: "icon", variant: "secondary" }), "size-8")}
-          aria-label="Login qilish"
-        >
-          <Bookmark className="size-4" />
-        </Link>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              type="button"
+              size={size ?? "icon"}
+              variant={variant ?? (overlay ? "ghost" : "outline")}
+              className={cn(overlay ? "size-8" : undefined, className)}
+              aria-label={t("save")}
+              onClick={() => toast.error(t("save_requires_auth"))}
+            >
+              <Bookmark className="size-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>{t("save")}</TooltipContent>
+        </Tooltip>
+      )
+    }
+    if (overlay || unauthAction === "link") {
+      return (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Link
+              href="/auth/login"
+              className={cn(
+                buttonVariants({ size: size ?? "icon", variant: variant ?? "secondary" }),
+                overlay ? "size-8" : undefined,
+                className
+              )}
+              aria-label={t("save")}
+            >
+              <Bookmark className="size-4" />
+            </Link>
+          </TooltipTrigger>
+          <TooltipContent>{t("save")}</TooltipContent>
+        </Tooltip>
       )
     }
     return (
-      <p className="text-sm text-muted-foreground">
-        <Link href="/auth/login" className="underline">Login</Link> qilsangiz, newsni saqlash imkoniyati ochiladi.
+      <p className={cn("text-sm text-muted-foreground", className)}>
+        <Link href="/auth/login" className="underline">{t("login")}</Link>{" "}
+        {t("save_requires_auth_inline")}
       </p>
     )
   }
 
   if (overlay) {
     return (
-      <Button
-        size="icon"
-        variant={saved ? "default" : "secondary"}
-        className="size-8"
-        onClick={() => void toggle()}
-        aria-label="Saqlash"
-      >
-        <Bookmark className="size-4" />
-      </Button>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            size={size ?? "icon"}
+            variant={saved ? "default" : (variant ?? "secondary")}
+            className={cn("size-8", className)}
+            onClick={() => void toggle()}
+            aria-label={t("save")}
+          >
+            <Bookmark className={cn("size-4", saved ? "fill-current" : undefined)} />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>{t("save")}</TooltipContent>
+      </Tooltip>
     )
   }
 
-  return <Button size="sm" variant={saved ? "default" : "outline"} onClick={() => void toggle()}>Saqlash</Button>
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          size={size ?? "sm"}
+          variant={saved ? "default" : (variant ?? "outline")}
+          className={className}
+          onClick={() => void toggle()}
+          aria-label={t("save")}
+        >
+          {t("save")}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>{t("save")}</TooltipContent>
+    </Tooltip>
+  )
 }

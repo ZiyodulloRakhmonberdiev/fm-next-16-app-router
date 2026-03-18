@@ -4,7 +4,6 @@ import { getNewsListForLocale, isImageTypeRawNews, type NewsItem } from "@/featu
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
 import { Card } from "@/shared/common/components/ui/card"
 import {
-  formatDate,
   formatDateISO,
   formatDateTimeLocale,
 } from "@/shared/common/lib/formatter"
@@ -12,7 +11,6 @@ import type { AppLocale } from "@/shared/common/lib/formatter"
 import { Link } from "@/i18n/navigation"
 import Image from "next/image"
 import { useLocale, useTranslations } from "next-intl"
-import { TruncateExpand } from "@/shared/common/components/ui/truncate-expand"
 
 export default function AuthorsChoice() {
   const locale = useLocale() as AppLocale

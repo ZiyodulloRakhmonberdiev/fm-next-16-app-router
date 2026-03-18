@@ -1,10 +1,10 @@
 "use client";
+
 import { useEffect, useState } from "react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem } from "@/shared/common/components/ui/dropdown-menu";
-import { DropdownMenuTrigger } from "@/shared/common/components/ui/dropdown-menu";
 import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useRouter } from "@/i18n/navigation";
-import { ChevronDownIcon } from "lucide-react";
+import { Button } from "@/shared/common/components/ui/button";
+import { cn } from "@/shared/common/lib/utils";
 
 const LOCALE_STORAGE_KEY = "preferred-locale";
 
@@ -19,7 +19,7 @@ const localeMeta: Record<
 };
 
 export default function LanguageSwitcherForSidebar() {
-  const t = useTranslations("common")
+  const t = useTranslations("common");
   const router = useRouter();
   const pathname = usePathname();
   const currentLocale = useLocale();
@@ -47,39 +47,37 @@ export default function LanguageSwitcherForSidebar() {
     router.replace(pathname, { locale: locale as any });
   };
 
-  const meta = localeMeta[selectedLocale] ?? localeMeta[currentLocale];
+  const locales = ["uz", "uzb", "ru", "en"] as const;
 
   return (
-    <div>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-sm font-medium">{t("app_language")}:</span>
-            <div className="flex items-center gap-1">
-              <span className="text-sm">{meta?.label}</span>
-              <ChevronDownIcon className="w-4 h-4" />
+    <div className="flex flex-col gap-2">
+      <div className="inline-flex items-center justify-center gap-2 rounded-full px-2 py-1.5">
+        {locales.map((locale, index) => {
+          const meta = localeMeta[locale];
+          const isActive = selectedLocale === locale;
+
+          return (
+            <div key={locale} className="flex items-center gap-2">
+              <Button
+                type="button"
+                size="sm"
+                variant={isActive ? "default" : "ghost"}
+                className={cn(
+                  "h-7 px-2 rounded-sm",
+                  isActive && "bg-brand text-white hover:bg-brand/90 shadow-sm",
+                )}
+                onClick={() => handleSetLocale(locale)}
+              >
+                <span className="leading-none">{meta.short}</span>
+              </Button>
+
+              {index < locales.length - 1 && (
+                <span className="mx-1 text-xs text-border select-none">|</span>
+              )}
             </div>
-          </div>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          <DropdownMenuItem className="flex items-center gap-2" onClick={() => handleSetLocale('uz')}>
-            <span>{localeMeta.uz.flag}</span>
-            <span>{localeMeta.uz.label}</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem className="flex items-center gap-2" onClick={() => handleSetLocale('uzb')}>
-            <span>{localeMeta.uzb.flag}</span>
-            <span>{localeMeta.uzb.label}</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem className="flex items-center gap-2" onClick={() => handleSetLocale('ru')}>
-            <span>{localeMeta.ru.flag}</span>
-            <span>{localeMeta.ru.label}</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem className="flex items-center gap-2" onClick={() => handleSetLocale('en')}>
-            <span>{localeMeta.en.flag}</span>
-            <span>{localeMeta.en.label}</span>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+          );
+        })}
+      </div>
     </div>
-  )
+  );
 }

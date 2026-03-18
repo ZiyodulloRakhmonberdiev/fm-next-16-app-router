@@ -84,7 +84,7 @@ export default function AdminSidebar() {
   }
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-border">
+    <Sidebar  collapsible="icon" className="border-r border-border">
       <SidebarHeader className="border-b border-border">
         <div className="flex h-12 items-center gap-2 px-2">
           <span className="font-semibold text-lg truncate group-data-[state=collapsed]:hidden">

@@ -2,6 +2,10 @@
 
 import * as React from "react"
 import { Card } from "@/shared/common/components/ui/card"
+import Image from "next/image"
+import { useLocale } from "next-intl"
+import { Link } from "@/i18n/navigation"
+import Autoplay from "embla-carousel-autoplay"
 import {
   Carousel,
   CarouselContent,
@@ -10,15 +14,10 @@ import {
   CarouselPrevious,
 } from "@/shared/common/components/ui/carousel"
 import type { CarouselApi } from "@/shared/common/components/ui/carousel"
-import Autoplay from "embla-carousel-autoplay"
 import { getNewsListForLocale, isImageTypeRawNews, type NewsItem } from "@/features/news/model"
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
-import Image from "next/image"
 import { cn } from "@/shared/common/lib/utils"
 import { AppLocale, formatDateISO, formatDateTimeLocale } from "../../lib/formatter"
-import { Link } from "@/i18n/navigation"
-import { useLocale } from "next-intl"
-import { TruncateExpand } from "@/shared/common/components/ui/truncate-expand"
 
 function CarouselDots({
   count,
@@ -49,7 +48,7 @@ function CarouselDots({
   )
 }
 
-export default function TopNews() {
+export default function TopNewsCarousel() {
   const plugin = React.useRef(
     Autoplay({ delay: 6000, stopOnInteraction: true })
   )

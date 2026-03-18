@@ -1,9 +1,11 @@
 "use client"
 
-import { AuthorsChoice, LatestNews, TopNews } from "../molecules";
+
+import { AuthorsChoice } from "../news-sections";
+import { LatestNews } from "../news-sections";
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query";
 import { isImageTypeRawNews } from "@/features/news/model";
-import TopNews2 from "../molecules/top-news-2";
+import TopNewsCarousel2 from "../molecules/top-news-carousel-2";
 
 export default function TopBanner() {
   const { data: publicNews = [] } = usePublicNewsQuery()
@@ -13,7 +15,7 @@ export default function TopBanner() {
   return (
     <div className="w-full flex flex-col lg:flex-row gap-4 px-4 md:px-6 lg:items-stretch">
       <div className="flex flex-col gap-4 lg:max-w-[70%]">
-        <TopNews2 />
+        <TopNewsCarousel2 />
         <AuthorsChoice />
       </div>
       <LatestNews />

@@ -15,15 +15,15 @@ import Image from "next/image"
 import { useLocale, useTranslations } from "next-intl"
 import { Button } from "../ui/button"
 
-type CategoryWithColumnsProps = {
+type ColumnSectionProps = {
   categorySlug?: string
   featuredPosition?: "left" | "right"
 }
 
-export default function CategoryWithColumns({
+export default function ColumnSection({
   categorySlug = "business",
   featuredPosition = "right",
-}: CategoryWithColumnsProps) {
+}: ColumnSectionProps) {
   const locale = useLocale() as AppLocale
   const t = useTranslations("common")
   const { data: publicNews = [] } = usePublicNewsQuery()

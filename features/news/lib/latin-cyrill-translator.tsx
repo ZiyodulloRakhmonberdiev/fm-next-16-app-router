@@ -219,7 +219,7 @@ export function UzUzbTranslateControls({
             variant="outline"
             onClick={handleFromUzb}
           >
-            Generate
+            Tarjima qilish
           </Button>
         </div>
       )}
@@ -231,7 +231,7 @@ export function UzUzbTranslateControls({
             variant="outline"
             onClick={handleFromUz}
           >
-            Generate
+            Tarjima qilish
           </Button>
         </div>
       )}

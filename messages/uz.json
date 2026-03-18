@@ -54,12 +54,27 @@
     "register_error": "Ro'yxatdan o'tib bo'lmadi",
     "edit_profile_description": "Ism, rasm va parolni yangilang",
     "image_url": "Rasm manzili"
-    
   },
   "common": {
+  "top_news": "Top yangiliklar",
+  "follow": "Obuna bo'lish",
+  "load_more": "Yana yuklash",
+  "server_unavailable": "Server vaqtincha ishlamayapti",
+  "server_unavailable_description": "Hozir bu muamnoni hal qilyapmiz. Iltimos, birozdan keyin qayta urinib ko'ring.",
+  "loading": "Yuklanmoqda...",
   "results": "Natijalar",
   "search": "Qidiruv",
   "video_news": "Video yangiliklar",
+  "news": "Yangiliklar",
+  "filter_latest": "So'nggi",
+  "filter_popular": "Mashhur",
+  "filter_top": "Top",
+  "filter_authors_choice": "Muallif tanlovi",
+  "filter_breaking": "Dolzarb",
+  "filter_video": "Video",
+  "video": "Video",
+  "apply": "Tasdiqlash",
+  "clear": "Tozalash",
   "search_placeholder": "Yangiliklar qidirish...",
   "search_results": "Qidiruv natijalari",
   "search_results_empty": "Ushbu so'rov bo'yicha natija topilmadi.",
@@ -103,10 +118,19 @@
   "reactions": "Reaksiyalar",
   "page_not_found": "Sahifa topilmadi",
   "page_not_found_desc": "Siz qidirgan sahifa yoki yangilik topilmadi.",
-  "go_back_to_home_page": "Asosiy sahifaga qaytish"
+  "go_back_to_home_page": "Asosiy sahifaga qaytish",
+  "copy_link": "Linkni nusxalash",
+  "copy": "Nusxa olish",
+  "copied": "Nusxalandi",
+  "share": "Ulashish",
+  "save": "Saqlash",
+  "saved": "Saqlandi",
+  "save_failed": "Saqlab bo'lmadi",
+  "save_requires_auth": "Saqlash uchun tizimda ro'yxatdan o'ting yoki kiring",
+  "save_requires_auth_inline": "qilsangiz, yangilikni saqlash imkoniyati ochiladi."
   },
   "stayConnected": {
-    "title": "Bizga qo'shiling",
+    "title": "Bizga ijtimoiy tarmoqlarda obuna bo'ling",
     "subtitle": "So'nggi yangiliklar va yangilanishlar uchun ijtimoiy tarmoqlarimizda bizni kuzating."
   },
   "ads": {

@@ -22,13 +22,13 @@ import { TruncateExpand } from "@/shared/common/components/ui/truncate-expand"
 import { Button } from "@/shared/common/components/ui/button"
 import { ArrowRightIcon } from "lucide-react"
 
-type CategoryWithSlideProps = {
+type SlideNewsSectionProps = {
   categorySlug?: string
 }
 
-export default function CategoryWithSlide({
+export default function SlideNewsSection({
   categorySlug = "sports",
-}: CategoryWithSlideProps) {
+}: SlideNewsSectionProps) {
   const locale = useLocale() as AppLocale
   const { data: publicNews = [] } = usePublicNewsQuery()
   const { data: categories = [] } = usePublicCategoriesQuery()

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { signOut, useSession } from "next-auth/react"
 import { Link } from "@/i18n/navigation"
 import { LiaUserEditSolid } from "react-icons/lia";
-import { CiBookmark } from "react-icons/ci";
+import { Bookmark, LogOut } from "lucide-react";
 import {
   ImageIcon,
   Lock,
@@ -14,8 +14,6 @@ import {
   User,
   UserPlus,
 } from "lucide-react"
-import { PiUserPlus, PiUser } from "react-icons/pi";
-import { AiOutlineLogin, AiOutlineLogout } from "react-icons/ai";
 
 import { Button } from "@/shared/common/components/ui/button"
 import {
@@ -115,37 +113,38 @@ export function ClientUserMenu() {
               href="/news/saved"
               className="relative inline-flex items-center rounded-md px-2 py-1 text-xs"
             >
-              <CiBookmark strokeWidth={0.5} className="size-4" />
+              <Bookmark className="size-5" />
               {savedCount > 0 ? (
-                <span className="absolute -right-1 -top-1 py-0.5 rounded-full bg-brand px-1.5 text-[10px] text-primary-foreground">
+                <span className="absolute -right-1 -top-1 py-0.5 rounded-full bg-brand px-1.5 text-[10px] text-primary-foreground text-white">
                   {savedCount}
                 </span>
               ) : null}
             </Link>
           </Button>
+          <span className="block w-[0.5px] h-5 bg-muted"></span>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button size="icon" variant="ghost" aria-label="User menu">
-                <User className="size-4" />
+                <User className="size-5" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => void openProfileDialog()}>
                 <LiaUserEditSolid className="size-5" />
-                Profilni tahrirlash
+                {t("edit_profile")}
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href="/user/comments" className="flex items-center gap-2">
-                  <MessageCircle className="size-4" />Mening izohlarim
+                  <MessageCircle className="size-4" />{t("my_comments")}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href="/user/reactions" className="flex items-center gap-2">
-                  <Smile className="size-4" />Mening reaksiyalarim
+                  <Smile className="size-4" />{t("my_reactions")}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => void signOut({ callbackUrl: "/" })}>
-                <AiOutlineLogout className="size-4" />Chiqish
+                <LogOut className="size-4" />{t("logout")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -165,7 +164,7 @@ export function ClientUserMenu() {
               }}
             >
               <span className="flex items-center gap-2">
-                <LogIn  className="size-4" />{t("login")}
+                <LogIn className="size-4" />{t("login")}
               </span>
             </DropdownMenuItem>
             <DropdownMenuItem

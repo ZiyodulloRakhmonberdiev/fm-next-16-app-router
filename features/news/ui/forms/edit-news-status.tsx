@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import type { NewsStatus } from '@/features/news/model'
 import { toast } from 'sonner'
-import { SettingsForm } from './settings-form'
+import { SettingsForm } from './settings-section'
 
 type EditNewsStatusFormProps = {
   initialStatus?: NewsStatus

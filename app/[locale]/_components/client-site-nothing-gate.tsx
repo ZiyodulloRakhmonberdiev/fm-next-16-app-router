@@ -10,7 +10,7 @@ type Props = {
 export default function ClientSiteNothingGate({ children }: Props) {
   const { data: settings } = usePublicSiteSettingsQuery()
   const mode = settings?.clientDelivery.mode ?? "normal"
-  const title = settings?.clientDelivery.title ?? "Texnik ishlar"
+  const title = settings?.clientDelivery.title ?? "Saytda profilaktika ishlari olib  borilmoqda!"
   const description =
     settings?.clientDelivery.description ??
     "Hozir tizimda texnik ishlar olib borilmoqda. Iltimos, birozdan keyin qayta urinib ko'ring."

@@ -1,24 +1,20 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
-import { FiSearch } from "react-icons/fi";
-
-// import { SearchIcon } from 'lucide-react'
-import { CiSearch } from "react-icons/ci";
-
 import { Link } from '@/i18n/navigation'
 import { useTheme } from 'next-themes'
 import Headline from './headline'
-import { ThemeSwitcherForHeader } from '@/widgets/theme-switcher'
 import CategoryList from '@/entities/category/ui/category-list'
 import { SidebarTrigger } from '@/shared/common/components/ui/sidebar'
 import { CategoryListForMobile } from '@/entities/category'
 import { SearchBar } from '@/widgets/client-searchbar'
-import { AdSlot } from '@/shared/common/components/molecules'
+import { AdSlot } from '@/features/ads/ui/ad-slot'
 import { ClientUserMenu } from '@/widgets/client-header/ui/client-user-menu'
-import { cn } from '@/shared/common/lib/utils'
 import { Button } from '@/shared/common/components/ui/button'
-import { Search } from 'lucide-react';
+import { Search } from 'lucide-react'
+import { LanguageSwitcher } from '@/widgets/language-switcher'
+import { cn } from '@/shared/common/lib/utils'
+import { ThemeSwitcherForHeader } from '@/widgets/theme-switcher'
 
 function AdSlotHeader() {
   return (
@@ -36,25 +32,23 @@ export default function Header() {
   const [mounted, setMounted] = useState(false)
   const [isPinned, setIsPinned] = useState(false)
   const [barHeight, setBarHeight] = useState(0)
-  const adRef = useRef<HTMLDivElement | null>(null)
-  const barRef = useRef<HTMLDivElement | null>(null)
+  const topBlockRef = useRef<HTMLDivElement>(null)
+  const barRef = useRef<HTMLDivElement>(null)
+
   useEffect(() => setMounted(true), [])
 
   useEffect(() => {
-    const updatePinnedState = () => {
-      const adHeight = adRef.current?.offsetHeight ?? 0
-      const nextPinned = window.scrollY > adHeight
-      setIsPinned(nextPinned)
+    const updatePinned = () => {
+      const topHeight = topBlockRef.current?.offsetHeight ?? 0
+      setIsPinned(window.scrollY > topHeight)
       setBarHeight(barRef.current?.offsetHeight ?? 0)
     }
-
-    updatePinnedState()
-    window.addEventListener('scroll', updatePinnedState, { passive: true })
-    window.addEventListener('resize', updatePinnedState)
-
+    updatePinned()
+    window.addEventListener('scroll', updatePinned, { passive: true })
+    window.addEventListener('resize', updatePinned)
     return () => {
-      window.removeEventListener('scroll', updatePinnedState)
-      window.removeEventListener('resize', updatePinnedState)
+      window.removeEventListener('scroll', updatePinned)
+      window.removeEventListener('resize', updatePinned)
     }
   }, [])
 
@@ -65,20 +59,25 @@ export default function Header() {
 
   return (
     <div>
-      <div ref={adRef}>
+      {/* Ads + Headline: scroll da yuqoriga ketadi; yuqoriga scroll da yana ko‘rinadi */}
+      <div ref={topBlockRef}>
         <AdSlotHeader />
+        <div className="border-b border-border bg-background">
+          <Headline />
+        </div>
       </div>
-      {isPinned ? <div style={{ height: barHeight }} aria-hidden /> : null}
+
+      {/* Spacer: pinned bo‘lganda layout sakramasligi uchun */}
+      {isPinned && <div style={{ height: barHeight }} aria-hidden />}
+
+      {/* Logo qatori: doim “sticky” — pinned bo‘lganda fixed, aks holda o‘z joyida */}
       <div
         ref={barRef}
         className={cn(
-          'bg-background border-b border-border shadow-sm',
-          isPinned ? 'fixed inset-x-0 top-0 z-50' : 'relative'
+          'bg-background border-b border-border shadow-sm z-50',
+          isPinned ? 'fixed inset-x-0 top-0' : 'relative'
         )}
       >
-        <div className="flex items-center justify-between">
-          <Headline />
-        </div>
         <div className="max-w-7xl mx-auto flex items-center justify-between py-2 px-4 md:px-6 border-b md:border-none border-border">
           <div className="flex items-center gap-8">
             <Link href="/" className="flex h-8 shrink-0 items-center md:h-10">
@@ -99,11 +98,15 @@ export default function Header() {
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-2">
               <Button variant="ghost" size="icon" className="" onClick={() => setSearchOpen(true)} aria-label="Qidiruv">
-                <Search className="w-4 h-4"/>
+                <Search size="4" />
               </Button>
+              <span className="block w-[0.5px] h-5 bg-foreground/10"></span>
               <ClientUserMenu />
+              <span className="block w-[0.5px] h-5 bg-foreground/10"></span>
               <div className="hidden md:block">
-                {/* <ThemeSwitcher /> */}
+                <LanguageSwitcher />
+              </div>
+              <div className="hidden md:block">
                 <ThemeSwitcherForHeader />
               </div>
             </div>

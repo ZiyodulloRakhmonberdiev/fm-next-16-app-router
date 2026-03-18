@@ -78,7 +78,15 @@ export function pickNewsForLocale(
   const title = localizedTitle && localizedTitle.trim() ? localizedTitle : fallbackTitle
   if (title === undefined || title === null || title === "") return null
 
-  const description = raw.description?.[locale]
+  const localizedDescription = raw.description?.[locale]
+  const fallbackDescription = LOCALES
+    .map((loc) => raw.description?.[loc])
+    .find((item) => typeof item === "string" && item.trim())
+  const description =
+    typeof localizedDescription === "string" && localizedDescription.trim()
+      ? localizedDescription
+      : fallbackDescription
+
   const content = raw.content?.[locale]
 
   return {

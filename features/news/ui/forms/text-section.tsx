@@ -11,7 +11,7 @@ import {
 import { Label } from '@/shared/common/components/ui/label'
 import { Input } from '@/shared/common/components/ui/input'
 import { cn } from '@/shared/common/lib/utils'
-import { UzUzbTranslateControls, type TranslationsState } from '../lib/latin-cyrill-translator'
+import { UzUzbTranslateControls, type TranslationsState } from '@/features/news/lib/latin-cyrill-translator'
 
 type TextFormProps = {
   locales: AppLocale[]

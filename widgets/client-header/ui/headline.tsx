@@ -6,6 +6,7 @@ import { LanguageSwitcher } from "@/widgets/language-switcher"
 import { useLocale } from "next-intl"
 import type { AppLocale } from "@/shared/common/lib/locale-api"
 import { usePublicSiteSettingsQuery } from "@/shared/common/lib/public-site-settings-query"
+import { ThemeSwitcherForHeader } from "@/widgets/theme-switcher"
 
 export default function Headline() {
   const locale = useLocale() as AppLocale
@@ -29,7 +30,8 @@ export default function Headline() {
         </div>
         <div className="flex items-center gap-3">
           <SocialMediaButtons variant="icon-only" />
-          <LanguageSwitcher />
+          {/* <LanguageSwitcher /> */}
+          {/* <ThemeSwitcherForHeader /> */}
         </div>
       </div>
     </div>

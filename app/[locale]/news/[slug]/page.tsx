@@ -4,12 +4,17 @@ import { Header } from "@/widgets/client-header"
 import ClientSidebar from "@/widgets/client-sidebar/ui/client-sidebar"
 import { NewsPageContent } from "@/features/news/ui/news-page-content"
 import { pickNewsForLocale, type RawNewsItem } from "@/features/news/model"
-import { StayConnected, StayConnectedSidebar, LatestNews } from "@/shared/common/components/molecules"
+import { StayConnectedForNewsPage } from "@/shared/common/components/organisms"
+import { LatestNews } from "@/shared/common/components/news-sections"
 import { isAppLocale } from "@/shared/common/lib/locale-api"
 import { dbConnect } from "@/shared/common/lib/db"
 import { NewsModel } from "@/features/news/model/news.model"
+import { Link } from "@/i18n/navigation"
+import { CategoryListForNewsPage } from "@/entities/category/ui/category-list"
 import ClientSiteNothingGate from "../../_components/client-site-nothing-gate"
 import ClientServerOffGate from "../../_components/client-server-off-gate"
+import { HomeIcon, Lightbulb, TrendingUpIcon, Zap } from "lucide-react"
+import { VideoIcon } from "lucide-react"
 
 type Props = {
   params: Promise<{ locale: string; slug: string }>
@@ -40,12 +45,50 @@ export default async function NewsPage({ params }: Props) {
         <Header />
         <main className="flex-1 py-4 px-4 md:px-6">
           <ClientServerOffGate model="news">
-            <div className="mx-auto max-w-7xl grid grid-cols-1 gap-6 lg:grid-cols-4">
-              <div className="min-w-0 lg:col-span-3">
+            <div className="mx-auto max-w-7xl grid grid-cols-1 gap-6 lg:grid-cols-7">
+              <aside className="hidden lg:flex lg:flex-col lg:col-span-1 lg:sticky lg:top-20 lg:self-start gap-4">
+                <div className="px-4 text-lg">
+                  <nav className="flex flex-col gap-4">
+                    <Link href="/" className="flex items-center gap-3">
+                     <HomeIcon className="w-5 h-5" /> <span className="text-lg">Bosh sahifa</span>
+                    </Link>
+                    <Link href="/" className="flex items-center gap-3">
+                      <Zap className="w-5 h-5" /> <span className="text-lg">Mashhur</span>
+                    </Link>
+                    <Link href="/news/video" className="flex items-center gap-3">
+                      <VideoIcon className="w-5 h-5" /> <span className="text-lg">So'nggi </span>
+                    </Link>
+                    <Link href="/news/video" className="flex items-center gap-3">
+                      <VideoIcon className="w-5 h-5" /> <span className="text-lg">Video </span>
+                    </Link>
+                  </nav>
+                </div>
+                <div className="border-t border-b border-border">
+                  <CategoryListForNewsPage />
+                </div>
+                <div className="px-4 text-sm">
+                  <nav className="flex flex-col gap-2">
+                    <Link href="/" className="flex items-center gap-3">
+                      <span className="text-lg">Telegram</span>
+                    </Link>
+                    <Link href="/" className="flex items-center gap-3">
+                      <span className="text-lg">Instagram</span>
+                    </Link>
+                    <Link href="/" className="flex items-center gap-3">
+                      <span className="text-lg">Facebook</span>
+                    </Link>
+                    <Link href="/" className="flex items-center gap-3">
+                      <span className="text-lg">YouTube</span>
+                    </Link>
+                  </nav>
+                </div>
+              </aside>
+
+              <div className="min-w-0 lg:col-span-4">
                 <NewsPageContent news={news} newsId={newsId} />
               </div>
-              <aside className="flex-col gap-6 lg:col-span-1">
-                <StayConnectedSidebar />
+
+              <aside className="flex flex-col gap-6 lg:col-span-2">
                 <LatestNews excludeSlug={news.slug} />
               </aside>
             </div>

@@ -1,14 +1,14 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { usePublicAdsQuery } from "@/shared/common/lib/public-ads-query"
-import { usePublicSiteSettingsQuery } from "@/shared/common/lib/public-site-settings-query"
-import { useIsMobile } from "@/shared/hooks/use-mobile"
-import { Button } from "@/shared/common/components/ui/button"
 import { MoreVertical } from "lucide-react"
 import { cn } from "@/shared/common/lib/utils"
-import { AdSlotPlaceholder } from "@/shared/common/components/molecules/ad-slot-placeholder"
-import { AdSlotHide } from "@/shared/common/components/molecules/ad-slot-hide"
+import { usePublicAdsQuery } from "@/shared/common/lib/public-ads-query"
+import { Button } from "@/shared/common/components/ui/button"
+import { usePublicSiteSettingsQuery } from "@/shared/common/lib/public-site-settings-query"
+import { useIsMobile } from "@/shared/hooks/use-mobile"
+import { AdSlotPlaceholder } from "./ad-slot-placeholder"
+import { AdSlotHide } from "./ad-slot-hide"
 
 type Props = {
   placement: "header_top_full" | "sidebar_widget" | "home_bottom_full" | "article_bottom_full"

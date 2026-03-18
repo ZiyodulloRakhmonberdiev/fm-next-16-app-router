@@ -1,19 +1,14 @@
 "use client"
 
 import {
-  CategoryWithBanner,
-  CategoryWithColumns,
-  CategoryWithSlide,
-  CategoryVideo,
-  TextNews,
+  StayConnected,
   TopBanner,
-  Yangiliklar,
 } from "@/shared/common/components/organisms"
-import { AdSlot, ServerLoading, ServerUnavailable, StayConnected } from "@/shared/common/components/molecules"
+import {  ServerLoading, ServerUnavailable } from "@/shared/common/components/molecules"
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
 import { isImageTypeRawNews, type RawNewsItem } from "@/features/news/model"
 import { usePublicCategoriesQuery } from "@/features/category/model/public-categories-query"
-import TopNewsSlider from "@/shared/common/components/molecules/top-news-slider"
+import {AllNews, BannerSection, ColumnSection, HeaderNewsCarousel, SlideNewsSection, TextNewsSection, VideoNewsSection} from "@/shared/common/components/news-sections"
 
 function isVideoNewsItem(item: RawNewsItem): boolean {
   const hasVideo = !!(item.videoSource && item.videoUrl)
@@ -58,17 +53,17 @@ export default function HomeMainContent() {
 
   return (
     <>
-      <TopNewsSlider />
+      <HeaderNewsCarousel />
       <TopBanner />
-      <CategoryWithSlide categorySlug={firstCategorySlug} />
-      <CategoryWithBanner categorySlug={secondCategorySlug} featuredPosition="left" />
-      <CategoryVideo />
-      {shouldShowYangiliklar && <Yangiliklar />}
-      <TextNews />
+      <SlideNewsSection categorySlug={firstCategorySlug} />
+      <BannerSection categorySlug={secondCategorySlug} featuredPosition="left" />
+      <VideoNewsSection />
+      {shouldShowYangiliklar && <AllNews />}
+      <TextNewsSection />
       <StayConnected />
-      <CategoryWithBanner categorySlug={firstCategorySlug} featuredPosition="right" />
-      <CategoryWithSlide categorySlug={secondCategorySlug} />
-      <CategoryWithColumns categorySlug={secondCategorySlug} featuredPosition="left" />
+      <BannerSection categorySlug={firstCategorySlug} featuredPosition="right" />
+      <SlideNewsSection categorySlug={secondCategorySlug} />
+      <ColumnSection categorySlug={secondCategorySlug} featuredPosition="left" />
     </>
   )
 }

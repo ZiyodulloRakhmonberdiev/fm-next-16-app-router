@@ -3,27 +3,27 @@
 import * as React from "react"
 import Image from "next/image"
 import { Link } from "@/i18n/navigation"
-import { useLocale } from "next-intl"
-import { getNewsListForLocale, isImageTypeRawNews, type NewsItem } from "@/features/news/model"
-import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
-import type { AppLocale } from "@/shared/common/lib/formatter"
+import { useLocale, useTranslations } from "next-intl"
 import { cn } from "@/shared/common/lib/utils"
+import type { AppLocale } from "@/shared/common/lib/formatter"
+import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
+import { getNewsListForLocale, isImageTypeRawNews, type NewsItem } from "@/features/news/model"
 
 const DEFAULT_IMAGE = "/images/news/image-1.png"
 
 function LiveIndicator() {
   return (
     <span className="relative flex h-2 w-2 items-center justify-center" aria-hidden>
-      <span className="absolute inline-flex h-2 w-2 animate-ping rounded-full bg-red-500 opacity-75" />
-      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-red-600" />
+      <span className="absolute inline-flex h-2 w-2 animate-ping rounded-full bg-brand opacity-75" />
+      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-brand" />
     </span>
   )
 }
 
-export default function TopNewsSlider() {
+export default function HeaderNewsCarousel() {
   const locale = useLocale() as AppLocale
   const { data: publicNews = [] } = usePublicNewsQuery()
-
+  const t = useTranslations("common")
   const items = React.useMemo(() => {
     const raw = [...publicNews]
       .filter(isImageTypeRawNews)
@@ -42,7 +42,7 @@ export default function TopNewsSlider() {
           <div className="flex shrink-0 items-center gap-2 border-r border-border pr-4 md:pr-6">
             <LiveIndicator />
             <h2 className="text-base font-semibold tracking-tight text-foreground md:text-lg">
-              Top yangiliklar
+              {t("top_news")}
             </h2>
           </div>
 

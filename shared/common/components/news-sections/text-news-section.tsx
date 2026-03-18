@@ -8,7 +8,7 @@ import { formatDateISO, formatDateTimeLocale, type AppLocale } from "@/shared/co
 import { getNewsListForLocale, isTextOnlyRawNews, type NewsItem } from "@/features/news/model"
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
 
-export default function TextNews() {
+export default function TextNewsSection() {
   const locale = useLocale() as AppLocale
   const { data: publicNews = [] } = usePublicNewsQuery()
 

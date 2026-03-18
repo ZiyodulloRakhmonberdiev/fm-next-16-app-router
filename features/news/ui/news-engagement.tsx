@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { useSession } from "next-auth/react"
+import { Heart, MessageSquare } from "lucide-react"
 import { Button } from "@/shared/common/components/ui/button"
 import { Textarea } from "@/shared/common/components/ui/textarea"
 import { toast } from "sonner"
@@ -208,38 +209,157 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
     return map
   }, [visibleComments])
 
+  const totalReactions = (counts.like ?? 0) + (counts.love ?? 0) + (counts.laugh ?? 0) + (counts.sad ?? 0) + (counts.angry ?? 0)
+
   return (
-    <section className="mt-8 space-y-6 border-t pt-6">
-      <div className="space-y-2">
-        <h3 className="text-lg font-semibold">{t("reactions")}</h3>
+    <section className="mt-8 space-y-8 shadow-sm">
+      <div className="space-y-3">
+        <h3 className="flex items-center gap-2 text-lg font-semibold">
+          {t("reactions")}
+          {/* {totalReactions > 0 && (
+            <span className="text-muted-foreground font-normal">({totalReactions})</span>
+          )} */}
+        </h3>
         <div className="flex flex-wrap gap-2">
           {reactionButtons.map((r) => (
             <Button
               key={r.type}
               size="sm"
-              variant={myReaction === r.type ? "default" : "outline"}
+              variant={myReaction === r.type ? "outline" : "outline"}
               onClick={() => void setReaction(r.type)}
+              className="rounded-md"
             >
-              {r.label} ({counts[r.type] ?? 0})
+              {r.label}  {counts[r.type] ?? 0}
             </Button>
           ))}
         </div>
       </div>
-
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold">{t("comments")} </h3>
+        {/* ({totalComments})  */}
+        {rootComments.map((c) => (
+          <div key={c._id} className="flex gap-3">
+            <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-medium text-primary-foreground">
+              {c.userImage ? (
+                <img src={c.userImage} alt={c.userName} className="size-10 rounded-full object-cover" />
+              ) : (
+                getInitials(c.userName)
+              )}
+            </span>
+            <div className="min-w-0 flex-1 space-y-1">
+              <div>
+                <p className="font-semibold text-foreground">{c.userName}</p>
+                <p className="text-xs text-muted-foreground">{formatCommentDate(c.createdAt)}</p>
+              </div>
+              {c.replyToUserLogin ? (
+                <p className="text-xs text-muted-foreground">↪ @{c.replyToUserLogin}</p>
+              ) : null}
+              <p className="text-sm text-foreground leading-snug">{c.content}</p>
+              <div className="flex flex-wrap items-center gap-2">
+                {session?.user?.id ? (
+                  <button
+                    type="button"
+                    className="text-xs text-muted-foreground hover:text-foreground hover:underline"
+                    onClick={() => {
+                      setReplyTo({ id: c._id, userLogin: c.userLogin })
+                      setReplyContent("")
+                    }}
+                  >
+                    Javob berish
+                  </button>
+                ) : null}
+                {myUserId && c.userId === myUserId ? (
+                  <button
+                    type="button"
+                    className="text-xs text-muted-foreground hover:text-destructive hover:underline"
+                    onClick={() => void removeMyComment(c._id)}
+                  >
+                    O'chirish
+                  </button>
+                ) : null}
+                {c.status === "pending" ? (
+                  <span className="text-xs text-amber-600">(pending)</span>
+                ) : null}
+              </div>
+              {repliesByParentId.get(c._id)?.length ? (
+                <div className="mt-3 space-y-3 border-l-2 border-muted pl-3">
+                  {repliesByParentId.get(c._id)?.map((reply) => (
+                    <div key={reply._id} className="flex gap-2">
+                      <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/80 text-xs font-medium text-primary-foreground">
+                        {reply.userImage ? (
+                          <img src={reply.userImage} alt={reply.userName} className="size-8 rounded-full object-cover" />
+                        ) : (
+                          getInitials(reply.userName)
+                        )}
+                      </span>
+                      <div className="min-w-0 flex-1 space-y-0.5">
+                        <p className="font-medium text-sm text-foreground">{reply.userName}</p>
+                        <p className="text-xs text-muted-foreground">{formatCommentDate(reply.createdAt)}</p>
+                        <p className="text-sm text-foreground">{reply.content}</p>
+                        {myUserId && reply.userId === myUserId ? (
+                          <button
+                            type="button"
+                            className="text-xs text-muted-foreground hover:text-destructive hover:underline"
+                            onClick={() => void removeMyComment(reply._id)}
+                          >
+                            O&apos;chirish
+                          </button>
+                        ) : null}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+              {replyTo?.id === c._id ? (
+                <div className="mt-2 space-y-2 rounded-md border bg-muted/30 p-3">
+                  <p className="text-xs text-muted-foreground">
+                    {replyTo.userLogin ? `@${replyTo.userLogin}` : "foydalanuvchi"} izohiga javob
+                  </p>
+                  <Textarea
+                    value={replyContent}
+                    onChange={(e) => setReplyContent(e.target.value)}
+                    placeholder="Javob yozing..."
+                    maxLength={512}
+                    rows={2}
+                    className="resize-none"
+                  />
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-xs text-muted-foreground">{replyContent.length}/512</p>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" onClick={() => setReplyTo(null)}>
+                        Bekor qilish
+                      </Button>
+                      <Button size="sm" onClick={() => void submitComment(replyContent, c._id)}>
+                        Yuborish
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        ))}
+        {rootComments.length === 0 ? <p className="text-sm text-muted-foreground">Izohlar yo&apos;q.</p> : null}
+        {hasMore ? (
+          <Button variant="outline" size="sm" onClick={() => void loadComments(commentOffset + 5, true)}>
+            Ko'proq
+          </Button>
+        ) : null}
+      </div>
       <div className="space-y-3">
-        <h3 className="text-lg font-semibold">{t("comments")} ({totalComments})</h3>
         {session?.user ? (
-          <div className="space-y-2">
+          <div className="space-y-2 p-1">
             <Textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="Izoh yozing..."
+              placeholder="Typing..."
               maxLength={512}
-              rows={3}
+              rows={6}
+              className="outline-none bg-accent min-h-[160px] resize-none"
             />
-            <div className="flex items-center justify-between">
-              <p className="text-xs text-muted-foreground">{content.length}/512</p>
+            <div className="flex items-center justify-between mt-4">
               <Button onClick={() => void submitComment(content)}>Yuborish</Button>
+              <p className="text-xs text-muted-foreground">{content.length}/512</p>
             </div>
           </div>
         ) : (
@@ -247,10 +367,10 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
             <Textarea
               disabled
               placeholder="Siz avtorizatsiya qilmagansiz. Izoh yozish uchun saytga kiring yoki ro'yxatdan o'ting"
-              rows={4}
-              className="resize-none bg-muted/50 border-muted-foreground/20 cursor-not-allowed"
+              rows={6}
+              className="resize-none bg-muted/50 border-muted-foreground/20 cursor-not-allowed outline-none"
             />
-            <div className="flex justify-center">
+            <div className="flex justify-st">
               <Button onClick={() => setAuthModalOpen(true)} size="default" className="min-w-[120px]">
                 Kirish
               </Button>
@@ -258,116 +378,7 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
           </div>
         )}
 
-        <div className="space-y-4">
-          {rootComments.map((c) => (
-            <div key={c._id} className="flex gap-3">
-              <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-medium text-primary-foreground">
-                {c.userImage ? (
-                  <img src={c.userImage} alt={c.userName} className="size-10 rounded-full object-cover" />
-                ) : (
-                  getInitials(c.userName)
-                )}
-              </span>
-              <div className="min-w-0 flex-1 space-y-1">
-                <div>
-                  <p className="font-semibold text-foreground">{c.userName}</p>
-                  <p className="text-xs text-muted-foreground">{formatCommentDate(c.createdAt)}</p>
-                </div>
-                {c.replyToUserLogin ? (
-                  <p className="text-xs text-muted-foreground">↪ @{c.replyToUserLogin}</p>
-                ) : null}
-                <p className="text-sm text-foreground leading-snug">{c.content}</p>
-                <div className="flex flex-wrap items-center gap-2">
-                  {session?.user?.id ? (
-                    <button
-                      type="button"
-                      className="text-xs text-muted-foreground hover:text-foreground hover:underline"
-                      onClick={() => {
-                        setReplyTo({ id: c._id, userLogin: c.userLogin })
-                        setReplyContent("")
-                      }}
-                    >
-                      Javob berish
-                    </button>
-                  ) : null}
-                  {myUserId && c.userId === myUserId ? (
-                    <button
-                      type="button"
-                      className="text-xs text-muted-foreground hover:text-destructive hover:underline"
-                      onClick={() => void removeMyComment(c._id)}
-                    >
-                      O&apos;chirish
-                    </button>
-                  ) : null}
-                  {c.status === "pending" ? (
-                    <span className="text-xs text-amber-600">(pending)</span>
-                  ) : null}
-                </div>
-                {repliesByParentId.get(c._id)?.length ? (
-                  <div className="mt-3 space-y-3 border-l-2 border-muted pl-3">
-                    {repliesByParentId.get(c._id)?.map((reply) => (
-                      <div key={reply._id} className="flex gap-2">
-                        <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/80 text-xs font-medium text-primary-foreground">
-                          {reply.userImage ? (
-                            <img src={reply.userImage} alt={reply.userName} className="size-8 rounded-full object-cover" />
-                          ) : (
-                            getInitials(reply.userName)
-                          )}
-                        </span>
-                        <div className="min-w-0 flex-1 space-y-0.5">
-                          <p className="font-medium text-sm text-foreground">{reply.userName}</p>
-                          <p className="text-xs text-muted-foreground">{formatCommentDate(reply.createdAt)}</p>
-                          <p className="text-sm text-foreground">{reply.content}</p>
-                          {myUserId && reply.userId === myUserId ? (
-                            <button
-                              type="button"
-                              className="text-xs text-muted-foreground hover:text-destructive hover:underline"
-                              onClick={() => void removeMyComment(reply._id)}
-                            >
-                              O&apos;chirish
-                            </button>
-                          ) : null}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : null}
-                {replyTo?.id === c._id ? (
-                  <div className="mt-2 space-y-2 rounded-md border bg-muted/30 p-3">
-                    <p className="text-xs text-muted-foreground">
-                      {replyTo.userLogin ? `@${replyTo.userLogin}` : "foydalanuvchi"} izohiga javob
-                    </p>
-                    <Textarea
-                      value={replyContent}
-                      onChange={(e) => setReplyContent(e.target.value)}
-                      placeholder="Javob yozing..."
-                      maxLength={512}
-                      rows={2}
-                      className="resize-none"
-                    />
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <p className="text-xs text-muted-foreground">{replyContent.length}/512</p>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm" onClick={() => setReplyTo(null)}>
-                          Bekor qilish
-                        </Button>
-                        <Button size="sm" onClick={() => void submitComment(replyContent, c._id)}>
-                          Yuborish
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ) : null}
-              </div>
-            </div>
-          ))}
-          {rootComments.length === 0 ? <p className="text-sm text-muted-foreground">Izohlar yo&apos;q.</p> : null}
-          {hasMore ? (
-            <Button variant="outline" size="sm" onClick={() => void loadComments(commentOffset + 5, true)}>
-              Ko&apos;proq
-            </Button>
-          ) : null}
-        </div>
+
       </div>
 
       <AuthModal

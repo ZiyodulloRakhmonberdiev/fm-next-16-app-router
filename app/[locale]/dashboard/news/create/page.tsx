@@ -1,7 +1,7 @@
 import { getLocale } from 'next-intl/server'
 import { headers } from 'next/headers'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/common/components/ui/card'
-import { CreateNewsForm } from '@/features/news/ui/create-news-form'
+import { CreateNewsForm } from '@/features/news/ui/forms/create-news-form'
 import type { AppLocale } from '@/shared/common/lib/locale-api'
 import { getServerApiUrl } from '@/shared/common/lib/server-api-url'
 import type { RawNewsItem } from '@/features/news/model'

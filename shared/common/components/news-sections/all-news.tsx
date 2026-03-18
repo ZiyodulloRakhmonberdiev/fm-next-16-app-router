@@ -8,7 +8,7 @@ import { Link } from "@/i18n/navigation"
 import Image from "next/image"
 import { useLocale } from "next-intl"
 
-export default function Yangiliklar() {
+export default function AllNews() {
   const locale = useLocale() as AppLocale
   const { data: publicNews = [] } = usePublicNewsQuery()
 

@@ -43,7 +43,7 @@ function getCardImageSrc(item: {
   return getCloudinaryVideoPosterUrl(item.videoUrl) || ""
 }
 
-export default function CategoryVideo() {
+export default function VideoNewsSection() {
   const locale = useLocale() as AppLocale
   const t = useTranslations("common")
   const { data: publicNews = [] } = usePublicNewsQuery()

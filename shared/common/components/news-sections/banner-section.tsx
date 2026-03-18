@@ -12,7 +12,7 @@ import Image from "next/image"
 import { useLocale, useTranslations } from "next-intl"
 import { Button } from "@/shared/common/components/ui/button"
 
-type CategoryWithBannerProps = {
+type BannerSectionProps = {
   categorySlug?: string
   featuredPosition?: "left" | "right"
 }
@@ -54,10 +54,10 @@ function FeaturedBlock({
   )
 }
 
-export default function CategoryWithBanner({
+export default function BannerSection({
   categorySlug = "business",
   featuredPosition = "left",
-}: CategoryWithBannerProps) {
+}: BannerSectionProps) {
   const locale = useLocale() as AppLocale
   const t = useTranslations("common")
   const { data: publicNews = [] } = usePublicNewsQuery()

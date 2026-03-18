@@ -56,7 +56,7 @@ function CarouselDots({
   )
 }
 
-export default function TopNews2() {
+export default function TopNewsCarousel2() {
   const plugin = React.useRef(
     Autoplay({ delay: 6000, stopOnInteraction: true })
   )
