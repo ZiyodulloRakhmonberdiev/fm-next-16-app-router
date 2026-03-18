@@ -167,8 +167,8 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
   }, [news.slug])
 
   return (
-    <div className="px-4 md:px-6">
-      <article className="pb-8 overflow-hidden">
+    <div className="">
+      <article className="overflow-hidden">
         {/* <div className="mb-6 flex flex-col gap-3">
           <Button
             variant="ghost"
@@ -654,8 +654,8 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
             </div>
           </div>
         </section>  
-        <RelatedNews categorySlug={news.categorySlug} excludeSlug={news.slug} />
       </article>
+        <RelatedNews categorySlug={news.categorySlug} excludeSlug={news.slug} />
     </div>
   )
 }

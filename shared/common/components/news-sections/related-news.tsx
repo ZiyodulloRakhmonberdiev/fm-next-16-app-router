@@ -74,9 +74,9 @@ export default function RelatedNews(props: RelatedNewsProps) {
               }
             }}
           >
-            <Card className="overflow-hidden p-0 rounded-sm shadow-none border-none transition-shadow hover:shadow-md bg-accent">
+            <Card className="overflow-hidden p-0 rounded-sm shadow-none border-none transition-shadow hover:shadow-md bg-card">
               <div className="flex h-full gap-3">
-                <div className="relative block h-24 w-32 shrink-0 overflow-hidden rounded-xs md:h-36 md:w-48">
+                <div className="relative block h-20 w-24 shrink-0 overflow-hidden rounded-xs md:h-36 md:w-48">
                   {getSafeImageSrc(item.images?.[0]) ? (
                     <Link href={`/news/${item.slug}`}>
                       <Image
@@ -98,25 +98,27 @@ export default function RelatedNews(props: RelatedNewsProps) {
                   )}
                 </div>
                 <div className="flex min-w-0 flex-1 flex-col justify-around gap-2 py-2 px-2">
+                  <div className="flex items-center gap-2">
                   <span className="text-xs font-medium text-brand italic uppercase">
                     {getCategoryName(item.categorySlug, locale)}
                   </span>
-                  <div className="flex flex-col gap-2">
-                    <Link href={`/news/${item.slug}`} className="line-clamp-3 md:text-lg font-medium leading-tight hover:underline">
+                  <span className="text-xs text-muted-foreground">/</span>
+                    <time
+                      dateTime={formatDateISO(item.publishedAt)}
+                      className="text-xs text-muted-foreground"
+                    >
+                      {formatDate(item.publishedAt, locale)}
+                    </time>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <Link href={`/news/${item.slug}`} className="line-clamp-2 md:line-clamp-3 text-sm md:text-lg font-medium leading-tight hover:underline">
                       {item.title ?? ""}
                     </Link>
                     {/* <h3 className="line-clamp-3 text-sm leading-tight">
                       <span className="line-clamp-2 md:line-clamp-3 text-muted-foreground">{item.description ?? ""}</span>
                     </h3> */}
                   </div>
-                  <div className="flex items-center gap-1">
-                    <time
-                      dateTime={formatDateISO(item.publishedAt)}
-                      className="text-xs"
-                    >
-                      {formatDate(item.publishedAt, locale)}
-                    </time>
-                    <span className="text-xs text-muted-foreground">|</span>
+                  <div className="hidden sm:flex items-center gap-1">
                     <span className="text-xs text-muted-foreground">
                       {item.views} {t("views")}
                     </span>

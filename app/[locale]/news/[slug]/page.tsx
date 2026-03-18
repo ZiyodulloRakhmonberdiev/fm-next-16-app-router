@@ -89,7 +89,7 @@ export default async function NewsPage({ params }: Props) {
                 <NewsPageContent news={news} newsId={newsId} />
               </div>
 
-              <aside className="flex flex-col gap-6 lg:col-span-2">
+              <aside className="hidden md:flex flex-col gap-6 lg:col-span-2">
                 <LatestNews excludeSlug={news.slug} />
               </aside>
             </div>
