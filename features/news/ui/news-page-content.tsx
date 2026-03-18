@@ -183,52 +183,52 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
 
         <TooltipProvider>
           <div className="mb-4 flex flex-wrap items-center justify-between gap-x-2 gap-y-2 text-sm text-muted-foreground bg-muted p-2 rounded-sm">
-            <div className="flex flex-wrap items-center gap-x-0 gap-y-1">
-
-              {/* <span aria-hidden className="select-none px-2">·</span> */}
+            <div className="flex flex-wrap items-center justify-start gap-x-0 gap-y-1">
               <time dateTime={formatDateISO(news.publishedAt)} className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 shrink-0" /> <span>{formatDateTimeLocale(news.publishedAt, locale)}</span>
               </time>
-              <span aria-hidden className="select-none px-2">·</span>
+              <span aria-hidden className="select-none px-2 hidden md:block">·</span>
+              <div className="flex items-center justify-start gap-1 mt-3 md:mt-0">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span className="inline-flex cursor-default items-center gap-1 px-1">
+                  <span className="inline-flex cursor-default items-center gap-1 md:px-1">
                     <Clock className="h-4 w-4 shrink-0" />
                     {news.minutes}
                   </span>
                 </TooltipTrigger>
                 <TooltipContent>{t("min_read")}</TooltipContent>
               </Tooltip>
-              <span aria-hidden className="select-none px-2">·</span>
+              <span aria-hidden className="select-none px-1 md:px-2">·</span>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span className="inline-flex cursor-default items-center gap-1 px-1">
+                  <span className="inline-flex cursor-default items-center gap-1 md:px-1">
                     <Eye className="h-4 w-4 shrink-0" />
                     {news.views}
                   </span>
                 </TooltipTrigger>
                 <TooltipContent>{t("views")}</TooltipContent>
               </Tooltip>
-              <span aria-hidden className="select-none px-2">·</span>
+              <span aria-hidden className="select-none px-1 md:px-2">·</span>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span className="inline-flex cursor-default items-center gap-1 px-1">
+                  <span className="inline-flex cursor-default items-center gap-1 md:px-1">
                     <Heart className="h-4 w-4 shrink-0" />
                     {reactionTotal}
                   </span>
                 </TooltipTrigger>
                 <TooltipContent>{t("reactions")}</TooltipContent>
               </Tooltip>
-              <span aria-hidden className="select-none px-2">·</span>
+              <span aria-hidden className="select-none px-1 md:px-2">·</span>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span className="inline-flex cursor-default items-center gap-1 px-1">
+                  <span className="inline-flex cursor-default items-center gap-1 md:px-1">
                     <MessageSquare className="h-4 w-4 shrink-0" />
                     {commentTotal}
                   </span>
                 </TooltipTrigger>
                 <TooltipContent>{t("comments")}</TooltipContent>
               </Tooltip>
+              </div>
             </div>
 
             <div className="flex items-center gap-1">
