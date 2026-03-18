@@ -13,7 +13,7 @@ import type { AppLocale } from "@/shared/common/lib/formatter"
 import { Link } from "@/i18n/navigation"
 import Image from "next/image"
 import { useLocale, useTranslations } from "next-intl"
-import { Play } from "lucide-react"
+import { Eye, Play } from "lucide-react"
 import { VideoNewsModal } from "@/shared/common/components/molecules"
 import { getCloudinaryVideoPosterUrl } from "@/shared/common/lib/cloudinary"
 import { getYoutubeThumbnailUrl, getYoutubeEmbedUrl } from "@/shared/common/lib/youtube"
@@ -113,15 +113,19 @@ export default function VideoNewsSection() {
                     </span>
                   </span>
 
-                  <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/75 to-transparent p-4">
+                  <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/50 to-transparent p-4 bg-black/50">
+                    <div className="mb-2 flex items-center justify-end text-[11px] text-white/90 gap-2">
+                      <time dateTime={formatDateISO(item.publishedAt)}>
+                        {formatDate(item.publishedAt, locale)}
+                      </time> /
+                      <span className="inline-flex items-center gap-1">
+                        <Eye className="h-3.5 w-3.5" />
+                        {item.views}
+                      </span>
+                    </div>
                     <p className="line-clamp-2 text-sm font-semibold leading-snug text-white">
                       {item.title}
                     </p>
-                    <div className="mt-2 flex items-center justify-end text-[11px] text-white/90">
-                      <time dateTime={formatDateISO(item.publishedAt)}>
-                        {formatDate(item.publishedAt, locale)}
-                      </time>
-                    </div>
                   </div>
                 </div>
               </button>
