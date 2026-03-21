@@ -206,7 +206,7 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
   const totalReactions = (counts.like ?? 0) + (counts.love ?? 0) + (counts.laugh ?? 0) + (counts.sad ?? 0) + (counts.angry ?? 0)
 
   return (
-    <section className="mt-8 space-y-8 shadow-sm">
+    <section className="mt-8 space-y-8">
       <div className="space-y-3">
         <h3 className="flex items-center gap-2 text-lg font-semibold">
           {t("reactions")}
@@ -219,7 +219,7 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
             <Button
               key={r.type}
               size="sm"
-              variant={myReaction === r.type ? "outline" : "outline"}
+              variant={myReaction === r.type ? "outline" : "ghost"}
               onClick={() => void setReaction(r.type)}
               className="rounded-md"
             >

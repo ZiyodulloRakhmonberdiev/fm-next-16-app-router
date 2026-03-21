@@ -187,48 +187,6 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
               <time dateTime={formatDateISO(news.publishedAt)} className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 shrink-0" /> <span>{formatDateTimeLocale(news.publishedAt, locale)}</span>
               </time>
-              <span aria-hidden className="select-none px-2 hidden md:block">·</span>
-              <div className="flex items-center justify-start gap-1 mt-3 md:mt-0">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className="inline-flex cursor-default items-center gap-1 md:px-1">
-                    <Clock className="h-4 w-4 shrink-0" />
-                    {news.minutes}
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent>{t("min_read")}</TooltipContent>
-              </Tooltip>
-              <span aria-hidden className="select-none px-1 md:px-2">·</span>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className="inline-flex cursor-default items-center gap-1 md:px-1">
-                    <Eye className="h-4 w-4 shrink-0" />
-                    {news.views}
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent>{t("views")}</TooltipContent>
-              </Tooltip>
-              <span aria-hidden className="select-none px-1 md:px-2">·</span>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className="inline-flex cursor-default items-center gap-1 md:px-1">
-                    <Heart className="h-4 w-4 shrink-0" />
-                    {reactionTotal}
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent>{t("reactions")}</TooltipContent>
-              </Tooltip>
-              <span aria-hidden className="select-none px-1 md:px-2">·</span>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className="inline-flex cursor-default items-center gap-1 md:px-1">
-                    <MessageSquare className="h-4 w-4 shrink-0" />
-                    {commentTotal}
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent>{t("comments")}</TooltipContent>
-              </Tooltip>
-              </div>
             </div>
 
             <div className="flex items-center gap-1">
@@ -333,10 +291,31 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
           {categoryLabel}
         </Link>
         {news.description != null && news.description !== "" && (
-          <p className="mb-6 text-muted-foreground leading-relaxed">
+          <p className="leading-relaxed">
             {news.description}
           </p>
         )}
+        <div className="my-4 flex items-center gap-2 text-muted-foreground text-sm">
+          <div className="inline-flex items-center gap-2 md:px-1">
+            <Clock className="h-4 w-4" />
+            <span>{news.minutes}</span> <span className="hidden md:inline-block">{t("min_read")}</span>
+          </div>
+          <span aria-hidden className="select-none px-1 md:px-2">·</span>
+          <div className="inline-flex items-center gap-1 md:px-1">
+            <Eye className="h-4 w-4" />
+            {news.views} <span className="hidden md:inline-block">{t("views")}</span>
+          </div>
+          {/* <span aria-hidden className="select-none px-1 md:px-2">·</span>
+          <div className="inline-flex items-center gap-1 md:px-1">
+            <Heart className="h-4 w-4" />
+            {reactionTotal} <span className="hidden md:inline-block">{t("reactions")}</span>
+          </div> */}
+          <span aria-hidden className="select-none px-1 md:px-2">·</span>
+          <div className="inline-flex items-center gap-1 md:px-1">
+            <MessageSquare className="h-4 w-4" />
+            {commentTotal} <span className="hidden md:inline-block">{t("comments")}</span>
+          </div>
+        </div>
         {hasVideo && (() => {
           const youtubeEmbed = getYoutubeEmbedUrl(news.videoUrl ?? "")
           return (
@@ -363,9 +342,9 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
                   {t("your_browser_does_not_support_the_video_tag")}
                 </video>
               )}
-              <div className="absolute right-3 top-3 z-10">
+              {/* <div className="absolute right-3 top-3 z-10">
                 <SavedNewsActions slug={news.slug} newsId={newsId} overlay />
-              </div>
+              </div> */}
             </div>
           )
         })()}
@@ -379,9 +358,9 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
                   alt={news.title}
                   className="block w-full h-auto rounded-lg"
                 />
-                <div className="absolute right-3 top-3 z-10">
+                {/* <div className="absolute right-3 top-3 z-10">
                   <SavedNewsActions slug={news.slug} newsId={newsId} overlay />
-                </div>
+                </div> */}
               </>
             ) : (
               <div className="flex min-h-[200px] w-full items-center justify-center rounded-lg bg-muted px-2 text-sm text-muted-foreground text-center">
@@ -412,11 +391,11 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
                             Rasmni yuklab bo&apos;lmadi
                           </div>
                         )}
-                        {i === 0 ? (
+                        {/* {i === 0 ? (
                           <div className="absolute right-3 top-3 z-10">
                             <SavedNewsActions slug={news.slug} newsId={newsId} overlay />
                           </div>
-                        ) : null}
+                        ) : null} */}
                       </div>
                     </CarouselItem>
                   ))}
@@ -427,7 +406,6 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
                 </div>
               </Carousel>
             </div>
-            {/* Desktop: 2 ustun */}
             <div className="hidden md:grid md:grid-cols-2 gap-3">
               {displayImages.map((src, i) => (
                 <div
@@ -445,14 +423,14 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center px-2 text-xs text-muted-foreground text-center">
-                      Rasmni yuklab bo&apos;lmadi
+                      Rasmni yuklab bo'lmadi
                     </div>
                   )}
-                  {i === 0 ? (
+                  {/* {i === 0 ? (
                     <div className="absolute right-3 top-3 z-10">
                       <SavedNewsActions slug={news.slug} newsId={newsId} overlay />
                     </div>
-                  ) : null}
+                  ) : null} */}
                 </div>
               ))}
             </div>
@@ -511,7 +489,7 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
             <TextContentRenderer content={news.content} />
           )
         )}
-  <div className="flex flex-wrap gap-2 mt-4">
+        <div className="flex flex-wrap gap-2 mt-4">
           {tagsEnabled && news.tags && news.tags.length > 0 && news.tags.map((tag) => (
             <span key={tag} className="text-sm text-muted-foreground bg-muted px-2 py-1 rounded-xs">
               #{" "}{tag}
@@ -522,101 +500,6 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
           <CreatedBy author={news.author} />
         </div>
 
-        {/* Pastdagi statistika — yozuvlar va separatorlar */}
-        {/* <div className="mb-6 rounded-xl border border-border bg-card px-5 py-4 shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex flex-wrap items-center gap-0">
-              <span className="inline-flex items-center gap-2 text-foreground">
-                <span className="text-sm text-muted-foreground">{t("views")}</span>
-                <span className="font-semibold tabular-nums">{news.views}</span>
-              </span>
-              <span aria-hidden className="select-none px-3 text-muted-foreground/60">|</span>
-              <span className="inline-flex items-center gap-2 text-foreground">
-                <span className="text-sm text-muted-foreground">{t("reactions")}</span>
-                <span className="font-semibold tabular-nums">{reactionTotal}</span>
-              </span>
-              <span aria-hidden className="select-none px-3 text-muted-foreground/60">|</span>
-              <span className="inline-flex items-center gap-2 text-foreground">
-                <span className="text-sm text-muted-foreground">{t("comments")}</span>
-                <span className="font-semibold tabular-nums">{commentTotal}</span>
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                variant="default"
-                size="sm"
-                className=""
-                onClick={copyLink}
-              >
-                <Link2 className="h-4 w-4" />
-                {copyDone ? t("copied") : t("copy_link")}
-              </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className=""
-                    onClick={copyLink}
-                  >
-                    <Share2 className="h-4 w-4" />
-                    {t("share")}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="min-w-40">
-                  <DropdownMenuItem
-                    onSelect={() => openShare("telegram")}
-                    className="flex items-center gap-2"
-                  >
-                    <div className="p-2 bg-foreground rounded-full mr-2">
-                      <Send className="h-4 w-4 text-white" />
-                    </div>
-                    Telegram
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onSelect={() => openShare("facebook")}
-                    className="flex items-center gap-2"
-                  >
-                    <div className="p-2 bg-foreground rounded-full mr-2">
-                      <Facebook className="h-4 w-4 text-white" />
-                    </div>
-                    Facebook
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onSelect={() => openShare("twitter")}
-                    className="flex items-center gap-2"
-                  >
-                    <div className="p-2 bg-foreground rounded-full mr-2">
-                      <Twitter className="h-4 w-4 text-white" />
-                    </div>
-                    X (Twitter)
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onSelect={() => openShare("whatsapp")}
-                    className="flex items-center gap-2"
-                  >
-                    <div className="p-2 bg-foreground rounded-full mr-2">
-                      <MessageSquare className="h-4 w-4 text-white" />
-                    </div>
-                    WhatsApp
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onSelect={() => openShare("linkedin")}
-                    className="flex items-center gap-2"
-                  >
-                    <div className="p-2 bg-foreground rounded-full mr-2">
-                      <Linkedin className="h-4 w-4 text-white" />
-                    </div>
-                    LinkedIn
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
-        </div> */}
-   
       
         <div className="my-6" />
 
@@ -641,7 +524,7 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
                 })}
               </p>
             </div>
-            <div className="flex justify-start md:justify-end">
+            <div className="flex justify-end">
               <Button
                 asChild
                 variant="secondary"
@@ -653,9 +536,9 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
               </Button>
             </div>
           </div>
-        </section>  
+        </section>
       </article>
-        <RelatedNews categorySlug={news.categorySlug} excludeSlug={news.slug} />
+      <RelatedNews categorySlug={news.categorySlug} excludeSlug={news.slug} />
     </div>
   )
 }

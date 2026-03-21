@@ -5,7 +5,7 @@ import { getNewsListForLocale, isImageTypeRawNews, type NewsItem } from "@/featu
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
 import { getCategoryNameFromApi, usePublicCategoriesQuery } from "@/features/category/model/public-categories-query"
 import { Card } from "@/shared/common/components/ui/card"
-import { formatDate, formatDateISO } from "@/shared/common/lib/formatter"
+import { formatDate, formatDateISO, formatDateTimeLocale } from "@/shared/common/lib/formatter"
 import type { AppLocale } from "@/shared/common/lib/formatter"
 import { Link } from "@/i18n/navigation"
 import Image from "next/image"
@@ -37,11 +37,8 @@ function FeaturedBlock({
           />
         </div>
         <div className="flex flex-col gap-2 p-3">
-          <time
-            dateTime={formatDateISO(featured.publishedAt)}
-            className="text-xs text-muted-foreground"
-          >
-            {formatDate(featured.publishedAt, locale)}
+          <time dateTime={formatDate(featured.publishedAt)} className="text-xs text-muted-foreground">
+            {formatDateTimeLocale(featured.publishedAt, locale)}
           </time>
           <h3 className="text-base font-semibold leading-tight line-clamp-3 hover:underline">
             {featured.title}
@@ -91,7 +88,7 @@ export default function BannerSection({
         </Button>
       </div>
 
-    
+
       <div className="grid grid-cols-1 gap-3 md:grid-cols-3 md:gap-4">
         <div className="hidden md:flex md:flex-col gap-2">
           {leftItems.map((item: NewsItem) => (
@@ -102,8 +99,8 @@ export default function BannerSection({
                     <Image src={item.images[0]} alt={item.title} fill className="object-cover" />
                   </div>
                   <div className="flex min-w-0 flex-1 flex-col justify-center gap-1 py-3 pr-4">
-                    <time dateTime={formatDateISO(item.publishedAt)} className="text-xs text-muted-foreground">
-                      {formatDate(item.publishedAt, locale)}
+                    <time dateTime={formatDate(item.publishedAt)} className="text-xs text-muted-foreground">
+                      {formatDateTimeLocale(item.publishedAt, locale)}
                     </time>
                     <h4 className="text-sm font-medium leading-tight">
                       <span className="line-clamp-3 hover:underline">{item.title}</span>
@@ -130,8 +127,8 @@ export default function BannerSection({
                     <Image src={item.images[0]} alt={item.title} fill className="object-cover" />
                   </div>
                   <div className="flex min-w-0 flex-1 flex-col justify-center gap-1 py-3 pr-4">
-                    <time dateTime={formatDateISO(item.publishedAt)} className="text-xs text-muted-foreground">
-                      {formatDate(item.publishedAt, locale)}
+                    <time dateTime={formatDate(item.publishedAt)} className="text-xs text-muted-foreground">
+                      {formatDateTimeLocale(item.publishedAt, locale)}
                     </time>
                     <h4 className="text-sm font-medium leading-tight">
                       <span className="line-clamp-3 hover:underline">{item.title}</span>
@@ -142,8 +139,6 @@ export default function BannerSection({
             </Link>
           ))}
         </div>
-
-        {/* Mobile: featured ham list bilan birga */}
         <div className="grid grid-cols-1 gap-2 md:hidden">
           {([featured, ...leftItems, ...rightItems].filter(Boolean) as NewsItem[]).slice(0, 12).map((item) => (
             <Link key={item.slug} href={`/news/${item.slug}`} className="block">
@@ -153,8 +148,8 @@ export default function BannerSection({
                     <Image src={item.images[0]} alt={item.title} fill className="object-cover" />
                   </div>
                   <div className="flex min-w-0 flex-1 flex-col justify-center gap-1 py-3 pr-4">
-                    <time dateTime={formatDateISO(item.publishedAt)} className="text-xs text-muted-foreground">
-                      {formatDate(item.publishedAt, locale)}
+                    <time dateTime={formatDate(item.publishedAt)} className="text-xs text-muted-foreground">
+                      {formatDateTimeLocale(item.publishedAt, locale)}
                     </time>
                     <h4 className="text-sm font-medium leading-tight">
                       <span className="line-clamp-3 hover:underline">{item.title}</span>

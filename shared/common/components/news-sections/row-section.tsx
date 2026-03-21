@@ -71,7 +71,7 @@ export default function RowSection({ categorySlug }: RowSectionProps) {
               <Link key={item.slug} href={`/news/${item.slug}`} className="group block">
                 <Card className="border-0 shadow-none bg-transparent gap-0 py-0">
                   <div className="flex items-stretch gap-3">
-                    <div className="relative h-24 w-32 shrink-0 overflow-hidden rounded-md bg-muted">
+                    <div className="relative h-24  w-32 shrink-0 overflow-hidden rounded-md bg-muted">
                       {img ? (
                         <Image
                           src={img}
@@ -84,24 +84,24 @@ export default function RowSection({ categorySlug }: RowSectionProps) {
 
                     <div className="min-w-0 flex-1 flex flex-col justify-around">
                       <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
-                        <span className="inline-flex items-center gap-3">
-                          <span className="uppercase text-brand italic">
+                        <span className="inline-flex items-center gap-1">
+                          <span className="uppercase text-brand italic font-medium">
                             {item.category}
-                          </span>
+                          </span> 
                         </span>
                       </div>
                       <div className="text-sm font-medium line-clamp-2 group-hover:underline">
                         {item.title}
                       </div>
-                      <div className="flex items-center justify-start gap-3 text-xs text-muted-foreground">
+                      <div className="flex items-center justify-start gap-1 text-xs text-muted-foreground">
                         <time dateTime={formatDate(item.publishedAt)} className="shrink-0">
                           {formatDateTimeLocale(item.publishedAt, locale)}
                         </time>
-                        /
+                      {/* /
                         <span className="inline-flex items-center gap-1">
-                          <Eye className="h-3.5 w-3.5" />
-                          {item.views}
-                        </span>
+                            <Eye className="h-3.5 w-3.5" />
+                            {item.views}
+                          </span> */}
                       </div>
                     </div>
                   </div>

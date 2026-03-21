@@ -35,16 +35,26 @@ function normalizeRaw(item: NewsListResponse["data"][number]): RawNewsItem {
   }
 }
 
-async function fetchInitial(locale: AppLocale, variant: NewsListingVariant) {
+async function fetchInitial(
+  locale: AppLocale,
+  variant: NewsListingVariant,
+  categorySlugs?: string[]
+) {
   const sortBy = variant === "trending" ? "views" : "publishedAt"
   const h = await headers()
   const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000"
   const proto = h.get("x-forwarded-proto") ?? "http"
   const origin = `${proto}://${host}`
-  const res = await fetch(
-    `${origin}/api/news?status=published&recentMonths=6&sortBy=${encodeURIComponent(sortBy)}&page=1&limit=4`,
-    { cache: "no-store" }
-  )
+  const params = new URLSearchParams()
+  params.set("status", "published")
+  params.set("recentMonths", "6")
+  params.set("sortBy", sortBy)
+  params.set("page", "1")
+  params.set("limit", "4")
+  for (const slug of categorySlugs ?? []) {
+    if (slug) params.append("category", slug)
+  }
+  const res = await fetch(`${origin}/api/news?${params.toString()}`, { cache: "no-store" })
   if (!res.ok) {
     return { items: [], page: 1, totalPages: 1 }
   }
@@ -60,11 +70,15 @@ async function fetchInitial(locale: AppLocale, variant: NewsListingVariant) {
 export async function NewsListingPage({
   locale,
   variant = "latest",
+  initialCategorySlug,
 }: {
   locale: AppLocale
   variant?: NewsListingVariant
+  /** Category sahifasi: filterda tanlangan va API da shu category bo‘yicha */
+  initialCategorySlug?: string
 }) {
-  const initial = await fetchInitial(locale, variant)
+  const categorySlugs = initialCategorySlug ? [initialCategorySlug] : undefined
+  const initial = await fetchInitial(locale, variant, categorySlugs)
   return (
     <ClientSiteNothingGate>
       <div className="block md:hidden">
@@ -72,10 +86,14 @@ export async function NewsListingPage({
       </div>
       <div className="flex w-full flex-1 flex-col">
         <Header />
-        <main className="flex-1 py-4 px-4 md:px-6">
+        <main className="flex-1">
           <ClientServerOffGate model="news">
             <div className="max-w-7xl mx-auto">
-              <NewsListingPageContent variant={variant} initial={initial} />
+              <NewsListingPageContent
+                variant={variant}
+                initial={initial}
+                initialCategorySlug={initialCategorySlug}
+              />
             </div>
           </ClientServerOffGate>
         </main>
