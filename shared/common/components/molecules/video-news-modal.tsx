@@ -1,6 +1,4 @@
 "use client"
-
-import * as React from "react"
 import { Button } from "@/shared/common/components/ui/button"
 import {
   Dialog,
@@ -14,7 +12,11 @@ import type { NewsItem } from "@/features/news/model"
 import { getYoutubeEmbedUrl } from "@/shared/common/lib/youtube"
 import { getCloudinaryVideoPosterUrl } from "@/shared/common/lib/cloudinary"
 import { getYoutubeThumbnailUrl } from "@/shared/common/lib/youtube"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
+import type { AppLocale } from "@/shared/common/lib/formatter"
+import { useCategoryLabel } from "@/features/category/model/use-category-label"
+import { ChevronRight } from "lucide-react"
+import { formatDate } from "../../lib/formatter"
 
 function getSafeImageSrc(raw?: string): string {
   if (!raw?.trim()) return ""
@@ -42,6 +44,12 @@ type VideoNewsModalProps = {
 
 export default function VideoNewsModal({ item, open, onOpenChange }: VideoNewsModalProps) {
   const t = useTranslations("common")
+  const locale = useLocale() as AppLocale
+  const categoryLabel = useCategoryLabel(
+    item?.categorySlug ?? "",
+    locale,
+    item?.category
+  )
   const hasVideo = !!(item && item.videoSource && item.videoUrl)
 
   return (
@@ -55,47 +63,60 @@ export default function VideoNewsModal({ item, open, onOpenChange }: VideoNewsMo
         {hasVideo && item && (() => {
           const youtubeEmbed = getYoutubeEmbedUrl(item.videoUrl ?? "")
           return (
-          <>
-            <div className="relative aspect-video w-full bg-muted">
-              {youtubeEmbed ? (
-                <iframe
-                  src={youtubeEmbed}
-                  title={item.title}
-                  className="absolute inset-0 h-full w-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              ) : (
-                <video
-                  key={item.videoUrl}
-                  src={getVideoSrc(item.videoUrl)}
-                  controls
-                  controlsList="nodownload"
-                  disablePictureInPicture
-                  onContextMenu={(e) => e.preventDefault()}
-                  className="h-full w-full object-contain"
-                  poster={getVideoPoster(item) || undefined}
-                >
-                  {t("your_browser_does_not_support_the_video_tag")}
-                </video>
-              )}
-            </div>
-            <div className="space-y-3 p-4">
-              <DialogHeader>
-                <DialogTitle className="text-start line-clamp-2 md:line-clamp-3">{item.title}</DialogTitle>
-                {item.description && (
-                  <DialogDescription className="mt-1 text-start line-clamp-2 md:line-clamp-3">
-                    {item.description}
-                  </DialogDescription>
+            <>
+              <div className="relative aspect-video p-2 w-full bg-muted">
+                {youtubeEmbed ? (
+                  <iframe
+                    src={youtubeEmbed}
+                    title={item.title}
+                    className="absolute inset-0 h-full w-full rounded-md"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                ) : (
+                  <video
+                    key={item.videoUrl}
+                    src={getVideoSrc(item.videoUrl)}
+                    controls
+                    controlsList="nodownload"
+                    disablePictureInPicture
+                    onContextMenu={(e) => e.preventDefault()}
+                    className="h-full w-full object-contain rounded-md"
+                    poster={getVideoPoster(item) || undefined}
+                  >
+                    {t("your_browser_does_not_support_the_video_tag")}
+                  </video>
                 )}
-              </DialogHeader>
-              <div className="flex justify-start">
-                <Button asChild>
-                  <Link href={`/news/${item.slug}`}>{t("read_article")}</Link>
-                </Button>
               </div>
-            </div>
-          </>
+              <div className="space-y-3 px-4 pb-4">
+                <div className="flex items-center gap-2 mb-4 border-b pb-3">
+                  <Link href={`/category/${item.categorySlug}`} className="flex items-center gap-2 hover:underline">
+                    <span className="block w-2 h-2 bg-brand rounded-full"></span>
+                    <span className="text-xs capitalize">{categoryLabel}</span>
+                  </Link>
+                  <span className="text-muted-foreground text-xs">/</span>
+                  <time dateTime={formatDate(item.publishedAt)} className="text-xs text-muted-foreground">
+                    {formatDate(item.publishedAt)}
+                  </time>
+                </div>
+                <DialogHeader className="">
+                  <DialogTitle className="text-start line-clamp-2 md:line-clamp-3">{item.title}</DialogTitle>
+                  {item.description && (
+                    <DialogDescription className="mt-1 text-start line-clamp-2 md:line-clamp-3">
+                      {item.description}
+                    </DialogDescription>
+                  )}
+                </DialogHeader>
+                <div className="flex justify-start">
+                  <Link href={`/news/${item.slug}`} className="flex items-center gap-2 py-2">
+                    <Button variant="ghost" className="h-auto py-2 bg-foreground/10">
+                      <ChevronRight className="size-7 bg-foreground text-background rounded-full p-1" />
+                      <span>{t("read_article")}</span>
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </>
           )
         })()}
       </DialogContent>

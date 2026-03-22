@@ -1,6 +1,8 @@
 import { NextRequest } from 'next/server'
 import { dbConnect } from '@/shared/common/lib/db'
 import { NewsModel } from '@/features/news/model/news.model'
+import { NewsCommentModel } from '@/features/news/model/comment.model'
+import { NewsReactionModel } from '@/features/news/model/reaction.model'
 import { createNewsSchema } from '@/features/news/model/schemas'
 import { sendNewsToTelegram } from '@/shared/common/lib/telegram'
 import { requireAdminSession } from '@/shared/common/lib/require-admin-session'
@@ -62,8 +64,41 @@ export async function GET(req: NextRequest) {
       NewsModel.countDocuments(filter),
     ])
 
+    const slugs = news.map((n) => n.slug).filter(Boolean)
+    const commentBySlug = new Map<string, number>()
+    const reactionBySlug = new Map<string, number>()
+    if (slugs.length > 0) {
+      const [commentAgg, reactionAgg] = await Promise.all([
+        NewsCommentModel.aggregate<{ _id: string; count: number }>([
+          {
+            $match: {
+              newsSlug: { $in: slugs },
+              status: { $in: ['confirmed', 'approved'] },
+            },
+          },
+          { $group: { _id: '$newsSlug', count: { $sum: 1 } } },
+        ]),
+        NewsReactionModel.aggregate<{ _id: string; count: number }>([
+          { $match: { newsSlug: { $in: slugs } } },
+          { $group: { _id: '$newsSlug', count: { $sum: 1 } } },
+        ]),
+      ])
+      for (const row of commentAgg) {
+        if (row._id) commentBySlug.set(String(row._id), row.count)
+      }
+      for (const row of reactionAgg) {
+        if (row._id) reactionBySlug.set(String(row._id), row.count)
+      }
+    }
+
+    const data = news.map((n) => ({
+      ...n,
+      commentCount: commentBySlug.get(n.slug) ?? 0,
+      reactionCount: reactionBySlug.get(n.slug) ?? 0,
+    }))
+
     return Response.json({
-      data: news,
+      data,
       meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
     })
   } catch (err) {

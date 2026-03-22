@@ -4,6 +4,7 @@ import * as React from "react"
 import { getNewsListForLocale, isImageTypeRawNews, type NewsItem } from "@/features/news/model"
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
 import { getCategoryNameFromApi, usePublicCategoriesQuery } from "@/features/category/model/public-categories-query"
+import { useCategoryLabel } from "@/features/category/model/use-category-label"
 import { Card } from "@/shared/common/components/ui/card"
 import {
   formatDateISO,
@@ -11,9 +12,8 @@ import {
 } from "@/shared/common/lib/formatter"
 import type { AppLocale } from "@/shared/common/lib/formatter"
 import { Link } from "@/i18n/navigation"
-import { useLocale, useTranslations } from "next-intl"
-import { Button } from "../ui/button"
-import { ArrowRight } from "lucide-react"
+import { useLocale } from "next-intl"
+import { NewsSectionHeader } from "@/shared/common/components/news-sections/news-section-header"
 import { FeaturedNewsCard } from "@/features/news/ui/featured-news-card"
 
 type ColumnSectionProps = {
@@ -26,7 +26,6 @@ export default function ColumnSection({
   featuredPosition = "right",
 }: ColumnSectionProps) {
   const locale = useLocale() as AppLocale
-  const t = useTranslations("common")
   const { data: publicNews = [] } = usePublicNewsQuery()
   const { data: categories = [] } = usePublicCategoriesQuery()
   const categoryName = getCategoryNameFromApi(categories, categorySlug, locale)
@@ -51,12 +50,12 @@ export default function ColumnSection({
   return (
     <div className="w-full px-4 md:px-6 mt-4">
       <div className="py-4">
-        <div className="flex items-center text-brand border-b-2 border-brand justify-between gap-2 pb-2 mb-4">
-          <h2 className="text-lg font-semibold">{categoryName}</h2>
-          <Button variant="ghost" size="sm" asChild className="text-brand">
-            <Link href={`/category/${categorySlug}`} className="text-xs md:text-sm hover:text-brand hover:underline">{t("view_all")} <ArrowRight className="w-4 h-4" /></Link>
-          </Button>
-        </div>
+        <NewsSectionHeader
+          title={categoryName}
+          viewAllHref={`/category/${categorySlug}`}
+          variant="brandAccent"
+          linkWrap="ghost"
+        />
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div
             className={`grid md:grid-cols-2 gap-4 ${
@@ -69,7 +68,9 @@ export default function ColumnSection({
                 className="flex flex-col gap-2 rounded-sm border-none p-3 shadow-none bg-foreground/5 md:bg-background"
               >
                 <div className="flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground">
-                  <span className="uppercase font-medium text-brand italic">{item.category}</span>
+                  <span className="uppercase font-medium text-brand italic">
+                    {useCategoryLabel(item.categorySlug, locale, item.category)}
+                  </span>
                   <span aria-hidden>/</span>
                   <time dateTime={formatDateISO(item.publishedAt)}>
                     {formatDateTimeLocale(item.publishedAt, locale)}

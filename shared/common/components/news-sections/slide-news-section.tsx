@@ -4,6 +4,7 @@ import * as React from "react"
 import { getNewsListForLocale, isImageTypeRawNews, type NewsItem } from "@/features/news/model"
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
 import { getCategoryNameFromApi, usePublicCategoriesQuery } from "@/features/category/model/public-categories-query"
+import { getCategoryLabelForNewsItem } from "@/features/category/model/use-category-label"
 import { Card } from "@/shared/common/components/ui/card"
 import {
   Carousel,
@@ -28,7 +29,6 @@ type SlideNewsSectionProps = {
 
 type SlideVisual = { opacity: number; blurPx: number }
 
-/** intersectionRatio 1 = to‘liq ko‘rinadi; <1 = qisman — opacity + blur */
 function ratioToVisual(ratio: number): SlideVisual {
   const hidden = 1 - Math.min(1, Math.max(0, ratio))
   const edge = Math.min(1, hidden * 1.15)
@@ -50,7 +50,7 @@ export default function SlideNewsSection({
   const locale = useLocale() as AppLocale
   const t = useTranslations("common")
   const { data: publicNews = [] } = usePublicNewsQuery()
-  const { data: categories = [] } = usePublicCategoriesQuery()
+  const { data: categories = [], isPending: categoriesPending } = usePublicCategoriesQuery()
   const categoryName = getCategoryNameFromApi(categories, categorySlug, locale)
   const [api, setApi] = React.useState<CarouselApi | null>(null)
   const [slideVisual, setSlideVisual] = React.useState<SlideVisual[]>([])
@@ -142,14 +142,14 @@ export default function SlideNewsSection({
           <div className="my-4 flex flex-wrap items-center justify-between gap-3 border-b-2 border-brand pb-3">
             <Link
               href={`/category/${categorySlug}`}
-              className="flex items-center gap-2 text-lg font-semibold text-brand transition-colors hover:text-brand/80 hover:underline"
+              className="flex items-center gap-2 text-lg font-semibold hover:underline"
             >
               <span>{categoryName}</span>
               <ExternalLink className="hidden size-4 md:inline-block" aria-hidden />
             </Link>
             <Link
               href={`/category/${categorySlug}`}
-              className="text-sm font-medium text-brand underline-offset-4 hover:underline md:hidden flex items-center gap-2"
+              className="text-sm font-medium underline-offset-4 hover:underline md:hidden flex items-center gap-2"
             >
               <span>{t("view_all")}</span> <ArrowRight className="w-4 h-4" />
             </Link>
@@ -165,7 +165,6 @@ export default function SlideNewsSection({
             </div>
           </div>
 
-          {/* Mobile: yon peek kartalar biroz torroq; md: ~3 ta + o‘ng peek */}
           <div className="min-w-0 w-full [--slide-w:calc((100%-1rem)/1.08)] md:[--slide-w:calc((100%-1rem)/3.2)]">
             <CarouselContent className="ml-0">
               {items.map((item: NewsItem, index: number) => {
@@ -185,32 +184,39 @@ export default function SlideNewsSection({
                             : undefined,
                       }}
                     >
-                      <Link href={`/news/${item.slug}`} className="block h-full">
-                        <Card className="h-full gap-0 overflow-hidden rounded-sm border bg-background p-0 shadow-none transition-shadow hover:shadow-md">
-                          <div className="relative aspect-video w-full">
-                            <Image
-                              src={item.images[0]}
-                              alt={item.title}
-                              fill
-                              className="object-cover"
-                            />
-                          </div>
-                          <div className="flex flex-col gap-2 p-4">
+                      <Card className="h-full group gap-0 overflow-hidden rounded-sm border bg-background p-0 shadow-none transition-shadow hover:shadow-md">
+                        <Link href={`/news/${item.slug}`} className="relative aspect-video w-full group-hover:scale-105 transition-transform duration-300">
+                          <Image
+                            src={item.images[0]}
+                            alt={item.title}
+                            fill
+                            className="object-cover"
+                          />
+                        </Link>
+                        <div className="flex flex-col gap-2 p-4">
+                          <div className="flex items-center justify-start gap-2">
+                            <Link href={`/category/${item.categorySlug}`} className="capitalize font-mono text-muted-foreground flex items-center gap-1 hover:underline">
+                              <span className="block w-2 h-2 bg-brand rounded-full"></span>
+                              <span className="text-xs capitalize">
+                                {getCategoryLabelForNewsItem(categories, categoriesPending, item, locale)}
+                              </span>
+                            </Link>
+                            <span className="text-muted-foreground text-xs">/</span>
                             <time
                               dateTime={formatDateISO(item.publishedAt)}
                               className="text-xs text-muted-foreground"
                             >
                               {formatDate(item.publishedAt, locale)}
                             </time>
-                            <h3 className="line-clamp-3 text-sm font-semibold leading-tight hover:underline">
-                              {item.title}
-                            </h3>
-                            <p className="line-clamp-3 text-xs text-muted-foreground">
-                              {item.description}
-                            </p>
                           </div>
-                        </Card>
-                      </Link>
+                          <Link href={`/news/${item.slug}`} className="line-clamp-3 text-sm font-semibold leading-tight hover:underline">
+                            {item.title}
+                          </Link>
+                          <p className="line-clamp-3 text-xs text-muted-foreground">
+                            {item.description}
+                          </p>
+                        </div>
+                      </Card>
                     </div>
                   </CarouselItem>
                 )

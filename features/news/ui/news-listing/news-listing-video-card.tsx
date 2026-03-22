@@ -7,6 +7,7 @@ import type { AppLocale } from "@/shared/common/lib/formatter"
 import { formatDateISO, formatDateTimeLocale } from "@/shared/common/lib/formatter"
 import { Card } from "@/shared/common/components/ui/card"
 import type { NewsItem } from "@/features/news/model"
+import { useCategoryLabel } from "@/features/category/model/use-category-label"
 import { getSafeImageSrc, getVideoPoster } from "./news-listing-utils"
 
 type NewsListingVideoCardProps = {
@@ -52,7 +53,7 @@ export function NewsListingVideoCard({ item, locale }: NewsListingVideoCardProps
             </div>
           ) : null}
           <div className="flex flex-wrap items-center gap-x-2 text-xs text-muted-foreground">
-            <span className="font-medium text-brand italic uppercase">{item.category}</span>
+            <span className="font-medium text-brand italic uppercase">{categoryLabel}</span>
             <span aria-hidden className="select-none">
               |
             </span>

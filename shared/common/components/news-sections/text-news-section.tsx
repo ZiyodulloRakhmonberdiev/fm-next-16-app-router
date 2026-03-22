@@ -7,10 +7,13 @@ import { Card } from "@/shared/common/components/ui/card"
 import { formatDateISO, formatDateTimeLocale, type AppLocale } from "@/shared/common/lib/formatter"
 import { getNewsListForLocale, isTextOnlyRawNews, type NewsItem } from "@/features/news/model"
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
+import { usePublicCategoriesQuery } from "@/features/category/model/public-categories-query"
+import { getCategoryLabelForNewsItem } from "@/features/category/model/use-category-label"
 
 export default function TextNewsSection() {
   const locale = useLocale() as AppLocale
   const { data: publicNews = [] } = usePublicNewsQuery()
+  const { data: categories = [], isPending: categoriesPending } = usePublicCategoriesQuery()
 
   const items = React.useMemo(() => {
     const raw = [...publicNews]
@@ -31,9 +34,17 @@ export default function TextNewsSection() {
             <li key={item.slug} className="w-full max-w-xl">
               <Card className="rounded-sm border p-3 shadow-none">
                 <div className="flex min-w-0 flex-1 flex-col gap-2">
-                  <div className="flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground">
-                    <span className="uppercase font-medium text-brand italic">{item.category}</span>
-                    
+                  <div className="flex items-center gap-2 border-b pb-2">
+                    <Link href={`/category/${item.categorySlug}`} className="flex flex-wrap items-center gap-2 text-xs font-mono text-muted-foreground hover:underline">
+                      <span className="block w-2 h-2 bg-brand rounded-full"></span>
+                      <span className="capitalize">
+                        {getCategoryLabelForNewsItem(categories, categoriesPending, item, locale)}
+                      </span>
+                    </Link>
+                    <span className="text-muted-foreground text-xs">/</span>
+                    <time dateTime={formatDateISO(item.publishedAt)} className="text-xs text-muted-foreground">
+                      {formatDateTimeLocale(item.publishedAt, locale)}
+                    </time>
                   </div>
                   <Link href={`/news/${item.slug}`} className="text-sm font-semibold leading-tight hover:underline">
                     <span className="line-clamp-2 md:line-clamp-3">{item.title ?? ""}</span>
@@ -41,9 +52,7 @@ export default function TextNewsSection() {
                   <p className="text-sm text-muted-foreground">
                     <span className="line-clamp-2 md:line-clamp-3">{item.description ?? ""}</span>
                   </p>
-                  <time dateTime={formatDateISO(item.publishedAt)} className="text-xs text-muted-foreground">
-                      {formatDateTimeLocale(item.publishedAt, locale)}
-                    </time>
+
                 </div>
               </Card>
             </li>

@@ -13,8 +13,11 @@ import type { AppLocale } from "@/shared/common/lib/formatter"
 import { Link } from "@/i18n/navigation"
 import Image from "next/image"
 import { useLocale, useTranslations } from "next-intl"
-import { ArrowRight, Eye, Play } from "lucide-react"
+import { Eye, Play } from "lucide-react"
 import { VideoNewsModal } from "@/shared/common/components/molecules"
+import { NewsSectionHeader } from "@/shared/common/components/news-sections/news-section-header"
+import { usePublicCategoriesQuery } from "@/features/category/model/public-categories-query"
+import { getCategoryLabelForNewsItem } from "@/features/category/model/use-category-label"
 import { getCloudinaryVideoPosterUrl } from "@/shared/common/lib/cloudinary"
 import { getYoutubeThumbnailUrl, getYoutubeEmbedUrl } from "@/shared/common/lib/youtube"
 
@@ -46,6 +49,7 @@ export default function VideoNewsSection() {
   const locale = useLocale() as AppLocale
   const t = useTranslations("common")
   const { data: publicNews = [] } = usePublicNewsQuery()
+  const { data: categories = [], isPending: categoriesPending } = usePublicCategoriesQuery()
   const [selected, setSelected] = React.useState<NewsItem | null>(null)
   const [isOpen, setIsOpen] = React.useState(false)
 
@@ -74,16 +78,8 @@ export default function VideoNewsSection() {
 
   return (
     <section className="w-full space-y-4 px-4 md:px-6 pt-4">
-      <div className="py-4 pt-4 pb-2">
-        <div className="flex text-brand border-b-2 border-brand pb-2 items-center justify-between gap-2 mb-4">
-          <h2 className="text-lg font-semibold">{t("video_news")}</h2>
-          <Link
-            href="/news/video"
-            className="text-xs hover:text-brand hover:underline md:text-sm font-medium flex items-center gap-1"
-          >
-            {t("view_all")} <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
+      <div className="py-4 pt-4 pb-4">
+        <NewsSectionHeader title={t("video_news")} viewAllHref="/news/video" variant="brand" />
 
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
           {featured.map((item) => {
@@ -117,12 +113,13 @@ export default function VideoNewsSection() {
                     <p className="line-clamp-2 text-sm font-semibold leading-snug text-white">
                       {item.title}
                     </p>
-                    <div className="mt-2 flex items-center justify-end text-[11px] text-white/90 gap-2">
-                      <span className="text-xs capitalize">
-                        {item.category}
-                      </span>
-                      <span aria-hidden className="text-muted-foreground text-xs">/</span>
-                      <time dateTime={formatDateISO(item.publishedAt)}>
+                    <div className="mt-2 flex items-center justify-between text-[11px] text-white/90 gap-2 font-mono">
+                      <Link href={`/category/${item.categorySlug}`} className="text-xs capitalize flex items-center gap-2 hover:underline">
+                        <span className="block w-2 h-2 bg-brand rounded-full"></span>{" "}
+                        <span>{getCategoryLabelForNewsItem(categories, categoriesPending, item, locale)}</span>
+                      </Link>
+                      {/* <span aria-hidden className="text-muted-foreground text-xs">/</span> */}
+                      <time dateTime={formatDate(item.publishedAt, locale)}>
                         {formatDate(item.publishedAt, locale)}
                       </time>
                       {/* <span className="inline-flex items-center gap-1">
@@ -170,7 +167,9 @@ export default function VideoNewsSection() {
                         <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
                           <span className="inline-flex items-center gap-1">
                             <span className="inline-block size-1.5 rounded-full bg-red-500" aria-hidden />
-                            <span className="uppercase">{item.category}</span>
+                            <span className="uppercase">
+                              {getCategoryLabelForNewsItem(categories, categoriesPending, item, locale)}
+                            </span>
                           </span>
                           <time dateTime={formatDateISO(item.publishedAt)} className="shrink-0">
                             {formatDate(item.publishedAt, locale)}

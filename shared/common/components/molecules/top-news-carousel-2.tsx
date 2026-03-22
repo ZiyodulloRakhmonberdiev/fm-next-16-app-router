@@ -17,6 +17,8 @@ import {
   type NewsItem,
 } from "@/features/news/model"
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
+import { usePublicCategoriesQuery } from "@/features/category/model/public-categories-query"
+import { getCategoryLabelForNewsItem } from "@/features/category/model/use-category-label"
 import Image from "next/image"
 import { cn } from "@/shared/common/lib/utils"
 import {
@@ -62,6 +64,7 @@ export default function TopNewsCarousel2() {
   )
   const locale = useLocale() as AppLocale
   const { data: publicNews = [] } = usePublicNewsQuery()
+  const { data: categories = [], isPending: categoriesPending } = usePublicCategoriesQuery()
   const [api, setApi] = React.useState<CarouselApi | null>(null)
   const [selectedIndex, setSelectedIndex] = React.useState(0)
 
@@ -139,7 +142,7 @@ export default function TopNewsCarousel2() {
 
                     <div className="absolute inset-x-0 bottom-0 z-20 p-4 md:p-6 flex flex-col gap-2 text-white bg-black/50">
                       <span className="text-xs font-medium uppercase tracking-wide text-white/80">
-                        {item.category}
+                        {getCategoryLabelForNewsItem(categories, categoriesPending, item, locale)}
                       </span>
                       <h3 className="text-lg font-semibold leading-tight md:text-2xl">
                         <span className="line-clamp-2 md:line-clamp-3">

@@ -1,84 +1,12 @@
 "use client";
 
 import { Link } from "@/i18n/navigation";
-import type { ReactNode } from "react";
 import { seed } from "@/scripts/seed";
 import { cn } from "@/shared/common/lib/utils";
 import { usePublicSiteSettingsQuery } from "@/shared/common/lib/public-site-settings-query";
+import { getSocialStyle } from "@/shared/common/components/ui/social-platform-styles";
 
 export type SocialPlatformName = "facebook" | "instagram" | "telegram" | "youtube";
-
-export const SOCIAL_ICONS: Record<
-  string,
-  { bgColor: string; icon: ReactNode }
-> = {
-  facebook: {
-    bgColor: "bg-[#1877F2] hover:opacity-90",
-    icon: (
-      <svg className="size-[1em] shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-      </svg>
-    ),
-  },
-  instagram: {
-    bgColor: "bg-[#E4405F] hover:opacity-90",
-    icon: (
-      <svg className="size-[1em] shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
-      </svg>
-    ),
-  },
-  telegram: {
-    bgColor: "bg-[#26A5E4] hover:opacity-90",
-    icon: (
-      <svg className="size-[1em] shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-        <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
-      </svg>
-    ),
-  },
-  youtube: {
-    bgColor: "bg-[#FF0000] hover:opacity-90",
-    icon: (
-      <svg className="size-[1em] shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
-      </svg>
-    ),
-  },
-  twitter: {
-    bgColor: "bg-[#1DA1F2] hover:opacity-90",
-    icon: (
-      <svg className="size-[1em] shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-        <path d="M18.244 2H21.5l-7.114 8.132L22.75 22h-6.554l-5.133-6.713L5.19 22H1.93l7.61-8.699L1.5 2h6.72l4.64 6.124L18.244 2zm-1.149 18h1.806L7.193 3.896H5.255L17.095 20z" />
-      </svg>
-    ),
-  },
-  threads: {
-    bgColor: "bg-black hover:opacity-90",
-    icon: (
-      <svg className="size-[1em] shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-        <path d="M14.93 11.07c-.2-.1-.41-.19-.64-.26-.09-1.52-.95-2.46-2.37-2.58-1.53-.13-2.58.66-3.03 2.27l1.66.46c.2-.72.56-1.03 1.21-.98.58.05.92.39 1.03 1.02-.52-.04-1.05-.03-1.58.04-1.77.24-2.88 1.31-2.82 2.75.06 1.4 1.22 2.42 2.86 2.53 1.55.1 2.73-.52 3.3-1.74.33-.71.42-1.48.39-2.26.12.05.23.11.34.17.66.37.98.86.96 1.49-.03.95-.82 1.87-2.15 2.32-1.91.64-4.22.22-5.7-1.07-1.45-1.25-2.18-3.18-1.95-5.14.23-1.99 1.42-3.7 3.19-4.59 1.79-.9 3.89-.86 5.65.1 1.28.7 2.2 1.89 2.58 3.35.18.68.24 1.39.18 2.1l1.73.13c.08-.94 0-1.88-.24-2.79-.52-1.99-1.8-3.65-3.58-4.62-2.26-1.23-4.95-1.29-7.28-.12C5.84 5.18 4.3 7.4 4 10c-.3 2.56.65 5.07 2.54 6.7 1.98 1.7 5.01 2.27 7.56 1.42 2.02-.68 3.27-2.18 3.32-3.95.03-1.31-.66-2.42-2.49-3.1z" />
-      </svg>
-    ),
-  },
-  reddit: {
-    bgColor: "bg-[#FF4500] hover:opacity-90",
-    icon: (
-      <svg className="size-[1em] shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-        <path d="M24 11.54c0-1.2-.98-2.18-2.18-2.18-.59 0-1.12.23-1.52.61-1.49-1.03-3.5-1.7-5.74-1.78l1.16-3.64 3.1.73a1.64 1.64 0 10.38-1.06l-3.86-.91a.55.55 0 00-.66.36l-1.38 4.32c-2.35.02-4.46.68-6.01 1.74a2.15 2.15 0 00-1.47-.58 2.18 2.18 0 00-2.18 2.18c0 .79.43 1.48 1.07 1.86-.04.25-.06.5-.06.76 0 3.09 3.57 5.6 7.96 5.6 4.4 0 7.97-2.51 7.97-5.6 0-.24-.02-.48-.06-.71A2.16 2.16 0 0024 11.54zM8.88 13.73a1.3 1.3 0 110-2.6 1.3 1.3 0 010 2.6zm6.85 3.07c-.9.9-2.61.97-3.73.97-1.12 0-2.83-.07-3.73-.97a.42.42 0 010-.6.42.42 0 01.6 0c.56.56 1.76.73 3.13.73 1.37 0 2.57-.17 3.13-.73a.42.42 0 01.6 0c.16.16.16.44 0 .6zm-.61-3.07a1.3 1.3 0 110-2.6 1.3 1.3 0 010 2.6z" />
-      </svg>
-    ),
-  },
-};
-
-export function getSocialStyle(name: string) {
-  const key = name.trim().toLowerCase();
-  return (
-    SOCIAL_ICONS[key] ?? {
-      bgColor: "bg-muted hover:opacity-90",
-      icon: null,
-    }
-  );
-}
 
 type SocialMediaLink = { slug: string; name: string; href: string };
 
@@ -90,15 +18,15 @@ type SocialMediaButtonsProps = {
 };
 
 function resolveSocialLabel(name: unknown): string {
-  if (typeof name === "string") return name
+  if (typeof name === "string") return name;
   if (name && typeof name === "object") {
-    const map = name as Record<string, unknown>
+    const map = name as Record<string, unknown>;
     const firstString = ["uz", "uzb", "ru", "en"]
       .map((k) => map[k])
-      .find((v) => typeof v === "string")
-    if (typeof firstString === "string") return firstString
+      .find((v) => typeof v === "string");
+    if (typeof firstString === "string") return firstString;
   }
-  return "Social"
+  return "Social";
 }
 
 export function SocialMediaButtonsForSidebar({
@@ -107,26 +35,31 @@ export function SocialMediaButtonsForSidebar({
   className,
   linkClassName,
 }: SocialMediaButtonsProps) {
-  const { data: settings } = usePublicSiteSettingsQuery()
-  const isIconOnly = variant === "icon-only"
-  const isIconBox = variant === "icon-box"
-  const resolvedLinks = links?.length ? links : (settings?.socialMedia ?? seed.socialMedia)
+  const { data: settings } = usePublicSiteSettingsQuery();
+  const isIconOnly = variant === "icon-only";
+  const isIconBox = variant === "icon-box";
+  const resolvedLinks = links?.length ? links : settings?.socialMedia ?? seed.socialMedia;
 
   return (
     <div className={cn("flex flex-wrap items-center gap-1", className)}>
       {resolvedLinks.map(({ slug, name, href }) => {
-        const style = getSocialStyle(slug)
-        const isExternal = href.startsWith("http")
-        const label = resolveSocialLabel(name)
+        const style = getSocialStyle(slug);
+        const isExternal = href.startsWith("http");
+        const label = resolveSocialLabel(name);
+
         const baseLinkClass = isIconBox
-          ? "inline-flex items-center justify-center gap-2 shadow-sm transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded"
-          : "inline-flex items-center justify-center gap-2 shadow-sm transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 px-4 rounded-lg"
-        const variantClass = isIconBox
-          ? "aspect-square size-12 p-2.5 bg-background/50 text-foreground hover:bg-muted/50 [&_svg]:size-5"
+          ? "group inline-flex items-center justify-center overflow-hidden rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           : isIconOnly
-            ? "size-7 p-0 rounded-full text-white [&_svg]:size-3.5"
-            : "rounded-lg px-3 py-2.5 text-sm font-medium text-white [&_svg]:size-5"
-        const colorClass = isIconBox ? "" : style.bgColor
+            ? "group inline-flex shrink-0 items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            : "group inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
+
+        const variantClass = isIconBox
+          ? "aspect-square size-12 p-2 text-white shadow-[0_6px_18px_-5px_rgba(0,0,0,0.35)] ring-1 ring-white/25 transition-all duration-300 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] hover:-translate-y-0.5 hover:scale-[1.06] hover:shadow-[0_10px_24px_-6px_rgba(0,0,0,0.42)] active:scale-100 [&_svg]:size-5 [&_svg]:drop-shadow-sm"
+          : isIconOnly
+            ? "size-9 rounded-full p-0 text-white shadow-sm ring-1 ring-white/25 transition-transform hover:scale-105 active:scale-100 [&_svg]:size-[0.95rem] [&_svg]:drop-shadow-sm"
+            : "border border-white/15 px-3 py-2 text-sm font-semibold text-white shadow-md ring-1 ring-white/20 transition-all hover:-translate-y-px hover:shadow-lg [&_svg]:size-5";
+
+        const surfaceClass = style.gradient;
 
         return (
           <Link
@@ -134,19 +67,14 @@ export function SocialMediaButtonsForSidebar({
             href={href}
             target={isExternal ? "_blank" : undefined}
             rel={isExternal ? "noopener noreferrer" : undefined}
-            className={cn(
-              baseLinkClass,
-              variantClass,
-              colorClass,
-              linkClassName
-            )}
+            className={cn(baseLinkClass, variantClass, surfaceClass, linkClassName)}
             aria-label={label}
           >
             {style.icon}
-            {!isIconOnly && !isIconBox && <span>{label}</span>}
+            {!isIconOnly && !isIconBox && <span className="drop-shadow-sm">{label}</span>}
           </Link>
-        )
+        );
       })}
     </div>
-  )
+  );
 }

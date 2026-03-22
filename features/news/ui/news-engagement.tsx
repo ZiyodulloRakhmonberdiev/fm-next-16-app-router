@@ -2,8 +2,16 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { useSession } from "next-auth/react"
-import { Heart, MessageSquare } from "lucide-react"
+import { Loader2 } from "lucide-react"
 import { Button } from "@/shared/common/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/shared/common/components/ui/dialog"
 import { Textarea } from "@/shared/common/components/ui/textarea"
 import { toast } from "sonner"
 import { formatDateTimeLocale } from "@/shared/common/lib/formatter"
@@ -13,6 +21,7 @@ import { useLocale } from "next-intl"
 import { Input } from "@/shared/common/components/ui/input"
 import { Label } from "@/shared/common/components/ui/label"
 import { AuthModal } from "@/features/auth/ui/auth-modal"
+import { LoadMoreButton } from "@/shared/common/components/molecules/load-more-button"
 
 type ReactionType = "like" | "love" | "laugh" | "sad" | "angry"
 type CommentItem = {
@@ -59,6 +68,8 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
 
   const [authModalOpen, setAuthModalOpen] = useState(false)
   const [authMode, setAuthMode] = useState<"login" | "register">("login")
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
+  const [deletingComment, setDeletingComment] = useState(false)
 
   function getAnonId() {
     if (typeof window === "undefined") return ""
@@ -149,14 +160,21 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
     void loadComments(0, false)
   }
 
-  async function removeMyComment(id: string) {
-    const res = await fetch(`/api/comments/${id}`, { method: "DELETE" })
-    if (!res.ok) {
-      toast.error(t("comment_delete_failed"))
-      return
+  async function confirmDeleteComment() {
+    if (!pendingDeleteId) return
+    setDeletingComment(true)
+    try {
+      const res = await fetch(`/api/comments/${pendingDeleteId}`, { method: "DELETE" })
+      if (!res.ok) {
+        toast.error(t("comment_delete_failed"))
+        return
+      }
+      toast.success(t("comment_deleted"))
+      setPendingDeleteId(null)
+      void loadComments(0, false)
+    } finally {
+      setDeletingComment(false)
     }
-    toast.success(t("comment_deleted"))
-    void loadComments()
   }
 
   async function setReaction(type: ReactionType) {
@@ -219,7 +237,7 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
             <Button
               key={r.type}
               size="sm"
-              variant={myReaction === r.type ? "outline" : "ghost"}
+              variant={myReaction === r.type ? "default" : "ghost"}
               onClick={() => void setReaction(r.type)}
               className="rounded-md"
             >
@@ -246,7 +264,7 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
                 <p className="text-xs text-muted-foreground">{formatCommentDate(c.createdAt)}</p>
               </div>
               {c.replyToUserLogin ? (
-                <p className="text-xs text-muted-foreground">↪ @{c.replyToUserLogin}</p>
+                <p className="text-xs text-muted-foreground">↪ @{c.userName}</p>
               ) : null}
               <p className="text-sm text-foreground leading-snug">{c.content}</p>
               <div className="flex flex-wrap items-center gap-2">
@@ -266,7 +284,7 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
                   <button
                     type="button"
                     className="text-xs text-muted-foreground hover:text-destructive hover:underline"
-                    onClick={() => void removeMyComment(c._id)}
+                    onClick={() => setPendingDeleteId(c._id)}
                   >
                     {t("delete")}
                   </button>
@@ -294,9 +312,9 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
                           <button
                             type="button"
                             className="text-xs text-muted-foreground hover:text-destructive hover:underline"
-                            onClick={() => void removeMyComment(reply._id)}
+                            onClick={() => setPendingDeleteId(reply._id)}
                           >
-                            O&apos;chirish
+                            {t("delete")}
                           </button>
                         ) : null}
                       </div>
@@ -335,9 +353,10 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
         ))}
         {rootComments.length === 0 ? <p className="text-sm text-muted-foreground">{t("comments_empty")}</p> : null}
         {hasMore ? (
-          <Button variant="outline" size="sm" onClick={() => void loadComments(commentOffset + 5, true)}>
-            {t("load_more")}
-          </Button>
+          // <Button variant="outline" size="sm" onClick={() => void loadComments(commentOffset + 5, true)}>
+          //   {t("load_more")}
+          // </Button>
+          <LoadMoreButton label={t("load_more")} onClick={() => void loadComments(commentOffset + 5, true)} />
         ) : null}
       </div>
       <div className="space-y-3">
@@ -381,6 +400,50 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
         defaultMode={authMode}
         onSuccess={() => setAuthModalOpen(false)}
       />
+
+      <Dialog
+        open={pendingDeleteId !== null}
+        onOpenChange={(open) => {
+          if (!open && !deletingComment) setPendingDeleteId(null)
+        }}
+      >
+        <DialogContent className="gap-4 sm:max-w-sm" showCloseButton={!deletingComment}>
+          <DialogHeader>
+            <DialogTitle className="text-base">{t("comment_delete_confirm_title")}</DialogTitle>
+            <DialogDescription>{t("comment_delete_confirm_description")}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={deletingComment}
+              onClick={() => {
+                if (!deletingComment) setPendingDeleteId(null)
+              }}
+            >
+              {ta("cancel")}
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              disabled={deletingComment}
+              onClick={() => void confirmDeleteComment()}
+              className="min-w-28"
+            >
+              {deletingComment ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" />
+                  {t("comment_delete_deleting")}
+                </>
+              ) : (
+                t("delete")
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </section>
   )
 }

@@ -4,15 +4,15 @@ import * as React from "react"
 import { getNewsListForLocale, isImageTypeRawNews, type NewsItem } from "@/features/news/model"
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
 import { Card } from "@/shared/common/components/ui/card"
-import { formatDate, formatDateISO } from "@/shared/common/lib/formatter"
+import { formatDate, formatDateISO, formatDateTimeLocale } from "@/shared/common/lib/formatter"
 import type { AppLocale } from "@/shared/common/lib/formatter"
 import Image from "next/image"
 import { useLocale, useTranslations } from "next-intl"
-import { ChevronRight, Play, RotateCcw, RotateCw } from "lucide-react"
-import { VideoNewsModal } from "@/shared/common/components/molecules"
-import { Button } from "../ui/button"
+import { Clock, Eye, Heart, MessageCircle, Play } from "lucide-react"
+import { LoadMoreButton, VideoNewsModal } from "@/shared/common/components/molecules"
 import { Link } from "@/i18n/navigation"
-import { getCategoryName } from "../../lib/seed-helpers"
+import { usePublicCategoriesQuery } from "@/features/category/model/public-categories-query"
+import { getCategoryLabelForNewsItem } from "@/features/category/model/use-category-label"
 
 type RelatedNewsProps =
   | { categorySlug: string; excludeSlug: string; latestLimit?: never }
@@ -23,6 +23,7 @@ export default function RelatedNews(props: RelatedNewsProps) {
   const locale = useLocale() as AppLocale
   const t = useTranslations("common")
   const { data: publicNews = [] } = usePublicNewsQuery()
+  const { data: categories = [], isPending: categoriesPending } = usePublicCategoriesQuery()
   const [selected, setSelected] = React.useState<NewsItem | null>(null)
   const [isOpen, setIsOpen] = React.useState(false)
 
@@ -76,9 +77,9 @@ export default function RelatedNews(props: RelatedNewsProps) {
           >
             <Card className="overflow-hidden p-0 rounded-sm shadow-none border-none transition-shadow hover:shadow-md bg-card">
               <div className="flex h-full gap-3">
-                <div className="relative block h-20 w-24 shrink-0 overflow-hidden rounded-xs md:h-36 md:w-48">
+                <div className="relative h-24 w-32 md:h-36 md:w-48 shrink-0 overflow-hidden rounded-md bg-muted transition-transform duration-300">
                   {getSafeImageSrc(item.images?.[0]) ? (
-                    <Link href={`/news/${item.slug}`}>
+                    <Link href={`/news/${item.slug}`} >
                       <Image
                         src={getSafeImageSrc(item.images[0])}
                         alt={item.title ?? ""}
@@ -97,51 +98,111 @@ export default function RelatedNews(props: RelatedNewsProps) {
                     </span>
                   )}
                 </div>
-                <div className="flex min-w-0 flex-1 flex-col justify-around gap-2 py-2 px-2">
-                  <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium text-brand italic uppercase">
-                    {getCategoryName(item.categorySlug, locale)}
-                  </span>
-                  <span className="text-xs text-muted-foreground">/</span>
-                    <time
-                      dateTime={formatDateISO(item.publishedAt)}
-                      className="text-xs text-muted-foreground"
-                    >
-                      {formatDate(item.publishedAt, locale)}
-                    </time>
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <Link href={`/news/${item.slug}`} className="line-clamp-2 md:line-clamp-3 text-sm md:text-lg font-medium leading-tight hover:underline">
+                <div className="flex min-w-0 flex-1 flex-col justify-around gap-2 py-4 px-2">
+                    <div className="flex items-center gap-2">
+                      <Link href={`/category/${item.categorySlug}`} className="text-xs font-mono capitalize flex items-center gap-2 hover:underline">
+                        <span className="block w-2 h-2 bg-brand rounded-full"></span>
+                        <span>
+                          {getCategoryLabelForNewsItem(categories, categoriesPending, item, locale)}
+                        </span>
+                      </Link>
+                      <span className="text-xs text-muted-foreground hidden md:block">/</span>
+                      <time
+                        dateTime={formatDateISO(item.publishedAt)}
+                        className="text-xs text-muted-foreground hidden md:block"
+                      >
+                        {formatDateTimeLocale(item.publishedAt, locale)}
+                      </time>
+                    </div>
+                    <Link href={`/news/${item.slug}`} className="line-clamp-2 md:line-clamp-2 text-sm md:text-lg font-medium leading-tight hover:underline flex-1">
                       {item.title ?? ""}
                     </Link>
-                    {/* <h3 className="line-clamp-3 text-sm leading-tight">
-                      <span className="line-clamp-2 md:line-clamp-3 text-muted-foreground">{item.description ?? ""}</span>
-                    </h3> */}
-                  </div>
-                  <div className="hidden sm:flex items-center gap-1">
-                    <span className="text-xs text-muted-foreground">
-                      {item.views} {t("views")}
-                    </span>
-                    <span className="text-xs text-muted-foreground">|</span>
-                    <span className="text-xs text-muted-foreground">
-                      {item.minutes} {t("min_read")}
-                    </span>
+                    <div className="hidden md:flex flex-wrap items-center gap-x-2 gap-y-1.5 border-t border-border/70 px-2 py-2 text-xs text-muted-foreground sm:px-1">
+                      <span
+                        className="inline-flex items-center gap-1.5"
+                        title={`${item.views} ${t("views")}`}
+                        aria-label={`${item.views} ${t("views")}`}
+                      >
+                        <Eye className="size-3.5 shrink-0 opacity-80" aria-hidden />
+                        <span className="tabular-nums font-medium text-foreground/90">{item.views}</span>
+                        <span className="hidden md:inline">{t("views")}</span>
+                      </span>
+                      <span className="text-border/80 select-none" aria-hidden>
+                        ·
+                      </span>
+                      <span
+                        className="inline-flex items-center gap-1.5"
+                        title={`${item.minutes} ${t("min_read")}`}
+                        aria-label={`${item.minutes} ${t("min_read")}`}
+                      >
+                        <Clock className="size-3.5 shrink-0 opacity-80" aria-hidden />
+                        <span className="tabular-nums font-medium text-foreground/90">{item.minutes}</span>
+                        <span className="hidden md:inline">{t("min_read")}</span>
+                      </span>
+                      <span className="text-border/80 select-none" aria-hidden>
+                        ·
+                      </span>
+                      <span
+                        className="inline-flex items-center gap-1.5"
+                        title={`${item.commentCount ?? 0} ${t("comments")}`}
+                        aria-label={`${item.commentCount ?? 0} ${t("comments")}`}
+                      >
+                        <MessageCircle className="size-3.5 shrink-0 opacity-80" aria-hidden />
+                        <span className="tabular-nums font-medium text-foreground/90">
+                          {item.commentCount ?? 0}
+                        </span>
+                        <span className="hidden md:inline">{t("comments")}</span>
+                      </span>
+                      <span className="text-border/80 select-none" aria-hidden>
+                        ·
+                      </span>
+                      <span
+                        className="inline-flex items-center gap-1.5"
+                        title={`${item.reactionCount ?? 0} ${t("reactions")}`}
+                        aria-label={`${item.reactionCount ?? 0} ${t("reactions")}`}
+                      >
+                        <Heart className="size-3.5 shrink-0 opacity-80" aria-hidden />
+                        <span className="tabular-nums font-medium text-foreground/90">
+                          {item.reactionCount ?? 0}
+                        </span>
+                        <span className="hidden md:inline">{t("reactions")}</span>
+                      </span>
                       
+                      {item.videoUrl ? (
+                        <>
+                          <span className="text-border/80 select-none" aria-hidden>
+                            ·
+                          </span>
+                          <span
+                            className="inline-flex items-center gap-1.5"
+                            aria-label={t("video")}
+                          >
+                            <Play className="size-3.5 shrink-0 opacity-80" aria-hidden />
+                            <span className="hidden md:inline">{t("video")}</span>
+                          </span>
+                        </>
+                      ) : null}
+                    </div>
+                    <time
+                        dateTime={formatDateISO(item.publishedAt)}
+                        className="text-xs text-muted-foreground block md:hidden"
+                      >
+                        {formatDateTimeLocale(item.publishedAt, locale)}
+                      </time>
                   </div>
                 </div>
-              </div>
             </Card>
+
+
           </button>
         ))}
       </div>
       {visibleCount < items.length && (
         <div className="mt-4 flex justify-start">
-          <Button
-            className="mt-2 md:mt-4 rounded-sm md:text-lg md:py-6 md:px-8 text-white bg-brand hover:bg-brand/90 cursor-pointer"
+          <LoadMoreButton
+            label={t("load_more")}
             onClick={() => setVisibleCount((prev) => prev + 4)}
-          >
-            {t("load_more")} <ChevronRight className="w-4 h-4" />
-          </Button>
+          />
         </div>
       )}
       <VideoNewsModal

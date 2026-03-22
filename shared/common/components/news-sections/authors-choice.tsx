@@ -2,6 +2,8 @@
 
 import { getNewsListForLocale, isImageTypeRawNews, type NewsItem } from "@/features/news/model"
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
+import { usePublicCategoriesQuery } from "@/features/category/model/public-categories-query"
+import { getCategoryLabelForNewsItem } from "@/features/category/model/use-category-label"
 import { Card } from "@/shared/common/components/ui/card"
 import {
   formatDateISO,
@@ -16,6 +18,7 @@ export default function AuthorsChoice() {
   const locale = useLocale() as AppLocale
   const t = useTranslations("common")
   const { data: publicNews = [] } = usePublicNewsQuery()
+  const { data: categories = [], isPending: categoriesPending } = usePublicCategoriesQuery()
 
   const rawFiltered = [...publicNews]
     .filter(isImageTypeRawNews)
@@ -49,7 +52,12 @@ export default function AuthorsChoice() {
               </Link>
               <div className="flex flex-col gap-2 p-4">
                 <div className="flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground">
-                  <span className="uppercase font-medium text-brand italic">{featured.category}</span>
+                  <Link href={`/category/${featured.categorySlug}`} className="capitalize font-mono flex items-center gap-1 hover:underline">
+                    <span className="block w-2 h-2 bg-brand rounded-full"></span>
+                    <span className="text-xs capitalize">
+                      {getCategoryLabelForNewsItem(categories, categoriesPending, featured, locale)}
+                    </span>
+                  </Link>
                   <span aria-hidden>/</span>
                   <time dateTime={formatDateISO(featured.publishedAt)}>
                     {formatDateTimeLocale(featured.publishedAt, locale)}
@@ -82,7 +90,12 @@ export default function AuthorsChoice() {
               className="flex flex-col gap-2 rounded-sm border-none p-4 shadow-none bg-foreground/5  md:bg-background"
             >
               <div className="flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground">
-                <span className="uppercase font-medium text-brand italic">{item.category}</span>
+                <Link href={`/category/${item.categorySlug}`} className="capitalize font-mono flex items-center gap-1 hover:underline">
+                  <span className="block w-2 h-2 bg-brand rounded-full"></span>
+                  <span className="text-xs capitalize">
+                    {getCategoryLabelForNewsItem(categories, categoriesPending, item, locale)}
+                  </span>
+                </Link>
                 <span aria-hidden>/</span>
                 <time dateTime={formatDateISO(item.publishedAt)}>
                   {formatDateTimeLocale(item.publishedAt, locale)}

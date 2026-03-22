@@ -4,13 +4,11 @@ import * as React from "react"
 import { getNewsListForLocale, isImageTypeRawNews, type NewsItem } from "@/features/news/model"
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
 import { getCategoryNameFromApi, usePublicCategoriesQuery } from "@/features/category/model/public-categories-query"
-import { useLocale, useTranslations } from "next-intl"
-import { Link } from "@/i18n/navigation"
-import { Button } from "@/shared/common/components/ui/button"
-import { ArrowRight } from "lucide-react"
+import { useLocale } from "next-intl"
 import type { AppLocale } from "@/shared/common/lib/formatter"
 import { FeaturedNewsCard } from "@/features/news/ui/featured-news-card"
 import { MiniNewsCard } from "@/features/news/ui/mini-news-card"
+import { NewsSectionHeader } from "@/shared/common/components/news-sections/news-section-header"
 
 type BannerSectionProps = {
   categorySlug?: string
@@ -21,7 +19,6 @@ export default function BannerSection({
   categorySlug = "business",
 }: BannerSectionProps) {
   const locale = useLocale() as AppLocale
-  const t = useTranslations("common")
   const { data: publicNews = [] } = usePublicNewsQuery()
   const { data: categories = [] } = usePublicCategoriesQuery()
   const categoryName = getCategoryNameFromApi(categories, categorySlug, locale)
@@ -45,59 +42,59 @@ export default function BannerSection({
   if (sorted.length < 1) return null
 
   return (
-    <section className="w-full space-y-4 px-4 pb-4 md:px-6 rounded-md">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-brand pb-2 pt-4 text-brand">
-        <h2 className="text-lg font-semibold">{categoryName}</h2>
-        <Button variant="ghost" size="sm" asChild className="">
-          <Link href={`/category/${categorySlug}`} className="text-xs md:text-sm">
-            {t("view_all")} <ArrowRight className="h-4 w-4" />
-          </Link>
-        </Button>
-      </div>
+    <div className="rounded-md px-4 md:px-6 py-6">
+      <section className="w-full space-y-4 pb-4 rounded-md border">
+        <NewsSectionHeader
+          title={categoryName}
+          viewAllHref={`/category/${categorySlug}`}
+          variant="brandThin"
+          linkWrap="link"
+        />
 
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-3 md:gap-4 
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 md:gap-4 px-4 md:px-6
       ">
-        <div className="hidden md:flex md:flex-col gap-2">
-          {leftItems.map((item: NewsItem) => (
-            <MiniNewsCard
-              key={item.slug}
-              item={item}
-              locale={locale}
-              variant="banner-side"
-            />
-          ))}
-        </div>
-
-        <div className="hidden md:block">
-          {featured ? (
-            <FeaturedNewsCard item={featured} locale={locale} variant="banner" />
-          ) : null}
-        </div>
-
-        <div className="hidden md:flex md:flex-col gap-2">
-          {rightItems.map((item: NewsItem) => (
-            <MiniNewsCard
-              key={item.slug}
-              item={item}
-              locale={locale}
-              variant="banner-side"
-            />
-          ))}
-        </div>
-
-        <div className="grid grid-cols-1 gap-2 md:hidden">
-          {([featured, ...leftItems, ...rightItems].filter(Boolean) as NewsItem[])
-            .slice(0, 12)
-            .map((item) => (
+          <div className="hidden md:flex md:flex-col gap-2">
+            {leftItems.map((item: NewsItem) => (
               <MiniNewsCard
                 key={item.slug}
                 item={item}
                 locale={locale}
-                variant="banner-mobile"
+                variant="row"
               />
             ))}
+          </div>
+
+          <div className="hidden lg:block">
+            {featured ? (
+              <FeaturedNewsCard item={featured} locale={locale} variant="banner" />
+            ) : null}
+          </div>
+
+          <div className="hidden md:flex md:flex-col gap-2">
+            {rightItems.map((item: NewsItem) => (
+              <MiniNewsCard
+                key={item.slug}
+                item={item}
+                locale={locale}
+                variant="row"
+              />
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 gap-2 md:hidden">
+            {([featured, ...leftItems, ...rightItems].filter(Boolean) as NewsItem[])
+              .slice(0, 12)
+              .map((item) => (
+                <MiniNewsCard
+                  key={item.slug}
+                  item={item}
+                  locale={locale}
+                  variant="row"
+                />
+              ))}
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
   )
 }

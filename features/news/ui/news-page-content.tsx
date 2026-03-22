@@ -4,12 +4,12 @@ import * as React from "react"
 import { Link } from "@/i18n/navigation"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { ArrowLeft, Calendar, Clock, Eye, Facebook, Heart, Link2, Linkedin, MessageSquare, Share2, Twitter } from "lucide-react"
+import { Calendar, Clock, Eye, Facebook, Heart, Link2, MessageSquare, Send, Share2 } from "lucide-react"
 import { Button } from "@/shared/common/components/ui/button"
-import { formatDate, formatDateISO, formatDateTimeLocale } from "@/shared/common/lib/formatter"
+import { formatDateISO, formatDateTimeLocale } from "@/shared/common/lib/formatter"
 import type { AppLocale } from "@/shared/common/lib/formatter"
 import { RelatedNews } from "@/shared/common/components/news-sections"
-import { Send } from "lucide-react"
+import { toast } from "sonner"
 import CreatedBy from "./created-by"
 import { useLocale, useTranslations } from "next-intl"
 import {
@@ -33,6 +33,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/shared/common/components/ui/dropdown-menu"
 import {
@@ -42,7 +43,7 @@ import {
   TooltipTrigger,
 } from "@/shared/common/components/ui/tooltip"
 import { SOCIAL_ICONS } from "@/shared/common/components/ui/social-media-buttons"
-import { getCategoryName } from "@/shared/common/lib/seed-helpers"
+import { useCategoryLabel } from "@/features/category/model/use-category-label"
 
 export type { NewsItem }
 
@@ -96,7 +97,6 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
   const hasVideo = Boolean(news.videoUrl?.trim())
 
   const [shareUrl, setShareUrl] = React.useState("")
-  const [copyDone, setCopyDone] = React.useState(false)
   const [reactionTotal, setReactionTotal] = React.useState(0)
   const [commentTotal, setCommentTotal] = React.useState(0)
   const newsRef = newsId ?? news.slug
@@ -124,30 +124,43 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
     if (!shareUrl) return
     try {
       await navigator.clipboard.writeText(shareUrl)
-      setCopyDone(true)
-      setTimeout(() => setCopyDone(false), 2000)
-    } catch { }
-  }, [shareUrl])
+      toast.success(t("copied"), { position: "bottom-center" })
+    } catch {
+      toast.error(t("copy_failed"))
+    }
+  }, [shareUrl, t])
 
+  const categoryLabelRaw = useCategoryLabel(categorySlug, locale, news.category)
   const categoryLabel = React.useMemo(() => {
-    const name = getCategoryName(categorySlug, locale)
+    const name = categoryLabelRaw
     return name ? name.charAt(0).toUpperCase() + name.slice(1) : name
-  }, [categorySlug, locale])
+  }, [categoryLabelRaw])
 
   const openShare = React.useCallback(
-    (type: "telegram" | "facebook" | "twitter" | "whatsapp" | "linkedin") => {
+    async (type: "telegram" | "facebook" | "whatsapp" | "instagram") => {
       const u = encodeURIComponent(shareUrl)
-      const t = encodeURIComponent(news.title ?? "")
-      const urls: Record<typeof type, string> = {
-        telegram: `https://t.me/share/url?url=${u}&text=${t}`,
-        facebook: `https://www.facebook.com/sharer/sharer.php?u=${u}`,
-        twitter: `https://twitter.com/intent/tweet?url=${u}&text=${t}`,
-        whatsapp: `https://wa.me/?text=${t}%20${u}`,
-        linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${u}`,
+      const titleEnc = encodeURIComponent(news.title ?? "")
+      if (type === "instagram") {
+        try {
+          await navigator.clipboard.writeText(shareUrl)
+          toast.success(t("copied"), {
+            position: "bottom-center",
+            description: t("instagram_share_hint"),
+          })
+        } catch {
+          toast.error(t("copy_failed"))
+        }
+        window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer")
+        return
       }
+      const urls = {
+        telegram: `https://t.me/share/url?url=${u}&text=${titleEnc}`,
+        facebook: `https://www.facebook.com/sharer/sharer.php?u=${u}`,
+        whatsapp: `https://wa.me/?text=${titleEnc}%20${u}`,
+      } as const
       window.open(urls[type], "_blank", "noopener,noreferrer")
     },
-    [shareUrl, news.title]
+    [shareUrl, news.title, t]
   )
 
   React.useEffect(() => {
@@ -199,20 +212,6 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
                 variant="ghost"
                 className="h-8 w-8 p-0"
               />
-              <Tooltip open={copyDone ? true : undefined}>
-                <TooltipTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 gap-1.5 text-muted-foreground hover:text-foreground"
-                    onClick={copyLink}
-                  >
-                    <Link2 className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>{copyDone ? t("copied") : t("copy")}</TooltipContent>
-              </Tooltip>
               <DropdownMenu>
                 <Tooltip>
                   <DropdownMenuTrigger asChild>
@@ -229,51 +228,54 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
                   </DropdownMenuTrigger>
                   <TooltipContent>{t("share")}</TooltipContent>
                 </Tooltip>
-                <DropdownMenuContent align="end" className="min-w-40">
+                <DropdownMenuContent align="end" className="min-w-50">
                   <DropdownMenuItem
-                    onSelect={() => openShare("telegram")}
-                    className="flex items-center gap-2"
+                    onSelect={() => void openShare("telegram")}
+                    className="flex cursor-pointer items-center gap-2"
                   >
-                    <div className="p-2 bg-foreground rounded-full mr-2">
-                      <Send className="h-4 w-4 text-background" />
-                    </div>
+                    <span className="flex size-8 shrink-0 items-center justify-center rounded-full border [&_svg]:size-3">
+                      <Send className="size-4" aria-hidden />
+                    </span>
                     Telegram
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    onSelect={() => openShare("facebook")}
-                    className="flex items-center gap-2"
+                    onSelect={() => void openShare("whatsapp")}
+                    className="flex cursor-pointer items-center gap-2"
                   >
-                    <div className="p-2 bg-foreground rounded-full mr-2">
-                      <Facebook className="h-4 w-4 text-background" />
-                    </div>
-                    Facebook
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onSelect={() => openShare("twitter")}
-                    className="flex items-center gap-2"
-                  >
-                    <div className="p-2 bg-foreground rounded-full mr-2">
-                      <Twitter className="h-4 w-4 text-background" />
-                    </div>
-                    X (Twitter)
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onSelect={() => openShare("whatsapp")}
-                    className="flex items-center gap-2"
-                  >
-                    <div className="p-2 bg-foreground rounded-full mr-2">
-                      <MessageSquare className="h-4 w-4 text-background" />
-                    </div>
+                    <span className="flex size-8 shrink-0 items-center justify-center rounded-full border [&_svg]:size-3">
+                      <svg className="size-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.435 9.884-9.881 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                      </svg>
+                    </span>
                     WhatsApp
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    onSelect={() => openShare("linkedin")}
-                    className="flex items-center gap-2"
+                    onSelect={() => void openShare("instagram")}
+                    className="flex cursor-pointer items-center gap-2"
                   >
-                    <div className="p-2 bg-foreground rounded-full mr-2">
-                      <Linkedin className="h-4 w-4 text-background" />
-                    </div>
-                    LinkedIn
+                    <span className="flex size-8 shrink-0 items-center justify-center rounded-full border [&_svg]:size-3">
+                      {SOCIAL_ICONS.instagram.icon}
+                    </span>
+                    Instagram
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onSelect={() => void openShare("facebook")}
+                    className="flex cursor-pointer items-center gap-2"
+                  >
+                    <span className="flex size-8 shrink-0 items-center justify-center rounded-full border">
+                      <Facebook className="size-4" aria-hidden />
+                    </span>
+                    Facebook
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onSelect={() => void copyLink()}
+                    className="flex cursor-pointer items-center gap-2"
+                  >
+                    <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-foreground">
+                      <Link2 className="size-4" aria-hidden />
+                    </span>
+                    {t("copy_link")}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -301,19 +303,19 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
             <span>{news.minutes}</span> <span className="hidden md:inline-block">{t("min_read")}</span>
           </div>
           <span aria-hidden className="select-none px-1 md:px-2">·</span>
-          <div className="inline-flex items-center gap-1 md:px-1">
+          <div className="inline-flex items-center gap-2 md:px-1">
             <Eye className="h-4 w-4" />
             {news.views} <span className="hidden md:inline-block">{t("views")}</span>
           </div>
-          {/* <span aria-hidden className="select-none px-1 md:px-2">·</span>
-          <div className="inline-flex items-center gap-1 md:px-1">
-            <Heart className="h-4 w-4" />
-            {reactionTotal} <span className="hidden md:inline-block">{t("reactions")}</span>
-          </div> */}
           <span aria-hidden className="select-none px-1 md:px-2">·</span>
-          <div className="inline-flex items-center gap-1 md:px-1">
+          <div className="inline-flex items-center gap-2 md:px-1">
             <MessageSquare className="h-4 w-4" />
             {commentTotal} <span className="hidden md:inline-block">{t("comments")}</span>
+          <span aria-hidden className="select-none px-1 md:px-2">·</span>
+          <div className="inline-flex items-center gap-2 md:px-1">
+            <Heart className="h-4 w-4" />
+            {reactionTotal} <span className="hidden md:inline-block">{t("reactions")}</span>
+          </div>
           </div>
         </div>
         {hasVideo && (() => {

@@ -1,5 +1,7 @@
+export { NewsSectionHeader } from "./news-section-header"
 export { default as BannerSection } from "./banner-section"
 export { default as VideoNewsSection } from "./video-news-section"
+export { default as VideoNewsSection2 } from "./video-news-section-2"
 export { default as ColumnSection } from "./column-section"
 export { default as TextNewsSection } from "./text-news-section"
 export { default as SlideNewsSection } from "./slide-news-section"

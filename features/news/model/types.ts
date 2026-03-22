@@ -39,6 +39,9 @@ export type RawNewsItem = {
   telegramLastAttemptAt?: Date
   videoSource?: "youtube" | "local"
   videoUrl?: string
+  /** GET /api/news javobida qo‘shiladi */
+  commentCount?: number
+  reactionCount?: number
 }
 
 export type NewsItem = {
@@ -67,6 +70,8 @@ export type NewsItem = {
   telegramLastAttemptAt?: Date
   videoSource?: "youtube" | "local"
   videoUrl?: string
+  commentCount?: number
+  reactionCount?: number
 }
 
 export function pickNewsForLocale(
@@ -117,6 +122,8 @@ export function pickNewsForLocale(
     telegramLastAttemptAt: raw.telegramLastAttemptAt,
     videoSource: raw.videoSource,
     videoUrl: raw.videoUrl,
+    commentCount: raw.commentCount ?? 0,
+    reactionCount: raw.reactionCount ?? 0,
   }
 }
 

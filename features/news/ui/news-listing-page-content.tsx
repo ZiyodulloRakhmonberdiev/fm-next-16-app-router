@@ -24,6 +24,7 @@ import { NewsListingSkeleton } from "./news-listing/news-listing-skeleton"
 import { NewsListingVideoGrid } from "./news-listing/news-listing-video-grid"
 import { NewsListingList } from "./news-listing/news-listing-list"
 import { NewsListingAuthorsChoiceSidebar } from "./news-listing/news-listing-authors-choice-sidebar"
+import { LoadMoreButton } from "@/shared/common/components/molecules/load-more-button"
 
 export type { NewsListingVariant }
 
@@ -265,17 +266,18 @@ export function NewsListingPageContent({
 
           <div className="mt-5 flex justify-start">
             {hasMore ? (
-              <Button
+              <LoadMoreButton label={t("load_more")} onClick={() => void loadMore()} />
+            ) : null}
+          </div>
+        </div>
+              {/* <Button
                 variant="outline"
                 onClick={() => void loadMore()}
                 disabled={loading}
                 className="min-w-40 w-full bg-brand text-white hover:bg-brand/90 hover:text-white"
               >
                 {loading ? t("loading") : t("load_more")}
-              </Button>
-            ) : null}
-          </div>
-        </div>
+              </Button> */}
 
         {showAuthorsChoice ? (
           <NewsListingAuthorsChoiceSidebar

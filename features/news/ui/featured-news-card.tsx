@@ -11,6 +11,7 @@ import {
   formatDateTimeLocale,
 } from "@/shared/common/lib/formatter"
 import type { AppLocale } from "@/shared/common/lib/formatter"
+import { useCategoryLabel } from "@/features/category/model/use-category-label"
 
 export type FeaturedNewsCardVariant = "banner" | "column"
 
@@ -53,7 +54,7 @@ export function FeaturedNewsCard({
         <div className="flex flex-col gap-2 p-4">
           <div className="flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground">
             <span className="font-medium uppercase italic text-brand">
-              {item.category}
+              {useCategoryLabel(item.categorySlug, locale, item.category)}
             </span>
             <span aria-hidden>/</span>
             <time dateTime={formatDateISO(item.publishedAt)}>
@@ -75,37 +76,42 @@ export function FeaturedNewsCard({
 
   /* banner */
   return (
-    <Link href={`/news/${item.slug}`} className={cn("block", className)}>
-      <Card className="overflow-hidden rounded-sm border-border bg-background p-0 shadow-none transition-shadow hover:shadow-none">
-        <div className="relative aspect-video max-h-64 w-full">
-          {img ? (
-            <Image
-              src={img}
-              alt={item.title}
-              fill
-              className="object-cover"
-            />
-          ) : null}
-        </div>
-        <div className="flex flex-col gap-2 p-3">
-          <span className="text-xs font-medium uppercase italic text-brand">
-            {item.category}
-          </span>
-          <h3 className="line-clamp-3 text-base font-semibold leading-tight hover:underline">
+    <Card className="overflow-hidden rounded-sm border-border group bg-background p-0 shadow-none transition-shadow hover:shadow-none">
+      <Link href={`/news/${item.slug}`} className="relative aspect-video max-h-64 w-full group-hover:scale-105 transition-transform duration-300">
+        {img ? (
+          <Image
+            src={img}
+            alt={item.title}
+            fill
+            className="object-cover"
+          />
+        ) : null}
+      </Link>
+      <div className="flex flex-col gap-2 p-3">
+       <div className="flex items-center justify-start gap-1">
+       <Link href={`/category/${item.categorySlug}`} className="text-xs text-muted-foreground font-mono capitalize hover:underline flex items-center gap-1">
+          <span className="block w-2 h-2 bg-brand rounded-full"></span>
+          <span className="text-xs capitalize">{useCategoryLabel(item.categorySlug, locale, item.category)}</span>
+        </Link>
+        <span aria-hidden className="text-muted-foreground text-xs">/</span>
+        <time
+          dateTime={formatDateISO(item.publishedAt)}
+          className="text-xs text-muted-foreground"
+        >
+          {formatDateTimeLocale(item.publishedAt, locale)}
+        </time>
+       </div>
+        <h3 className="line-clamp-3 text-base font-semibold leading-tight hover:underline">
+          <Link href={`/news/${item.slug}`} className="hover:underline">
             {item.title}
-          </h3>
-          {/* <span className="line-clamp-2 text-base font-normal leading-tight text-muted-foreground">
-            {item.description}
-          </span> */}
-          <time
-            dateTime={formatDateISO(item.publishedAt)}
-            className="text-xs text-muted-foreground"
-          >
-            {formatDateTimeLocale(item.publishedAt, locale)}
-          </time>
-        </div>
-      </Card>
-    </Link>
+          </Link>
+        </h3>
+        <span className="line-clamp-3 text-sm leading-tight text-muted-foreground">
+          {item.description}
+        </span>
+        
+      </div>
+    </Card>
   )
 }
 

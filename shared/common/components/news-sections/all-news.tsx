@@ -2,6 +2,8 @@
 
 import { getNewsListForLocale, isImageTypeRawNews, type NewsItem } from "@/features/news/model"
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
+import { usePublicCategoriesQuery } from "@/features/category/model/public-categories-query"
+import { getCategoryLabelForNewsItem } from "@/features/category/model/use-category-label"
 import { Card } from "@/shared/common/components/ui/card"
 import { formatDateISO, formatDateTimeLocale, type AppLocale } from "@/shared/common/lib/formatter"
 import { Link } from "@/i18n/navigation"
@@ -64,7 +66,9 @@ export default function AllNews() {
                   </Link>
                   <div className="flex min-w-0 py-2 px-1 flex-col flex-1 justify-center gap-3">
                     <div className="flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground">
-                      <span className="uppercase font-medium text-brand italic">{item.category}</span>
+                      <span className="uppercase font-medium text-brand italic">
+                        {getCategoryLabelForNewsItem(categories, categoriesPending, item, locale)}
+                      </span>
                       <span aria-hidden>/</span>
                       <time dateTime={formatDateISO(item.publishedAt)}>
                         {formatDateTimeLocale(item.publishedAt, locale)}

@@ -13,6 +13,7 @@ import {
 } from "@/features/category/model/public-categories-query"
 import { BannerSection, ColumnSection, HeaderNewsCarousel, SlideNewsSection, TextNewsSection, VideoNewsSection } from "@/shared/common/components/news-sections"
 import RowSection from "@/shared/common/components/news-sections/row-section"
+import VideoNewsSection2 from "@/shared/common/components/news-sections/video-news-section-2"
 
 export default function HomeMainContent() {
   const { data: publicNews = [], isError, isLoading, isFetching } = usePublicNewsQuery()
@@ -44,6 +45,26 @@ export default function HomeMainContent() {
     categoriesByPriority[0]?.slug ??
     "world"
 
+  const fifthCategorySlug =
+    categoriesByPriority[4]?.slug ??
+    "rights"
+
+  const sixthCategorySlug =
+    categoriesByPriority[5]?.slug ??
+    "economy"
+  const seventhCategorySlug =
+    categoriesByPriority[6]?.slug ??
+    "health"
+  const eighthCategorySlug =
+    categoriesByPriority[7]?.slug ??
+    "science"
+  const ninthCategorySlug =
+    categoriesByPriority[8]?.slug ??
+    "technology"
+  const tenthCategorySlug =
+    categoriesByPriority[9]?.slug ??
+    "sports"
+    
   if ((isLoading || isFetching || categoriesLoading || categoriesFetching) && publicNews.length === 0) {
     return <ServerLoading />
   }
@@ -59,13 +80,18 @@ export default function HomeMainContent() {
       <HeaderNewsCarousel />
       <TopBanner />
       <BannerSection categorySlug={firstCategorySlug} featuredPosition="right" />
-      <SlideNewsSection categorySlug={firstCategorySlug} />
-      {/* <ColumnSection categorySlug={firstCategorySlug} featuredPosition="left" /> */}
+      <SlideNewsSection categorySlug={fourthCategorySlug} />
       <BannerSection categorySlug={secondCategorySlug} featuredPosition="left" />
       <TextNewsSection />
-      <VideoNewsSection />
+      {/* <VideoNewsSection /> */}
+      <VideoNewsSection2 />
       <RowSection categorySlug={thirdCategorySlug} />
-      <StayConnected />
+      <SlideNewsSection categorySlug={fifthCategorySlug} />
+      <ColumnSection categorySlug={sixthCategorySlug} />
+      <RowSection categorySlug={seventhCategorySlug} />
+      <BannerSection categorySlug={eighthCategorySlug} featuredPosition="right" />
+      <SlideNewsSection categorySlug={ninthCategorySlug} />
+      <ColumnSection categorySlug={tenthCategorySlug} />      
     </>
   )
 }

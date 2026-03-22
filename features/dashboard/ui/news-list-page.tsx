@@ -44,6 +44,8 @@ import { cn } from '@/shared/common/lib/utils'
 import type { AppLocale } from '@/shared/common/lib/locale-api'
 import { LOCALES } from '@/shared/common/lib/locale-constants'
 import type { NewsItem, NewsStatus, RawNewsItem } from '@/features/news/model'
+import { usePublicCategoriesQuery } from '@/features/category/model/public-categories-query'
+import { getCategoryLabelForNewsItem } from '@/features/category/model/use-category-label'
 import { useNewsQuery } from '@/features/dashboard/model/admin-hooks'
 import {
   Newspaper, PlusCircle, Eye, Search, ChevronDown,
@@ -142,6 +144,7 @@ export function DashboardNewsListPage({
   variant = 'full',
   initialStatus = '',
 }: DashboardNewsListPageProps) {
+  const { data: categories = [], isPending: categoriesPending } = usePublicCategoriesQuery()
   const { data, isLoading, error } = useNewsQuery(variant === 'tableOnly' ? initialStatus || undefined : undefined)
   const rawNews = useMemo(() => data?.data ?? [], [data])
   const news = useMemo(
@@ -465,7 +468,11 @@ export function DashboardNewsListPage({
                             </Link>
                           </TableCell>
                         )}
-                        {columnVisibility.kategoriya !== false && <TableCell className="text-muted-foreground">{item.category}</TableCell>}
+                        {columnVisibility.kategoriya !== false && (
+                          <TableCell className="text-muted-foreground">
+                            {getCategoryLabelForNewsItem(categories, categoriesPending, item, locale)}
+                          </TableCell>
+                        )}
                         {columnVisibility.status !== false && (
                           <TableCell>
                             <span className="inline-flex rounded-md bg-muted px-2 py-0.5 text-xs font-medium capitalize">

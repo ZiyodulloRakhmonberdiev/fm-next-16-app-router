@@ -1,18 +1,13 @@
 "use client"
 
-import { useTranslations } from "next-intl"
 import { SocialMediaButtonsForSidebar } from "@/shared/common/components/ui/social-media-buttons-for-sidebar"
 
 export default function StayConnectedSidebar() {
-  const t = useTranslations("stayConnected")
-
   return (
-    <section className="w-full border-t border-border px-4 pt-3">
-      {/* <h2 className="text-base font-semibold text-foreground">{t("title")}</h2> */}
-      <div className="" aria-hidden />
+    <section className="w-full border-t border-border/40 px-4 pt-4">
       <SocialMediaButtonsForSidebar
-        variant="icon-box"
-        className="grid grid-cols-4 gap-1"
+        variant="icon-only"
+        className="flex flex-wrap items-center justify-center gap-2 sm:justify-start"
       />
     </section>
   )

@@ -16,6 +16,8 @@ import {
 import type { CarouselApi } from "@/shared/common/components/ui/carousel"
 import { getNewsListForLocale, isImageTypeRawNews, type NewsItem } from "@/features/news/model"
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
+import { usePublicCategoriesQuery } from "@/features/category/model/public-categories-query"
+import { getCategoryLabelForNewsItem } from "@/features/category/model/use-category-label"
 import { cn } from "@/shared/common/lib/utils"
 import { AppLocale, formatDateISO, formatDateTimeLocale } from "../../lib/formatter"
 
@@ -54,6 +56,7 @@ export default function TopNewsCarousel() {
   )
   const locale = useLocale() as AppLocale
   const { data: publicNews = [] } = usePublicNewsQuery()
+  const { data: categories = [], isPending: categoriesPending } = usePublicCategoriesQuery()
   const [api, setApi] = React.useState<CarouselApi | null>(null)
   const [selectedIndex, setSelectedIndex] = React.useState(0)
 
@@ -111,7 +114,7 @@ export default function TopNewsCarousel() {
                   <div className="grid grid-cols-1 md:grid-cols-5 h-full min-h-[420px] md:min-h-[480px] lg:min-h-[520px]">
                     <div className="flex flex-col justify-between order-1 md:order-0 gap-2 p-4 md:gap-3 md:p-8 bg-background border-none md:col-span-2 min-h-0">
                       <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                        {item.category}
+                        {getCategoryLabelForNewsItem(categories, categoriesPending, item, locale)}
                       </span>
                       <div className="flex flex-col gap-2">
                         <h3 className="text-lg font-semibold leading-tight md:text-xl">
