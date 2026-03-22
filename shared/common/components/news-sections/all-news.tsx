@@ -13,6 +13,7 @@ import { useLocale } from "next-intl"
 export default function AllNews() {
   const locale = useLocale() as AppLocale
   const { data: publicNews = [] } = usePublicNewsQuery()
+  const { data: categories = [], isPending: categoriesPending } = usePublicCategoriesQuery()
 
   const raw = [...publicNews]
     .filter(isImageTypeRawNews)
