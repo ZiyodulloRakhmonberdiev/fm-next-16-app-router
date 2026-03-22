@@ -25,6 +25,7 @@ import {
 } from "@/features/news/lib/latin-cyrill-translator"
 import type { AppLocale } from "@/shared/common/lib/locale-api"
 import { toast } from "sonner"
+import { uploadVideoViaApiOrCloudinary } from "@/shared/common/lib/cloudinary-client-upload"
 
 type LocalMedia = {
   id: string
@@ -64,12 +65,16 @@ export function ContentForm({
   }
 
   const uploadMedia = async (file: File, kind: "image" | "video"): Promise<string> => {
+    if (kind === "video") {
+      return uploadVideoViaApiOrCloudinary(file, { credentials: "include" })
+    }
     const formData = new FormData()
     formData.append("file", file)
     formData.append("kind", kind)
 
     const res = await fetch("/api/uploads", {
       method: "POST",
+      credentials: "include",
       body: formData,
     })
     const data = (await res.json().catch(() => null)) as { url?: string; error?: string } | null
@@ -772,7 +777,7 @@ export function ContentForm({
             value={content}
             onChange={(e) => onChange(e.target.value)}
             placeholder={placeholder}
-            className="min-h-64 w-full resize-vertical rounded-md border bg-background px-3 py-2 text-sm font-mono outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40"
+            className="min-h-64 w-full resize-vertical rounded-md border bg-background px-3 py-2 text-sm  outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40"
           />
         </div>
 

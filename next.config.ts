@@ -5,6 +5,12 @@ const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ["mongoose"],
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "500mb",
+    },
+    proxyClientMaxBodySize: "500mb",
+  },
   images: {
     loader: "custom",
     loaderFile: "./lib/image-loader.ts",

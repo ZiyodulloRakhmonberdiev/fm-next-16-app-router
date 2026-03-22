@@ -1,8 +1,9 @@
 "use client"
 
+import type { ReactNode } from "react"
 import Image from "next/image"
 import { Link } from "@/i18n/navigation"
-import { Calendar, Clock, Eye, Heart, MessageSquare, Play } from "lucide-react"
+import { Clock, Eye, Heart, MessageSquare, Play } from "lucide-react"
 import type { AppLocale } from "@/shared/common/lib/formatter"
 import { formatDateISO, formatDateTimeLocale } from "@/shared/common/lib/formatter"
 import { Card } from "@/shared/common/components/ui/card"
@@ -15,9 +16,11 @@ type NewsListingListCardProps = {
   locale: AppLocale
   stats?: { comments: number; reactions: number }
   imagesLabel: string
+  /** Rasm ustidagi tugmalar (masalan, saqlanganlar sahifasida bookmark) */
+  imageOverlay?: ReactNode
 }
 
-export function NewsListingListCard({ item, locale, stats, imagesLabel }: NewsListingListCardProps) {
+export function NewsListingListCard({ item, locale, stats, imagesLabel, imageOverlay }: NewsListingListCardProps) {
   const categoryLabel = useCategoryLabel(item.categorySlug, locale, item.category)
   const thumbSrc = getSafeImageSrc(item.images?.[0])
   const videoPoster = !thumbSrc ? getSafeImageSrc(getVideoPoster(item.videoUrl)) : ""
@@ -27,31 +30,36 @@ export function NewsListingListCard({ item, locale, stats, imagesLabel }: NewsLi
   return (
     <Card className="gap-0 overflow-hidden rounded-lg group p-0 py-0 shadow-none transition-colors hover:bg-muted/30">
       <div className="flex flex-col gap-3 p-0 sm:flex-row">
-        <Link href={`/news/${item.slug}`} className="relative h-44 w-full overflow-hidden rounded-md bg-muted sm:h-48 sm:basis-1/3">
-          {mediaSrc ? (
-            <Image
-              src={mediaSrc}
-              alt={item.title}
-              fill
-              className="object-cover transition-transform duration-300 group-hover:scale-105"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center px-1 text-center text-[10px] text-muted-foreground">
-              {imagesLabel}
-            </div>
-          )}
+        <div className="relative h-44 w-full overflow-hidden rounded-md bg-muted sm:h-48 sm:basis-1/3">
+          <Link href={`/news/${item.slug}`} className="absolute inset-0 z-0 block">
+            {mediaSrc ? (
+              <Image
+                src={mediaSrc}
+                alt={item.title}
+                fill
+                className="object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center px-1 text-center text-[10px] text-muted-foreground">
+                {imagesLabel}
+              </div>
+            )}
+          </Link>
           {showVideo ? (
-            <div className="absolute inset-0 flex items-center justify-center">
+            <div className="pointer-events-none absolute inset-0 z-1 flex items-center justify-center">
               <span className="inline-flex size-10 items-center justify-center rounded-full bg-black/50">
                 <Play className="h-5 w-5 text-white" />
               </span>
             </div>
           ) : null}
-        </Link>
+          {imageOverlay ? (
+            <div className="absolute right-2 top-2 z-2">{imageOverlay}</div>
+          ) : null}
+        </div>
 
         <div className="min-w-0 flex flex-1 flex-col justify-start space-y-2 p-2 sm:basis-2/3 md:p-4">
           <div className="flex flex-wrap items-center text-[11px] text-muted-foreground gap-2 justify-between">
-            <Link href={`/category/${item.categorySlug}`} className="font-mono hover:underline capitalize inline-flex items-center gap-1">
+            <Link href={`/category/${item.categorySlug}`} className=" hover:underline capitalize inline-flex items-center gap-1">
               <span className="block w-2 h-2 bg-brand rounded-full"></span>
               {categoryLabel}
             </Link>

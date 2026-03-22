@@ -40,7 +40,7 @@ async function fetchInitial(locale: AppLocale) {
   const proto = h.get("x-forwarded-proto") ?? "http"
   const origin = `${proto}://${host}`
   const res = await fetch(
-    `${origin}/api/news?status=published&recentMonths=6&video=1&sortBy=publishedAt&page=1&limit=9`,
+    `${origin}/api/news?status=published&video=1&sortBy=publishedAt&page=1&limit=9`,
     { cache: "no-store" }
   )
   if (!res.ok) return { items: [], page: 1, totalPages: 1 }
@@ -66,14 +66,13 @@ export default async function VideoNewsPage({
       </div>
       <div className="flex w-full flex-1 flex-col">
         <Header />
-        <main className="flex-1 py-4 px-4 md:px-6">
+        <main className="flex-1">
           <ClientServerOffGate model="news">
-            <div className="w-full">
+            <div className="mx-auto max-w-7xl">
               <NewsListingPageContent
                 initial={initial}
                 initialFilter="video"
                 layout="videoGrid"
-                showAuthorsChoice={false}
                 forceVideoOnly
                 pageSize={9}
               />

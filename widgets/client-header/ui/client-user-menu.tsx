@@ -42,6 +42,7 @@ import { useTranslations } from "next-intl"
 export function ClientUserMenu() {
   const { data: session } = useSession()
   const t = useTranslations("auth")
+  const tc = useTranslations("common")
   const [savedCount, setSavedCount] = useState(0)
   const [profileOpen, setProfileOpen] = useState(false)
   const [authOpen, setAuthOpen] = useState(false)
@@ -95,10 +96,10 @@ export function ClientUserMenu() {
     })
     if (!res.ok) {
       const err = await res.json().catch(() => null)
-      toast.error(err?.error ?? "Saqlab bo'lmadi")
+      toast.error(typeof err?.error === "string" ? err.error : tc("save_failed"))
       return
     }
-    toast.success("Profil yangilandi")
+    toast.success(t("profile_updated"))
     setCurrentPassword("")
     setNewPassword("")
     setProfileOpen(false)
@@ -108,31 +109,39 @@ export function ClientUserMenu() {
     <>
       {session?.user ? (
         <>
-          <Button size="icon" variant="ghost" aria-label="Saved news">
+          {/* <Button size="icon" variant="ghost" aria-label="Saved news">
             <Link
               href="/news/saved"
               className="relative inline-flex items-center rounded-md px-2 py-1 text-xs"
             >
               <Bookmark className="size-5" />
               {savedCount > 0 ? (
-                <span className="absolute -right-1 -top-1 py-0.5 rounded-full bg-brand px-1.5 text-[10px] text-primary-foreground text-white">
+                <span className="absolute -right-1 -top-1 py-0.5 rounded-full bg-brand px-1.5 text-[10px] text-white">
                   {savedCount}
                 </span>
               ) : null}
             </Link>
-          </Button>
-          <span className="block w-[0.5px] h-5 bg-muted"></span>
+          </Button> */}
+          {/* <span className="block w-[0.5px] h-5 bg-muted"></span> */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button size="icon" variant="ghost" aria-label="User menu">
-                <User className="size-5" />
+              <Button size="icon" variant="ghost" aria-label={t("user_menu_aria")}>
+                <User className="size-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => void openProfileDialog()}>
-                <LiaUserEditSolid className="size-5" />
+                <LiaUserEditSolid className="size-4" />
                 {t("edit_profile")}
               </DropdownMenuItem>
+              <span className="block w-full h-[0.5px] bg-foreground/10 my-1"></span>
+              <DropdownMenuItem asChild>
+                <Link href="/news/saved" className="flex items-center gap-2">
+                  <Bookmark className="size-4" />{t("saved_news")}
+                </Link>
+              </DropdownMenuItem>
+              {/* <span className="block w-full h-[0.5px] bg-foreground/10 my-1"></span> */}
+              <span className="block w-full h-[0.5px] bg-foreground/10 my-1"></span>
               <DropdownMenuItem asChild>
                 <Link href="/user/comments" className="flex items-center gap-2">
                   <MessageCircle className="size-4" />{t("my_comments")}
@@ -143,6 +152,7 @@ export function ClientUserMenu() {
                   <Smile className="size-4" />{t("my_reactions")}
                 </Link>
               </DropdownMenuItem>
+              <span className="block w-full h-[0.5px] bg-foreground/10 my-1"></span>
               <DropdownMenuItem onClick={() => void signOut({ callbackUrl: "/" })}>
                 <LogOut className="size-4" />{t("logout")}
               </DropdownMenuItem>
@@ -152,7 +162,7 @@ export function ClientUserMenu() {
       ) : (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button size="icon" variant="ghost" aria-label="Auth menu">
+            <Button size="icon" variant="ghost" aria-label={t("auth_menu_aria")}>
               <User className="size-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -220,7 +230,7 @@ export function ClientUserMenu() {
                 </div>
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="profile-current-password">Joriy parol</Label>
+                <Label htmlFor="profile-current-password">{t("current_password")}</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
@@ -233,7 +243,7 @@ export function ClientUserMenu() {
                 </div>
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="profile-new-password">Yangi parol</Label>
+                <Label htmlFor="profile-new-password">{t("new_password")}</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
@@ -249,7 +259,7 @@ export function ClientUserMenu() {
                 onClick={() => void saveProfile()}
                 className="w-full rounded-lg bg-neutral-800 hover:bg-neutral-900 dark:bg-neutral-200 dark:hover:bg-neutral-100 dark:text-neutral-900"
               >
-                Saqlash
+                {tc("save")}
               </Button>
             </div>
           </div>

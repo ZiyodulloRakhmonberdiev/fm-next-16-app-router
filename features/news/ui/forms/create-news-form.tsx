@@ -19,6 +19,7 @@ import { ContentForm } from './content-section'
 import type { NewsStatus } from '@/features/news/model'
 import type { EditNewsInitialData } from '@/features/news/lib/raw-to-edit-initial'
 import { adminQueryKeys } from '@/features/dashboard/model/admin-hooks'
+import { uploadVideoViaApiOrCloudinary } from '@/shared/common/lib/cloudinary-client-upload'
 
 const LOCALES: AppLocale[] = ['uz', 'uzb', 'ru', 'en']
 const LOCALE_LABELS: Record<AppLocale, string> = {
@@ -262,15 +263,7 @@ export function CreateNewsForm({ categories, tags, authors, existingSlugs = [], 
       let finalVideoUrl: string | null = null
       let finalVideoSource: 'youtube' | 'local' | null = null
       if (videoFileArg) {
-        const formData = new FormData()
-        formData.append('file', videoFileArg)
-        formData.append('kind', 'video')
-        const uploadRes = await fetch('/api/uploads', { method: 'POST', credentials: 'include', body: formData })
-        const uploadData = (await uploadRes.json().catch(() => null)) as { url?: string; error?: string } | null
-        if (!uploadRes.ok || !uploadData?.url) {
-          throw new Error(uploadData?.error ?? "Videoni yuklab bo'lmadi")
-        }
-        finalVideoUrl = uploadData.url
+        finalVideoUrl = await uploadVideoViaApiOrCloudinary(videoFileArg, { credentials: 'include' })
         finalVideoSource = 'local'
       } else if (videoUrlArg?.trim()) {
         finalVideoUrl = videoUrlArg.trim()

@@ -6,6 +6,9 @@ import { requireAdminSession } from "@/shared/common/lib/require-admin-session"
 // import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3"
 import { v2 as cloudinary } from "cloudinary"
 
+/** Vercel: uzoq video yuklash (sekundlar) */
+export const maxDuration = 300
+
 // Contabo (comment): pnpm run contabo:public
 
 const IMAGE_EXTENSIONS = new Set([".jpg", ".jpeg", ".png", ".webp", ".gif", ".svg"])

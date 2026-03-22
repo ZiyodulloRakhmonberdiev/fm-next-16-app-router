@@ -285,7 +285,7 @@ export function UsersPage({ users: initialUsers }: UsersPageProps) {
                         {USER_ROLES.find((r) => r.value === row.role)?.label ?? row.role}
                       </TableCell>
                       <TableCell>{row.position || '—'}</TableCell>
-                      <TableCell className="font-mono text-sm">{row.login}</TableCell>
+                      <TableCell className=" text-sm">{row.login}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Button

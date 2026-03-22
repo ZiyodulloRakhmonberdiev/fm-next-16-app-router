@@ -1,5 +1,6 @@
 import type { RawNewsItem } from "@/features/news/model"
 import { getCloudinaryVideoPosterUrl } from "@/shared/common/lib/cloudinary"
+import type { DateInput } from "@/shared/common/lib/formatter"
 import { getYoutubeEmbedUrl, getYoutubeThumbnailUrl } from "@/shared/common/lib/youtube"
 import type { NewsListResponse } from "./news-listing-types"
 
@@ -37,4 +38,23 @@ export function getVideoPoster(url?: string) {
   if (!u) return ""
   if (getYoutubeEmbedUrl(u)) return getYoutubeThumbnailUrl(u)
   return getCloudinaryVideoPosterUrl(u)
+}
+
+/** `video-news-section-2` bilan bir xil poster tanlash */
+export function getCardImageSrc(item: {
+  images?: string[]
+  videoUrl?: string | null
+  videoSource?: string | null
+}): string {
+  const img = getSafeImageSrc(item.images?.[0])
+  if (img) return img
+  if (getYoutubeEmbedUrl(item.videoUrl ?? "")) return getYoutubeThumbnailUrl(item.videoUrl) || ""
+  return getCloudinaryVideoPosterUrl(item.videoUrl) || ""
+}
+
+/** Rasmdagidek: `17:11 / 21.03.2026` — `video-news-section-2` bilan mos */
+export function formatVideoCardMetaLine(date: DateInput): string {
+  const d = date instanceof Date ? date : new Date(date)
+  const pad = (n: number) => String(n).padStart(2, "0")
+  return `${pad(d.getHours())}:${pad(d.getMinutes())} / ${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`
 }

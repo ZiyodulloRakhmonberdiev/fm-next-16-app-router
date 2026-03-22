@@ -14,7 +14,7 @@ export function NewsListingSkeleton({ pageSize }: NewsListingSkeletonProps) {
             <div className="flex-1 space-y-3">
               <div className="h-3 w-2/3 rounded bg-muted" />
               <div className="h-4 w-5/6 rounded bg-muted" />
-              <div className="h-4 w-4/6 rounded bg-muted" />
+              <div className="h-4 w-2/3 rounded bg-muted" />
               <div className="h-3 w-full rounded bg-muted" />
               <div className="h-3 w-5/6 rounded bg-muted" />
             </div>

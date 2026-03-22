@@ -12,6 +12,7 @@ import { Switch } from "@/shared/common/components/ui/switch"
 import { Textarea } from "@/shared/common/components/ui/textarea"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/common/components/ui/table"
 import { Loader2, Pencil, Plus, Trash2, Upload } from "lucide-react"
+import { uploadVideoViaApiOrCloudinary } from "@/shared/common/lib/cloudinary-client-upload"
 
 type AdItem = {
   _id: string
@@ -66,10 +67,13 @@ export default function DashboardAdsPage() {
   const logoFileRef = useRef<HTMLInputElement>(null)
 
   async function uploadMedia(file: File, kind: "image" | "video"): Promise<string> {
+    if (kind === "video") {
+      return uploadVideoViaApiOrCloudinary(file, { credentials: "include" })
+    }
     const formData = new FormData()
     formData.append("file", file)
     formData.append("kind", kind)
-    const res = await fetch("/api/uploads", { method: "POST", body: formData })
+    const res = await fetch("/api/uploads", { method: "POST", credentials: "include", body: formData })
     const data = (await res.json().catch(() => null)) as { url?: string; error?: string } | null
     if (!res.ok || !data?.url) throw new Error(data?.error || "Yuklab bo'lmadi")
     return data.url

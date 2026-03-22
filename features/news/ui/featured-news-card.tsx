@@ -89,7 +89,7 @@ export function FeaturedNewsCard({
       </Link>
       <div className="flex flex-col gap-2 p-3">
        <div className="flex items-center justify-start gap-1">
-       <Link href={`/category/${item.categorySlug}`} className="text-xs text-muted-foreground font-mono capitalize hover:underline flex items-center gap-1">
+       <Link href={`/category/${item.categorySlug}`} className="text-xs text-muted-foreground  capitalize hover:underline flex items-center gap-1">
           <span className="block w-2 h-2 bg-brand rounded-full"></span>
           <span className="text-xs capitalize">{useCategoryLabel(item.categorySlug, locale, item.category)}</span>
         </Link>

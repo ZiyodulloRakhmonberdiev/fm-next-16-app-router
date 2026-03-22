@@ -246,7 +246,7 @@ export function CategoriesPage({ locale }: CategoriesPageProps) {
                 ) : (
                   categories.map((row) => (
                     <TableRow key={row._id}>
-                      <TableCell className="font-mono text-sm">{row.slug}</TableCell>
+                      <TableCell className=" text-sm">{row.slug}</TableCell>
                       <TableCell>{row.name.uz}</TableCell>
                       <TableCell>{row.name.uzb}</TableCell>
                       <TableCell>{row.name.ru}</TableCell>

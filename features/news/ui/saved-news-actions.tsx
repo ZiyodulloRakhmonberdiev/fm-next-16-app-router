@@ -22,6 +22,7 @@ export function SavedNewsActions({
   size,
   variant,
   className,
+  onToggle,
 }: {
   slug: string
   newsId?: string
@@ -30,6 +31,8 @@ export function SavedNewsActions({
   size?: React.ComponentProps<typeof Button>["size"]
   variant?: React.ComponentProps<typeof Button>["variant"]
   className?: string
+  /** Saqlash/o‘chirish muvaffaqiyatli bo‘lganda */
+  onToggle?: (saved: boolean) => void
 }) {
   const { data: session } = useSession()
   const t = useTranslations("common")
@@ -62,6 +65,7 @@ export function SavedNewsActions({
     const data = await res.json()
     const isSaved = Boolean(data.saved)
     setSaved(isSaved)
+    onToggle?.(isSaved)
     if (isSaved) {
       toast.success(t("saved"))
     }

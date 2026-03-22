@@ -67,10 +67,8 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Spacer: pinned bo‘lganda layout sakramasligi uchun */}
       {isPinned && <div style={{ height: barHeight }} aria-hidden />}
 
-      {/* Logo qatori: doim “sticky” — pinned bo‘lganda fixed, aks holda o‘z joyida */}
       <div
         ref={barRef}
         className={cn(

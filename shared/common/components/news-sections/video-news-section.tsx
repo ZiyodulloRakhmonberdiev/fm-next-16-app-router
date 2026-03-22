@@ -113,7 +113,7 @@ export default function VideoNewsSection() {
                     <p className="line-clamp-2 text-sm font-semibold leading-snug text-white">
                       {item.title}
                     </p>
-                    <div className="mt-2 flex items-center justify-between text-[11px] text-white/90 gap-2 font-mono">
+                    <div className="mt-2 flex items-center justify-between text-[11px] text-white/90 gap-2 ">
                       <Link href={`/category/${item.categorySlug}`} className="text-xs capitalize flex items-center gap-2 hover:underline">
                         <span className="block w-2 h-2 bg-brand rounded-full"></span>{" "}
                         <span>{getCategoryLabelForNewsItem(categories, categoriesPending, item, locale)}</span>

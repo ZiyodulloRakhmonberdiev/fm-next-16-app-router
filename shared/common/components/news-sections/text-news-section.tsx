@@ -35,7 +35,7 @@ export default function TextNewsSection() {
               <Card className="rounded-sm border p-3 shadow-none">
                 <div className="flex min-w-0 flex-1 flex-col gap-2">
                   <div className="flex items-center gap-2 border-b pb-2">
-                    <Link href={`/category/${item.categorySlug}`} className="flex flex-wrap items-center gap-2 text-xs font-mono text-muted-foreground hover:underline">
+                    <Link href={`/category/${item.categorySlug}`} className="flex flex-wrap items-center gap-2 text-xs  text-muted-foreground hover:underline">
                       <span className="block w-2 h-2 bg-brand rounded-full"></span>
                       <span className="capitalize">
                         {getCategoryLabelForNewsItem(categories, categoriesPending, item, locale)}

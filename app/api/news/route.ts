@@ -41,9 +41,15 @@ export async function GET(req: NextRequest) {
     if (top === "1" || top === "true") filter.isTop = true
     if (authorsChoice === "1" || authorsChoice === "true") filter.authorsChoice = true
     if (breaking === "1" || breaking === "true") filter.isBreaking = true
+    /** UI (`video-news-section-2`): `type === "video"` yoki `videoSource` + `videoUrl` */
     if (video === "1" || video === "true") {
-      filter.type = "video"
-      filter.videoUrl = { $exists: true, $ne: "" }
+      filter.$or = [
+        { type: "video", videoUrl: { $exists: true, $ne: "" } },
+        {
+          videoUrl: { $exists: true, $ne: "" },
+          videoSource: { $in: ["youtube", "local"] },
+        },
+      ]
     }
     if (Number.isFinite(recentMonths) && recentMonths > 0) {
       const now = new Date()

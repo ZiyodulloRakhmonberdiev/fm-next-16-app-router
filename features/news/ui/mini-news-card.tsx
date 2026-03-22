@@ -58,7 +58,7 @@ export function MiniNewsCard({
         <div className="flex min-w-0 flex-1 flex-col justify-evenly gap-1 py-1">
           <Link
             href={`/category/${item.categorySlug}`}
-            className="flex items-center gap-1 font-mono capitalize text-muted-foreground hover:underline"
+            className="flex items-center gap-1  capitalize text-muted-foreground hover:underline"
           >
             <span className="block size-2 shrink-0 rounded-full bg-brand" />
             <span className="text-xs capitalize">{categoryLabel}</span>

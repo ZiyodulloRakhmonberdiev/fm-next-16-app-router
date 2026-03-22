@@ -74,7 +74,7 @@ export function NewsListingPageContent({
     (nextPage: number, filter: FilterType, slugs: string[]) => {
       const params = new URLSearchParams()
       params.set("status", "published")
-      params.set("recentMonths", "6")
+      if (!forceVideoOnly) params.set("recentMonths", "6")
       params.set("page", String(nextPage))
       params.set("limit", String(pageSize))
       params.set("sortBy", sortByForFilter(filter))
@@ -219,7 +219,13 @@ export function NewsListingPageContent({
 
   return (
     <section className="w-full px-4 pb-4 md:px-6">
-      <div className={showAuthorsChoice ? "grid grid-cols-1 gap-6 lg:grid-cols-3" : "relative w-full"}>
+      <div
+        className={
+          showAuthorsChoice
+            ? "grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 lg:items-start"
+            : "relative w-full"
+        }
+      >
         <div className={showAuthorsChoice ? "lg:col-span-2" : "w-full"}>
           <NewsListingFilterToolbar
             pageHeading={pageHeading}
@@ -284,7 +290,7 @@ export function NewsListingPageContent({
             items={authorsChoiceItems}
             loading={authorsChoiceLoading}
             locale={locale}
-          />
+          /> 
         ) : null}
       </div>
     </section>

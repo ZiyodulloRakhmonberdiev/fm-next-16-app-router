@@ -114,7 +114,7 @@ export default function DashboardReactionsPage() {
             <TableBody>
               {items.map((item) => (
                 <TableRow key={item._id}>
-                  <TableCell className="font-mono text-xs">
+                  <TableCell className=" text-xs">
                     <Link href={`/dashboard/news/${item.newsSlug}/edit`} className="underline hover:text-primary">
                       {item.newsSlug}
                     </Link>

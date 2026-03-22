@@ -74,7 +74,6 @@ export async function NewsListingPage({
 }: {
   locale: AppLocale
   variant?: NewsListingVariant
-  /** Category sahifasi: filterda tanlangan va API da shu category bo‘yicha */
   initialCategorySlug?: string
 }) {
   const categorySlugs = initialCategorySlug ? [initialCategorySlug] : undefined

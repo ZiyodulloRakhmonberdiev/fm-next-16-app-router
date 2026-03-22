@@ -195,7 +195,7 @@ export default function SlideNewsSection({
                         </Link>
                         <div className="flex flex-col gap-2 p-4">
                           <div className="flex items-center justify-start gap-2">
-                            <Link href={`/category/${item.categorySlug}`} className="capitalize font-mono text-muted-foreground flex items-center gap-1 hover:underline">
+                            <Link href={`/category/${item.categorySlug}`} className="capitalize  text-muted-foreground flex items-center gap-1 hover:underline">
                               <span className="block w-2 h-2 bg-brand rounded-full"></span>
                               <span className="text-xs capitalize">
                                 {getCategoryLabelForNewsItem(categories, categoriesPending, item, locale)}

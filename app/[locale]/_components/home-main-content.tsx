@@ -5,7 +5,7 @@ import {
   StayConnected,
   TopBanner,
 } from "@/shared/common/components/organisms"
-import {  ServerLoading, ServerUnavailable } from "@/shared/common/components/molecules"
+import { ServerUnavailable } from "@/shared/common/components/molecules"
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
 import {
   sortCategoriesByPriority,
@@ -14,6 +14,7 @@ import {
 import { BannerSection, ColumnSection, HeaderNewsCarousel, SlideNewsSection, TextNewsSection, VideoNewsSection } from "@/shared/common/components/news-sections"
 import RowSection from "@/shared/common/components/news-sections/row-section"
 import VideoNewsSection2 from "@/shared/common/components/news-sections/video-news-section-2"
+import HomePageSkeleton from "./home-page-skeleton"
 
 export default function HomeMainContent() {
   const { data: publicNews = [], isError, isLoading, isFetching } = usePublicNewsQuery()
@@ -66,7 +67,7 @@ export default function HomeMainContent() {
     "sports"
     
   if ((isLoading || isFetching || categoriesLoading || categoriesFetching) && publicNews.length === 0) {
-    return <ServerLoading />
+    return <HomePageSkeleton />
   }
   if ((isError || categoriesError) && publicNews.length === 0) {
     return <ServerUnavailable />

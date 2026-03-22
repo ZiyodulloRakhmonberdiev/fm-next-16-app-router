@@ -1,11 +1,11 @@
-import { SavedNewsPageContent } from "@/features/news/ui/saved-news-page-content"
 import { Footer } from "@/widgets/client-footer"
 import { Header } from "@/widgets/client-header"
 import { ClientSidebar } from "@/widgets/client-sidebar"
 import ClientSiteNothingGate from "../../_components/client-site-nothing-gate"
 import ClientServerOffGate from "../../_components/client-server-off-gate"
+import { NewsListingRouteSkeleton } from "@/features/news/ui/news-listing-route-skeleton"
 
-export default function SavedNewsPage() {
+export default function CategoryPageLoading() {
   return (
     <ClientSiteNothingGate>
       <div className="block md:hidden">
@@ -16,7 +16,7 @@ export default function SavedNewsPage() {
         <main className="flex-1">
           <ClientServerOffGate model="news">
             <div className="mx-auto max-w-7xl">
-              <SavedNewsPageContent />
+              <NewsListingRouteSkeleton />
             </div>
           </ClientServerOffGate>
         </main>
