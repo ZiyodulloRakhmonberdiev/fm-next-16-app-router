@@ -17,7 +17,6 @@ import {
 } from '@/shared/common/components/ui/sidebar'
 import {
   LayoutDashboard,
-  FileText,
   FolderTree,
   Settings,
   Users,
@@ -28,8 +27,6 @@ import {
   Megaphone,
   LogOut,
   MessageSquare,
-  UsersRound,
-  Users2,
   UserSquare,
 } from 'lucide-react'
 import { useTheme } from 'next-themes'
@@ -40,15 +37,15 @@ import { normalizeRole, type NormalizedRole } from '@/shared/common/lib/rbac'
 import { Button } from '@/shared/common/components/ui/button'
 
 const navItems = [
-  { href: '/dashboard', label: 'Boshqaruv paneli', icon: LayoutDashboard, roles: ['ceo', 'administrator'] as NormalizedRole[] },
+  { href: '/dashboard', label: 'Boshqaruv paneli', icon: LayoutDashboard, roles: ['ceo', 'administrator',] as NormalizedRole[] },
   { href: '/dashboard/news', label: 'Yangiliklar', icon: Newspaper, roles: ['ceo', 'administrator', 'moderator'] as NormalizedRole[] },
   { href: '/dashboard/categories', label: 'Kategoriyalar', icon: FolderTree, roles: ['ceo', 'administrator', 'moderator'] as NormalizedRole[] },
   { href: '/dashboard/tags', label: 'Teglar', icon: Tag, roles: ['ceo', 'administrator', 'moderator'] as NormalizedRole[] },
   { href: '/dashboard/users', label: 'Foydalanuvchilar', icon: Users, roles: ['ceo', 'administrator'] as NormalizedRole[] },
   { href: '/dashboard/team', label: 'Jamoa', icon: UserSquare, roles: ['ceo', 'administrator'] as NormalizedRole[] },
-  { href: '/dashboard/configs', label: 'Maxfiylik', icon: KeyRound, roles: ['ceo', 'administrator'] as NormalizedRole[] },
   { href: '/dashboard/comments', label: 'Izohlar', icon: MessageSquare, roles: ['ceo', 'administrator', 'moderator'] as NormalizedRole[] },
   { href: '/dashboard/ads', label: 'Reklama', icon: Megaphone, roles: ['ceo', 'administrator', 'ads_manager'] as NormalizedRole[] },
+  { href: '/dashboard/configs', label: 'Maxfiylik', icon: KeyRound, roles: ['ceo', 'administrator'] as NormalizedRole[] },
 ]
 
 const bottomItems = [

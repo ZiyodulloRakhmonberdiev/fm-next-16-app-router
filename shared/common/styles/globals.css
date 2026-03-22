@@ -52,7 +52,8 @@
   color-scheme: light;
   --radius: 0.625rem;
   --background: #ffffff;
-  --foreground: #0a0a0a;
+  /* --foreground: #0a0a0a; */
+  --foreground: #111;
   --card: #ffffff;
   --card-foreground: #0a0a0a;
   --popover: #ffffff;
@@ -88,7 +89,9 @@
 
 .dark {
   color-scheme: dark;
-  --background: #0a0a0a;
+  --background: #111;
+  /* --background: #091413; */
+  /* --background: #0f0d0d; */
   --foreground: #fafafa;
   --card: #171717;
   --card-foreground: #fafafa;
