@@ -12,7 +12,7 @@ export interface ISavedNews {
 
 const SavedNewsSchema = new Schema<ISavedNews>(
   {
-    _id: { type: String, required: true, unique: true, default: () => uuidv4() },
+    _id: { type: String, required: true, default: () => uuidv4() },
     userId: { type: String, required: true, index: true },
     newsId: { type: String, required: true, index: true },
     newsSlug: { type: String, index: true },

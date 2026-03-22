@@ -11,10 +11,10 @@ import {
 } from "@/shared/common/lib/formatter"
 import type { AppLocale } from "@/shared/common/lib/formatter"
 import { Link } from "@/i18n/navigation"
-import Image from "next/image"
 import { useLocale, useTranslations } from "next-intl"
 import { Button } from "../ui/button"
 import { ArrowRight } from "lucide-react"
+import { FeaturedNewsCard } from "@/features/news/ui/featured-news-card"
 
 type ColumnSectionProps = {
   categorySlug?: string
@@ -46,7 +46,7 @@ export default function ColumnSection({
 
   const [featured, ...rightItems] = items
 
-  if (items.length < 6) return null
+  if (items.length < 1) return null
 
   return (
     <div className="w-full px-4 md:px-6 mt-4">
@@ -91,46 +91,15 @@ export default function ColumnSection({
           </div>
           {featured && (
             <div
-              className={`md:col-span-1 h-full ${
+              className={`h-full md:col-span-1 ${
                 featuredPosition === "left" ? "md:order-1" : ""
               }`}
             >
-              <Card className="overflow-hidden rounded-sm border border-border p-0 shadow-none">
-                <Link href={`/news/${featured.slug}`} className="block">
-                  <div className="relative aspect-video w-full">
-                    <Image
-                      src={featured.images[0]}
-                      alt={featured.title}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                </Link>
-                <div className="flex flex-col gap-2 p-4">
-                  <div className="flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground">
-                    <span className="uppercase font-medium text-brand italic">{featured.category}</span>
-                    <span aria-hidden>/</span>
-                    <time dateTime={formatDateISO(featured.publishedAt)}>
-                      {formatDateTimeLocale(featured.publishedAt, locale)}
-                    </time>
-                  </div>
-                  <h3 className="text-lg font-semibold leading-tight">
-                    <Link
-                      href={`/news/${featured.slug}`}
-                      className="hover:underline"
-                    >
-                      <span className="line-clamp-3">
-                        {featured.title}
-                      </span>
-                    </Link>
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    <span className="line-clamp-3">
-                      {featured.description}
-                    </span>
-                  </p>
-                </div>
-              </Card>
+              <FeaturedNewsCard
+                item={featured}
+                locale={locale}
+                variant="column"
+              />
             </div>
           )}
         </div>

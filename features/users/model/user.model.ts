@@ -17,7 +17,7 @@ export interface IUser {
 
 const UserSchema = new Schema<IUser>(
   {
-    _id: { type: String, required: true, unique: true, default: () => uuidv4() },
+    _id: { type: String, required: true, default: () => uuidv4() },
     full_name: { type: String, required: true },
     image: String,
     role: { type: String, required: true },

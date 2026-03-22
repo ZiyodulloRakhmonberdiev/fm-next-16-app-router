@@ -14,7 +14,7 @@ export interface ICategory {
 
 const CategorySchema = new Schema<ICategory>(
   {
-    _id: { type: String, required: true, unique: true, default: () => uuidv4() },
+    _id: { type: String, required: true, default: () => uuidv4() },
     slug: { type: String, required: true, unique: true },
     href: { type: String, required: true },
     name: {

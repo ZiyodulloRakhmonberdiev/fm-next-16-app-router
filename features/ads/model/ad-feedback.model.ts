@@ -15,7 +15,7 @@ export interface IAdFeedback {
 
 const AdFeedbackSchema = new Schema<IAdFeedback>(
   {
-    _id: { type: String, required: true, unique: true, default: () => uuidv4() },
+    _id: { type: String, required: true, default: () => uuidv4() },
     adId: { type: String, required: true, index: true },
     action: { type: String, required: true, enum: ["hide", "report"] },
     reason: { type: String, required: true },

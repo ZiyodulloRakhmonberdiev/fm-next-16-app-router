@@ -15,7 +15,7 @@ export interface ITeamMember {
 
 const TeamMemberSchema = new Schema<ITeamMember>(
   {
-    _id: { type: String, required: true, unique: true, default: () => uuidv4() },
+    _id: { type: String, required: true, default: () => uuidv4() },
     order: { type: Number, required: true, default: 0, index: true },
     image: { type: String },
     fullName: { type: String, required: true },

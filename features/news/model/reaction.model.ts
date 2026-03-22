@@ -18,7 +18,7 @@ export interface INewsReaction {
 
 const NewsReactionSchema = new Schema<INewsReaction>(
   {
-    _id: { type: String, required: true, unique: true, default: () => uuidv4() },
+    _id: { type: String, required: true, default: () => uuidv4() },
     newsSlug: { type: String, required: true, index: true },
     newsId: { type: String, index: true },
     userId: { type: String, index: true },

@@ -38,7 +38,7 @@ export interface IAd {
 
 const AdSchema = new Schema<IAd>(
   {
-    _id: { type: String, required: true, unique: true, default: () => uuidv4() },
+    _id: { type: String, required: true, default: () => uuidv4() },
     type: { type: String, enum: ["content", "image"], default: "content", required: true },
     placement: {
       type: String,

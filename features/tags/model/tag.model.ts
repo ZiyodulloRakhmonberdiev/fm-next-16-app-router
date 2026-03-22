@@ -12,7 +12,7 @@ export interface ITag {
 
 const TagSchema = new Schema<ITag>(
   {
-    _id: { type: String, required: true, unique: true, default: () => uuidv4() },
+    _id: { type: String, required: true, default: () => uuidv4() },
     slug: { type: String, required: true, unique: true },
     name: {
       uz: { type: String, required: true },

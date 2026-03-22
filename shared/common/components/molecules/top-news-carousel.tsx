@@ -39,7 +39,7 @@ function CarouselDots({
           className={cn(
             "h-2 rounded-full transition-all duration-200",
             i === selectedIndex
-              ? "w-6 bg-primary"
+              ? "w-6 bg-brand"
               : "w-2 bg-muted-foreground/40 hover:bg-muted-foreground/60"
           )}
         />

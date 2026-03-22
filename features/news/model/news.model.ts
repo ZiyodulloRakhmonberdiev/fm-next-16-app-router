@@ -47,7 +47,7 @@ const localeOptionalString = {
 
 const NewsSchema = new Schema<INews>(
   {
-    _id: { type: String, required: true, unique: true, default: () => uuidv4() },
+    _id: { type: String, required: true, default: () => uuidv4() },
     slug: { type: String, required: true, unique: true },
     title: {
       uz: { type: String, required: true },

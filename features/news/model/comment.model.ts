@@ -23,7 +23,7 @@ export interface INewsComment {
 
 const NewsCommentSchema = new Schema<INewsComment>(
   {
-    _id: { type: String, required: true, unique: true, default: () => uuidv4() },
+    _id: { type: String, required: true, default: () => uuidv4() },
     newsSlug: { type: String, required: true, index: true },
     newsId: { type: String, index: true },
     userId: { type: String, required: true, index: true },

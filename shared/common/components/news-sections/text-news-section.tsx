@@ -33,10 +33,7 @@ export default function TextNewsSection() {
                 <div className="flex min-w-0 flex-1 flex-col gap-2">
                   <div className="flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground">
                     <span className="uppercase font-medium text-brand italic">{item.category}</span>
-                    <span aria-hidden>/</span>
-                    <time dateTime={formatDateISO(item.publishedAt)}>
-                      {formatDateTimeLocale(item.publishedAt, locale)}
-                    </time>
+                    
                   </div>
                   <Link href={`/news/${item.slug}`} className="text-sm font-semibold leading-tight hover:underline">
                     <span className="line-clamp-2 md:line-clamp-3">{item.title ?? ""}</span>
@@ -44,6 +41,9 @@ export default function TextNewsSection() {
                   <p className="text-sm text-muted-foreground">
                     <span className="line-clamp-2 md:line-clamp-3">{item.description ?? ""}</span>
                   </p>
+                  <time dateTime={formatDateISO(item.publishedAt)} className="text-xs text-muted-foreground">
+                      {formatDateTimeLocale(item.publishedAt, locale)}
+                    </time>
                 </div>
               </Card>
             </li>

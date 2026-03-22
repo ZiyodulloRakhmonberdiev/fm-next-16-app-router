@@ -5,10 +5,28 @@ import { Button } from '@/shared/common/components/ui/button'
 
 export type TranslationsState = Record<AppLocale, { title: string; description: string }>
 
+/**
+ * Word / muharrir typographic tirnoqlari (’ ‘ ` ‚ va h.k.) ASCII apostrophe (') ga —
+ * transliteratsiya faqat oddiy ' bilan O', G' kabi qoidalarni biladi.
+ */
+function normalizeLatinUzApostropheLikeChars(text: string): string {
+  return text
+    .replace(/\u2018/g, "'") // ‘ LEFT SINGLE QUOTATION MARK
+    .replace(/\u2019/g, "'") // ’ RIGHT SINGLE QUOTATION MARK
+    .replace(/\u201A/g, "'") // ‚ SINGLE LOW-9 QUOTATION MARK
+    .replace(/\u201B/g, "'") // ‛ SINGLE HIGH-REVERSED-9 QUOTATION MARK
+    .replace(/\u2032/g, "'") // ′ PRIME
+    .replace(/\u02BC/g, "'") // ʼ MODIFIER LETTER APOSTROPHE
+    .replace(/\u02BB/g, "'") // ʻ → standart ' (Oʻ/oʻ keyin bir xil ishlaydi)
+    .replace(/\u0060/g, "'") // ` GRAVE ACCENT — ba’zan tirnoq o‘rnida
+    .replace(/\u00B4/g, "'") // ´ ACUTE ACCENT
+    .replace(/\u2035/g, "'") // ‵ REVERSED PRIME
+}
+
 export function latinToCyrillicUz(text: string): string {
   if (!text) return ''
 
-  let result = text
+  let result = normalizeLatinUzApostropheLikeChars(text)
 
   const multiReplacements: [RegExp, string][] = [
     [/O['ʻ’`]/g, 'Ў'],
@@ -91,6 +109,28 @@ export function latinToCyrillicUz(text: string): string {
     y: 'й',
     Z: 'З',
     z: 'з',
+    "O'": 'Ў',
+    "O‘": 'Ў',
+    "o'": 'ў',
+    "o‘": 'ў',
+    "G'": 'Ғ',
+    "G‘": 'Ғ',
+    "g'": 'ғ',
+    "g‘": 'ғ',
+    'Sh': 'Ш',
+    'sh': 'ш',
+    'Ch': 'Ч',
+    'ch': 'ч',
+    'Ng': 'Нг',
+    'NG': 'НГ',
+    'ng': 'нг',
+    'Yo': 'Ё',
+    'YO': 'Ё',
+    'yo': 'ё',
+    'Ya': 'Я',
+    'ya': 'я',
+    'Yu': 'Ю',
+    'yu': 'ю',
   }
 
   return result
@@ -149,11 +189,11 @@ export function cyrillicToLatinUz(text: string): string {
     ф: 'f',
     Х: 'X',
     х: 'x',
-    Ц: 'Ts',
-    ц: 'ts',
-    Ч: 'Ch',
+    Ц: 'S',
+    ц: 's',
+    Ч: 'CH',
     ч: 'ch',
-    Ш: 'Sh',
+    Ш: 'SH',
     ш: 'sh',
     Ъ: "'",
     ъ: "'",

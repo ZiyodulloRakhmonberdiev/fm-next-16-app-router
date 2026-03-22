@@ -81,7 +81,7 @@ export default function VideoNewsSection() {
             href="/news/video"
             className="text-xs hover:text-brand hover:underline md:text-sm font-medium flex items-center gap-1"
           >
-            {t("view_all")} <ArrowRight className="w-4 h-4" /> 
+            {t("view_all")} <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
 
@@ -113,19 +113,23 @@ export default function VideoNewsSection() {
                     </span>
                   </span>
 
-                  <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/50 to-transparent py-2 px-4 bg-black/50">
-                    <div className="mb-2 flex items-center justify-end text-[11px] text-white/90 gap-2">
-                      <time dateTime={formatDateISO(item.publishedAt)}>
-                        {formatDate(item.publishedAt, locale)}
-                      </time> /
-                      <span className="inline-flex items-center gap-1">
-                        <Eye className="h-3.5 w-3.5" />
-                        {item.views}
-                      </span>
-                    </div>
+                  <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/50 to-transparent py-2 px-4 bg-black/30">
                     <p className="line-clamp-2 text-sm font-semibold leading-snug text-white">
                       {item.title}
                     </p>
+                    <div className="mt-2 flex items-center justify-end text-[11px] text-white/90 gap-2">
+                      <span className="text-xs capitalize">
+                        {item.category}
+                      </span>
+                      <span aria-hidden className="text-muted-foreground text-xs">/</span>
+                      <time dateTime={formatDateISO(item.publishedAt)}>
+                        {formatDate(item.publishedAt, locale)}
+                      </time>
+                      {/* <span className="inline-flex items-center gap-1">
+                        <Eye className="h-3.5 w-3.5" />
+                        {item.views}
+                      </span> */}
+                    </div>
                   </div>
                 </div>
               </button>

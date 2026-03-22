@@ -13,6 +13,11 @@ export type PublicCategory = {
   priority?: number
 }
 
+/** Yuqori `priority` birinchi (masalan bosh sahifa section tartibi). */
+export function sortCategoriesByPriority(categories: PublicCategory[]): PublicCategory[] {
+  return [...categories].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))
+}
+
 async function fetchPublicCategories(): Promise<PublicCategory[]> {
   const res = await fetch("/api/categories")
   if (!res.ok) {
@@ -21,7 +26,7 @@ async function fetchPublicCategories(): Promise<PublicCategory[]> {
 
   const data = (await res.json()) as PublicCategory[]
   if (!Array.isArray(data)) return []
-  return [...data].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))
+  return sortCategoriesByPriority(data)
 }
 
 export function getCategoryNameFromApi(
