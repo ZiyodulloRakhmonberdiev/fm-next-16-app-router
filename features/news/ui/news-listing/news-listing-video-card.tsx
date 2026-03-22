@@ -53,7 +53,7 @@ export function NewsListingVideoCard({ item, locale }: NewsListingVideoCardProps
             </div>
           ) : null}
           <div className="flex flex-wrap items-center gap-x-2 text-xs text-muted-foreground">
-            <span className="font-medium text-brand italic uppercase">{categoryLabel}</span>
+            <span className="font-medium text-brand italic uppercase">{useCategoryLabel(item.categorySlug, locale)}</span>
             <span aria-hidden className="select-none">
               |
             </span>
