@@ -24,11 +24,11 @@ export function AdminDashboardShell({
   return (
     <>
       {!isMobile && <AdminSidebar />}
-      <SidebarInset className="overflow-x-hidden">
-        <div className="w-full z-20 bg-background flex flex-col flex-1 min-h-0 min-w-0 overflow-x-hidden">
+      <SidebarInset className="flex min-w-0 flex-1 flex-col overflow-x-hidden">
+        <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden bg-background z-20">
           <AdminHeader />
-          <div className="mx-auto w-full max-w-[1240px] flex flex-1 flex-col min-h-[calc(100vh-3.5rem)] min-w-0 overflow-x-hidden">
-            <main className="flex-1 p-4 md:p-6 pb-20 md:pb-6 min-w-0 overflow-x-hidden">
+          <div className="mx-auto w-full max-w-[1240px] min-w-0 flex-1">
+            <main className="min-w-0 px-3 py-3 pb-24 md:px-6 md:py-6 md:pb-6">
               {!isMainDashboard && (
                 <div className="mb-3">
                   <Button

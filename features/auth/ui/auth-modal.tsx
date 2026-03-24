@@ -141,7 +141,7 @@ export function AuthModal({
               <div className="space-y-2">
                 <Label htmlFor="auth-fullname">{t("full_name")}</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                  <User className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     id="auth-fullname"
                     type="text"

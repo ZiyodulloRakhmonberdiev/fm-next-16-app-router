@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server"
 import { dbConnect } from "@/shared/common/lib/db"
 import { isClientDeliveryEnabled } from "@/shared/common/lib/server-client-delivery"
+import { mapTeamDocToClient } from "@/features/team/lib/team-api-map"
 import { TeamMemberModel } from "@/features/team/model/team.model"
 import { createTeamMemberSchema } from "@/features/team/model/schemas"
 import { requireAdminSession } from "@/shared/common/lib/require-admin-session"
@@ -13,13 +14,16 @@ export async function GET(req: NextRequest) {
   }
 
   await dbConnect()
-  const rows = await TeamMemberModel.find().sort({ order: 1, createdAt: 1 }).lean()
+  const rows = await TeamMemberModel.find()
+    .sort({ certificateNumber: 1, createdAt: 1 })
+    .lean()
+  const mapped = rows.map((r) => mapTeamDocToClient(r as Record<string, unknown>))
   if (isPublic) {
-    return Response.json(rows)
+    return Response.json(mapped)
   }
   const unauthorized = await requireAdminSession(["ceo", "administrator"])
   if (unauthorized) return unauthorized
-  return Response.json(rows)
+  return Response.json(mapped)
 }
 
 export async function POST(req: NextRequest) {
@@ -35,6 +39,21 @@ export async function POST(req: NextRequest) {
       { status: 400 }
     )
   }
-  const created = await TeamMemberModel.create(parsed.data)
-  return Response.json(created, { status: 201 })
+
+  const d = parsed.data
+  try {
+    const created = await TeamMemberModel.create({
+      fullName: d.fullName,
+      position: d.position,
+      certificateNumber: d.certificateNumber,
+      ...(d.image && d.image !== "" ? { image: d.image } : {}),
+      ...(d.qrCode && d.qrCode !== "" ? { qrCode: d.qrCode } : {}),
+      ...(d.badgeImage && d.badgeImage !== "" ? { badgeImage: d.badgeImage } : {}),
+    })
+    const plain = created.toObject() as Record<string, unknown>
+    return Response.json(mapTeamDocToClient(plain), { status: 201 })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Saqlashda xatolik"
+    return Response.json({ error: message }, { status: 500 })
+  }
 }

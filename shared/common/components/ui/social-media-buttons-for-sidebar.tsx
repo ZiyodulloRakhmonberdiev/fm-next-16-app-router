@@ -48,16 +48,16 @@ export function SocialMediaButtonsForSidebar({
         const label = resolveSocialLabel(name);
 
         const baseLinkClass = isIconBox
-          ? "group inline-flex items-center justify-center overflow-hidden rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          ? "group inline-flex items-center justify-center overflow-hidden rounded-xl focus-visible:outline-none"
           : isIconOnly
-            ? "group inline-flex shrink-0 items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            : "group inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
+            ? "group inline-flex shrink-0 items-center justify-center focus-visible:outline-none"
+            : "group inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 focus-visible:outline-none";
 
         const variantClass = isIconBox
-          ? "aspect-square size-12 p-2 text-white shadow-[0_6px_18px_-5px_rgba(0,0,0,0.35)] ring-1 ring-white/25 transition-all duration-300 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] hover:-translate-y-0.5 hover:scale-[1.06] hover:shadow-[0_10px_24px_-6px_rgba(0,0,0,0.42)] active:scale-100 [&_svg]:size-5 [&_svg]:drop-shadow-sm"
+          ? "aspect-square size-12 p-2 text-white shadow-[0_6px_18px_-5px_rgba(0,0,0,0.35)] transition-all duration-300 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] hover:-translate-y-0.5 hover:scale-[1.06] hover:shadow-[0_10px_24px_-6px_rgba(0,0,0,0.42)] active:scale-100 [&_svg]:size-5 [&_svg]:drop-shadow-sm"
           : isIconOnly
-            ? "size-9 rounded-full p-0 text-white shadow-sm ring-1 ring-white/25 transition-transform hover:scale-105 active:scale-100 [&_svg]:size-[0.95rem] [&_svg]:drop-shadow-sm"
-            : "border border-white/15 px-3 py-2 text-sm font-semibold text-white shadow-md ring-1 ring-white/20 transition-all hover:-translate-y-px hover:shadow-lg [&_svg]:size-5";
+            ? "size-9 rounded-full p-0 text-white shadow-sm transition-transform hover:scale-105 active:scale-100 [&_svg]:size-[0.95rem] [&_svg]:drop-shadow-sm"
+            : "px-3 py-2 text-sm font-semibold text-white shadow-md transition-all hover:-translate-y-px hover:shadow-lg [&_svg]:size-5";
 
         const surfaceClass = style.gradient;
 

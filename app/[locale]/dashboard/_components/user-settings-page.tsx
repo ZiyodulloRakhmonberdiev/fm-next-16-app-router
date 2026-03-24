@@ -1,8 +1,9 @@
 'use client'
+
+import { Link } from '@/i18n/navigation'
+import { usePathname } from '@/i18n/navigation'
 import { ThemeSwitcher } from '@/widgets/theme-switcher'
 import { useSession } from 'next-auth/react'
-import { useEffect, useRef, useState } from 'react'
-import { toast } from 'sonner'
 import {
   Card,
   CardContent,
@@ -10,183 +11,137 @@ import {
   CardHeader,
   CardTitle,
 } from '@/shared/common/components/ui/card'
-import { Input } from '@/shared/common/components/ui/input'
-import { Label } from '@/shared/common/components/ui/label'
-import { Button } from '@/shared/common/components/ui/button'
-import { Settings, Upload } from 'lucide-react'
 import { normalizeRole } from '@/shared/common/lib/rbac'
+import type { AdminMainNavMeta } from '@/widgets/admin-sidebar/config/admin-nav-meta'
+import { adminMainNavMeta } from '@/widgets/admin-sidebar/config/admin-nav-meta'
+import { adminNavIcons } from '@/widgets/admin-sidebar/config/admin-nav-items'
+import { cn } from '@/shared/common/lib/utils'
+
+const SETTINGS_HUB_GROUPS: { title: string; hrefs: readonly string[] }[] = [
+  {
+    title: 'Yangiliklar, kategoriyalar va teglar',
+    hrefs: ['/dashboard/news', '/dashboard/categories', '/dashboard/tags'],
+  },
+  {
+    title: 'Foydalanuvchilar va jamoa',
+    hrefs: ['/dashboard/users', '/dashboard/team'],
+  },
+  {
+    title: 'Izohlar',
+    hrefs: ['/dashboard/comments'],
+  },
+  {
+    title: 'Reklamalar',
+    hrefs: ['/dashboard/ads', '/dashboard/ads/feedback'],
+  },
+]
+
+function visibleItemsForGroup(
+  hrefs: readonly string[],
+  role: ReturnType<typeof normalizeRole>
+): AdminMainNavMeta[] {
+  const out: AdminMainNavMeta[] = []
+  for (const href of hrefs) {
+    const meta = adminMainNavMeta.find((m) => m.href === href)
+    if (meta && meta.roles.includes(role)) out.push(meta)
+  }
+  return out
+}
+
+function SettingsSectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="mb-2 px-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">{children}</p>
+  )
+}
 
 export function DashboardUserSettingsPage() {
+  const pathname = usePathname()
   const { data: session } = useSession()
   const role = normalizeRole(session?.user?.role)
-  const canEditProfile = role === 'ceo' || role === 'administrator'
-  const [fullName, setFullName] = useState('')
-  const [position, setPosition] = useState('')
-  const [image, setImage] = useState('')
-  const [currentPassword, setCurrentPassword] = useState('')
-  const [newPassword, setNewPassword] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [imageUploading, setImageUploading] = useState(false)
-  const imageFileRef = useRef<HTMLInputElement>(null)
 
-  useEffect(() => {
-    if (!canEditProfile) return
-    void (async () => {
-      const res = await fetch('/api/me', { cache: 'no-store' })
-      if (!res.ok) return
-      const data = await res.json()
-      setFullName(data.full_name ?? '')
-      setPosition(data.position ?? '')
-      setImage(data.image ?? '')
-    })()
-  }, [canEditProfile])
+  const privacyMeta = adminMainNavMeta.find((m) => m.href === '/dashboard/configs')
+  const showPrivacy = privacyMeta && privacyMeta.roles.includes(role)
+  const PrivacyIcon = privacyMeta ? adminNavIcons[privacyMeta.iconKey] : null
 
-  async function uploadProfileImage(file: File) {
-    setImageUploading(true)
-    try {
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('kind', 'image')
-      const res = await fetch('/api/uploads', { method: 'POST', credentials: 'include', body: formData })
-      const data = (await res.json().catch(() => null)) as { url?: string; error?: string } | null
-      if (!res.ok || !data?.url) {
-        toast.error(data?.error ?? 'Rasm yuklab bo\'lmadi')
-        return
-      }
-      setImage(data.url)
-      toast.success('Rasm Cloudinaryga yuklandi')
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Rasm yuklab bo\'lmadi')
-    } finally {
-      setImageUploading(false)
-      if (imageFileRef.current) imageFileRef.current.value = ''
-    }
-  }
-
-  async function saveProfile() {
-    setLoading(true)
-    const res = await fetch('/api/me', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        full_name: fullName,
-        position,
-        image: image || null,
-        currentPassword: currentPassword || undefined,
-        newPassword: newPassword || undefined,
-      }),
-    })
-    setLoading(false)
-    if (!res.ok) {
-      const err = await res.json().catch(() => null)
-      toast.error(err?.error ?? 'Saqlab bo‘lmadi')
-      return
-    }
-    setCurrentPassword('')
-    setNewPassword('')
-    toast.success('Profil yangilandi')
+  const linkActive = (href: string) => {
+    if (href === '/dashboard') return pathname === '/dashboard'
+    if (href === '/dashboard/ads') return pathname === '/dashboard/ads'
+    return pathname === href || pathname.startsWith(`${href}/`)
   }
 
   return (
-    <div className="space-y-6 max-w-3xl">
-      <div>
-        <h1 className="text-xl md:text-2xl font-semibold tracking-tight">Sozlamalar</h1>
-        <p className="text-sm text-muted-foreground">
-          Bu bo&apos;limda faqat tema boshqaruvi mavjud.
-        </p>
-      </div>
-
-      <Card className="border-primary/30 bg-primary/5">
-        <CardHeader className="flex flex-row items-center justify-between gap-4">
-          <div>
-            <CardTitle className="text-xl flex items-center gap-2">
-              <Settings className="size-6" />
-              Sozlamalar
-            </CardTitle>
-            <CardDescription>
-              Sozlamalar bo&apos;limi.
-            </CardDescription>
-          </div>
-        </CardHeader>
-      </Card>
-
+    <div className="mx-auto w-full max-w-lg space-y-6 pb-4 md:max-w-xl md:space-y-8">
       <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Tema</CardTitle>
-          <CardDescription>Yorug' yoki qorong'i rejimni tanlang.</CardDescription>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">Ilova</CardTitle>
+          <CardDescription>Yorug‘ yoki qorong‘i mavzu.</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-4">
-            <ThemeSwitcher />
-          </div>
+        <CardContent className="flex items-center gap-4 pt-0">
+          <ThemeSwitcher />
         </CardContent>
       </Card>
 
-      {canEditProfile ? (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Profil ma&apos;lumotlari</CardTitle>
-            <CardDescription>Admin/CEO profilini yangilash.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label>Full name</Label>
-              <Input value={fullName} onChange={(e) => setFullName(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>Position</Label>
-              <Input value={position} onChange={(e) => setPosition(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>Profil rasmi</Label>
-              <div className="flex gap-2 items-center">
-                <Input
-                  value={image}
-                  onChange={(e) => setImage(e.target.value)}
-                  placeholder="URL yoki yuklash tugmasi orqali"
-                  className="flex-1"
-                />
-                <input
-                  ref={imageFileRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0]
-                    if (f) void uploadProfileImage(f)
-                  }}
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  disabled={imageUploading}
-                  onClick={() => imageFileRef.current?.click()}
-                  title="Cloudinaryga yuklash"
-                >
-                  <Upload className="size-4" />
-                </Button>
+      <div>
+        <h1 className="text-xl font-semibold tracking-tight md:text-2xl">Menu</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Boshqaruv bo‘limlari — rolingizga mos ko‘rinadi.</p>
+      </div>
+
+      {showPrivacy && privacyMeta && PrivacyIcon ? (
+        <div>
+          <SettingsSectionLabel>Maxfiylik</SettingsSectionLabel>
+          <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
+            <Link
+              href={privacyMeta.href}
+              className={cn(
+                'flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-muted/60 active:bg-muted/80',
+                linkActive(privacyMeta.href) && 'bg-muted/40'
+              )}
+            >
+              <div className="min-w-0 flex-1">
+                <div className="font-medium leading-tight">{privacyMeta.label}</div>
+                {privacyMeta.description ? (
+                  <div className="mt-0.5 text-xs text-muted-foreground">{privacyMeta.description}</div>
+                ) : null}
               </div>
-              {image ? (
-                <div className="h-16 w-16 rounded-md overflow-hidden border bg-muted">
-                  <img src={image} alt="" className="h-full w-full object-cover" />
-                </div>
-              ) : null}
-            </div>
-            <div className="grid gap-3 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label>Joriy parol</Label>
-                <Input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label>Yangi parol</Label>
-                <Input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
-              </div>
-            </div>
-            <Button onClick={() => void saveProfile()} disabled={loading}>Saqlash</Button>
-          </CardContent>
-        </Card>
+              <PrivacyIcon className="size-5 shrink-0 text-muted-foreground" />
+            </Link>
+          </div>
+        </div>
       ) : null}
+
+      {SETTINGS_HUB_GROUPS.map((group) => {
+        const items = visibleItemsForGroup(group.hrefs, role)
+        if (items.length === 0) return null
+        return (
+          <div key={group.title}>
+            <SettingsSectionLabel>{group.title}</SettingsSectionLabel>
+            <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
+              {items.map((item) => {
+                const active = linkActive(item.href)
+                const RowIcon = adminNavIcons[item.iconKey]
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cn(
+                      'flex items-center gap-3 border-b border-border px-4 py-3.5 transition-colors last:border-b-0 hover:bg-muted/60 active:bg-muted/80',
+                      active && 'bg-muted/40'
+                    )}
+                  >
+                    <div className="min-w-0 flex-1">
+                      <div className="font-medium leading-tight">{item.label}</div>
+                      {item.description ? (
+                        <div className="mt-0.5 text-xs text-muted-foreground">{item.description}</div>
+                      ) : null}
+                    </div>
+                    <RowIcon className="size-5 shrink-0 text-muted-foreground" />
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+        )
+      })}
     </div>
   )
 }

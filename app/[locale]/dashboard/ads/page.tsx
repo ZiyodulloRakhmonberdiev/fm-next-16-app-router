@@ -1,6 +1,7 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { Suspense, useCallback, useEffect, useRef, useState } from "react"
+import { useSearchParams } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { toast } from "sonner"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/common/components/ui/card"
@@ -11,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/shared/common/components/ui/switch"
 import { Textarea } from "@/shared/common/components/ui/textarea"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/common/components/ui/table"
+import { Link, useRouter } from "@/i18n/navigation"
 import { Loader2, Pencil, Plus, Trash2, Upload } from "lucide-react"
 import { uploadVideoViaApiOrCloudinary } from "@/shared/common/lib/cloudinary-client-upload"
 
@@ -55,8 +57,30 @@ const emptyForm = {
   displaySeconds: 12,
 }
 
-export default function DashboardAdsPage() {
+function applyAdItemToForm(item: AdItem) {
+  return {
+    type: item.type ?? "content",
+    placement: item.placement ?? "header_top_full",
+    media: Array.isArray(item.media) ? item.media : item.media ? [item.media] : [""],
+    logo: item.logo ?? "",
+    siteName: item.siteName ?? "",
+    title: item.title ?? "",
+    description: item.description ?? "",
+    links: item.links?.length ? item.links : [{ label: "", href: "" }],
+    adUrl: item.adUrl ?? "",
+    advertiserUrl: item.advertiserUrl ?? "",
+    adInfoUrl: item.adInfoUrl ?? "",
+    advertiseWithUsUrl: item.advertiseWithUsUrl ?? "",
+    active: item.active,
+    priority: item.priority ?? 0,
+    displaySeconds: item.displaySeconds ?? 12,
+  }
+}
+
+function DashboardAdsPage() {
   const t = useTranslations("ads")
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const [items, setItems] = useState<AdItem[]>([])
   const [form, setForm] = useState(emptyForm)
   const [editId, setEditId] = useState<string | null>(null)
@@ -65,6 +89,18 @@ export default function DashboardAdsPage() {
   const [mediaUploading, setMediaUploading] = useState(false)
   const mediaFileRef = useRef<HTMLInputElement>(null)
   const logoFileRef = useRef<HTMLInputElement>(null)
+  const formTopRef = useRef<HTMLDivElement>(null)
+  const appliedEditFromQuery = useRef<string | null>(null)
+
+  const clearEditQuery = useCallback(() => {
+    appliedEditFromQuery.current = null
+    router.replace("/dashboard/ads")
+  }, [router])
+
+  const openAdForEdit = useCallback((item: AdItem) => {
+    setEditId(item._id)
+    setForm(applyAdItemToForm(item))
+  }, [])
 
   async function uploadMedia(file: File, kind: "image" | "video"): Promise<string> {
     if (kind === "video") {
@@ -141,6 +177,23 @@ export default function DashboardAdsPage() {
     void loadAds()
   }, [])
 
+  useEffect(() => {
+    const id = searchParams.get("edit")?.trim()
+    if (!id) {
+      appliedEditFromQuery.current = null
+      return
+    }
+    if (!items.length) return
+    if (appliedEditFromQuery.current === id) return
+    const item = items.find((x) => x._id === id)
+    if (!item) return
+    appliedEditFromQuery.current = id
+    openAdForEdit(item)
+    window.setTimeout(() => {
+      formTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+    }, 50)
+  }, [searchParams, items, openAdForEdit])
+
   async function saveAd() {
     const mediaList = form.media.filter(Boolean)
     if (!mediaList.length) {
@@ -208,6 +261,7 @@ export default function DashboardAdsPage() {
     toast.success(editId ? "Reklama yangilandi" : "Reklama yaratildi")
     setForm(emptyForm)
     setEditId(null)
+    clearEditQuery()
     void loadAds()
   }
 
@@ -227,13 +281,19 @@ export default function DashboardAdsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Reklama qo'shish</CardTitle>
-          <CardDescription>Reklama ma'lumotlarini kiriting</CardDescription>
+    <div className="w-full min-w-0 space-y-4 sm:space-y-6">
+      <div ref={formTopRef} className="scroll-mt-4" />
+      <Card className="overflow-hidden">
+        <CardHeader className="flex flex-col gap-3 space-y-0 px-4 py-4 sm:px-6 sm:py-6 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0 space-y-1.5">
+            <CardTitle className="text-lg sm:text-xl">Reklama qo'shish</CardTitle>
+            <CardDescription className="text-pretty">Reklama ma'lumotlarini kiriting</CardDescription>
+          </div>
+          <Button variant="outline" size="sm" className="w-full shrink-0 sm:w-auto" asChild>
+            <Link href="/dashboard/ads/feedback">Reklama fikrlari</Link>
+          </Button>
         </CardHeader>
-        <CardContent className="grid gap-4 md:grid-cols-2">
+        <CardContent className="grid gap-4 p-4 sm:p-6 md:grid-cols-2">
           {/* 1. Media (1–10 ta) - URL yoki lokaldan; davomiylik ular orasida teng taqsimlanadi */}
           <div className="space-y-2 md:col-span-2">
             <Label>Reklama media (1–10 ta) *</Label>
@@ -246,12 +306,12 @@ export default function DashboardAdsPage() {
             <div className="space-y-3">
               {form.media.map((url, index) => (
                 <div key={index} className="space-y-1.5">
-                  <div className="flex gap-2 items-center">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                     <Input
                       value={url}
                       onChange={(e) => setForm((p) => ({ ...p, media: p.media.map((u, i) => (i === index ? e.target.value : u)) }))}
                       placeholder={`Media ${index + 1} URL`}
-                      className="flex-1"
+                      className="min-w-0 flex-1"
                     />
                     <input
                     ref={index === 0 ? mediaFileRef : null}
@@ -261,10 +321,12 @@ export default function DashboardAdsPage() {
                     onChange={(ev) => handleMediaFileChange(ev, index)}
                     data-media-index={index}
                   />
+                    <div className="flex shrink-0 gap-2 sm:justify-end">
                   <Button
                     type="button"
                     variant="outline"
                     size="icon"
+                    className="size-10 shrink-0 sm:size-9"
                     disabled={mediaUploading}
                     onClick={() => {
                       const input = index === 0 ? mediaFileRef.current : document.querySelector<HTMLInputElement>(`input[data-media-index="${index}"]`)
@@ -279,15 +341,17 @@ export default function DashboardAdsPage() {
                       type="button"
                       variant="outline"
                       size="icon"
+                      className="size-10 shrink-0 sm:size-9"
                       onClick={() => setForm((p) => ({ ...p, media: p.media.filter((_, i) => i !== index) }))}
                       title="O'chirish"
                     >
                       <Trash2 className="size-4" />
                     </Button>
                   ) : null}
+                    </div>
                   </div>
                   {url.trim() ? (
-                    <div className="h-20 w-full max-w-[320px] overflow-hidden rounded-md border bg-muted">
+                    <div className="h-20 w-full max-w-full overflow-hidden rounded-md border bg-muted sm:max-w-[320px]">
                       {/\.(mp4|webm|ogg|mov|m4v)(\?|#|$)/i.test(url.trim()) ? (
                         <video src={url.trim()} className="h-full w-full object-cover" muted playsInline />
                       ) : (
@@ -298,7 +362,7 @@ export default function DashboardAdsPage() {
                 </div>
               ))}
               {form.media.length < 10 ? (
-                <div className="flex gap-2">
+                <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                   <input
                     type="file"
                     accept="image/*,video/*"
@@ -310,18 +374,20 @@ export default function DashboardAdsPage() {
                   <Button
                     type="button"
                     variant="outline"
+                    className="w-full justify-center sm:w-auto"
                     disabled={mediaUploading}
                     onClick={() => document.getElementById("add-media-file")?.click()}
                   >
-                    <Plus className="mr-2 size-4" />
+                    <Plus className="mr-2 size-4 shrink-0" />
                     Media qo&#39;shish (lokal)
                   </Button>
                   <Button
                     type="button"
                     variant="outline"
+                    className="w-full justify-center sm:w-auto"
                     onClick={() => setForm((p) => ({ ...p, media: [...p.media, ""] }))}
                   >
-                    <Plus className="mr-2 size-4" />
+                    <Plus className="mr-2 size-4 shrink-0" />
                     URL qo&#39;shish
                   </Button>
                 </div>
@@ -330,15 +396,27 @@ export default function DashboardAdsPage() {
           </div>
           <div className="space-y-2">
             <Label>Reklama URL *</Label>
-            <Input value={form.adUrl} onChange={(e) => setForm((p) => ({ ...p, adUrl: e.target.value }))} placeholder="https://..." />
+            <Input
+              value={form.adUrl}
+              onChange={(e) => setForm((p) => ({ ...p, adUrl: e.target.value }))}
+              placeholder="https://..."
+              className="min-w-0"
+            />
           </div>
           <div className="space-y-2">
             <Label>Reklama logo *</Label>
-            <div className="flex gap-2">
-              <Input value={form.logo} onChange={(e) => setForm((p) => ({ ...p, logo: e.target.value }))} placeholder="URL yoki lokaldan" className="flex-1" />
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <Input value={form.logo} onChange={(e) => setForm((p) => ({ ...p, logo: e.target.value }))} placeholder="URL yoki lokaldan" className="min-w-0 flex-1" />
               <input ref={logoFileRef} type="file" accept="image/*" className="hidden" onChange={handleLogoFileChange} />
-              <Button type="button" variant="outline" onClick={() => logoFileRef.current?.click()}>
-                <Upload className="size-4" />
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full shrink-0 justify-center gap-2 sm:w-auto sm:justify-center"
+                title="Logo yuklash"
+                onClick={() => logoFileRef.current?.click()}
+              >
+                <Upload className="size-4 shrink-0" />
+                <span className="sm:hidden">Yuklash</span>
               </Button>
             </div>
           </div>
@@ -368,41 +446,109 @@ export default function DashboardAdsPage() {
           </div> */}
           <div className="space-y-2">
             <Label>Reklama nomi *</Label>
-            <Input value={form.title} onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))} />
+            <Input
+              value={form.title}
+              onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
+              className="min-w-0"
+            />
           </div>
           <div className="space-y-2">
             <Label>Reklama sayt nomi *</Label>
-            <Input value={form.siteName} onChange={(e) => setForm((p) => ({ ...p, siteName: e.target.value }))} />
+            <Input
+              value={form.siteName}
+              onChange={(e) => setForm((p) => ({ ...p, siteName: e.target.value }))}
+              className="min-w-0"
+            />
           </div>
 
-          <div className="space-y-2">
-            <Label>Ustuvorlik *</Label>
-            <Input type="number" value={form.priority} onChange={(e) => setForm((p) => ({ ...p, priority: Number(e.target.value) }))} />
-          </div>
-          <div className="space-y-2">
-            <Label>Davomiylik *</Label>
-            <Input type="number" value={form.displaySeconds} onChange={(e) => setForm((p) => ({ ...p, displaySeconds: Number(e.target.value) }))} min={3} max={120} />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:col-span-2">
+            <div className="space-y-2">
+              <Label>Ustuvorlik *</Label>
+              <Input
+                type="number"
+                inputMode="numeric"
+                className="min-w-0"
+                value={form.priority}
+                onChange={(e) => setForm((p) => ({ ...p, priority: Number(e.target.value) }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Davomiylik *</Label>
+              <Input
+                type="number"
+                inputMode="numeric"
+                className="min-w-0"
+                value={form.displaySeconds}
+                onChange={(e) => setForm((p) => ({ ...p, displaySeconds: Number(e.target.value) }))}
+                min={3}
+                max={120}
+              />
+            </div>
           </div>
 
           <div className="space-y-2">
             <Label>Reklama tavsifi *</Label>
-            <Textarea value={form.description} onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))} />
+            <Textarea
+              value={form.description}
+              onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
+              className="min-h-[100px] min-w-0 resize-y"
+            />
           </div>
 
           <div className="space-y-2 md:col-span-2">
-            <div className="flex justify-between items-center">
-            <Label>Reklama havolalar (Ixtiyoriy)</Label>
-              <Button type="button" size="sm" variant="outline" onClick={() => setForm((p) => ({ ...p, links: [...p.links, { label: "", href: "" }] }))}>
-                <Plus className="mr-2 size-4" />
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <Label className="text-base sm:text-sm">Reklama havolalar (Ixtiyoriy)</Label>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="w-full shrink-0 sm:w-auto"
+                onClick={() => setForm((p) => ({ ...p, links: [...p.links, { label: "", href: "" }] }))}
+              >
+                <Plus className="mr-2 size-4 shrink-0" />
                 Havola qo'shish
               </Button>
             </div>
             <div className="space-y-3">
               {form.links.map((link, index) => (
-                <div key={index} className="grid gap-2 rounded-md border p-3 md:grid-cols-[1fr_1fr_auto]">
-                  <Input value={link.label} placeholder="Link nomi" onChange={(e) => setForm((p) => ({ ...p, links: p.links.map((item, i) => (i === index ? { ...item, label: e.target.value } : item)) }))} />
-                  <Input value={link.href} placeholder="Href" onChange={(e) => setForm((p) => ({ ...p, links: p.links.map((item, i) => (i === index ? { ...item, href: e.target.value } : item)) }))} />
-                  <Button type="button" size="icon" variant="outline" onClick={() => setForm((p) => ({ ...p, links: p.links.length === 1 ? [{ label: "", href: "" }] : p.links.filter((_, i) => i !== index) }))}>
+                <div
+                  key={index}
+                  className="grid grid-cols-1 gap-2 rounded-md border p-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end"
+                >
+                  <Input
+                    value={link.label}
+                    placeholder="Link nomi"
+                    className="min-w-0"
+                    onChange={(e) =>
+                      setForm((p) => ({
+                        ...p,
+                        links: p.links.map((item, i) => (i === index ? { ...item, label: e.target.value } : item)),
+                      }))
+                    }
+                  />
+                  <Input
+                    value={link.href}
+                    placeholder="Href"
+                    className="min-w-0"
+                    onChange={(e) =>
+                      setForm((p) => ({
+                        ...p,
+                        links: p.links.map((item, i) => (i === index ? { ...item, href: e.target.value } : item)),
+                      }))
+                    }
+                  />
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="outline"
+                    className="size-10 justify-self-start sm:justify-self-auto"
+                    onClick={() =>
+                      setForm((p) => ({
+                        ...p,
+                        links: p.links.length === 1 ? [{ label: "", href: "" }] : p.links.filter((_, i) => i !== index),
+                      }))
+                    }
+                  >
                     <Trash2 className="size-4" />
                   </Button>
                 </div>
@@ -411,98 +557,200 @@ export default function DashboardAdsPage() {
           </div>
           <div className="space-y-2">
             <Label>Reklama beruvchi haqida (Ixtiyoriy)</Label>
-            <Input value={form.advertiserUrl} onChange={(e) => setForm((p) => ({ ...p, advertiserUrl: e.target.value }))} />
+            <Input
+              value={form.advertiserUrl}
+              onChange={(e) => setForm((p) => ({ ...p, advertiserUrl: e.target.value }))}
+              className="min-w-0"
+            />
           </div>
           <div className="space-y-2">
             <Label>Reklama haqida (Ixtiyoriy)</Label>
-            <Input value={form.adInfoUrl} onChange={(e) => setForm((p) => ({ ...p, adInfoUrl: e.target.value }))} />
+            <Input
+              value={form.adInfoUrl}
+              onChange={(e) => setForm((p) => ({ ...p, adInfoUrl: e.target.value }))}
+              className="min-w-0"
+            />
           </div>
           <div className="space-y-2">
             <Label>Bizga reklam berish (Ixtiyoriy)</Label>
-            <Input value={form.advertiseWithUsUrl} onChange={(e) => setForm((p) => ({ ...p, advertiseWithUsUrl: e.target.value }))} />
+            <Input
+              value={form.advertiseWithUsUrl}
+              onChange={(e) => setForm((p) => ({ ...p, advertiseWithUsUrl: e.target.value }))}
+              className="min-w-0"
+            />
           </div>
-          <div className="flex items-center justify-between rounded-md border px-3 py-2">
-            <Label>Faol</Label>
-            <Switch checked={form.active} onCheckedChange={(v) => setForm((p) => ({ ...p, active: v }))} />
+          <div className="flex min-h-11 items-center justify-between gap-3 rounded-md border px-3 py-2.5 sm:py-2 md:col-span-2">
+            <Label htmlFor="ad-active-switch" className="cursor-pointer">
+              Faol
+            </Label>
+            <Switch
+              id="ad-active-switch"
+              checked={form.active}
+              onCheckedChange={(v) => setForm((p) => ({ ...p, active: v }))}
+            />
           </div>
-          <div className="md:col-span-2 flex gap-2">
-            <Button onClick={() => void saveAd()} disabled={loading} className="gap-2">
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:flex-wrap md:col-span-2">
+            <Button onClick={() => void saveAd()} disabled={loading} className="w-full gap-2 sm:w-auto">
               {loading ? <Loader2 className="size-4 animate-spin" /> : null}
               {editId ? "Tahrirlash" : "Qo'shish"}
             </Button>
-            {editId ? <Button variant="outline" onClick={() => { setEditId(null); setForm(emptyForm) }}>Bekor qilish</Button> : null}
+            {editId ? (
+              <Button
+                variant="outline"
+                className="w-full sm:w-auto"
+                onClick={() => {
+                  setEditId(null)
+                  setForm(emptyForm)
+                  clearEditQuery()
+                }}
+              >
+                Bekor qilish
+              </Button>
+            ) : null}
           </div>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Reklamlar ro'yxati</CardTitle>
+      <Card className="overflow-hidden">
+        <CardHeader className="px-4 py-4 sm:px-6 sm:py-6">
+          <CardTitle className="text-lg sm:text-xl">Reklamlar ro'yxati</CardTitle>
         </CardHeader>
-        <CardContent className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Reklama nomi</TableHead>
-                {/* <TableHead>Turi</TableHead> */}
-                <TableHead>Sayt</TableHead>
-                {/* <TableHead>{t("placement")}</TableHead> */}
-                <TableHead>Faol</TableHead>
-                <TableHead>Ustuvorlik</TableHead>
-                <TableHead>Amallar</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {items.map((item) => (
-                <TableRow key={item._id}>
-                  <TableCell>{item.title}</TableCell>
-                  {/* <TableCell>{item.type}</TableCell> */}
-                  <TableCell>{item.siteName}</TableCell>
-                  {/* <TableCell>{t(`placement_${item.placement}`)}</TableCell> */}
-                  <TableCell>{item.active ? "Ha" : "Yo'q"}</TableCell>
-                  <TableCell>{item.priority}</TableCell>
-                  <TableCell className="space-x-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        setEditId(item._id)
-                        setForm({
-                          type: item.type ?? "content",
-                          placement: item.placement ?? "header_top_full",
-                          media: Array.isArray(item.media) ? item.media : (item.media ? [item.media] : [""]),
-                          logo: item.logo ?? "",
-                          siteName: item.siteName ?? "",
-                          title: item.title ?? "",
-                          description: item.description ?? "",
-                          links: item.links?.length ? item.links : [{ label: "", href: "" }],
-                          adUrl: item.adUrl ?? "",
-                          advertiserUrl: item.advertiserUrl ?? "",
-                          adInfoUrl: item.adInfoUrl ?? "",
-                          advertiseWithUsUrl: item.advertiseWithUsUrl ?? "",
-                          active: item.active,
-                          priority: item.priority ?? 0,
-                          displaySeconds: item.displaySeconds ?? 12,
-                        })
-                      }}
-                    >
-                      <Pencil className="size-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      disabled={deletingId === item._id}
-                      onClick={() => void removeAd(item._id)}
-                    >
-                      {deletingId === item._id ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
-                    </Button>
-                  </TableCell>
+        <CardContent className="space-y-3 p-4 sm:p-6">
+          <div className="md:hidden">
+            {items.length === 0 ? (
+              <p className="py-8 text-center text-sm text-muted-foreground">Reklama yo&apos;q</p>
+            ) : (
+              <ul className="space-y-3">
+                {items.map((item) => (
+                  <li
+                    key={item._id}
+                    className="rounded-lg border bg-card p-4 shadow-sm"
+                  >
+                    <p className="font-medium leading-snug">{item.title}</p>
+                    <p className="mt-1 text-sm text-muted-foreground">{item.siteName}</p>
+                    <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                      <span>Faol: {item.active ? "Ha" : "Yo'q"}</span>
+                      <span>Ustuvorlik: {item.priority}</span>
+                    </div>
+                    <div className="mt-4 flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="min-h-10 flex-1 gap-2"
+                        onClick={() => {
+                          appliedEditFromQuery.current = item._id
+                          openAdForEdit(item)
+                          void router.replace(`/dashboard/ads?edit=${encodeURIComponent(item._id)}`)
+                          window.setTimeout(() => {
+                            formTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+                          }, 50)
+                        }}
+                      >
+                        <Pencil className="size-4 shrink-0" />
+                        Tahrirlash
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="min-h-10 flex-1 gap-2"
+                        disabled={deletingId === item._id}
+                        onClick={() => void removeAd(item._id)}
+                      >
+                        {deletingId === item._id ? (
+                          <Loader2 className="size-4 shrink-0 animate-spin" />
+                        ) : (
+                          <Trash2 className="size-4 shrink-0" />
+                        )}
+                        O&apos;chirish
+                      </Button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div className="hidden md:block md:overflow-x-auto md:rounded-md md:border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Reklama nomi</TableHead>
+                  <TableHead>Sayt</TableHead>
+                  <TableHead>Faol</TableHead>
+                  <TableHead>Ustuvorlik</TableHead>
+                  <TableHead className="w-[120px]">Amallar</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {items.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
+                      Reklama yo&apos;q
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  items.map((item) => (
+                    <TableRow key={item._id}>
+                      <TableCell className="max-w-[200px] truncate font-medium">{item.title}</TableCell>
+                      <TableCell className="max-w-[160px] truncate">{item.siteName}</TableCell>
+                      <TableCell>{item.active ? "Ha" : "Yo'q"}</TableCell>
+                      <TableCell>{item.priority}</TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            className="size-9 shrink-0"
+                            title="Tahrirlash"
+                            onClick={() => {
+                              appliedEditFromQuery.current = item._id
+                              openAdForEdit(item)
+                              void router.replace(`/dashboard/ads?edit=${encodeURIComponent(item._id)}`)
+                              window.setTimeout(() => {
+                                formTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+                              }, 50)
+                            }}
+                          >
+                            <Pencil className="size-4" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            className="size-9 shrink-0"
+                            title="O'chirish"
+                            disabled={deletingId === item._id}
+                            onClick={() => void removeAd(item._id)}
+                          >
+                            {deletingId === item._id ? (
+                              <Loader2 className="size-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="size-4" />
+                            )}
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+export default function DashboardAdsPageWithSuspense() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-[40vh] items-center justify-center text-muted-foreground">
+          <Loader2 className="size-8 animate-spin" />
+        </div>
+      }
+    >
+      <DashboardAdsPage />
+    </Suspense>
   )
 }

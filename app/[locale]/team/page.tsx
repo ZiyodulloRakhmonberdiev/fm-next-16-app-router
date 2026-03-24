@@ -11,7 +11,7 @@ import { getTranslations } from "next-intl/server"
 
 type TeamRow = {
   _id: string
-  order: number
+  order: string
   image?: string
   fullName: string
   position: string
@@ -43,9 +43,9 @@ export default async function TeamPage() {
                 <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">
                   {t("team_title")}
                 </h1>
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                   {items.map((m) => (
-                    <Card key={m._id} className="overflow-hidden flex items-center justify-center">
+                    <Card key={m._id} className="overflow-hidden flex items-center justify-center p-0">
                       <CardContent className="flex items-center justify-center p-0">
                         {m.badgeImage && (
                           <img

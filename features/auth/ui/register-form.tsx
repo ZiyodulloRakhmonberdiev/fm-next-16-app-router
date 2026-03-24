@@ -6,7 +6,7 @@ import { Input } from "@/shared/common/components/ui/input";
 import { Label } from "@/shared/common/components/ui/label";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { Eye, EyeOff, Lock, Mail } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, User } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { toast } from "sonner";
 
@@ -63,7 +63,7 @@ export const RegisterForm = () => {
         <div className="space-y-2">
           <Label htmlFor="reg-fullname">{t("full_name")}</Label>
           <div className="relative">
-            <Mail className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <User className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               id="reg-fullname"
               type="text"

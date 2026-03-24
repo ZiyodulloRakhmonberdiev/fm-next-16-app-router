@@ -18,7 +18,8 @@ import { toast } from "sonner"
 
 type TeamRow = {
   _id: string
-  order: number
+  order: string
+  certificateNumber?: string
   image?: string
   fullName: string
   position: string
@@ -26,8 +27,17 @@ type TeamRow = {
   badgeImage?: string
 }
 
-const emptyForm: Omit<TeamRow, "_id"> = {
-  order: 0,
+type TeamForm = {
+  certificateNumber: string
+  image: string
+  fullName: string
+  position: string
+  qrCode: string
+  badgeImage: string
+}
+
+const emptyForm: TeamForm = {
+  certificateNumber: "",
   image: "",
   fullName: "",
   position: "",
@@ -37,7 +47,7 @@ const emptyForm: Omit<TeamRow, "_id"> = {
 
 export default function DashboardTeamPage() {
   const [items, setItems] = useState<TeamRow[]>([])
-  const [form, setForm] = useState(emptyForm)
+  const [form, setForm] = useState<TeamForm>(emptyForm)
   const [editId, setEditId] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
@@ -49,7 +59,18 @@ export default function DashboardTeamPage() {
   async function load() {
     const res = await fetch("/api/team", { cache: "no-store" })
     if (!res.ok) return
-    setItems((await res.json()) as TeamRow[])
+    const raw = (await res.json()) as (TeamRow & { order?: unknown })[]
+    setItems(
+      raw.map((m) => {
+        const cert =
+          typeof m.certificateNumber === "string"
+            ? m.certificateNumber
+            : typeof m.order === "string"
+              ? m.order
+              : String(m.order ?? "")
+        return { ...m, order: cert, certificateNumber: cert }
+      })
+    )
   }
 
   useEffect(() => {
@@ -68,8 +89,9 @@ export default function DashboardTeamPage() {
       method,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        ...form,
-        order: Number(form.order) || 0,
+        certificateNumber: String(form.certificateNumber ?? ""),
+        fullName: form.fullName.trim(),
+        position: form.position.trim(),
         image: form.image?.trim() || undefined,
         qrCode: form.qrCode?.trim() || undefined,
         badgeImage: form.badgeImage?.trim() || undefined,
@@ -77,7 +99,16 @@ export default function DashboardTeamPage() {
     })
     setLoading(false)
     if (!res.ok) {
-      toast.error("Saqlab bo'lmadi")
+      const errBody = (await res.json().catch(() => null)) as {
+        error?: string
+        issues?: { fieldErrors?: Record<string, string[]>; formErrors?: string[] }
+      } | null
+      const fieldMsgs = errBody?.issues?.fieldErrors
+        ? Object.values(errBody.issues.fieldErrors).flat()
+        : []
+      const formMsgs = errBody?.issues?.formErrors ?? []
+      const detail = [...fieldMsgs, ...formMsgs].filter(Boolean).join(" · ")
+      toast.error(detail || errBody?.error || "Saqlab bo'lmadi")
       return
     }
     toast.success(editId ? "Team a'zo yangilandi" : "Team a'zo qo'shildi")
@@ -106,16 +137,17 @@ export default function DashboardTeamPage() {
       formData.append("kind", "image")
       const res = await fetch("/api/uploads", { method: "POST", body: formData })
       const data = (await res.json().catch(() => null)) as { url?: string; error?: string } | null
-      if (!res.ok || !data?.url) {
+      const uploadedUrl = data?.url
+      if (!res.ok || !uploadedUrl) {
         toast.error(data?.error || "Rasmni yuklab bo'lmadi")
         return
       }
       if (kind === "image") {
-        setForm((p) => ({ ...p, image: data.url }))
+        setForm((p) => ({ ...p, image: uploadedUrl }))
       } else if (kind === "qr") {
-        setForm((p) => ({ ...p, qrCode: data.url }))
+        setForm((p) => ({ ...p, qrCode: uploadedUrl }))
       } else {
-        setForm((p) => ({ ...p, badgeImage: data.url }))
+        setForm((p) => ({ ...p, badgeImage: uploadedUrl }))
       }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Rasmni yuklab bo'lmadi")
@@ -132,12 +164,20 @@ export default function DashboardTeamPage() {
       <CardContent className="space-y-6 px-4 md:px-6">
         <div className="grid gap-3 md:grid-cols-2">
           <div className="space-y-2">
-            <Label>Order</Label>
+            <Label htmlFor="team-certificate">Guvohnoma raqami</Label>
             <Input
-              type="number"
-              value={form.order}
-              onChange={(e) => setForm((p) => ({ ...p, order: Number(e.target.value) }))}
+              id="team-certificate"
+              type="text"
+              inputMode="text"
+              value={form.certificateNumber}
+              maxLength={24}
+              autoComplete="off"
+              onChange={(e) =>
+                setForm((p) => ({ ...p, certificateNumber: e.target.value }))
+              }
+              placeholder="Matn — qanday kirsangiz shunday saqlanadi"
             />
+            <p className="text-xs text-muted-foreground">Maksimal 24 belgi</p>
           </div>
           <div className="space-y-2">
             <Label>Ism familiya</Label>
@@ -265,7 +305,7 @@ export default function DashboardTeamPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>#</TableHead>
+                <TableHead>Guvohnoma</TableHead>
                 <TableHead>Rasm</TableHead>
                 <TableHead>Ism</TableHead>
                 <TableHead>Lavozim</TableHead>
@@ -290,7 +330,7 @@ export default function DashboardTeamPage() {
                       onClick={() => {
                         setEditId(m._id)
                         setForm({
-                          order: m.order,
+                          certificateNumber: m.order,
                           image: m.image ?? "",
                           fullName: m.fullName,
                           position: m.position,
@@ -299,14 +339,14 @@ export default function DashboardTeamPage() {
                         })
                       }}
                     >
-                      Edit
+                      Tahrirlash
                     </Button>
                     <Button
                       size="sm"
                       variant="destructive"
                       onClick={() => setDeleteTargetId(m._id)}
                     >
-                      Delete
+                      O'chirish
                     </Button>
                   </TableCell>
                 </TableRow>

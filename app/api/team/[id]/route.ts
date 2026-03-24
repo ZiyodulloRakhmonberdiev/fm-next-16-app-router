@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server"
 import { dbConnect } from "@/shared/common/lib/db"
+import { mapTeamDocToClient } from "@/features/team/lib/team-api-map"
 import { TeamMemberModel } from "@/features/team/model/team.model"
 import { updateTeamMemberSchema } from "@/features/team/model/schemas"
 import { requireAdminSession } from "@/shared/common/lib/require-admin-session"
@@ -21,13 +22,35 @@ export async function PATCH(
       { status: 400 }
     )
   }
-  const updated = await TeamMemberModel.findByIdAndUpdate(id, parsed.data, {
-    new: true,
-  }).lean()
-  if (!updated) {
-    return Response.json({ error: "Topilmadi" }, { status: 404 })
+
+  const $set = Object.fromEntries(
+    Object.entries(parsed.data).filter(([, v]) => v !== undefined)
+  ) as Record<string, unknown>
+  if (Object.keys($set).length === 0) {
+    return Response.json({ error: "Yangilanadigan maydon yo'q" }, { status: 400 })
   }
-  return Response.json(updated)
+
+  const updateDoc: { $set: Record<string, unknown>; $unset?: Record<string, string> } = {
+    $set,
+  }
+  if (Object.prototype.hasOwnProperty.call($set, "certificateNumber")) {
+    updateDoc.$unset = { order: "" }
+  }
+
+  try {
+    const updated = await TeamMemberModel.findOneAndUpdate(
+      { _id: id },
+      updateDoc,
+      { new: true, runValidators: true }
+    ).lean()
+    if (!updated) {
+      return Response.json({ error: "Topilmadi" }, { status: 404 })
+    }
+    return Response.json(mapTeamDocToClient(updated as Record<string, unknown>))
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Yangilashda xatolik"
+    return Response.json({ error: message }, { status: 500 })
+  }
 }
 
 export async function DELETE(
@@ -39,7 +62,7 @@ export async function DELETE(
 
   await dbConnect()
   const id = (await params).id
-  const deleted = await TeamMemberModel.findByIdAndDelete(id).lean()
+  const deleted = await TeamMemberModel.findOneAndDelete({ _id: id }).lean()
   if (!deleted) {
     return Response.json({ error: "Topilmadi" }, { status: 404 })
   }

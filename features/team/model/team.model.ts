@@ -1,9 +1,10 @@
-import { Schema, model, models } from "mongoose"
+import mongoose, { Schema, model } from "mongoose"
 import { v4 as uuidv4 } from "uuid"
 
 export interface ITeamMember {
   _id: string
-  order: number
+  /** Guvohnoma raqami — matn (BSON string) */
+  certificateNumber: string
   image?: string | null
   fullName: string
   position: string
@@ -16,7 +17,13 @@ export interface ITeamMember {
 const TeamMemberSchema = new Schema<ITeamMember>(
   {
     _id: { type: String, required: true, default: () => uuidv4() },
-    order: { type: Number, required: true, default: 0, index: true },
+    certificateNumber: {
+      type: String,
+      required: true,
+      default: "",
+      maxlength: 24,
+      index: true,
+    },
     image: { type: String },
     fullName: { type: String, required: true },
     position: { type: String, required: true },
@@ -26,5 +33,9 @@ const TeamMemberSchema = new Schema<ITeamMember>(
   { timestamps: true }
 )
 
-export const TeamMemberModel =
-  models.TeamMember || model<ITeamMember>("TeamMember", TeamMemberSchema)
+/** Next.js dev: eski skema keshlangan bo'lsa yangi maydonlar ishlamaydi */
+if (mongoose.models.TeamMember) {
+  delete mongoose.models.TeamMember
+}
+
+export const TeamMemberModel = model<ITeamMember>("TeamMember", TeamMemberSchema)

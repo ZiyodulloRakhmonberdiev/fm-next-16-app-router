@@ -15,42 +15,18 @@ import {
   SidebarMenuItem,
   SidebarSeparator,
 } from '@/shared/common/components/ui/sidebar'
-import {
-  LayoutDashboard,
-  FolderTree,
-  Settings,
-  Users,
-  Newspaper,
-  Tag,
-  Settings2,
-  KeyRound,
-  Megaphone,
-  LogOut,
-  MessageSquare,
-  UserSquare,
-} from 'lucide-react'
+import { LogOut } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import Image from 'next/image'
 import { useEffect, useMemo, useState } from 'react'
 import { signOut, useSession } from 'next-auth/react'
-import { normalizeRole, type NormalizedRole } from '@/shared/common/lib/rbac'
+import { normalizeRole } from '@/shared/common/lib/rbac'
 import { Button } from '@/shared/common/components/ui/button'
-
-const navItems = [
-  { href: '/dashboard', label: 'Boshqaruv paneli', icon: LayoutDashboard, roles: ['ceo', 'administrator',] as NormalizedRole[] },
-  { href: '/dashboard/news', label: 'Yangiliklar', icon: Newspaper, roles: ['ceo', 'administrator', 'moderator'] as NormalizedRole[] },
-  { href: '/dashboard/categories', label: 'Kategoriyalar', icon: FolderTree, roles: ['ceo', 'administrator', 'moderator'] as NormalizedRole[] },
-  { href: '/dashboard/tags', label: 'Teglar', icon: Tag, roles: ['ceo', 'administrator', 'moderator'] as NormalizedRole[] },
-  { href: '/dashboard/users', label: 'Foydalanuvchilar', icon: Users, roles: ['ceo', 'administrator'] as NormalizedRole[] },
-  { href: '/dashboard/team', label: 'Jamoa', icon: UserSquare, roles: ['ceo', 'administrator'] as NormalizedRole[] },
-  { href: '/dashboard/comments', label: 'Izohlar', icon: MessageSquare, roles: ['ceo', 'administrator', 'moderator'] as NormalizedRole[] },
-  { href: '/dashboard/ads', label: 'Reklama', icon: Megaphone, roles: ['ceo', 'administrator', 'ads_manager'] as NormalizedRole[] },
-  { href: '/dashboard/configs', label: 'Maxfiylik', icon: KeyRound, roles: ['ceo', 'administrator'] as NormalizedRole[] },
-]
-
-const bottomItems = [
-  { href: '/dashboard/settings', label: 'Sozlamalar', icon: Settings, roles: ['ceo', 'administrator', 'moderator', 'ads_manager'] as NormalizedRole[] },
-]
+import {
+  adminMainNavItems,
+  adminSystemNavItems,
+  filterAdminNavByRole,
+} from '../config/admin-nav-items'
 
 export default function AdminSidebar() {
   const pathname = usePathname()
@@ -59,29 +35,24 @@ export default function AdminSidebar() {
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
   const role = normalizeRole(session?.user?.role)
-  const visibleNavItems = useMemo(
-    () => navItems.filter((item) => item.roles.includes(role)),
-    [role]
-  )
-  const visibleBottomItems = useMemo(
-    () => bottomItems.filter((item) => item.roles.includes(role)),
-    [role]
-  )
+  const visibleNavItems = useMemo(() => filterAdminNavByRole(adminMainNavItems, role), [role])
+  const visibleBottomItems = useMemo(() => filterAdminNavByRole(adminSystemNavItems, role), [role])
 
   const logoSrc =
-    mounted && resolvedTheme === 'light'
-      ? '/images/fm-logo-dark.svg'
-      : '/images/fm-logo.svg'
+    mounted && resolvedTheme === 'light' ? '/images/fm-logo-dark.svg' : '/images/fm-logo.svg'
 
   const isItemActive = (href: string) => {
     if (href === '/dashboard') {
       return pathname === '/dashboard'
     }
+    if (href === '/dashboard/ads') {
+      return pathname === '/dashboard/ads'
+    }
     return pathname === href || pathname.startsWith(`${href}/`)
   }
 
   return (
-    <Sidebar  collapsible="icon" className="border-r border-border">
+    <Sidebar collapsible="icon" className="border-r border-border">
       <SidebarHeader className="border-b border-border">
         <div className="flex h-12 items-center gap-2 px-2">
           <span className="font-semibold text-lg truncate group-data-[state=collapsed]:hidden">

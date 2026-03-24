@@ -296,9 +296,9 @@ export function DashboardNewsListPage({
         : 'Filtrlangan yangiliklar ro\'yxati.'
 
   return (
-    <div className="space-y-6 min-w-0 overflow-hidden scrollbar-hide">
-      <Card className="border-primary/30 bg-primary/5 p-4 md:p-6">
-        <CardHeader className="flex flex-col md:flex-row items-center justify-between gap-4 px-0 md:px-4">
+    <div className="min-w-0 space-y-4 md:space-y-6">
+      <Card className="gap-4 border-primary/30 bg-primary/5 py-4 md:gap-6 md:py-6">
+        <CardHeader className="flex flex-col items-center justify-between gap-4 px-3 md:flex-row md:px-6">
           <div>
             <CardTitle className="text-xl flex items-center gap-2">
               <Newspaper className="size-6" />
@@ -319,7 +319,7 @@ export function DashboardNewsListPage({
 
       {variant === 'full' && (
         <>
-          <div className="grid gap-4 grid-cols-2 sm:grid-cols-3">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-4">
             <Link href="/dashboard/news" className="block">
               <Card className="hover:border-primary/60 transition-colors cursor-pointer h-full p-2 md:p-4">
                 <CardHeader className="py-3 flex flex-row items-center gap-3 px-0 md:px-4">
@@ -355,13 +355,13 @@ export function DashboardNewsListPage({
             })}
           </div>
 
-          <Card className='py-0 md:py-6'>
-            <CardHeader className='hidden md:block'>
+          <Card className="gap-3 py-0 md:gap-6 md:py-6">
+            <CardHeader className="hidden px-3 md:block md:px-6">
               <CardTitle className="text-base">Filterlar</CardTitle>
               <CardDescription>Status, Top, tur va sana bo'yicha filtrlash</CardDescription>
             </CardHeader>
-            <CardContent className='p-4'>
-              <div className="grid gap-2 md:gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+            <CardContent className="px-3 pb-4 pt-2 md:px-6 md:pb-6 md:pt-0">
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-2 md:gap-6 lg:grid-cols-3 xl:grid-cols-6">
                 <FilterSelect label="Status" value={statusFilter} options={STATUS_OPTIONS} onSelect={setStatusFilter} />
                 <FilterSelect label="Top" value={isTopFilter} options={TOP_OPTIONS} onSelect={setIsTopFilter} />
                 <FilterSelect label="Turi" value={typeFilter} options={TYPE_OPTIONS_FULL} onSelect={setTypeFilter} />
@@ -383,9 +383,9 @@ export function DashboardNewsListPage({
         </>
       )}
 
-      <Card className="py-4 md:py-6">
-        <CardHeader>
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between px-0">
+      <Card className="gap-3 py-3 md:gap-6 md:py-6">
+        <CardHeader className="px-3 md:px-6">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <CardTitle className="text-base">Barcha yangiliklar ({filtered.length})</CardTitle>
             <div className="relative w-full sm:w-auto sm:min-w-[400px]">
               <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -414,7 +414,7 @@ export function DashboardNewsListPage({
             </DropdownMenu>
           </div>
         </CardHeader>
-        <CardContent className="min-w-0">
+        <CardContent className="min-w-0 px-3 pb-4 md:px-6 md:pb-6">
           {isLoading ? (
             <p className="text-sm text-muted-foreground py-8 text-center">Yangiliklar yuklanmoqda...</p>
           ) : error ? (
@@ -425,7 +425,7 @@ export function DashboardNewsListPage({
             </p>
           ) : (
             <>
-              <div className="min-w-0 w-full max-w-full overflow-x-auto -mx-1">
+              <div className="-mx-3 min-w-0 w-[calc(100%+1.5rem)] max-w-none touch-pan-x overflow-x-auto overscroll-x-contain px-3 [scrollbar-width:thin] md:mx-0 md:w-full md:max-w-full md:px-0">
                 <Table className="min-w-max">
                   <TableHeader>
                     <TableRow>
