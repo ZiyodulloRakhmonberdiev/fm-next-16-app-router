@@ -57,7 +57,7 @@ export function NewsListingFilterToolbar({
   ]
 
   return (
-    <div className="mb-4 flex flex-col gap-1 bg-background py-2 sm:flex-row sm:items-center sm:justify-between md:top-17 md:gap-3 sticky top-22 z-10">
+    <div className="mb-4 flex flex-col gap-1 bg-background py-2 sm:flex-row sm:items-center sm:justify-between md:top-17 md:gap-3 sticky top-22 z-20 border-b">
       <h1 className="text-xl font-semibold">{pageHeading}</h1>
       <div className="flex items-center gap-2">
         <div className="w-full flex-wrap">
@@ -69,7 +69,7 @@ export function NewsListingFilterToolbar({
                 size="sm"
                 variant="ghost"
                 className={[
-                  "h-8 rounded-sm px-0",
+                  "h-8 rounded-sm px-2",
                   activeFilter === btn.key
                     ? "text-brand underline underline-offset-4"
                     : "text-muted-foreground",

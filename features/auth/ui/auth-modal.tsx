@@ -177,14 +177,14 @@ export function AuthModal({
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="auth-password">{t("password")}</Label>
-                {isLogin && (
+                {/* {isLogin && (
                   <button
                     type="button"
                     className="text-xs text-primary hover:underline"
                   >
                     {t("forgot_password")}
                   </button>
-                )}
+                )} */}
               </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -238,7 +238,7 @@ export function AuthModal({
             </Button>
           </form>
 
-          <div className="relative">
+          {/* <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t border-border" />
             </div>
@@ -247,9 +247,9 @@ export function AuthModal({
                 {t("or_sign_in_with")}
               </span>
             </div>
-          </div>
+          </div> */}
 
-          <div className="flex justify-center gap-3">
+          {/* <div className="flex justify-center gap-3">
             <button
               type="button"
               disabled
@@ -266,7 +266,7 @@ export function AuthModal({
             >
               <TelegramIcon className="size-6" />
             </button>
-          </div>
+          </div> */}
 
           <p className="text-center text-sm text-muted-foreground">
             {isLogin ? (

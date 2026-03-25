@@ -1,6 +1,9 @@
 import { NextRequest } from 'next/server'
 import { hash } from 'bcryptjs'
+import { getServerSession } from 'next-auth'
 import { dbConnect } from '@/shared/common/lib/db'
+import { authOptions } from '@/shared/common/lib/auth-options'
+import { normalizeRole } from '@/shared/common/lib/rbac'
 import { requireAdminSession } from '@/shared/common/lib/require-admin-session'
 import { UserModel } from '@/features/users/model/user.model'
 import { createUserSchema } from '@/features/users/model/schemas'
@@ -39,6 +42,14 @@ export async function POST(req: NextRequest) {
           issues: parsed.error.flatten(),
         },
         { status: 400 }
+      )
+    }
+
+    const session = await getServerSession(authOptions)
+    if (normalizeRole(session?.user?.role) === 'administrator' && parsed.data.role === 'ceo') {
+      return Response.json(
+        { error: 'Administrator CEO roli bilan foydalanuvchi yarata olmaydi' },
+        { status: 403 }
       )
     }
 

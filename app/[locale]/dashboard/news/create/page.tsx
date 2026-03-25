@@ -1,7 +1,6 @@
 import { getLocale } from 'next-intl/server'
 import { headers } from 'next/headers'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/common/components/ui/card'
-import { CreateNewsForm } from '@/features/news/ui/forms/create-news-form'
+import { CreateNewsPageClient } from './_components/create-news-page-client'
 import type { AppLocale } from '@/shared/common/lib/locale-api'
 import { getServerApiUrl } from '@/shared/common/lib/server-api-url'
 import type { RawNewsItem } from '@/features/news/model'
@@ -62,21 +61,11 @@ export default async function CreateNewsPage() {
   ).sort()
 
   return (
-    <Card className='pt-4'>
-      <CardHeader className='px-4'>
-        <CardTitle>Yangilik yaratish</CardTitle>
-        <CardDescription>
-          Ikki bosqichda: birinchi — tarjimalar va umumiy maydonlar, ikkinchi — boolean sozlamalar va saqlash.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className='px-4'>
-        <CreateNewsForm
-          categories={categories}
-          tags={tags}
-          authors={authors}
-          existingSlugs={newsData.data.map((n) => n.slug)}
-        />
-      </CardContent>
-    </Card>
+    <CreateNewsPageClient
+      categories={categories}
+      tags={tags}
+      authors={authors}
+      existingSlugs={newsData.data.map((n) => n.slug)}
+    />
   )
 }

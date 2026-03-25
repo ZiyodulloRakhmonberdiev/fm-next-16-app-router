@@ -14,6 +14,10 @@ export function AdminNavMobile() {
   const role = normalizeRole(session?.user?.role)
   const visibleItems = useMemo(() => getMobileBottomNavItems(role), [role])
 
+  if (visibleItems.length === 0) {
+    return null
+  }
+
   return (
     <nav
       className="fixed bottom-0 left-0 right-0 z-50 md:hidden border-t border-border bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80 safe-area-pb"
@@ -22,9 +26,17 @@ export function AdminNavMobile() {
       <div className="flex h-14 items-center justify-around px-1">
         {visibleItems.map((item) => {
           const isActive =
-            item.href === '/dashboard/settings'
-              ? pathname === '/dashboard/settings' || pathname?.startsWith('/dashboard/settings/')
-              : pathname === item.href || pathname.startsWith(`${item.href}/`)
+            item.href === '/dashboard'
+              ? pathname === '/dashboard'
+              : item.href === '/dashboard/ads'
+                ? pathname === '/dashboard/ads'
+                : item.href === '/dashboard/settings'
+                  ? pathname === '/dashboard/settings' ||
+                    pathname?.startsWith('/dashboard/settings/')
+                  : item.href === '/dashboard/reactions'
+                    ? pathname === '/dashboard/reactions' ||
+                      pathname?.startsWith('/dashboard/reactions/')
+                    : pathname === item.href || pathname.startsWith(`${item.href}/`)
           return (
             <Link
               key={item.href}

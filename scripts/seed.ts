@@ -109,10 +109,10 @@ export const seed = {
   ] as const,
 
   copyright: {
-    uz: "© 2026 Fergana Media. Barcha huquqlar himoyalangan.",
-    uzb: "© 2026 Fergana Media. Барча ҳуқуқлар ҳимояланган.",
-    ru: "© 2026 Fergana Media. Все права защищены.",
-    en: "© 2026 Fergana Media. All rights reserved.",
+    uz: "© 2024 dan boshlab. Fergana Media. Barcha huquqlar himoyalangan.",
+    uzb: "© 2024 дан бошлаб. Fergana Media. Барча ҳуқуқлар ҳимояланган.",
+    ru: "© С 2024 года. Fergana Media. Все права защищены.",
+    en: "© Since 2024. Fergana Media. All rights reserved.",
   } satisfies LocaleMap,
 
   headline: {
@@ -134,18 +134,18 @@ export const seed = {
       href: "/team",
       name: { uz: "Biz haqimizda", uzb: "Биз ҳақимизда", ru: "О нас", en: "About us" } satisfies LocaleMap,
     },
-    {
-      href: "/contact-us",
-      name: { uz: "Bog'lanish", uzb: "Боғланиш", ru: "Контакты", en: "Contact us" } satisfies LocaleMap,
-    },
-    {
-      href: "/terms-of-service",
-      name: { uz: "Foydalanish shartlari", uzb: "Фойдаланиш шартлари", ru: "Условия использования", en: "Terms of service" } satisfies LocaleMap,
-    },
-    {
-      href: "/privacy-policy",
-      name: { uz: "Maxfiylik siyosati", uzb: "Махфийлик сиёсати", ru: "Политика конфиденциальности", en: "Privacy policy" } satisfies LocaleMap,
-    },
+    // {
+    //   href: "/contact-us",
+    //   name: { uz: "Bog'lanish", uzb: "Боғланиш", ru: "Контакты", en: "Contact us" } satisfies LocaleMap,
+    // },
+    // {
+    //   href: "/terms-of-service",
+    //   name: { uz: "Foydalanish shartlari", uzb: "Фойдаланиш шартлари", ru: "Условия использования", en: "Terms of service" } satisfies LocaleMap,
+    // },
+    // {
+    //   href: "/privacy-policy",
+    //   name: { uz: "Maxfiylik siyosati", uzb: "Махфийлик сиёсати", ru: "Политика конфиденциальности", en: "Privacy policy" } satisfies LocaleMap,
+    // },
     {
       href: "https://president.uz/uz",
       name: { uz: "Prezident portali", uzb: "Президент портали", ru: "Портал Президента", en: "President's portal" } satisfies LocaleMap,

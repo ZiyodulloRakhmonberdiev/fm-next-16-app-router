@@ -20,14 +20,22 @@ export function getDefaultDashboardPath(role?: string | null): string | null {
   return null
 }
 
+/** Administrator Content delivery (Telegram shu yerda) sahifasiga kira olmaydi. */
+function isAdministratorBlockedConfigPath(path: string): boolean {
+  return path === "/dashboard/configs/delivery" || path.startsWith("/dashboard/configs/delivery/")
+}
+
 export function canAccessDashboardPath(role: string | null | undefined, path: string): boolean {
   const r = normalizeRole(role)
   if (!path.startsWith("/dashboard")) return true
 
   if (r === "ceo") return true
+
   if (r === "administrator") {
-    return !path.startsWith("/dashboard/configs")
+    if (isAdministratorBlockedConfigPath(path)) return false
+    return true
   }
+
   if (r === "moderator") {
     return (
       path === "/dashboard/news" ||
@@ -38,17 +46,14 @@ export function canAccessDashboardPath(role: string | null | undefined, path: st
       path.startsWith("/dashboard/tags/") ||
       path === "/dashboard/comments" ||
       path.startsWith("/dashboard/comments/") ||
-      path === "/dashboard/settings" ||
-      path.startsWith("/dashboard/settings/")
+      path === "/dashboard/reactions" ||
+      path.startsWith("/dashboard/reactions/")
     )
   }
+
   if (r === "ads_manager") {
-    return (
-      path === "/dashboard/ads" ||
-      path.startsWith("/dashboard/ads/") ||
-      path === "/dashboard/settings" ||
-      path.startsWith("/dashboard/settings/")
-    )
+    return path === "/dashboard/ads" || path.startsWith("/dashboard/ads/")
   }
+
   return false
 }

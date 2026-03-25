@@ -21,12 +21,11 @@ export default function LatestNews({ excludeSlug }: LatestNewsProps = {}) {
     .filter((n) => !excludeSlug || n.slug !== excludeSlug)
     .sort(
       (a, b) =>
-        new Date((b as { createdAt?: Date }).createdAt ?? 0).getTime() -
-        new Date((a as { createdAt?: Date }).createdAt ?? 0).getTime()
+        new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
     )
-    .slice(0, 9)
+    .slice(0, 10)
   const sorted = getNewsListForLocale(rawSorted, locale)
-  if (sorted.length < 3) return null
+  if (sorted.length === 0) return null
 
   return (
     <div className="flex w-full flex-col gap-4">

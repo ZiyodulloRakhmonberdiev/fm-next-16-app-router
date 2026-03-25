@@ -25,6 +25,8 @@ export type NewsSectionHeaderProps = {
   linkWrap?: "none" | "link" | "ghost";
   /** row-section: pastida brand chiziq */
   showBrandLine?: boolean;
+  /** `linkWrap="link"` bo‘lsa: matn va tugma `text-primary` o‘rniga oddiy foreground (oq/qora) */
+  neutralViewAll?: boolean;
 };
 
 function rowClass(variant: NewsSectionHeaderVariant): string {
@@ -81,25 +83,32 @@ export function NewsSectionHeader({
   viewAllClassName,
   linkWrap = "none",
   showBrandLine = false,
+  neutralViewAll = false,
 }: NewsSectionHeaderProps) {
   const t = useTranslations("common");
 
-  const label = (
-    <div className="flex items-center gap-2">
-      {t("view_all")}
-      <ChevronRight className="size-5 shrink-0 bg-foreground text-background rounded-full p-1" aria-hidden />
-    </div>
-  );
+  const label =
+    neutralViewAll && linkWrap === "link" ? (
+      <span className="flex items-center text-foreground gap-1.5">
+        {t("view_all")}
+        <ChevronRight className="size-4 shrink-0 opacity-70" aria-hidden />
+      </span>
+    ) : (
+      <div className="flex items-center gap-2">
+        {t("view_all")}
+        <ChevronRight className="size-5 shrink-0 rounded-full bg-foreground p-1 text-background" aria-hidden />
+      </div>
+    );
 
   const linkClasses = cn(defaultViewAllClass(variant, linkWrap), viewAllClassName);
 
   const link =
     linkWrap === "ghost" ? (
-      <Button variant="ghost" size="sm" asChild className="text-brand">
+      <Button variant="link" size="sm" asChild className="">
         <Link
           href={viewAllHref}
           className={cn(
-            "text-xs md:text-sm hover:text-brand hover:underline flex items-center gap-1",
+            "text-xs md:text-sm hover:underline flex items-center gap-1",
             viewAllClassName
           )}
         >
@@ -107,7 +116,16 @@ export function NewsSectionHeader({
         </Link>
       </Button>
     ) : linkWrap === "link" ? (
-      <Button variant="link" size="sm" asChild className="">
+      <Button
+        variant={neutralViewAll ? "ghost" : "link"}
+        size="sm"
+        asChild
+        className={
+          neutralViewAll
+            ? "h-auto px-0 text-muted-foreground hover:bg-transparent hover:text-foreground"
+            : ""
+        }
+      >
         <Link
           href={viewAllHref}
           className={cn(

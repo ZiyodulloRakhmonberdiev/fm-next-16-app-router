@@ -36,14 +36,14 @@ export function HeadlineSection({
   saving,
 }: HeadlineSectionProps) {
   return (
-    <Card>
-      <CardHeader>
+    <Card className="py-4 md:py-6 gap-2 md:gap-4">
+      <CardHeader className="px-4 md:px-6">
         <CardTitle className="text-base">Sarlavha</CardTitle>
         <CardDescription className="hidden md:block">
           Yoqilsa banner ko'rsatiladi, o'chirilsa client saytda yashiriladi.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 px-4 md:px-6">
         <div className="flex items-center justify-between rounded-md border p-3">
           <div className="space-y-0.5">
             <Label className="text-sm">Headline holati</Label>

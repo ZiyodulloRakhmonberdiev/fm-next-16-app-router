@@ -8,12 +8,20 @@ import {
   Card,
   CardContent,
   CardHeader,
-  CardTitle,
+  CardTitle
 } from '@/shared/common/components/ui/card'
-import { Newspaper, FolderTree, Tag, BarChart3, MessageSquare, Megaphone, Heart } from 'lucide-react'
+import { Newspaper, FolderTree, Tag, BarChart3, MessageSquare, Megaphone, Heart, Inbox } from 'lucide-react'
+import { attachNewsIdsToItems } from '@/features/dashboard/lib/attach-news-ids'
 import { DashboardNewsLists } from '@/features/dashboard/ui/news-lists'
+import { DashboardCharts } from '@/features/dashboard/ui/dashboard-charts'
+import {
+  buildDashboardCategoryPie,
+  buildDashboardMonthlySeries,
+} from '@/features/dashboard/lib/chart-data'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/shared/common/lib/auth-options'
+
+type DashboardCategoryRow = { slug: string; name?: Partial<Record<AppLocale, string>> }
 
 function getFetchOptions(cookie: string | null): RequestInit {
   return {
@@ -29,31 +37,38 @@ export default async function DashboardPage() {
   const cookie = h.get('cookie')
   const opts = getFetchOptions(cookie)
 
-  const [categoriesRes, tagsRes, newsRes, commentsRes, adsRes, reactionsRes] = await Promise.all([
-    fetch(await getServerApiUrl('/api/categories'), opts),
-    fetch(await getServerApiUrl('/api/tags'), opts),
-    fetch(await getServerApiUrl('/api/news?page=1&limit=500'), opts),
-    fetch(await getServerApiUrl('/api/comments'), opts),
-    fetch(await getServerApiUrl('/api/ads'), opts),
-    fetch(await getServerApiUrl('/api/reactions'), opts),
-  ])
+  const [categoriesRes, tagsRes, newsRes, commentsRes, adsRes, adsFeedbackRes, reactionsRes] =
+    await Promise.all([
+      fetch(await getServerApiUrl('/api/categories'), opts),
+      fetch(await getServerApiUrl('/api/tags'), opts),
+      fetch(await getServerApiUrl('/api/news?page=1&limit=500'), opts),
+      fetch(await getServerApiUrl('/api/comments'), opts),
+      fetch(await getServerApiUrl('/api/ads'), opts),
+      fetch(await getServerApiUrl('/api/ads/feedback?countOnly=1'), opts),
+      fetch(await getServerApiUrl('/api/reactions'), opts),
+    ])
   const failed = [
     !categoriesRes.ok && 'categories',
     !tagsRes.ok && 'tags',
     !newsRes.ok && 'news',
     !commentsRes.ok && 'comments',
     !adsRes.ok && 'ads',
+    !adsFeedbackRes.ok && 'adsFeedback',
     !reactionsRes.ok && 'reactions',
   ].filter(Boolean)
   if (failed.length > 0) {
     throw new Error('Dashboard ma’lumotlarini yuklab bo‘lmadi')
   }
-  const categories = (await categoriesRes.json()) as unknown[]
+  const categories = (await categoriesRes.json()) as DashboardCategoryRow[]
   const tags = (await tagsRes.json()) as unknown[]
   const newsJson = (await newsRes.json()) as { data: RawNewsItem[] }
   const comments = (await commentsRes.json()) as unknown[]
   const ads = (await adsRes.json()) as unknown[]
+  const adsFeedbackJson = (await adsFeedbackRes.json()) as { count?: number }
+  const adsFeedbackCount = adsFeedbackJson.count ?? 0
   const reactionsJson = (await reactionsRes.json()) as { count: number }
+  const monthlySeries = buildDashboardMonthlySeries(newsJson.data, locale)
+  const categoryPie = buildDashboardCategoryPie(newsJson.data, categories, locale)
   const allNews = getNewsListForLocale(newsJson.data, locale)
   const latestNews = [...allNews].sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
   const topNewsRaw = getNewsListForLocale(
@@ -64,14 +79,27 @@ export default async function DashboardPage() {
     newsJson.data.filter((r) => r.authorsChoice),
     locale
   ).sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
+  const breakingRaw = getNewsListForLocale(
+    newsJson.data.filter((r) => r.isBreaking),
+    locale
+  ).sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
   const topNews = topNewsRaw.length ? topNewsRaw : latestNews.slice(0, 20)
   const authorsChoiceNews = authorsChoiceRaw.length ? authorsChoiceRaw : latestNews.slice(0, 20)
   const mostReadNews = [...allNews].sort((a, b) => b.views - a.views)
+  const topNewsWithIds = attachNewsIdsToItems(topNews, newsJson.data)
+  const authorsChoiceWithIds = attachNewsIdsToItems(authorsChoiceNews, newsJson.data)
+  const breakingWithIds = attachNewsIdsToItems(breakingRaw, newsJson.data)
   const totalCount = newsJson.data.length
   const publishedCount = newsJson.data.filter((item) => (item.status ?? 'published') === 'published').length
   const totalViews = newsJson.data.reduce((acc, item) => acc + (item.views ?? 0), 0)
 
-  const stats = [
+  const stats: {
+    label: string
+    value: number | string
+    secondary?: string
+    icon: typeof Newspaper
+    href: string
+  }[] = [
     {
       label: 'Yangiliklar',
       value: `${publishedCount}/${totalCount}`,
@@ -109,6 +137,12 @@ export default async function DashboardPage() {
       href: '/dashboard/ads',
     },
     {
+      label: 'Reklama feedback',
+      value: adsFeedbackCount,
+      icon: Inbox,
+      href: '/dashboard/ads/feedback',
+    },
+    {
       label: 'Reaksiyalar',
       value: reactionsJson.count ?? 0,
       icon: Heart,
@@ -119,14 +153,6 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8 overflow-x-hidden">
       <div>
-        <div className="mb-4 space-y-1">
-          <h1 className="text-xl md:text-2xl font-semibold tracking-tight">
-            Hush kelibsiz, {session?.user?.name}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Boshqaruv panelidan yangiliklar, kategoriyalar va teglarni tezkor boshqaring.
-          </p>
-        </div>
         <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           {stats.map((s) => (
             <Link key={s.label} href={s.href} className="group">
@@ -142,10 +168,13 @@ export default async function DashboardPage() {
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className="flex items-end justify-between gap-2">
-                  <p className="text-2xl sm:text-3xl font-semibold tracking-tight">
+                <CardContent className="flex flex-col items-stretch gap-1">
+                  <p className="text-2xl sm:text-3xl font-semibold tracking-tight tabular-nums">
                     {typeof s.value === 'number' ? s.value.toLocaleString() : s.value}
                   </p>
+                  {s.secondary != null ? (
+                    <p className="text-xs sm:text-sm text-muted-foreground tabular-nums">{s.secondary}</p>
+                  ) : null}
                 </CardContent>
               </Card>
             </Link>
@@ -153,9 +182,12 @@ export default async function DashboardPage() {
         </div>
       </div>
 
+      <DashboardCharts monthly={monthlySeries} categoryPie={categoryPie} />
+
       <DashboardNewsLists
-        topNews={topNews}
-        authorsChoiceNews={authorsChoiceNews}
+        topNews={topNewsWithIds}
+        authorsChoiceNews={authorsChoiceWithIds}
+        breakingNews={breakingWithIds}
         mostReadNews={mostReadNews}
         locale={locale}
       />

@@ -39,6 +39,7 @@ export type RawNewsItem = {
   telegramLastAttemptAt?: Date
   videoSource?: "youtube" | "local"
   videoUrl?: string
+  createdBy?: { userId?: string; name?: string }
   /** GET /api/news javobida qo‘shiladi */
   commentCount?: number
   reactionCount?: number
@@ -70,6 +71,7 @@ export type NewsItem = {
   telegramLastAttemptAt?: Date
   videoSource?: "youtube" | "local"
   videoUrl?: string
+  createdBy?: { userId?: string; name?: string }
   commentCount?: number
   reactionCount?: number
 }

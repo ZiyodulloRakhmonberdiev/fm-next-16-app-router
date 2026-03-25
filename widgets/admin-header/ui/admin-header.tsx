@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Link } from '@/i18n/navigation'
+import { Link, usePathname, useRouter } from '@/i18n/navigation'
 import { useLocale } from 'next-intl'
 import Image from 'next/image'
 import { SidebarTrigger } from '@/shared/common/components/ui/sidebar'
@@ -21,13 +21,17 @@ import {
 } from '@/shared/common/components/ui/dialog'
 import { Input } from '@/shared/common/components/ui/input'
 import { Label } from '@/shared/common/components/ui/label'
-import { LogOut, Search, User, ExternalLink, Settings, Upload, ImageIcon, Lock } from 'lucide-react'
+import { LogOut, Search, User, ExternalLink, LayoutGrid, Upload, ImageIcon, Lock, ArrowLeft } from 'lucide-react'
 import { LiaUserEditSolid } from 'react-icons/lia'
 import type { NewsItem } from '@/features/news/model'
 import { useTheme } from 'next-themes'
 import { signOut, useSession } from 'next-auth/react'
 import { toast } from 'sonner'
 import { normalizeRole } from '@/shared/common/lib/rbac'
+
+function canOpenDashboardMenuHub(role: ReturnType<typeof normalizeRole>): boolean {
+  return role === 'ceo' || role === 'administrator'
+}
 
 const DEBOUNCE_MS = 200
 
@@ -56,8 +60,13 @@ function roleLabelUz(role: string | undefined | null) {
 }
 
 export default function AdminHeader() {
+  const router = useRouter()
+  const pathname = usePathname()
   const locale = useLocale()
+  const showBack = pathname !== '/dashboard'
   const { data: session, status: sessionStatus } = useSession()
+  const menuHubRole = normalizeRole(session?.user?.role)
+  const showMenuHubButton = canOpenDashboardMenuHub(menuHubRole)
   const [me, setMe] = useState<MePayload | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [results, setResults] = useState<NewsItem[]>([])
@@ -205,20 +214,49 @@ export default function AdminHeader() {
 
   return (
     <>
-      <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b border-border bg-background px-4 md:px-6">
+      <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-border bg-background px-4 md:gap-4 md:px-6">
+        {showBack ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="-ml-1 hidden shrink-0 md:flex"
+            onClick={() => router.back()}
+            aria-label="Orqaga"
+          >
+            <ArrowLeft className="size-5" />
+          </Button>
+        ) : null}
         <SidebarTrigger className="-ml-1 hidden md:flex" />
-        <Link href="/dashboard" className="flex shrink-0 items-center gap-2 md:hidden">
-          <Image
-            src={mounted ? logoSrc : '/images/fm-logo-dark.svg'}
-            alt="Fergana Media"
-            width={120}
-            height={32}
-            className="h-7 w-auto object-contain"
-            priority
-          />
-        </Link>
-        <div className="flex flex-1 items-center gap-4">
-          <div className="relative hidden max-w-md flex-1 md:block" ref={wrapperRef}>
+        {showBack ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="shrink-0 md:hidden"
+            onClick={() => router.back()}
+            aria-label="Orqaga"
+          >
+            <ArrowLeft className="size-5" />
+          </Button>
+        ) : (
+          <span className="inline-flex size-9 shrink-0 md:hidden" aria-hidden />
+        )}
+        <div className="relative min-w-0 flex-1 md:flex md:items-center md:gap-4">
+          <Link
+            href="/dashboard"
+            className="absolute left-1/2 top-1/2 z-0 flex -translate-x-1/2 -translate-y-1/2 md:hidden"
+          >
+            <Image
+              src={mounted ? logoSrc : '/images/fm-logo-dark.svg'}
+              alt="Fergana Media"
+              width={120}
+              height={32}
+              className="h-7 w-auto object-contain"
+              priority
+            />
+          </Link>
+          <div className="relative z-[1] mx-auto hidden w-full max-w-md flex-1 md:block" ref={wrapperRef}>
             <div className="relative">
               <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <input
@@ -258,7 +296,7 @@ export default function AdminHeader() {
             )}
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="relative z-[1] flex shrink-0 items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="rounded-full" disabled={sessionStatus === 'loading'}>
@@ -308,7 +346,7 @@ export default function AdminHeader() {
               <DropdownMenuItem asChild>
                 <Link href="/" className="flex cursor-pointer items-center gap-2">
                   <ExternalLink className="size-4" />
-                  Saytga qaytish
+                  Asosiy saytga qaytish
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem
@@ -320,11 +358,13 @@ export default function AdminHeader() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button variant="outline" size="icon" className="" asChild>
-            <Link href="/dashboard/settings" aria-label="Menu">
-              <Settings className="size-4" />
-            </Link>
-          </Button>
+          {showMenuHubButton ? (
+            <Button variant="outline" size="icon" className="hidden" asChild>
+              <Link href="/dashboard/settings" aria-label="Menu">
+                <LayoutGrid className="size-4" />
+              </Link>
+            </Button>
+          ) : null}
         </div>
       </header>
 
@@ -335,7 +375,7 @@ export default function AdminHeader() {
           </DialogHeader>
           <div className="space-y-4 pt-1">
             <div className="space-y-2">
-              <Label htmlFor="admin-profile-name">To‘liq ism</Label>
+              <Label htmlFor="admin-profile-name">To'liq ism</Label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                 <Input

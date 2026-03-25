@@ -209,6 +209,7 @@ export type ReactionType = 'like' | 'love' | 'laugh' | 'sad' | 'angry'
 export type ReactionRow = {
   _id: string
   newsSlug: string
+  newsTitle?: string
   userId?: string
   anonId?: string
   userName: string

@@ -1,6 +1,9 @@
 import { NextRequest } from 'next/server'
 import { hash } from 'bcryptjs'
+import { getServerSession } from 'next-auth'
 import { dbConnect } from '@/shared/common/lib/db'
+import { authOptions } from '@/shared/common/lib/auth-options'
+import { normalizeRole } from '@/shared/common/lib/rbac'
 import { requireAdminSession } from '@/shared/common/lib/require-admin-session'
 import { UserModel } from '@/features/users/model/user.model'
 import { createUserSchema } from '@/features/users/model/schemas'
@@ -40,6 +43,14 @@ export async function PUT(
     )
   }
 
+  const session = await getServerSession(authOptions)
+  if (normalizeRole(session?.user?.role) === 'administrator' && parsed.data.role === 'ceo') {
+    return Response.json(
+      { error: 'Administrator foydalanuvchini CEO qilib tayinlay olmaydi' },
+      { status: 403 }
+    )
+  }
+
   const updated = await UserModel.findByIdAndUpdate(
     (await params).id,
     {
@@ -72,6 +83,17 @@ export async function PATCH(
     return Response.json(
       { error: 'Validation error', issues: parsed.error.flatten() },
       { status: 400 }
+    )
+  }
+
+  const session = await getServerSession(authOptions)
+  if (
+    normalizeRole(session?.user?.role) === 'administrator' &&
+    parsed.data.role === 'ceo'
+  ) {
+    return Response.json(
+      { error: 'Administrator foydalanuvchini CEO qilib tayinlay olmaydi' },
+      { status: 403 }
     )
   }
 

@@ -40,6 +40,11 @@ export type CreateNewsFormProps = {
   existingSlugs?: string[]
   /** Berilsa — tahrirlash rejimi (barcha maydonlar shu qiymatlar bilan to‘ldiriladi) */
   initialData?: EditNewsInitialData
+  /** Create sahifasida tashqi sticky tablar bilan boshqarish */
+  controlledStep?: 1 | 2 | 3
+  onControlledStepChange?: (step: 1 | 2 | 3) => void
+  /** `true` bo‘lsa forma ichidagi step tablari chizilmaydi (ustidagi layoutda) */
+  hideStepTabs?: boolean
 }
 
 type TranslationsState = Record<AppLocale, { title: string; description: string }>
@@ -198,7 +203,16 @@ function getValidationDescription(data: unknown): string | undefined {
   return lines.length ? lines.join('\n') : undefined
 }
 
-export function CreateNewsForm({ categories, tags, authors, existingSlugs = [], initialData }: CreateNewsFormProps) {
+export function CreateNewsForm({
+  categories,
+  tags,
+  authors,
+  existingSlugs = [],
+  initialData,
+  controlledStep,
+  onControlledStepChange,
+  hideStepTabs = false,
+}: CreateNewsFormProps) {
   const router = useRouter()
   const queryClient = useQueryClient()
   const isEditMode = !!initialData
@@ -207,7 +221,14 @@ export function CreateNewsForm({ categories, tags, authors, existingSlugs = [], 
     initialData?.publishedAt ? new Date(initialData.publishedAt).toISOString() : undefined
   )
 
-  const [step, setStep] = useState<1 | 2 | 3>(1)
+  const [internalStep, setInternalStep] = useState<1 | 2 | 3>(1)
+  const stepControlled =
+    controlledStep !== undefined && typeof onControlledStepChange === 'function'
+  const step = stepControlled ? controlledStep! : internalStep
+  const setStep = (next: 1 | 2 | 3) => {
+    if (stepControlled) onControlledStepChange!(next)
+    else setInternalStep(next)
+  }
   const [translations, setTranslations] = useState<TranslationsState>(
     () => initialData?.translations ?? emptyTranslations()
   )
@@ -682,51 +703,38 @@ export function CreateNewsForm({ categories, tags, authors, existingSlugs = [], 
   const videoDisplayUrl = videoUrl.trim() || videoPreviewUrl || ''
   const youtubeEmbedUrl = videoUrl.trim() ? getYoutubeEmbedUrl(videoUrl.trim()) : null
 
+  const stepTitles: Record<1 | 2 | 3, string> = {
+    1: "Ma'lumotlar — sarlavha, kategoriya, media",
+    2: 'Kontent — matn va bloklar',
+    3: 'Sozlamalar — status, Telegram, chop etish',
+  }
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center gap-2 text-sm">
-        <Button
-          type="button"
-          onClick={() => goToStep(1)}
-          variant={step === 1 ? 'default' : 'outline'}
-        >
-          <span
-            className={cn(
-              'size-1.5 rounded-full',
-              step === 1 ? 'bg-primary-foreground' : 'bg-muted-foreground/70'
-            )}
-          />
-          Bosqich 1: Ma'lumotlar
-        </Button>
-        <ArrowRight className="size-4 text-muted-foreground shrink-0" />
-        <Button
-          type="button"
-          onClick={() => goToStep(2)}
-          variant={step === 2 ? 'default' : 'outline'}
-        >
-          <span
-            className={cn(
-              'size-1.5 rounded-full',
-              step === 2 ? 'bg-primary-foreground' : 'bg-muted-foreground/70'
-            )}
-          />
-          Bosqich 2: Kontent
-        </Button>
-        <ArrowRight className="size-4 text-muted-foreground shrink-0" />
-        <Button
-          type="button"
-          onClick={() => goToStep(3)}
-          variant={step === 3 ? 'default' : 'outline'}
-        >
-          <span
-            className={cn(
-              'size-1.5 rounded-full',
-              step === 3 ? 'bg-primary-foreground' : 'bg-muted-foreground/70'
-            )}
-          />
-          Bosqich 3: Sozlamalar
-        </Button>
-      </div>
+      {!hideStepTabs ? (
+        <div className="sticky top-14 z-20 -mx-6 border-b border-border bg-background/95 px-6 py-3 shadow-sm backdrop-blur-md supports-backdrop-filter:bg-background/85">
+          <div className="flex items-center justify-center gap-3 sm:gap-4">
+            {([1, 2, 3] as const).map((s) => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => goToStep(s)}
+                title={stepTitles[s]}
+                aria-label={`${s}-bosqich: ${stepTitles[s]}`}
+                aria-current={step === s ? 'step' : undefined}
+                className={cn(
+                  'flex size-11 shrink-0 items-center justify-center rounded-full text-sm font-semibold shadow-sm ring-offset-background transition-all sm:size-12 sm:text-base',
+                  step === s
+                    ? 'bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2'
+                    : 'bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground'
+                )}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       {step === 1 && (
         <>

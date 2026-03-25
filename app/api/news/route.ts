@@ -1,4 +1,6 @@
 import { NextRequest } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/shared/common/lib/auth-options'
 import { dbConnect } from '@/shared/common/lib/db'
 import { NewsModel } from '@/features/news/model/news.model'
 import { NewsCommentModel } from '@/features/news/model/comment.model'
@@ -58,8 +60,11 @@ export async function GET(req: NextRequest) {
       filter.publishedAt = { $gte: from }
     }
 
-    const sort: Record<string, SortOrder> = { publishedAt: -1 }
-    if (sortBy === 'views') sort.views = -1
+    /** `views` bo‘lsa faqat ko‘rishlar bo‘yicha (publishedAt ikkinchi tartibda); aks holda nashr sanasi. */
+    const sort: Record<string, SortOrder> =
+      sortBy === 'views'
+        ? { views: -1, publishedAt: -1 }
+        : { publishedAt: -1 }
 
     const [news, total] = await Promise.all([
       NewsModel.find(filter)
@@ -117,9 +122,29 @@ export async function GET(req: NextRequest) {
   }
 }
 
+function creatorDisplayName(user: {
+  name?: string | null
+  email?: string | null
+  login?: string | null
+}): string {
+  const n = user.name?.trim()
+  if (n) return n
+  const l = user.login?.trim()
+  if (l) return l
+  const e = user.email?.trim()
+  if (e) return e
+  return "Noma'lum"
+}
+
 export async function POST(req: NextRequest) {
   const unauthorized = await requireAdminSession(['ceo', 'administrator', 'moderator'])
   if (unauthorized) return unauthorized
+
+  const session = await getServerSession(authOptions)
+  const sessionUser = session?.user
+  if (!sessionUser?.id) {
+    return Response.json({ error: 'Unauthorized' }, { status: 401 })
+  }
 
   try {
     await dbConnect()
@@ -140,7 +165,17 @@ export async function POST(req: NextRequest) {
       createData.images = createData.images.filter((u): u is string => typeof u === 'string' && u.trim() !== '')
     }
 
-    const news = await NewsModel.create(createData)
+    const news = await NewsModel.create({
+      ...createData,
+      createdBy: {
+        userId: sessionUser.id,
+        name: creatorDisplayName({
+          name: sessionUser.name,
+          email: sessionUser.email,
+          login: (sessionUser as { login?: string }).login,
+        }),
+      },
+    })
     if (news.pushedToTelegram && news.status === 'published') {
       const tgResult = await sendNewsToTelegram({
         titleUzb: news.title?.uzb || news.title?.uz || news.slug,

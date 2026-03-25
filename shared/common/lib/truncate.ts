@@ -1,5 +1,11 @@
 const DEFAULT_MAX_LENGTH = 75
 
+/** Belgilar soni bo‘yicha qisqartirish (so‘z chegarasiz). */
+export function truncateChars(text: string, maxLength: number): string {
+  if (!text || text.length <= maxLength) return text
+  return text.slice(0, maxLength) + "…"
+}
+
 export function truncate(text: string, maxLength = DEFAULT_MAX_LENGTH): string {
   if (!text || text.length <= maxLength) return text
   const slice = text.slice(0, maxLength)

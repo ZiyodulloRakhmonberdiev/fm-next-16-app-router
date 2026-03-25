@@ -16,7 +16,6 @@ type NewsListingListCardProps = {
   locale: AppLocale
   stats?: { comments: number; reactions: number }
   imagesLabel: string
-  /** Rasm ustidagi tugmalar (masalan, saqlanganlar sahifasida bookmark) */
   imageOverlay?: ReactNode
 }
 
@@ -28,7 +27,7 @@ export function NewsListingListCard({ item, locale, stats, imagesLabel, imageOve
   const mediaSrc = thumbSrc || videoPoster
 
   return (
-    <Card className="gap-0 overflow-hidden rounded-lg group p-0 py-0 shadow-none transition-colors hover:bg-muted/30">
+    <Card className="gap-0 overflow-hidden border-none rounded-lg group p-0 py-0 shadow-none transition-colors bg-foreground/5 hover:bg-background/30">
       <div className="flex flex-col gap-3 p-0 sm:flex-row">
         <div className="relative h-44 w-full overflow-hidden rounded-md bg-muted sm:h-48 sm:basis-1/3">
           <Link href={`/news/${item.slug}`} className="absolute inset-0 z-0 block">
@@ -58,7 +57,7 @@ export function NewsListingListCard({ item, locale, stats, imagesLabel, imageOve
         </div>
 
         <div className="min-w-0 flex flex-1 flex-col justify-start space-y-2 p-2 sm:basis-2/3 md:p-4">
-          <div className="flex flex-wrap items-center text-[11px] text-muted-foreground gap-2 justify-between">
+          <div className="flex flex-wrap items-center text-[11px] text-muted-foreground gap-2 justify-between border-b border-border pb-2">
             <Link href={`/category/${item.categorySlug}`} className=" hover:underline capitalize inline-flex items-center gap-1">
               <span className="block w-2 h-2 bg-brand rounded-full"></span>
               {categoryLabel}
@@ -82,7 +81,7 @@ export function NewsListingListCard({ item, locale, stats, imagesLabel, imageOve
             </div>
           ) : null}
 
-          <div className="flex items-center justify-start gap-2 text-xs text-muted-foreground">
+          <div className="flex items-center justify-start gap-2 text-xs text-muted-foreground pt-2 border-t border-border mt-auto">
 
             <div className="inline-flex items-center gap-3 pl-1">
               <span className="inline-flex items-center gap-1">

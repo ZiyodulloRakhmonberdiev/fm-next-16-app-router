@@ -1,21 +1,27 @@
 import type { LucideIcon } from 'lucide-react'
 import {
+  Building2,
   ClipboardList,
+  CloudCog,
   FolderTree,
-  KeyRound,
+  Heart,
   LayoutDashboard,
+  LayoutGrid,
   Megaphone,
   MessageSquare,
   Newspaper,
   PlusCircle,
-  Settings,
+  Send,
+  Share2,
+  Sparkles,
   Tag,
+  UserCircle,
   UserSquare,
   Users,
 } from 'lucide-react'
 import type { NormalizedRole } from '@/shared/common/lib/rbac'
 import type { AdminNavIconKey } from './admin-nav-meta'
-import { adminMainNavMeta, adminSystemNavMeta } from './admin-nav-meta'
+import { adminMainNavMeta } from './admin-nav-meta'
 
 const NAV_ICONS: Record<AdminNavIconKey, LucideIcon> = {
   LayoutDashboard,
@@ -25,14 +31,18 @@ const NAV_ICONS: Record<AdminNavIconKey, LucideIcon> = {
   Users,
   UserSquare,
   MessageSquare,
+  Heart,
   Megaphone,
   ClipboardList,
-  KeyRound,
-  Settings,
+  Sparkles,
+  Building2,
+  Share2,
+  Send,
+  CloudCog,
+  LayoutGrid,
   PlusCircle,
 }
 
-/** Sozlamalar (Menu) sahifasidagi qatorlar uchun */
 export const adminNavIcons: Record<AdminNavIconKey, LucideIcon> = NAV_ICONS
 
 export type AdminNavItemConfig = {
@@ -41,6 +51,7 @@ export type AdminNavItemConfig = {
   icon: LucideIcon
   roles: NormalizedRole[]
   description?: string
+  hideFromSidebar?: boolean
 }
 
 export const adminMainNavItems: AdminNavItemConfig[] = adminMainNavMeta.map((m) => ({
@@ -49,14 +60,7 @@ export const adminMainNavItems: AdminNavItemConfig[] = adminMainNavMeta.map((m) 
   roles: m.roles,
   description: m.description,
   icon: NAV_ICONS[m.iconKey],
-}))
-
-export const adminSystemNavItems: AdminNavItemConfig[] = adminSystemNavMeta.map((m) => ({
-  href: m.href,
-  label: m.label,
-  roles: m.roles,
-  description: m.description,
-  icon: NAV_ICONS[m.iconKey],
+  hideFromSidebar: m.hideFromSidebar,
 }))
 
 export function filterAdminNavByRole(items: AdminNavItemConfig[], role: NormalizedRole) {
@@ -69,31 +73,24 @@ export type MobileBottomNavItem = {
   icon: LucideIcon
 }
 
-/** Pastki mobil tabbar: oxirgi element doim Menu. */
 export function getMobileBottomNavItems(role: NormalizedRole): MobileBottomNavItem[] {
-  const settings: MobileBottomNavItem = {
-    href: '/dashboard/settings',
-    label: 'Menu',
-    icon: Settings,
-  }
-
   if (role === 'ceo' || role === 'administrator') {
     return [
       { href: '/dashboard', label: 'Bosh sahifa', icon: LayoutDashboard },
       { href: '/dashboard/news', label: 'Yangiliklar', icon: Newspaper },
       { href: '/dashboard/news/create', label: 'Yangi', icon: PlusCircle },
-      { href: '/dashboard/users', label: 'Foydalanuvchilar', icon: Users },
-      settings,
+      { href: '/dashboard/comments', label: 'Izohlar', icon: MessageSquare },
+      { href: '/dashboard/settings', label: 'Kabinet', icon: UserCircle },
     ]
   }
 
   if (role === 'moderator') {
     return [
-      { href: '/dashboard/news', label: 'Yangiliklar', icon: Newspaper },
-      { href: '/dashboard/news/create', label: 'Yangi', icon: PlusCircle },
       { href: '/dashboard/categories', label: 'Kategoriya', icon: FolderTree },
       { href: '/dashboard/tags', label: 'Teglar', icon: Tag },
-      settings,
+      { href: '/dashboard/news', label: 'Yangiliklar', icon: Newspaper },
+      { href: '/dashboard/comments', label: 'Izohlar', icon: MessageSquare },
+      { href: '/dashboard/reactions', label: 'Reaksiya', icon: Heart },
     ]
   }
 
@@ -101,9 +98,8 @@ export function getMobileBottomNavItems(role: NormalizedRole): MobileBottomNavIt
     return [
       { href: '/dashboard/ads', label: 'Reklama', icon: Megaphone },
       { href: '/dashboard/ads/feedback', label: 'Fikrlar', icon: ClipboardList },
-      settings,
     ]
   }
 
-  return [settings]
+  return []
 }

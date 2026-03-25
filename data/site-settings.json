@@ -1,6 +1,6 @@
 {
   "headline": {
-    "enabled": true,
+    "enabled": false,
     "message": {
       "uz": "Sayt demo rejimida ishlamoqda!",
       "uzb": "Сайт демо режимида ишламоқда!",
@@ -15,26 +15,6 @@
     "en": "Ferganamedia.uz is registered as an electronic mass media 26 September 2024 by the AOKA under the administration of the President. Certificate number: 414738. Founder: OOO «Fergana Media Press»."
   },
   "socialMedia": [
-    {
-      "slug": "telegram",
-      "name": {
-        "uz": "Telegram",
-        "uzb": "Телеграм",
-        "ru": "Телеграм",
-        "en": "Telegram"
-      },
-      "href": "https://t.me/ferganamedia"
-    },
-    {
-      "slug": "instagram",
-      "name": {
-        "uz": "Instagram",
-        "uzb": "Инстаграм",
-        "ru": "Инстаграм",
-        "en": "Instagram"
-      },
-      "href": ""
-    },
     {
       "slug": "facebook",
       "name": {

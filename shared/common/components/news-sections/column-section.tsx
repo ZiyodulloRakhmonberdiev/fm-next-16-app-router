@@ -6,10 +6,7 @@ import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
 import { getCategoryNameFromApi, usePublicCategoriesQuery } from "@/features/category/model/public-categories-query"
 import { useCategoryLabel } from "@/features/category/model/use-category-label"
 import { Card } from "@/shared/common/components/ui/card"
-import {
-  formatDateISO,
-  formatDateTimeLocale,
-} from "@/shared/common/lib/formatter"
+import { formatDateISO, formatDateTimeLocale } from "@/shared/common/lib/formatter"
 import type { AppLocale } from "@/shared/common/lib/formatter"
 import { Link } from "@/i18n/navigation"
 import { useLocale } from "next-intl"
@@ -19,6 +16,27 @@ import { FeaturedNewsCard } from "@/features/news/ui/featured-news-card"
 type ColumnSectionProps = {
   categorySlug?: string
   featuredPosition?: "left" | "right"
+}
+
+function ColumnListCard({ item, locale }: { item: NewsItem; locale: AppLocale }) {
+  const categoryLabel = useCategoryLabel(item.categorySlug, locale, item.category)
+  return (
+    <Card className="flex flex-col gap-2 rounded-sm border-none bg-foreground/5 p-3 shadow-none md:bg-background">
+      <div className="flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground">
+        <span className="font-medium uppercase italic text-brand">{categoryLabel}</span>
+        <span aria-hidden>/</span>
+        <time dateTime={formatDateISO(item.publishedAt)}>{formatDateTimeLocale(item.publishedAt, locale)}</time>
+      </div>
+      <h4 className="text-sm font-semibold leading-tight">
+        <Link href={`/news/${item.slug}`} className="hover:underline">
+          <span className="line-clamp-2 md:line-clamp-3">{item.title ?? ""}</span>
+        </Link>
+      </h4>
+      <p className="text-sm text-muted-foreground">
+        <span className="line-clamp-2 md:line-clamp-3">{item.description ?? ""}</span>
+      </p>
+    </Card>
+  )
 }
 
 export default function ColumnSection({
@@ -36,8 +54,7 @@ export default function ColumnSection({
       .filter((n) => n.categorySlug === categorySlug)
       .sort(
         (a, b) =>
-          new Date(b.publishedAt).getTime() -
-          new Date(a.publishedAt).getTime()
+          new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
       )
       .slice(0, 7)
     return getNewsListForLocale(raw, locale)
@@ -48,63 +65,37 @@ export default function ColumnSection({
   if (items.length < 1) return null
 
   return (
-    <div className="w-full px-4 md:px-6 mt-4">
-      <div className="py-4">
+    <div className="rounded-md px-4 py-6 md:px-6">
+      <section className="w-full space-y-4 rounded-md border pb-4">
         <NewsSectionHeader
           title={categoryName}
           viewAllHref={`/category/${categorySlug}`}
-          variant="brandAccent"
-          linkWrap="ghost"
+          variant="brandThin"
+          linkWrap="link"
+          neutralViewAll
         />
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+
+        <div className="grid grid-cols-1 gap-4 px-4 md:grid-cols-2 md:px-6">
           <div
-            className={`grid md:grid-cols-2 gap-4 ${
+            className={`grid gap-4 md:grid-cols-2 ${
               featuredPosition === "left" ? "md:order-2" : ""
             }`}
           >
             {rightItems.map((item: NewsItem) => (
-              <Card
-                key={item.slug}
-                className="flex flex-col gap-2 rounded-sm border-none p-3 shadow-none bg-foreground/5 md:bg-background"
-              >
-                <div className="flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground">
-                  <span className="uppercase font-medium text-brand italic">
-                    {useCategoryLabel(item.categorySlug, locale, item.category)}
-                  </span>
-                  <span aria-hidden>/</span>
-                  <time dateTime={formatDateISO(item.publishedAt)}>
-                    {formatDateTimeLocale(item.publishedAt, locale)}
-                  </time>
-                </div>
-                <h4 className="text-sm font-semibold leading-tight">
-                  <Link
-                    href={`/news/${item.slug}`}
-                    className="hover:underline"
-                  >
-                    <span className="line-clamp-2 md:line-clamp-3">{item.title ?? ""}</span>
-                  </Link>
-                </h4>
-                <p className="text-sm text-muted-foreground">
-                  <span className="line-clamp-2 md:line-clamp-3">{item.description ?? ""}</span>
-                </p>
-              </Card>
+              <ColumnListCard key={item.slug} item={item} locale={locale} />
             ))}
           </div>
-          {featured && (
+          {featured ? (
             <div
               className={`h-full md:col-span-1 ${
                 featuredPosition === "left" ? "md:order-1" : ""
               }`}
             >
-              <FeaturedNewsCard
-                item={featured}
-                locale={locale}
-                variant="column"
-              />
+              <FeaturedNewsCard item={featured} locale={locale} variant="column" />
             </div>
-          )}
+          ) : null}
         </div>
-      </div>
+      </section>
     </div>
   )
 }

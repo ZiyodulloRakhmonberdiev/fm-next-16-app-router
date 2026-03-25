@@ -30,14 +30,14 @@ export function DescriptionSection({
   saving,
 }: DescriptionSectionProps) {
   return (
-    <Card>
-      <CardHeader>
+    <Card className="py-4 md:py-6 gap-2 md:gap-4">
+      <CardHeader className="px-4 md:px-6">
         <CardTitle className="text-base">Tavsif</CardTitle>
         <CardDescription className="hidden md:block">
-          Sayt haqida qisqacha — barcha tillar
+          Sayt haqida qisqacha.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 px-4 md:px-6">
         {locales.map((locale) => (
           <div key={locale} className="space-y-2">
             <Label>{localeLabels[locale]}</Label>

@@ -1,5 +1,5 @@
-import { ConfigsPage } from '../_components'
+import { redirect } from '@/i18n/navigation'
 
-export default function DashboardConfigsRoute() {
-  return <ConfigsPage />
+export default function DashboardConfigsIndexPage() {
+  redirect('/dashboard/configs/site')
 }

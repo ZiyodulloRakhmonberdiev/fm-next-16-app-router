@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server"
+import { mapSlugsToNewsTitles } from "@/shared/common/lib/admin-news-titles"
 import { dbConnect } from "@/shared/common/lib/db"
 import { NewsCommentModel } from "@/features/news/model/comment.model"
 import { requireAdminSession } from "@/shared/common/lib/require-admin-session"
@@ -8,7 +9,17 @@ export async function GET(req: NextRequest) {
   if (unauthorized) return unauthorized
 
   await dbConnect()
-  const status = new URL(req.url).searchParams.get("status")
+  const { searchParams } = new URL(req.url)
+  if (searchParams.get("counts") === "1") {
+    const [pending, confirmed, rejected] = await Promise.all([
+      NewsCommentModel.countDocuments({ status: "pending" }),
+      NewsCommentModel.countDocuments({ status: { $in: ["confirmed", "approved"] } }),
+      NewsCommentModel.countDocuments({ status: "rejected" }),
+    ])
+    return Response.json({ pending, confirmed, rejected })
+  }
+
+  const status = searchParams.get("status")
   const filter: Record<string, unknown> = {}
   if (status === "confirmed") {
     filter.status = { $in: ["confirmed", "approved"] }
@@ -16,5 +27,22 @@ export async function GET(req: NextRequest) {
     filter.status = status
   }
   const rows = await NewsCommentModel.find(filter).sort({ createdAt: -1 }).lean()
-  return Response.json(rows)
+  const titleMap = await mapSlugsToNewsTitles(
+    rows.map((r) => String((r as { newsSlug?: string }).newsSlug ?? ""))
+  )
+  const data = rows.map((r) => {
+    const rec = r as {
+      _id: unknown
+      newsSlug?: string
+      [key: string]: unknown
+    }
+    const newsSlug = String(rec.newsSlug ?? "")
+    return {
+      ...rec,
+      _id: String(rec._id),
+      newsSlug,
+      newsTitle: titleMap.get(newsSlug) ?? "",
+    }
+  })
+  return Response.json(data)
 }

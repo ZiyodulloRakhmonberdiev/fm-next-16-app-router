@@ -1,5 +1,9 @@
 import { NextRequest } from "next/server"
 import { dbConnect } from "@/shared/common/lib/db"
+import {
+  findSlugsMatchingTitleQuery,
+  mapSlugsToNewsTitles,
+} from "@/shared/common/lib/admin-news-titles"
 import { NewsReactionModel } from "@/features/news/model/reaction.model"
 import { requireAdminSession } from "@/shared/common/lib/require-admin-session"
 
@@ -10,7 +14,7 @@ export async function GET(req: NextRequest) {
   await dbConnect()
   const { searchParams } = new URL(req.url)
   const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10))
-  const limit = Math.min(50, Math.max(1, parseInt(searchParams.get("limit") ?? "30", 10)))
+  const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") ?? "30", 10)))
   const type = searchParams.get("type")
   const q = searchParams.get("q")?.trim()
 
@@ -19,9 +23,11 @@ export async function GET(req: NextRequest) {
     filter.type = type
   }
   if (q) {
+    const titleSlugs = await findSlugsMatchingTitleQuery(q)
     filter.$or = [
       { newsSlug: { $regex: q, $options: "i" } },
       { userName: { $regex: q, $options: "i" } },
+      ...(titleSlugs.length ? [{ newsSlug: { $in: titleSlugs } }] : []),
     ]
   }
 
@@ -35,16 +41,28 @@ export async function GET(req: NextRequest) {
     .limit(limit)
     .lean()
 
-  const data = rows.map((r) => ({
-    _id: String(r._id),
-    newsSlug: String(r.newsSlug ?? ""),
-    userId: r.userId != null ? String(r.userId) : undefined,
-    anonId: r.anonId != null ? String(r.anonId) : undefined,
-    userName: String(r.userName ?? ""),
-    type: r.type,
-    createdAt:
-      r.createdAt instanceof Date ? r.createdAt.toISOString() : typeof r.createdAt === "string" ? r.createdAt : "",
-  }))
+  const titleMap = await mapSlugsToNewsTitles(
+    rows.map((r) => String(r.newsSlug ?? ""))
+  )
+
+  const data = rows.map((r) => {
+    const newsSlug = String(r.newsSlug ?? "")
+    return {
+      _id: String(r._id),
+      newsSlug,
+      newsTitle: titleMap.get(newsSlug) ?? "",
+      userId: r.userId != null ? String(r.userId) : undefined,
+      anonId: r.anonId != null ? String(r.anonId) : undefined,
+      userName: String(r.userName ?? ""),
+      type: r.type,
+      createdAt:
+        r.createdAt instanceof Date
+          ? r.createdAt.toISOString()
+          : typeof r.createdAt === "string"
+            ? r.createdAt
+            : "",
+    }
+  })
 
   return Response.json({
     data,

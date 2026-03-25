@@ -1,15 +1,10 @@
 'use client'
 
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from '@/shared/common/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/shared/common/components/ui/card'
 import { Input } from '@/shared/common/components/ui/input'
+import { Textarea } from '@/shared/common/components/ui/textarea'
 import { Button } from '@/shared/common/components/ui/button'
-import { Plus, Save, Trash2 } from 'lucide-react'
+import { Minus, Plus, Save, Trash2 } from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -25,6 +20,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/shared/common/components/ui/select'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/shared/common/components/ui/dialog'
 import { useMemo, useState } from 'react'
 
 export type UiSocialItem = {
@@ -62,6 +65,10 @@ export function SocialMediaSection({
 }: SocialMediaSectionProps) {
   const [selectedSlug, setSelectedSlug] = useState<string>('')
   const [newHref, setNewHref] = useState('')
+  const [deleteIndex, setDeleteIndex] = useState<number | null>(null)
+
+  const pendingDeleteItem =
+    deleteIndex !== null ? items[deleteIndex] : undefined
 
   const availablePlatforms = useMemo(
     () =>
@@ -78,17 +85,20 @@ export function SocialMediaSection({
     setNewHref('')
   }
 
+  const confirmDelete = () => {
+    if (deleteIndex === null) return
+    onRemove(deleteIndex)
+    setDeleteIndex(null)
+  }
+
   return (
-    <Card>
-      <CardHeader>
+    <Card className="gap-0 py-3 shadow-sm md:py-4">
+      <CardHeader className="px-4 md:px-6">
         <CardTitle className="text-base">Ijtimoiy tarmoqlar</CardTitle>
-        <CardDescription>
-          Oldindan belgilangan platformalardan tanlab, havolani kiriting.
-        </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid gap-2 sm:grid-cols-[minmax(0,220px)_minmax(0,1fr)_auto] items-end">
-          <div className="space-y-1">
+      <CardContent className="space-y-4 px-3 pt-0 md:px-5 md:pt-0">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,11rem)_minmax(0,1fr)_auto] sm:items-end">
+          <div className="min-w-0 space-y-1">
             <span className="text-xs font-medium text-muted-foreground">
               Platforma
             </span>
@@ -96,7 +106,7 @@ export function SocialMediaSection({
               value={selectedSlug}
               onValueChange={setSelectedSlug}
             >
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Tanlang" />
               </SelectTrigger>
               <SelectContent>
@@ -108,23 +118,24 @@ export function SocialMediaSection({
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-1">
+          <div className="min-w-0 space-y-1">
             <span className="text-xs font-medium text-muted-foreground">
               Havola
             </span>
             <Input
               value={newHref}
               onChange={(e) => setNewHref(e.target.value)}
-              placeholder="/telegram yoki https://t.me/ferganamedia"
+              placeholder="https://"
+              className="font-mono text-xs md:text-sm"
             />
           </div>
-          <div className="flex justify-end">
+          <div className="flex sm:justify-end">
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={handleAddClick}
-              className="gap-1"
+              className="w-full gap-1 sm:w-auto"
               disabled={!availablePlatforms.length}
             >
               <Plus className="size-4" />
@@ -133,70 +144,153 @@ export function SocialMediaSection({
           </div>
         </div>
 
-        <div className="rounded-md border overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-12">#</TableHead>
-                <TableHead>Platforma</TableHead>
-                <TableHead>Slug</TableHead>
-                <TableHead>Havola</TableHead>
-                <TableHead className="w-[80px] text-right">Amal</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {items.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground py-6">
-                    Ijtimoiy tarmoqlar qo‘shilmagan.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                items.map((item, index) => (
-                  <TableRow key={item.slug}>
-                    <TableCell className="text-xs text-muted-foreground">
-                      #{index + 1}
-                    </TableCell>
-                    <TableCell className="font-medium">
+        {/* Mobil: kartalar — havola to‘liq */}
+        <div className="space-y-3 sm:hidden">
+          {items.length === 0 ? (
+            <p className="py-4 text-center text-sm text-muted-foreground">
+              Ijtimoiy tarmoqlar qo‘shilmagan.
+            </p>
+          ) : (
+            items.map((item, index) => (
+              <div
+                key={item.slug}
+                className="space-y-2 rounded-lg border border-border/80 bg-background/50 p-3"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <p className="text-xs text-muted-foreground">#{index + 1}</p>
+                    <p className="font-medium">
                       {SOCIAL_PLATFORMS.find((p) => p.slug === item.slug)?.label ??
                         item.name}
-                    </TableCell>
-                    <TableCell className="text-xs text-muted-foreground">
-                      {item.slug}
-                    </TableCell>
-                    <TableCell>
-                      <Input
-                        value={item.href}
-                        onChange={(e) => onUpdateHref(index, e.target.value)}
-                        placeholder="/telegram yoki https://..."
-                      />
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="text-destructive hover:text-destructive"
-                        onClick={() => onRemove(index)}
-                      >
-                        <Trash2 className="size-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                    </p>
+                    <p className="text-xs text-muted-foreground">{item.slug}</p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="shrink-0 rounded-full"
+                    onClick={() => setDeleteIndex(index)}
+                  >
+                    <Minus className="size-4" />
+                  </Button>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-xs font-medium text-muted-foreground">
+                    Havola
+                  </span>
+                  <Input
+                    value={item.href}
+                    onChange={(e) => onUpdateHref(index, e.target.value)}
+                    placeholder="https://"
+                    className="font-mono text-xs md:text-sm"
+                  />
+                </div>
+              </div>
+            ))
+          )}
         </div>
 
-        <div className="flex justify-end pt-2">
-          <Button type="button" onClick={onSave} disabled={saving} className="gap-2">
+        {/* Desktop: jadval — havola to‘liq (wrap + textarea) */}
+        <div className="hidden sm:block">
+          <div className="max-w-full overflow-x-auto rounded-md border">
+            <Table className="w-full min-w-[36rem]">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-10">#</TableHead>
+                  <TableHead className="w-[7rem]">Platforma</TableHead>
+                  {/* <TableHead className="w-[6rem]">Slug</TableHead> */}
+                  <TableHead className="min-w-[16rem]">Havola</TableHead>
+                  <TableHead className="w-14 text-right">Amal</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {items.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="py-6 text-center text-muted-foreground">
+                      Ijtimoiy tarmoqlar qo‘shilmagan.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  items.map((item, index) => (
+                    <TableRow key={item.slug}>
+                      <TableCell className="align-top text-xs text-muted-foreground">
+                        #{index + 1}
+                      </TableCell>
+                      <TableCell className="align-top font-medium">
+                        {SOCIAL_PLATFORMS.find((p) => p.slug === item.slug)?.label ??
+                          item.name}
+                      </TableCell>
+                      {/* <TableCell className="align-top text-xs text-muted-foreground">
+                        {item.slug}
+                      </TableCell> */}
+                      <TableCell className="align-top">
+                        <Input
+                          value={item.href}
+                          onChange={(e) => onUpdateHref(index, e.target.value)}
+                          placeholder="https:"
+                          className="font-mono text-xs md:text-sm"
+                        />
+                      </TableCell>
+                      <TableCell className="align-top text-right">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          className="rounded-full"
+                          onClick={() => setDeleteIndex(index)}
+                        >
+                          <Minus className="size-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+
+        <div className="flex justify-end pt-1">
+          <Button
+            type="button"
+            onClick={onSave}
+            disabled={saving}
+            className="w-full gap-2 sm:w-auto"
+          >
             <Save className="size-4" />
             Saqlash
           </Button>
         </div>
+
+        <Dialog
+          open={deleteIndex !== null}
+          onOpenChange={(open) => {
+            if (!open) setDeleteIndex(null)
+          }}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Ijtimoiy tarmoqni o‘chirish?</DialogTitle>
+            </DialogHeader>
+            <DialogFooter>
+          <div className="flex justify-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                className="w-auto"
+                onClick={() => setDeleteIndex(null)}
+              >
+                Bekor qilish
+              </Button>
+              <Button type="button" variant="destructive" onClick={confirmDelete} className="w-auto">
+                O‘chirish
+              </Button>
+            </div>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   )
 }
-

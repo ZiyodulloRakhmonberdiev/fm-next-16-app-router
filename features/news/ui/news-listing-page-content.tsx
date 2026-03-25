@@ -36,6 +36,7 @@ export function NewsListingPageContent({
   layout = "list",
   showAuthorsChoice = true,
   forceVideoOnly = false,
+  forceBreakingOnly = false,
   pageSize = 4,
 }: {
   variant?: NewsListingVariant
@@ -45,6 +46,7 @@ export function NewsListingPageContent({
   layout?: LayoutType
   showAuthorsChoice?: boolean
   forceVideoOnly?: boolean
+  forceBreakingOnly?: boolean
   pageSize?: number
 }) {
   const locale = useLocale() as AppLocale
@@ -74,21 +76,21 @@ export function NewsListingPageContent({
     (nextPage: number, filter: FilterType, slugs: string[]) => {
       const params = new URLSearchParams()
       params.set("status", "published")
-      if (!forceVideoOnly) params.set("recentMonths", "6")
+      if (!forceVideoOnly && !forceBreakingOnly) params.set("recentMonths", "6")
       params.set("page", String(nextPage))
       params.set("limit", String(pageSize))
       params.set("sortBy", sortByForFilter(filter))
       const flags = flagsForFilter(filter)
       if (flags.top) params.set("top", "1")
       if (flags.authorsChoice) params.set("authorsChoice", "1")
-      if (flags.breaking) params.set("breaking", "1")
+      if (flags.breaking || forceBreakingOnly) params.set("breaking", "1")
       if (flags.video || forceVideoOnly) params.set("video", "1")
       for (const slug of slugs) {
         params.append("category", slug)
       }
       return `/api/news?${params.toString()}`
     },
-    [pageSize, forceVideoOnly]
+    [pageSize, forceVideoOnly, forceBreakingOnly]
   )
 
   const fetchFirstPage = React.useCallback(
@@ -114,7 +116,7 @@ export function NewsListingPageContent({
     setAuthorsChoiceLoading(true)
     try {
       const res = await fetch(
-        `/api/news?status=published&recentMonths=6&authorsChoice=1&sortBy=publishedAt&page=1&limit=4`,
+        `/api/news?status=published&authorsChoice=1&sortBy=publishedAt&page=1&limit=6`,
         { cache: "no-store" }
       )
       if (!res.ok) return
@@ -204,9 +206,10 @@ export function NewsListingPageContent({
   const selectedCount = selectedCategorySlugs.length
 
   const pageHeading = React.useMemo(() => {
+    if (forceBreakingOnly) return t("filter_breaking")
     if (!initialCategorySlug) return t("news")
     return getCategoryNameFromApi(categories, initialCategorySlug, locale)
-  }, [initialCategorySlug, categories, locale, t])
+  }, [forceBreakingOnly, initialCategorySlug, categories, locale, t])
 
   const onCategoryToggle = React.useCallback((slug: string, checked: boolean) => {
     setSelectedCategorySlugs((prev) => {
@@ -250,7 +253,7 @@ export function NewsListingPageContent({
             }}
           />
 
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-1 gap-4 px-0.5">
             {loading && page === 1 ? (
               <NewsListingSkeleton pageSize={pageSize} />
             ) : layout === "videoGrid" ? (

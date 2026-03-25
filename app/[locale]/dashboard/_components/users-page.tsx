@@ -41,6 +41,8 @@ import { Users, PlusCircle, Pencil, Trash2, User } from 'lucide-react'
 import { createUserSchema, type CreateUserInput } from '@/features/users/model/schemas'
 import { useUserMutations, useUsersQuery } from '@/features/dashboard/model/admin-hooks'
 import { useUsersUiStore } from '@/features/dashboard/model/admin-ui-store'
+import { useSession } from 'next-auth/react'
+import { normalizeRole } from '@/shared/common/lib/rbac'
 
 export const USER_ROLES = [
   { value: 'ceo', label: 'CEO' },
@@ -67,6 +69,11 @@ type UsersPageProps = {
 }
 
 export function UsersPage({ users: initialUsers }: UsersPageProps) {
+  const { data: session } = useSession()
+  const actorRole = normalizeRole(session?.user?.role)
+  const canAssignCeo = actorRole === 'ceo'
+  const assignableRoles = USER_ROLES.filter((r) => canAssignCeo || r.value !== 'ceo')
+
   const { data, isLoading, error } = useUsersQuery()
   const { create, update, remove } = useUserMutations()
   const { createOpen, editId, deleteId, setCreateOpen, setEditId, setDeleteId } = useUsersUiStore()
@@ -89,6 +96,12 @@ export function UsersPage({ users: initialUsers }: UsersPageProps) {
   const editUser = useMemo(() => users.find((u) => u.id === editId) ?? null, [users, editId])
   const deleteUser = useMemo(() => users.find((u) => u.id === deleteId) ?? null, [users, deleteId])
 
+  const editRoleOptions = useMemo(() => {
+    if (canAssignCeo) return USER_ROLES
+    if (editUser?.role === 'ceo') return USER_ROLES.filter((r) => r.value === 'ceo')
+    return assignableRoles
+  }, [canAssignCeo, editUser?.role, assignableRoles])
+
   const handleCreateSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const form = e.currentTarget
@@ -103,7 +116,7 @@ export function UsersPage({ users: initialUsers }: UsersPageProps) {
     const file = imageFileInput?.files?.[0]
     const image = file ? URL.createObjectURL(file) : imageUrlInput?.value?.trim() || null
 
-    if (!role || !USER_ROLES.some((r) => r.value === role)) {
+    if (!role || !assignableRoles.some((r) => r.value === role)) {
       toast.error('Rolni tanlang')
       return
     }
@@ -169,7 +182,7 @@ export function UsersPage({ users: initialUsers }: UsersPageProps) {
       toast.error('To\'liq ism va login kiritilishi shart')
       return
     }
-    if (!role || !USER_ROLES.some((r) => r.value === role)) {
+    if (!role || !editRoleOptions.some((r) => r.value === role)) {
       toast.error('Rolni tanlang')
       return
     }
@@ -340,7 +353,7 @@ export function UsersPage({ users: initialUsers }: UsersPageProps) {
                   <SelectValue placeholder="Tanlang" />
                 </SelectTrigger>
                 <SelectContent>
-                  {USER_ROLES.map((r) => (
+                  {assignableRoles.map((r) => (
                     <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
                   ))}
                 </SelectContent>
@@ -393,7 +406,7 @@ export function UsersPage({ users: initialUsers }: UsersPageProps) {
                     <SelectValue placeholder="Tanlang" />
                   </SelectTrigger>
                   <SelectContent>
-                    {USER_ROLES.map((r) => (
+                    {editRoleOptions.map((r) => (
                       <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
                     ))}
                   </SelectContent>

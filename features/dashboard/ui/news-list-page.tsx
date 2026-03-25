@@ -27,6 +27,8 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/shared/common/components/ui/dialog'
@@ -47,6 +49,9 @@ import type { NewsItem, NewsStatus, RawNewsItem } from '@/features/news/model'
 import { usePublicCategoriesQuery } from '@/features/category/model/public-categories-query'
 import { getCategoryLabelForNewsItem } from '@/features/category/model/use-category-label'
 import { useNewsQuery } from '@/features/dashboard/model/admin-hooks'
+import { useQueryClient } from '@tanstack/react-query'
+import { useSession } from 'next-auth/react'
+import { normalizeRole } from '@/shared/common/lib/rbac'
 import {
   Newspaper, PlusCircle, Eye, Search, ChevronDown,
   ExternalLink, Pencil, Columns3, Languages,
@@ -82,12 +87,13 @@ const TYPE_OPTIONS_FULL: { value: '' | 'video' | 'image'; label: string }[] = [
 
 const COLUMN_KEYS = [
   'rasm', 'sarlavha', 'kategoriya', 'status', 'tur', 'top',
-  'publishedAt', 'views', 'telegram', 'tarjimalar', 'amallar',
+  'createdBy', 'publishedAt', 'views', 'telegram', 'tarjimalar', 'amallar',
 ] as const
 
 const COLUMN_LABELS: Record<(typeof COLUMN_KEYS)[number], string> = {
   rasm: 'Rasm', sarlavha: 'Sarlavha', kategoriya: 'Kategoriya',
-  status: 'Status', tur: 'Tur', top: 'Top', publishedAt: 'publishedAt',
+  status: 'Status', tur: 'Tur', top: 'Top', createdBy: 'Yaratgan',
+  publishedAt: 'publishedAt',
   views: "Ko'rishlar", telegram: 'Telegram', tarjimalar: 'Tarjimalar', amallar: 'Amallar',
 }
 
@@ -144,9 +150,22 @@ export function DashboardNewsListPage({
   variant = 'full',
   initialStatus = '',
 }: DashboardNewsListPageProps) {
+  const queryClient = useQueryClient()
+  const { data: session } = useSession()
+  const isCeo = normalizeRole(session?.user?.role) === 'ceo'
   const { data: categories = [], isPending: categoriesPending } = usePublicCategoriesQuery()
   const { data, isLoading, error } = useNewsQuery(variant === 'tableOnly' ? initialStatus || undefined : undefined)
   const rawNews = useMemo(() => data?.data ?? [], [data])
+  const idBySlug = useMemo(() => {
+    const m = new Map<string, string>()
+    for (const raw of rawNews as (RawNewsItem & { _id?: string })[]) {
+      const id = raw._id
+      if (raw.slug && id != null && String(id) !== '') {
+        m.set(raw.slug, String(id))
+      }
+    }
+    return m
+  }, [rawNews])
   const news = useMemo(
     () => {
       const pickTitle = (raw: RawNewsItem) => {
@@ -186,6 +205,7 @@ export function DashboardNewsListPage({
           telegramLastAttemptAt: raw.telegramLastAttemptAt,
           videoSource: raw.videoSource,
           videoUrl: raw.videoUrl,
+          createdBy: raw.createdBy,
         }))
         .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
     },
@@ -218,6 +238,8 @@ export function DashboardNewsListPage({
     Object.fromEntries(COLUMN_KEYS.map((k) => [k, true]))
   )
   const [translationsModalSlug, setTranslationsModalSlug] = useState<string | null>(null)
+  const [permanentDeleteSlug, setPermanentDeleteSlug] = useState<string | null>(null)
+  const [permanentDeleting, setPermanentDeleting] = useState(false)
 
   const countsByStatus = useMemo(() => {
     const base: Record<NewsStatus, number> = {
@@ -238,7 +260,8 @@ export function DashboardNewsListPage({
         (item) =>
           item.title.toLowerCase().includes(q) ||
           item.category.toLowerCase().includes(q) ||
-          item.author.toLowerCase().includes(q)
+          item.author.toLowerCase().includes(q) ||
+          (item.createdBy?.name?.toLowerCase().includes(q) ?? false)
       )
     }
     if (statusFilter) list = list.filter((item) => (item.status ?? 'published') === statusFilter)
@@ -284,6 +307,33 @@ export function DashboardNewsListPage({
     setDateFrom('')
     setDateTo('')
     setPage(1)
+  }
+
+  const itemPendingPermanentDelete = permanentDeleteSlug
+    ? news.find((n) => n.slug === permanentDeleteSlug)
+    : null
+
+  const handlePermanentDelete = async () => {
+    if (!permanentDeleteSlug) return
+    const id = idBySlug.get(permanentDeleteSlug)
+    if (!id) {
+      toast.error("Yangilik ID topilmadi — sahifani yangilang")
+      return
+    }
+    setPermanentDeleting(true)
+    try {
+      const res = await fetch(`/api/news/${id}`, { method: 'DELETE', credentials: 'include' })
+      const j = (await res.json().catch(() => ({}))) as { error?: string }
+      if (!res.ok) {
+        toast.error(j.error ?? "O'chirishda xato")
+        return
+      }
+      toast.success('Yangilik bazadan butunlay o‘chirildi')
+      setPermanentDeleteSlug(null)
+      await queryClient.invalidateQueries({ queryKey: ['admin', 'news'] })
+    } finally {
+      setPermanentDeleting(false)
+    }
   }
 
   const isTrashView = initialStatus === 'deleted'
@@ -435,6 +485,7 @@ export function DashboardNewsListPage({
                       {columnVisibility.status !== false && <TableHead>{COLUMN_LABELS.status}</TableHead>}
                       {columnVisibility.tur !== false && <TableHead>{COLUMN_LABELS.tur}</TableHead>}
                       {columnVisibility.top !== false && <TableHead className="text-center">{COLUMN_LABELS.top}</TableHead>}
+                      {columnVisibility.createdBy !== false && <TableHead>{COLUMN_LABELS.createdBy}</TableHead>}
                       {columnVisibility.publishedAt !== false && <TableHead>{COLUMN_LABELS.publishedAt}</TableHead>}
                       {columnVisibility.views !== false && <TableHead className="text-right">{COLUMN_LABELS.views}</TableHead>}
                       {columnVisibility.telegram !== false && <TableHead>{COLUMN_LABELS.telegram}</TableHead>}
@@ -486,6 +537,13 @@ export function DashboardNewsListPage({
                             {item.isTop ? <span className="text-primary font-medium">Ha</span> : <span className="text-muted-foreground">Yo'q</span>}
                           </TableCell>
                         )}
+                        {columnVisibility.createdBy !== false && (
+                          <TableCell className="max-w-[140px] text-sm text-muted-foreground">
+                            <span className="line-clamp-2" title={item.createdBy?.name}>
+                              {item.createdBy?.name?.trim() || '—'}
+                            </span>
+                          </TableCell>
+                        )}
                         {columnVisibility.publishedAt !== false && (
                           <TableCell className="text-muted-foreground whitespace-nowrap text-sm">
                             {formatDateTimeLocale(item.publishedAt, locale)}
@@ -533,13 +591,25 @@ export function DashboardNewsListPage({
                         )}
                         {columnVisibility.amallar !== false && (
                           <TableCell className="text-right">
-                            <div className="flex items-center justify-end gap-1">
+                            <div className="flex flex-wrap items-center justify-end gap-1">
                               <Button variant="outline" size="sm" asChild onClick={() => toast.info('Tahrirlash sahifasi ochildi')}>
                                 <Link href={`/dashboard/news/${item.slug}/edit`}><Pencil className="size-4" /></Link>
                               </Button>
                               <Button variant="ghost" size="sm" asChild>
                                 <Link href={`/news/${item.slug}`} target="_blank" rel="noopener noreferrer"><ExternalLink className="size-4" /></Link>
                               </Button>
+                              {isCeo ? (
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                                  onClick={() => setPermanentDeleteSlug(item.slug)}
+                                  title="Bazadan butunlay o‘chirish"
+                                >
+                                  <Trash2 className="size-4" />
+                                </Button>
+                              ) : null}
                             </div>
                           </TableCell>
                         )}
@@ -558,6 +628,35 @@ export function DashboardNewsListPage({
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={!!permanentDeleteSlug} onOpenChange={(open) => !open && setPermanentDeleteSlug(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Yangilikni butunlay o‘chirish</DialogTitle>
+            <DialogDescription>
+              {itemPendingPermanentDelete ? (
+                <>
+                  <span className="font-medium text-foreground">&quot;{itemPendingPermanentDelete.title}&quot;</span> bazadan
+                  qaytarilmasdan o‘chiriladi. Faqat CEO bajarishi mumkin.
+                </>
+              ) : null}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex gap-2">
+            <Button type="button" variant="outline" onClick={() => setPermanentDeleteSlug(null)}>
+              Bekor qilish
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={permanentDeleting}
+              onClick={() => void handlePermanentDelete()}
+            >
+              Butunlay o‘chirish
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={!!translationsModalSlug} onOpenChange={(open) => !open && setTranslationsModalSlug(null)}>
         <DialogContent className="sm:max-w-md">

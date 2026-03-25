@@ -5,28 +5,19 @@ import { usePathname } from '@/i18n/navigation'
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarSeparator,
 } from '@/shared/common/components/ui/sidebar'
-import { LogOut } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import Image from 'next/image'
 import { useEffect, useMemo, useState } from 'react'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { normalizeRole } from '@/shared/common/lib/rbac'
-import { Button } from '@/shared/common/components/ui/button'
-import {
-  adminMainNavItems,
-  adminSystemNavItems,
-  filterAdminNavByRole,
-} from '../config/admin-nav-items'
+import { adminMainNavItems, filterAdminNavByRole } from '../config/admin-nav-items'
 
 export default function AdminSidebar() {
   const pathname = usePathname()
@@ -35,8 +26,11 @@ export default function AdminSidebar() {
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
   const role = normalizeRole(session?.user?.role)
-  const visibleNavItems = useMemo(() => filterAdminNavByRole(adminMainNavItems, role), [role])
-  const visibleBottomItems = useMemo(() => filterAdminNavByRole(adminSystemNavItems, role), [role])
+  const visibleNavItems = useMemo(
+    () =>
+      filterAdminNavByRole(adminMainNavItems, role).filter((item) => !item.hideFromSidebar),
+    [role]
+  )
 
   const logoSrc =
     mounted && resolvedTheme === 'light' ? '/images/fm-logo-dark.svg' : '/images/fm-logo.svg'
@@ -47,6 +41,12 @@ export default function AdminSidebar() {
     }
     if (href === '/dashboard/ads') {
       return pathname === '/dashboard/ads'
+    }
+    if (href.startsWith('/dashboard/configs')) {
+      return pathname === href || pathname.startsWith(`${href}/`)
+    }
+    if (href === '/dashboard/settings') {
+      return pathname === '/dashboard/settings' || pathname.startsWith('/dashboard/settings/')
     }
     return pathname === href || pathname.startsWith(`${href}/`)
   }
@@ -70,8 +70,7 @@ export default function AdminSidebar() {
         </div>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Asosiy</SidebarGroupLabel>
+        <SidebarGroup className="px-0">
           <SidebarGroupContent>
             <SidebarMenu>
               {visibleNavItems.map((item) => (
@@ -87,41 +86,7 @@ export default function AdminSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        <SidebarSeparator />
-        <SidebarGroup>
-          <SidebarGroupLabel>Tizim</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {visibleBottomItems.map((item) => (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton asChild isActive={isItemActive(item.href)}>
-                    <Link href={item.href}>
-                      <item.icon className="size-4" />
-                      <span>{item.label}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="border-t border-border min-w-0 overflow-hidden shrink-0">
-        <div className="px-2 py-2 space-y-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full gap-2 justify-start group-data-[state=collapsed]:justify-center"
-            onClick={() => void signOut({ callbackUrl: '/auth/login' })}
-          >
-            <LogOut className="size-4" />
-            <span className="group-data-[state=collapsed]:hidden">Chiqish</span>
-          </Button>
-          <div className="text-xs text-muted-foreground truncate group-data-[state=collapsed]:hidden">
-            Admin panel v1.0
-          </div>
-        </div>
-      </SidebarFooter>
     </Sidebar>
   )
 }

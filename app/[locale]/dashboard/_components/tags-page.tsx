@@ -188,12 +188,12 @@ export function TagsPage({ locale }: TagsPageProps) {
         </CardHeader>
       </Card>
 
-      <Card>
-        <CardHeader>
+      <Card className="py-4 md:py-6"> 
+        <CardHeader className="px-4 md:px-6">
           <CardTitle className="text-base">Ro'yxat</CardTitle>
           <CardDescription>Jami: {tags.length} ta teg</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-4 md:px-6">
           {isLoading ? (
             <p className="text-sm text-muted-foreground">Yuklanmoqda...</p>
           ) : error ? (

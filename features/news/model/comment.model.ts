@@ -15,6 +15,9 @@ export interface INewsComment {
   content: string
   status: CommentStatus
   confirmedAt?: Date
+  /** Izohni tasdiqlagan admin (faqat status confirmed/approved bo‘lganda) */
+  confirmedByUserId?: string
+  confirmedByUserName?: string
   replyToCommentId?: string
   replyToUserLogin?: string
   createdAt: Date
@@ -39,6 +42,8 @@ const NewsCommentSchema = new Schema<INewsComment>(
       index: true,
     },
     confirmedAt: Date,
+    confirmedByUserId: String,
+    confirmedByUserName: String,
     replyToCommentId: String,
     replyToUserLogin: String,
   },

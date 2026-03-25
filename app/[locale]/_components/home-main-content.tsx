@@ -11,7 +11,14 @@ import {
   sortCategoriesByPriority,
   usePublicCategoriesQuery,
 } from "@/features/category/model/public-categories-query"
-import { BannerSection, ColumnSection, HeaderNewsCarousel, SlideNewsSection, TextNewsSection, VideoNewsSection } from "@/shared/common/components/news-sections"
+import {
+  BannerSection,
+  BreakingSection,
+  ColumnSection,
+  HeaderNewsCarousel,
+  SlideNewsSection,
+  TextNewsSection,
+} from "@/shared/common/components/news-sections"
 import RowSection from "@/shared/common/components/news-sections/row-section"
 import VideoNewsSection2 from "@/shared/common/components/news-sections/video-news-section-2"
 import HomePageSkeleton from "./home-page-skeleton"
@@ -82,6 +89,7 @@ export default function HomeMainContent() {
       <TopBanner />
       <BannerSection categorySlug={firstCategorySlug} featuredPosition="right" />
       <SlideNewsSection categorySlug={fourthCategorySlug} />
+      <BreakingSection />
       <BannerSection categorySlug={secondCategorySlug} featuredPosition="left" />
       <TextNewsSection />
       {/* <VideoNewsSection /> */}

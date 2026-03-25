@@ -156,7 +156,7 @@ export async function DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const unauthorized = await requireAdminSession(['ceo', 'administrator', 'moderator'])
+  const unauthorized = await requireAdminSession(['ceo'])
   if (unauthorized) return unauthorized
 
   await dbConnect()

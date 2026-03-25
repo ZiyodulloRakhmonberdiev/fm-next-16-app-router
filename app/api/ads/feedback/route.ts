@@ -10,6 +10,12 @@ export async function GET(req: NextRequest) {
   if (unauthorized) return unauthorized
 
   const { searchParams } = new URL(req.url)
+  if (searchParams.get("countOnly") === "1") {
+    await dbConnect()
+    const count = await AdFeedbackModel.countDocuments({})
+    return Response.json({ count })
+  }
+
   const action = searchParams.get("action")
   const reason = searchParams.get("reason")?.trim()
   const placement = searchParams.get("placement")?.trim()

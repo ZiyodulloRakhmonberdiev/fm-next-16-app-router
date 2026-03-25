@@ -34,6 +34,8 @@ export interface INews {
   telegramLastAttemptAt?: Date
   videoSource?: 'youtube' | 'local'
   videoUrl?: string
+  /** Yangilikni yaratgan admin foydalanuvchi */
+  createdBy?: { userId: string; name: string }
   createdAt: Date
   updatedAt: Date
 }
@@ -90,6 +92,10 @@ const NewsSchema = new Schema<INews>(
     telegramLastAttemptAt: Date,
     videoSource: { type: String, enum: ['youtube', 'local'] },
     videoUrl: String,
+    createdBy: {
+      userId: { type: String },
+      name: { type: String },
+    },
   },
   { timestamps: true }
 )

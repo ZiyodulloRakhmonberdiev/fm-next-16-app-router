@@ -34,12 +34,12 @@ export function SiteConfigSection({
   saving,
 }: SiteConfigSectionProps) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">Site config</CardTitle>
-        <CardDescription>Email, telefon va manzil (tillar bo‘yicha).</CardDescription>
+    <Card className="py-4 md:py-6 gap-2 md:gap-4">
+      <CardHeader className="px-4 md:px-6">
+        <CardTitle className="text-base">Sayt ma'lumotlari</CardTitle>
+        <CardDescription>Email, telefon va manzil.</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 px-4 md:px-6">
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label>Email</Label>

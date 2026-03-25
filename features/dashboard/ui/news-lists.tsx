@@ -1,7 +1,7 @@
 'use client'
 /* eslint-disable react/no-unescaped-entities */
 
-import { useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { Link } from '@/i18n/navigation'
 import Image from 'next/image'
 import {
@@ -24,289 +24,379 @@ import { PaginationControl } from '@/shared/common/components/ui/pagination-cont
 import { formatDateTimeLocale } from '@/shared/common/lib/formatter'
 import type { AppLocale } from '@/shared/common/lib/locale-api'
 import type { NewsItem } from '@/features/news/model'
-import { Newspaper, Trash2, Eye } from 'lucide-react'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/shared/common/components/ui/table'
+import type { DashboardNewsListItem } from '@/features/dashboard/lib/attach-news-ids'
+import { Newspaper, ListMinus, Eye, Zap } from 'lucide-react'
+import { toast } from 'sonner'
 
 const PER_PAGE = 5
+const TITLE_MAX = 36
 
-type ListType = 'top' | 'authorsChoice'
+export type { DashboardNewsListItem } from '@/features/dashboard/lib/attach-news-ids'
+
+type ListKind = 'top' | 'authorsChoice' | 'breaking'
 
 type DashboardNewsListsProps = {
-  topNews: NewsItem[]
-  authorsChoiceNews: NewsItem[]
+  topNews: DashboardNewsListItem[]
+  authorsChoiceNews: DashboardNewsListItem[]
+  breakingNews: DashboardNewsListItem[]
   mostReadNews: NewsItem[]
   locale: AppLocale
+}
+
+function truncateTitle(title: string, max = TITLE_MAX): string {
+  const t = title.trim()
+  if (t.length <= max) return t
+  return `${t.slice(0, max)}…`
+}
+
+async function patchNewsFlag(newsId: string, body: Record<string, boolean>): Promise<boolean> {
+  const res = await fetch(`/api/news/${newsId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+    credentials: 'include',
+  })
+  if (!res.ok) {
+    const err = (await res.json().catch(() => null)) as { error?: string } | null
+    toast.error(err?.error ?? "Saqlashda xatolik")
+    return false
+  }
+  return true
+}
+
+function SimpleRow({
+  item,
+  locale,
+  showRemove,
+  onRemoveClick,
+  disabled,
+}: {
+  item: NewsItem
+  locale: AppLocale
+  showRemove?: boolean
+  onRemoveClick?: () => void
+  disabled?: boolean
+}) {
+  return (
+    <div className="flex items-center gap-2 rounded-lg border border-border/60 bg-muted/15 px-2 py-2 md:gap-3 md:px-3 md:py-2.5">
+      <Link
+        href={`/dashboard/news/${item.slug}/edit`}
+        className="relative size-12 shrink-0 overflow-hidden rounded-md bg-muted md:size-14"
+      >
+        {item.images[0] ? (
+          <Image src={item.images[0]} alt="" fill className="object-cover" sizes="56px" />
+        ) : (
+          <div className="flex size-full items-center justify-center">
+            <Newspaper className="size-4 text-muted-foreground md:size-5" />
+          </div>
+        )}
+      </Link>
+      <div className="min-w-0 flex-1">
+        <Link
+          href={`/dashboard/news/${item.slug}/edit`}
+          className="text-sm font-medium leading-snug hover:underline"
+          title={item.title}
+        >
+          {truncateTitle(item.title)}
+        </Link>
+        <p className="mt-0.5 text-[11px] text-muted-foreground tabular-nums md:text-xs">
+          {formatDateTimeLocale(item.publishedAt, locale)} · {item.views.toLocaleString()} ko&apos;rish
+        </p>
+      </div>
+      {showRemove && onRemoveClick ? (
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="size-8 shrink-0 text-muted-foreground hover:bg-muted hover:text-foreground md:size-9"
+          disabled={disabled}
+          onClick={onRemoveClick}
+          aria-label="Ro'yxatdan olib tashlash"
+        >
+          <ListMinus className="size-4" />
+        </Button>
+      ) : null}
+    </div>
+  )
 }
 
 export function DashboardNewsLists({
   topNews,
   authorsChoiceNews,
+  breakingNews,
   mostReadNews,
   locale,
 }: DashboardNewsListsProps) {
+  const [topItems, setTopItems] = useState(topNews)
+  const [authorsItems, setAuthorsItems] = useState(authorsChoiceNews)
+  const [breakingItems, setBreakingItems] = useState(breakingNews)
+
+  useEffect(() => {
+    setTopItems(topNews)
+  }, [topNews])
+  useEffect(() => {
+    setAuthorsItems(authorsChoiceNews)
+  }, [authorsChoiceNews])
+  useEffect(() => {
+    setBreakingItems(breakingNews)
+  }, [breakingNews])
+
   const [pageTop, setPageTop] = useState(1)
   const [pageAuthors, setPageAuthors] = useState(1)
+  const [pageBreaking, setPageBreaking] = useState(1)
   const [pageMostRead, setPageMostRead] = useState(1)
-  const [removedFromTop, setRemovedFromTop] = useState<Set<string>>(new Set())
-  const [removedFromAuthorsChoice, setRemovedFromAuthorsChoice] = useState<Set<string>>(new Set())
-  const [confirmDialog, setConfirmDialog] = useState<{ open: boolean; slug: string; listType: ListType }>({
-    open: false, slug: '', listType: 'top',
-  })
 
-  const topFiltered = topNews.filter((item) => !removedFromTop.has(item.slug))
-  const authorsFiltered = authorsChoiceNews.filter((item) => !removedFromAuthorsChoice.has(item.slug))
+  const [confirm, setConfirm] = useState<{
+    open: boolean
+    kind: ListKind | null
+    item: DashboardNewsListItem | null
+  }>({ open: false, kind: null, item: null })
 
-  const totalPagesTop = Math.max(1, Math.ceil(topFiltered.length / PER_PAGE))
-  const totalPagesAuthors = Math.max(1, Math.ceil(authorsFiltered.length / PER_PAGE))
+  const [pendingId, setPendingId] = useState<string | null>(null)
+
+  const totalPagesTop = Math.max(1, Math.ceil(topItems.length / PER_PAGE))
+  const totalPagesAuthors = Math.max(1, Math.ceil(authorsItems.length / PER_PAGE))
+  const totalPagesBreaking = Math.max(1, Math.ceil(breakingItems.length / PER_PAGE))
   const totalPagesMostRead = Math.max(1, Math.ceil(mostReadNews.length / PER_PAGE))
 
   const topPage = Math.min(pageTop, totalPagesTop)
   const authorsPage = Math.min(pageAuthors, totalPagesAuthors)
+  const breakingPage = Math.min(pageBreaking, totalPagesBreaking)
   const mostReadPage = Math.min(pageMostRead, totalPagesMostRead)
 
-  const topSlice = topFiltered.slice((topPage - 1) * PER_PAGE, topPage * PER_PAGE)
-  const authorsSlice = authorsFiltered.slice((authorsPage - 1) * PER_PAGE, authorsPage * PER_PAGE)
+  const topSlice = topItems.slice((topPage - 1) * PER_PAGE, topPage * PER_PAGE)
+  const authorsSlice = authorsItems.slice((authorsPage - 1) * PER_PAGE, authorsPage * PER_PAGE)
+  const breakingSlice = breakingItems.slice((breakingPage - 1) * PER_PAGE, breakingPage * PER_PAGE)
   const mostReadSlice = mostReadNews.slice((mostReadPage - 1) * PER_PAGE, mostReadPage * PER_PAGE)
 
-  const handleRemoveClick = (slug: string, listType: ListType) => {
-    setConfirmDialog({ open: true, slug, listType })
+  const openConfirm = (kind: ListKind, item: DashboardNewsListItem) => {
+    setConfirm({ open: true, kind, item })
   }
 
-  const handleConfirmRemove = () => {
-    const { slug, listType } = confirmDialog
-    if (listType === 'top') {
-      setRemovedFromTop((prev) => new Set(prev).add(slug))
-      setPageTop((p) => Math.max(1, Math.min(p, Math.ceil((topFiltered.length - 1) / PER_PAGE))))
+  const closeConfirm = () => {
+    setConfirm({ open: false, kind: null, item: null })
+  }
+
+  const confirmCopy: Record<
+    ListKind,
+    { title: string; description: string; patch: Record<string, boolean> }
+  > = {
+    top: {
+      title: "Top yangiliklar ro'yxatidan olib tashlaysizmi?",
+      // description: "Yangilikda «Top» belgisi o‘chiriladi (isTop = false).",
+      patch: { isTop: false },
+    },
+    authorsChoice: {
+      title: "Muallif tanlovi ro'yxatidan olib tashlaysizmi?",
+      // description: "Yangilikda «Muallif tanlovi» belgisi o‘chiriladi (authorsChoice = false).",
+      patch: { authorsChoice: false },
+    },
+    breaking: {
+      title: "Breaking ro'yxatidan olib tashlaysizmi?",
+      // description: "Yangilikda «Breaking» belgisi o‘chiriladi (isBreaking = false).",
+      patch: { isBreaking: false },
+    },
+  }
+
+  const handleConfirmRemove = async () => {
+    const { kind, item } = confirm
+    if (!kind || !item) return
+    const { patch } = confirmCopy[kind]
+    setPendingId(item.newsId)
+    const ok = await patchNewsFlag(item.newsId, patch)
+    setPendingId(null)
+    if (!ok) return
+
+    if (kind === 'top') {
+      setTopItems((prev) => {
+        const next = prev.filter((x) => x.slug !== item.slug)
+        const totalPages = Math.max(1, Math.ceil(next.length / PER_PAGE))
+        setPageTop((p) => Math.min(p, totalPages))
+        return next
+      })
+    } else if (kind === 'authorsChoice') {
+      setAuthorsItems((prev) => {
+        const next = prev.filter((x) => x.slug !== item.slug)
+        const totalPages = Math.max(1, Math.ceil(next.length / PER_PAGE))
+        setPageAuthors((p) => Math.min(p, totalPages))
+        return next
+      })
     } else {
-      setRemovedFromAuthorsChoice((prev) => new Set(prev).add(slug))
-      setPageAuthors((p) => Math.max(1, Math.min(p, Math.ceil((authorsFiltered.length - 1) / PER_PAGE))))
+      setBreakingItems((prev) => {
+        const next = prev.filter((x) => x.slug !== item.slug)
+        const totalPages = Math.max(1, Math.ceil(next.length / PER_PAGE))
+        setPageBreaking((p) => Math.min(p, totalPages))
+        return next
+      })
     }
-    setConfirmDialog({ open: false, slug: '', listType: 'top' })
+    toast.success("Ro'yxat yangilandi")
+    closeConfirm()
   }
 
-  const handleCancelDialog = () => {
-    setConfirmDialog({ open: false, slug: '', listType: 'top' })
-  }
-
-  const confirmTitle =
-    confirmDialog.listType === 'top'
-      ? "Top yangiliklar ro'yxatidan olib tashlashni xohlaysizmi?"
-      : "Muallif tanlovi ro'yxatidan olib tashlashni xohlaysizmi?"
-  const confirmDescription =
-    confirmDialog.listType === 'top'
-      ? "Tasdiqlanganda bu yangilik Top yangiliklar ro'yxatidan chiqariladi."
-      : "Tasdiqlanganda bu yangilik Muallif tanlovi ro'yxatidan chiqariladi."
-
-  function NewsTableRow({ item, index, page: currentPage, showAuthor, showViews, showRanking, listType }: {
-    item: NewsItem
-    index: number
-    page: number
-    showAuthor?: boolean
-    showViews?: boolean
-    showRanking?: boolean
-    listType?: ListType
-  }) {
-    const rank = (currentPage - 1) * PER_PAGE + index + 1
-    return (
-      <TableRow className="hover:bg-muted/40">
-        <TableCell className="text-xs text-muted-foreground">
-          {showRanking ? (
-            <span className="font-medium text-foreground">TOP-{rank}</span>
-          ) : (
-            <span>#{rank}</span>
-          )}
-        </TableCell>
-        <TableCell>
-          <Link href={`/dashboard/news/${item.slug}/edit`} className="block">
-            <div className="relative h-12 w-16 overflow-hidden rounded-md bg-muted">
-              {item.images[0] ? (
-                <Image src={item.images[0]} alt="" fill className="object-cover" sizes="64px" />
-              ) : (
-                <div className="flex h-full items-center justify-center">
-                  <Newspaper className="size-4 text-muted-foreground" />
-                </div>
-              )}
+  const listBlock = (
+    title: ReactNode,
+    description: string,
+    items: DashboardNewsListItem[],
+    slice: DashboardNewsListItem[],
+    kind: ListKind,
+    page: number,
+    totalPages: number,
+    setPage: React.Dispatch<React.SetStateAction<number>>,
+    empty: string
+  ) => (
+    <Card className="shadow-sm">
+      <CardHeader className="space-y-1 px-4 py-0">
+        <CardTitle className="flex items-center gap-2 text-base">{title}</CardTitle>
+        {/* <CardDescription className="text-xs md:text-sm">{description}</CardDescription> */}
+      </CardHeader>
+      <CardContent className="space-y-2 px-4 py-0 md:space-y-3">
+        {items.length === 0 ? (
+          <p className="text-sm text-muted-foreground py-1">{empty}</p>
+        ) : (
+          <>
+            <div className="max-h-[min(22rem,50vh)] space-y-1.5 overflow-y-auto md:space-y-2 md:pr-1">
+              {slice.map((item) => (
+                <SimpleRow
+                  key={item.slug}
+                  item={item}
+                  locale={locale}
+                  showRemove
+                  disabled={pendingId === item.newsId}
+                  onRemoveClick={() => openConfirm(kind, item)}
+                />
+              ))}
             </div>
-          </Link>
-        </TableCell>
-        <TableCell>
-          <Link href={`/dashboard/news/${item.slug}/edit`} className="text-sm font-medium line-clamp-2 hover:underline">
-            {item.title}
-          </Link>
-        </TableCell>
-        {showAuthor && <TableCell className="text-xs text-muted-foreground">{item.author}</TableCell>}
-        <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
-          {formatDateTimeLocale(item.publishedAt, locale)}
-        </TableCell>
-        {showViews && (
-          <TableCell className="text-xs text-muted-foreground text-right whitespace-nowrap">
-            {item.views.toLocaleString()} ko'rish
-          </TableCell>
+            <PaginationControl
+              page={page}
+              totalPages={totalPages}
+              onPrev={() => setPage((p) => Math.max(1, p - 1))}
+              onNext={() => setPage((p) => Math.min(totalPages, p + 1))}
+            />
+          </>
         )}
-        {listType && (
-          <TableCell className="text-right">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-destructive hover:text-destructive hover:bg-destructive/10"
-              onClick={() => handleRemoveClick(item.slug, listType)}
-            >
-              <Trash2 className="size-4" />
-            </Button>
-          </TableCell>
+      </CardContent>
+    </Card>
+  )
+
+  const readOnlyCard = (
+    title: ReactNode,
+    description: string,
+    slice: NewsItem[],
+    total: number,
+    page: number,
+    totalPages: number,
+    setPage: React.Dispatch<React.SetStateAction<number>>,
+    empty: string
+  ) => (
+    <Card className="shadow-sm">
+      <CardHeader className="space-y-1 px-4">
+        <CardTitle className="flex items-center gap-2 text-base">{title}</CardTitle>
+        {/* <CardDescription className="text-xs md:text-sm">{description}</CardDescription> */}
+      </CardHeader>
+      <CardContent className="space-y-2 px-4 py-0 md:space-y-3">
+        {total === 0 ? (
+          <p className="text-sm text-muted-foreground py-1">{empty}</p>
+        ) : (
+          <>
+            <div className="max-h-[min(22rem,50vh)] space-y-1.5 overflow-y-auto md:space-y-2 md:pr-1">
+              {slice.map((item) => (
+                <SimpleRow key={item.slug} item={item} locale={locale} />
+              ))}
+            </div>
+            <PaginationControl
+              page={page}
+              totalPages={totalPages}
+              onPrev={() => setPage((p) => Math.max(1, p - 1))}
+              onNext={() => setPage((p) => Math.min(totalPages, p + 1))}
+            />
+          </>
         )}
-      </TableRow>
-    )
-  }
+      </CardContent>
+    </Card>
+  )
 
   return (
-    <div className="space-y-8">
-      <div className="grid gap-8">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Newspaper className="size-5" />
-              Top yangiliklar
-            </CardTitle>
-            <CardDescription>Eng muhim yangiliklar</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {topFiltered.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-4">Top yangiliklar yo'q.</p>
-            ) : (
-              <>
-                <div className="rounded-md border overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-12">#</TableHead>
-                        <TableHead className="w-[84px]">Rasm</TableHead>
-                        <TableHead>Sarlavha</TableHead>
-                        <TableHead className="whitespace-nowrap">Sana</TableHead>
-                        <TableHead className="whitespace-nowrap text-right">Ko'rishlar</TableHead>
-                        <TableHead className="w-[72px] text-right">Amal</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {topSlice.map((item, index) => (
-                        <NewsTableRow key={item.slug} item={item} index={index} page={topPage} showViews listType="top" />
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-                <PaginationControl
-                  page={topPage}
-                  totalPages={totalPagesTop}
-                  onPrev={() => setPageTop((p) => Math.max(1, p - 1))}
-                  onNext={() => setPageTop((p) => Math.min(totalPagesTop, p + 1))}
-                />
-              </>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <span className="text-amber-600 dark:text-amber-400">★</span>
-              Muallif tanlovi
-            </CardTitle>
-            <CardDescription>Tahririyat tanlangan yangiliklar</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {authorsFiltered.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-4">Muallif tanlovi yangiliklar yo'q.</p>
-            ) : (
-              <>
-                <div className="rounded-md border overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-12">#</TableHead>
-                        <TableHead className="w-[84px]">Rasm</TableHead>
-                        <TableHead>Sarlavha</TableHead>
-                        <TableHead>Muallif</TableHead>
-                        <TableHead className="whitespace-nowrap">Sana</TableHead>
-                        <TableHead className="w-[72px] text-right">Amal</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {authorsSlice.map((item, index) => (
-                        <NewsTableRow key={item.slug} item={item} index={index} page={authorsPage} showAuthor listType="authorsChoice" />
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-                <PaginationControl
-                  page={authorsPage}
-                  totalPages={totalPagesAuthors}
-                  onPrev={() => setPageAuthors((p) => Math.max(1, p - 1))}
-                  onNext={() => setPageAuthors((p) => Math.min(totalPagesAuthors, p + 1))}
-                />
-              </>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Eye className="size-5" />
-              Ko'p o'qilgan
-            </CardTitle>
-            <CardDescription>Ko'rishlar soni bo'yicha</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {mostReadNews.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-4">Yangiliklar yo'q.</p>
-            ) : (
-              <>
-                <div className="rounded-md border overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-12">#</TableHead>
-                        <TableHead className="w-[84px]">Rasm</TableHead>
-                        <TableHead>Sarlavha</TableHead>
-                        <TableHead className="whitespace-nowrap">Sana</TableHead>
-                        <TableHead className="whitespace-nowrap text-right">Ko'rishlar</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {mostReadSlice.map((item, index) => (
-                        <NewsTableRow key={item.slug} item={item} index={index} page={mostReadPage} showViews showRanking />
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-                <PaginationControl
-                  page={mostReadPage}
-                  totalPages={totalPagesMostRead}
-                  onPrev={() => setPageMostRead((p) => Math.max(1, p - 1))}
-                  onNext={() => setPageMostRead((p) => Math.min(totalPagesMostRead, p + 1))}
-                />
-              </>
-            )}
-          </CardContent>
-        </Card>
+    <div className="space-y-4 md:space-y-6">
+      <div className="grid gap-4 md:gap-6 lg:grid-cols-2">
+        {listBlock(
+          <>
+            <Newspaper className="size-5 shrink-0" />
+            Top yangiliklar
+          </>,
+          'Eng muhim yangiliklar',
+          topItems,
+          topSlice,
+          'top',
+          topPage,
+          totalPagesTop,
+          setPageTop,
+          "Top yangiliklar yo'q."
+        )}
+        {listBlock(
+          <>
+            <span className="text-amber-600 dark:text-amber-400">★</span>
+            Muallif tanlovi
+          </>,
+          'Tahririyat tanlangan yangiliklar',
+          authorsItems,
+          authorsSlice,
+          'authorsChoice',
+          authorsPage,
+          totalPagesAuthors,
+          setPageAuthors,
+          "Muallif tanlovi yangiliklar yo'q."
+        )}
+        {listBlock(
+          <>
+            <Zap className="size-5 shrink-0 text-amber-500" />
+            Dolzarb
+          </>,
+          'Dolzarb yangiliklar',
+          breakingItems,
+          breakingSlice,
+          'breaking',
+          breakingPage,
+          totalPagesBreaking,
+          setPageBreaking,
+          "Breaking yangiliklar yo'q."
+        )}
+        {readOnlyCard(
+          <>
+            <Eye className="size-5 shrink-0" />
+            Ko'p o'qilgan
+          </>,
+          "Ko'rishlar soni bo'yicha",
+          mostReadSlice,
+          mostReadNews.length,
+          mostReadPage,
+          totalPagesMostRead,
+          setPageMostRead,
+          "Yangiliklar yo'q."
+        )}
       </div>
 
-      <Dialog open={confirmDialog.open} onOpenChange={(open) => !open && handleCancelDialog()}>
-        <DialogContent showCloseButton={true}>
+      <Dialog open={confirm.open} onOpenChange={(open) => !open && closeConfirm()}>
+        <DialogContent showCloseButton>
           <DialogHeader>
-            <DialogTitle>{confirmTitle}</DialogTitle>
-            <DialogDescription>{confirmDescription}</DialogDescription>
+            <DialogTitle>
+              {confirm.kind ? confirmCopy[confirm.kind].title : ''}
+            </DialogTitle>
+            <DialogDescription>
+              {confirm.kind ? confirmCopy[confirm.kind].description : ''}
+            </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" onClick={handleCancelDialog}>Bekor qilish</Button>
-            <Button variant="destructive" onClick={handleConfirmRemove}>Tasdiqlash</Button>
+          <DialogFooter className="flex gap-2 sm:gap-2">
+            <Button type="button" variant="outline" onClick={closeConfirm}>
+              Bekor qilish
+            </Button>
+            <Button
+              type="button"
+              variant="default"
+              disabled={pendingId != null}
+              onClick={() => void handleConfirmRemove()}
+            >
+              Tasdiqlash
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

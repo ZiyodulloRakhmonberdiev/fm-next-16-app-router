@@ -8,10 +8,15 @@ export type AdminNavIconKey =
   | 'Users'
   | 'UserSquare'
   | 'MessageSquare'
+  | 'Heart'
   | 'Megaphone'
   | 'ClipboardList'
-  | 'KeyRound'
-  | 'Settings'
+  | 'Sparkles'
+  | 'Building2'
+  | 'Share2'
+  | 'Send'
+  | 'CloudCog'
+  | 'LayoutGrid'
   | 'PlusCircle'
 
 export type AdminMainNavMeta = {
@@ -20,21 +25,24 @@ export type AdminMainNavMeta = {
   roles: NormalizedRole[]
   description?: string
   iconKey: AdminNavIconKey
+  /** Desktop sidebar da ko‘rinmasin (masalan Menu — header orqali). */
+  hideFromSidebar?: boolean
 }
 
+/** Sidebar, Menu sahifasi — tartib saqlanadi. */
 export const adminMainNavMeta: AdminMainNavMeta[] = [
   {
     href: '/dashboard',
     label: 'Boshqaruv paneli',
     roles: ['ceo', 'administrator'],
-    description: 'Umumiy ko‘rinish',
+    // description: 'Umumiy ko‘rinish',
     iconKey: 'LayoutDashboard',
   },
   {
     href: '/dashboard/news',
     label: 'Yangiliklar',
     roles: ['ceo', 'administrator', 'moderator'],
-    description: 'Ro‘yxat va tahrirlash',
+    // description: 'Ro‘yxat va tahrirlash',
     iconKey: 'Newspaper',
   },
   {
@@ -50,6 +58,18 @@ export const adminMainNavMeta: AdminMainNavMeta[] = [
     iconKey: 'Tag',
   },
   {
+    href: '/dashboard/comments',
+    label: 'Izohlar',
+    roles: ['ceo', 'administrator', 'moderator'],
+    iconKey: 'MessageSquare',
+  },
+  {
+    href: '/dashboard/reactions',
+    label: 'Reaksiyalar',
+    roles: ['ceo', 'administrator', 'moderator'],
+    iconKey: 'Heart',
+  },
+  {
     href: '/dashboard/users',
     label: 'Foydalanuvchilar',
     roles: ['ceo', 'administrator'],
@@ -60,12 +80,6 @@ export const adminMainNavMeta: AdminMainNavMeta[] = [
     label: 'Jamoa',
     roles: ['ceo', 'administrator'],
     iconKey: 'UserSquare',
-  },
-  {
-    href: '/dashboard/comments',
-    label: 'Izohlar',
-    roles: ['ceo', 'administrator', 'moderator'],
-    iconKey: 'MessageSquare',
   },
   {
     href: '/dashboard/ads',
@@ -80,31 +94,30 @@ export const adminMainNavMeta: AdminMainNavMeta[] = [
     iconKey: 'ClipboardList',
   },
   {
-    href: '/dashboard/configs',
-    label: 'Maxfiylik',
+    href: '/dashboard/configs/site',
+    label: 'Sayt sozlamalari',
     roles: ['ceo', 'administrator'],
-    description: 'Cookie va maxfiylik matnlari',
-    iconKey: 'KeyRound',
+    // description: 'Headline, sayt haqida, ijtimoiy tarmoqlar',
+    iconKey: 'Building2',
   },
-]
-
-export type AdminSystemNavMeta = {
-  href: string
-  label: string
-  roles: NormalizedRole[]
-  description?: string
-  iconKey: AdminNavIconKey
-}
-
-export const adminSystemNavMeta: AdminSystemNavMeta[] = [
   {
-    href: '/dashboard/settings',
-    label: 'Menu',
-    roles: ['ceo', 'administrator', 'moderator', 'ads_manager'],
-    description: 'Bo‘limlar va navigatsiya',
-    iconKey: 'Settings',
+    href: '/dashboard/configs/delivery',
+    label: "Ma'lumot uzatish",
+    roles: ['ceo'],
+    // description: 'Telegram va client uzatish — faqat CEO',
+    iconKey: 'CloudCog',
   },
+  // {
+  //   href: '/dashboard/settings',
+  //   label: 'Menu',
+  //   roles: ['ceo', 'administrator'],
+  //   // description: 'Boshqaruv ro‘yxati',
+  //   iconKey: 'LayoutGrid',
+  //   hideFromSidebar: true,
+  // },
 ]
+
+export const ADMIN_MENU_HUB_ORDER: string[] = adminMainNavMeta.map((m) => m.href)
 
 export function filterAdminNavMetaByRole<T extends { roles: NormalizedRole[] }>(
   items: readonly T[],

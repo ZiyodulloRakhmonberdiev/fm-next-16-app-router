@@ -45,6 +45,21 @@ function isLocalOrigin(origin: string): boolean {
   )
 }
 
+/**
+ * Telegram inline keyboard `url` may not point to localhost/private hosts.
+ * Prefer NEXT_PUBLIC_SITE_URL / SITE_URL when the request comes from local dev.
+ */
+function resolvePublicBaseUrl(requestOrigin: string): string {
+  const trimmed = requestOrigin.replace(/\/$/, "")
+  if (!isLocalOrigin(trimmed)) return trimmed
+  const fromEnv =
+    process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
+    process.env.SITE_URL?.trim() ||
+    process.env.PUBLIC_SITE_URL?.trim()
+  if (fromEnv) return fromEnv.replace(/\/$/, "")
+  return trimmed
+}
+
 function buildTelegramMessageLink(chatId: string, messageId: number, username?: string): string | undefined {
   if (username?.trim()) {
     return `https://t.me/${username.trim()}/${messageId}`
@@ -96,18 +111,23 @@ export async function sendNewsToTelegram(input: {
     return { status: "failed", reason: "Telegram botToken/chatId sozlanmagan." }
   }
 
-  const detailUrl = `${input.origin}/news/${input.slug}`
+  const linkBase = resolvePublicBaseUrl(input.origin)
+  const detailUrl = `${linkBase}/news/${input.slug}`
   const trimmedDescription = truncateWords(input.descriptionUzb ?? "", 56)
   const caption = [input.titleUzb, trimmedDescription].filter(Boolean).join("\n\n")
-  const replyMarkup = {
-    inline_keyboard: [
-      [{ text: "Батафсил бу ерда", url: detailUrl }],
-    ],
-  }
+  /** Telegram rejects localhost in inline button URLs; omit keyboard if still local. */
+  const canUseInlineUrl = !isLocalOrigin(linkBase)
+  const replyMarkup = canUseInlineUrl
+    ? {
+        inline_keyboard: [
+          [{ text: "Батафсил бу ерда", url: detailUrl }],
+        ],
+      }
+    : undefined
 
   const basePayload: Record<string, unknown> = {
     chat_id: settings.chatId,
-    reply_markup: replyMarkup,
+    ...(replyMarkup ? { reply_markup: replyMarkup } : {}),
   }
   if (settings.threadId) basePayload.message_thread_id = Number(settings.threadId)
 
