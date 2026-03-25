@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
   const rows = await TeamMemberModel.find()
     .sort({ certificateNumber: 1, createdAt: 1 })
     .lean()
-  const mapped = rows.map((r) => mapTeamDocToClient(r as Record<string, unknown>))
+  const mapped = rows.map((r) => mapTeamDocToClient(r))
   if (isPublic) {
     return Response.json(mapped)
   }
@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
       ...(d.qrCode && d.qrCode !== "" ? { qrCode: d.qrCode } : {}),
       ...(d.badgeImage && d.badgeImage !== "" ? { badgeImage: d.badgeImage } : {}),
     })
-    const plain = created.toObject() as Record<string, unknown>
+    const plain = created.toObject()
     return Response.json(mapTeamDocToClient(plain), { status: 201 })
   } catch (err) {
     const message = err instanceof Error ? err.message : "Saqlashda xatolik"

@@ -3,16 +3,17 @@
  * Yangi `certificateNumber` faqat string; foydalanuvchi nima kiritgan bo‘lsa shu saqlanadi.
  * API javobida ikkala kalit ham bir xil qiymat (dashboard `order` ishlatadi).
  */
-export function mapTeamDocToClient(doc: Record<string, unknown>) {
-  const cert = doc.certificateNumber
+export function mapTeamDocToClient(doc: object) {
+  const d = doc as Record<string, unknown>
+  const cert = d.certificateNumber
   const guvohnoma =
     typeof cert === "string"
       ? cert
-      : doc.order === undefined || doc.order === null
+      : d.order === undefined || d.order === null
         ? ""
-        : String(doc.order)
+        : String(d.order)
 
-  const { order: _drop, certificateNumber: _c, ...rest } = doc
+  const { order: _drop, certificateNumber: _c, ...rest } = d
   return {
     ...rest,
     order: guvohnoma,
