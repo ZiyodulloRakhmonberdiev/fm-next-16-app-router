@@ -1,11 +1,11 @@
 "use client"
 
-import Image from "next/image"
 import { Link } from "@/i18n/navigation"
 import { Play } from "lucide-react"
 import { formatDateISO } from "@/shared/common/lib/formatter"
 import type { NewsItem } from "@/features/news/model"
-import { formatVideoCardMetaLine, getCardImageSrc } from "./news-listing-utils"
+import { formatVideoCardMetaLine } from "./news-listing-utils"
+import { VideoCardMediaPreview } from "./video-card-media-preview"
 
 type NewsListingVideoCardProps = {
   item: NewsItem
@@ -18,24 +18,13 @@ export function NewsListingVideoCard({
   categoryLabel,
   onOpenVideo,
 }: NewsListingVideoCardProps) {
-  const poster = getCardImageSrc(item)
   const metaLine = formatVideoCardMetaLine(item.publishedAt)
   const canOpenVideo = Boolean(item.videoSource && item.videoUrl && onOpenVideo)
 
   const body = (
     <>
       <div className="relative aspect-video w-full shrink-0 overflow-hidden bg-muted">
-        {poster ? (
-          <Image
-            src={poster}
-            alt={item.title}
-            fill
-            sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-          />
-        ) : (
-          <div className="absolute inset-0 bg-muted" aria-hidden />
-        )}
+        <VideoCardMediaPreview title={item.title} item={item} />
         <span
           className="pointer-events-none absolute bottom-2 left-2 z-10 inline-flex size-8 items-center justify-center rounded-full bg-brand text-foreground shadow-md ring-1 ring-black/5"
           aria-hidden

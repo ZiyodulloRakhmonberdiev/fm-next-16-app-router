@@ -3,11 +3,14 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/common/components/ui/card'
 import { Input } from '@/shared/common/components/ui/input'
 import { Label } from '@/shared/common/components/ui/label'
+import { Button } from '@/shared/common/components/ui/button'
+import { X } from 'lucide-react'
 
 type VideoFormProps = {
   videoUrl: string
   videoDisplayUrl: string
   youtubeEmbedUrl: string | null
+  hasVideoFile: boolean
   onVideoUrlChange: (value: string) => void
   onVideoFileChange: (file: File | null) => void
 }
@@ -16,9 +19,15 @@ export function VideoForm({
   videoUrl,
   videoDisplayUrl,
   youtubeEmbedUrl,
+  hasVideoFile,
   onVideoUrlChange,
   onVideoFileChange,
 }: VideoFormProps) {
+  const hasVideo = Boolean(videoUrl.trim() || hasVideoFile)
+  const shownUrl =
+    (youtubeEmbedUrl ? videoUrl.trim() : '') ||
+    (!youtubeEmbedUrl && videoUrl.trim() ? videoUrl.trim() : '') ||
+    (!youtubeEmbedUrl && videoDisplayUrl ? videoDisplayUrl : '')
   return (
     <Card className='pt-0 md:pt-4 border-none md:border-border shadow-none'>
       <CardHeader className='px-0'>
@@ -52,8 +61,8 @@ export function VideoForm({
             />
           </div>
         </div>
-        {(videoDisplayUrl || youtubeEmbedUrl) && (
-          <div className="rounded-lg border overflow-hidden bg-muted aspect-video max-w-2xl">
+        {hasVideo ? (
+          <div className="relative rounded-lg border overflow-hidden bg-muted aspect-video max-w-2xl">
             {youtubeEmbedUrl ? (
               <iframe
                 src={youtubeEmbedUrl}
@@ -74,8 +83,27 @@ export function VideoForm({
                 Brauzeringiz video qo'llab-quvvatlamaydi.
               </video>
             )}
+            <button
+              type="button"
+              onClick={() => {
+                onVideoFileChange(null)
+                onVideoUrlChange('')
+              }}
+              className="absolute top-2 right-2 z-10 inline-flex size-8 items-center justify-center rounded-full bg-destructive/90 text-white"
+              aria-label="Videoni o‘chirish"
+              title="Videoni o‘chirish"
+            >
+              <X className="size-4" />
+            </button>
           </div>
-        )}
+        ) : null}
+
+        {hasVideo && shownUrl ? (
+          <div className="rounded-md border bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
+            <div className="font-medium text-foreground/80">Video URL</div>
+            <div className="mt-1 break-all font-mono">{shownUrl}</div>
+          </div>
+        ) : null}
       </CardContent>
     </Card>
   )

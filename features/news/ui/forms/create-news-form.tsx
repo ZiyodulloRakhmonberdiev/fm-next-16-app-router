@@ -802,6 +802,7 @@ export function CreateNewsForm({
             videoUrl={videoUrl}
             videoDisplayUrl={videoDisplayUrl}
             youtubeEmbedUrl={youtubeEmbedUrl}
+            hasVideoFile={Boolean(videoFile)}
             onVideoUrlChange={setVideoUrl}
             onVideoFileChange={setVideoFile}
           />

@@ -12,39 +12,19 @@ import {
   type AppLocale,
   type DateInput,
 } from "@/shared/common/lib/formatter";
-import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { Play } from "lucide-react";
 import { VideoNewsModal } from "@/shared/common/components/molecules";
 import { NewsSectionHeader } from "@/shared/common/components/news-sections/news-section-header";
 import { usePublicCategoriesQuery } from "@/features/category/model/public-categories-query";
 import { getCategoryLabelForNewsItem } from "@/features/category/model/use-category-label";
-import { getCloudinaryVideoPosterUrl } from "@/shared/common/lib/cloudinary";
-import { getYoutubeThumbnailUrl, getYoutubeEmbedUrl } from "@/shared/common/lib/youtube";
+import { VideoCardMediaPreview } from "@/features/news/ui/news-listing/video-card-media-preview";
 
 const VIDEO_NEWS_LIMIT = 8;
 
 function isVideoNewsItem(item: RawNewsItem): boolean {
   const hasVideo = Boolean(item.videoSource && item.videoUrl);
   return item.type === "video" || hasVideo;
-}
-
-function getSafeImageSrc(raw?: string): string {
-  if (!raw?.trim()) return "";
-  return raw.startsWith("http://") || raw.startsWith("https://") || raw.startsWith("/")
-    ? raw
-    : `/uploads/images/${raw}`;
-}
-
-function getCardImageSrc(item: {
-  images?: string[];
-  videoUrl?: string | null;
-  videoSource?: string | null;
-}): string {
-  const img = getSafeImageSrc(item.images?.[0]);
-  if (img) return img;
-  if (getYoutubeEmbedUrl(item.videoUrl ?? "")) return getYoutubeThumbnailUrl(item.videoUrl) || "";
-  return getCloudinaryVideoPosterUrl(item.videoUrl) || "";
 }
 
 /** Rasmdagidek: `17:11 / 21.03.2026` */
@@ -65,6 +45,8 @@ export default function VideoNewsSection2() {
   const items = React.useMemo(() => {
     const raw = [...publicNews]
       .filter(isVideoNewsItem)
+      // Poster bo'lmasa ham card ko'rinishi kerak — faqat videoUrl bo'lmaganlarni chiqarib yuboramiz.
+      .filter((n) => Boolean((n as RawNewsItem).videoUrl))
       .sort(
         (a, b) =>
           new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
@@ -91,7 +73,6 @@ export default function VideoNewsSection2() {
 
       <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
         {items.map((item) => {
-          const poster = getCardImageSrc(item);
           const categoryLabel = getCategoryLabelForNewsItem(
             categories,
             categoriesPending,
@@ -107,17 +88,7 @@ export default function VideoNewsSection2() {
                 onClick={() => handleOpenVideo(item)}
               >
                 <div className="relative aspect-video w-full shrink-0 overflow-hidden bg-muted">
-                  {poster ? (
-                    <Image
-                      src={poster}
-                      alt={item.title}
-                      fill
-                      sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                      className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-                    />
-                  ) : (
-                    <div className="absolute inset-0 bg-muted" aria-hidden />
-                  )}
+                  <VideoCardMediaPreview title={item.title} item={item} />
                   <span
                     className="pointer-events-none absolute bottom-2 left-2 z-10 inline-flex size-8 items-center justify-center rounded-full bg-brand text-foreground shadow-md ring-1 ring-black/5"
                     aria-hidden

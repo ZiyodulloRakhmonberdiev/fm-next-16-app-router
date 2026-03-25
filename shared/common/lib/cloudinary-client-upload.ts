@@ -1,16 +1,13 @@
 /**
- * Video fayllarni brauzerdan to‘g‘ridan-to‘g‘ri Cloudinary ga yuborish.
- * `/api/uploads` orqali yuborishda 413 (Vercel body limiti, nginx va h.k.) chiqishi mumkin.
+ * Client faqat `/api/uploads` ga yuboradi.
  *
- * Cloudinary Console: Upload → Upload presets → unsigned preset (resource: video).
- * Muhit: NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME + NEXT_PUBLIC_CLOUDINARY_VIDEO_UPLOAD_PRESET
+ * Server tomonda media saqlash Contabo object storage (S3 compatible) orqali amalga oshiriladi.
+ * Cloudinary faqat optional fallback sifatida qoldirilgan.
  */
 
+// Direct Cloudinary upload yo‘li hozircha ishlatilmaydi.
 export function isCloudinaryDirectVideoUploadConfigured(): boolean {
-  return Boolean(
-    process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME?.trim() &&
-      process.env.NEXT_PUBLIC_CLOUDINARY_VIDEO_UPLOAD_PRESET?.trim()
-  )
+  return false
 }
 
 export async function uploadVideoToCloudinaryDirect(file: File): Promise<string> {
@@ -45,15 +42,6 @@ export async function uploadVideoViaApiOrCloudinary(
   file: File,
   options?: { credentials?: RequestCredentials }
 ): Promise<string> {
-  if (isCloudinaryDirectVideoUploadConfigured()) {
-    // Cloudinary direct ba'zan preset yoki tarmoq sabab fail bo'lishi mumkin.
-    // Shunda ham `/api/uploads` orqali fallback qilamiz.
-    try {
-      return await uploadVideoToCloudinaryDirect(file)
-    } catch {
-      // Fallback quyida davom etadi.
-    }
-  }
   const formData = new FormData()
   formData.append("file", file)
   formData.append("kind", "video")

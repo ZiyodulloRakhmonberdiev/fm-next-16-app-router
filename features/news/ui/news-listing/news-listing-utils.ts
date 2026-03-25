@@ -52,6 +52,15 @@ export function getCardImageSrc(item: {
   return getCloudinaryVideoPosterUrl(item.videoUrl) || ""
 }
 
+/** Kartochka / `<video>` uchun — mahalliy yoki to‘liq URL */
+export function getPublicVideoSrc(url?: string | null): string {
+  const u = url?.trim()
+  if (!u) return ""
+  if (u.startsWith("http://") || u.startsWith("https://")) return u
+  if (u.startsWith("/")) return u
+  return `/${u}`
+}
+
 /** Rasmdagidek: `17:11 / 21.03.2026` — `video-news-section-2` bilan mos */
 export function formatVideoCardMetaLine(date: DateInput): string {
   const d = date instanceof Date ? date : new Date(date)
