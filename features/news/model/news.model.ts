@@ -103,6 +103,7 @@ const NewsSchema = new Schema<INews>(
 NewsSchema.index({ categorySlug: 1 })
 NewsSchema.index({ status: 1, publishedAt: -1 })
 NewsSchema.index({ tagSlugs: 1 })
+NewsSchema.index({ telegramMessageId: 1 })
 
 export const NewsModel =
   models.News || model<INews>('News', NewsSchema)

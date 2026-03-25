@@ -177,8 +177,8 @@ export default function DashboardReactionsPage() {
                     <TableCell className="align-top text-right">
                       <Button
                         size="sm"
-                        variant="ghost"
-                        className="h-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                        variant="destructive"
+                        className="h-8 text-white hover:text-white"
                         disabled={deleteMutation.isPending && deleteMutation.variables === item._id}
                         onClick={() => remove(item._id)}
                       >

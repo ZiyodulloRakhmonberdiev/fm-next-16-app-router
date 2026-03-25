@@ -99,7 +99,11 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
   const [shareUrl, setShareUrl] = React.useState("")
   const [reactionTotal, setReactionTotal] = React.useState(0)
   const [commentTotal, setCommentTotal] = React.useState(0)
+  const [showTelegramPost, setShowTelegramPost] = React.useState(false)
   const newsRef = newsId ?? news.slug
+  const telegramEmbedSrc = news.telegramMessageLink
+    ? `${news.telegramMessageLink}${news.telegramMessageLink.includes("?") ? "&" : "?"}embed=1`
+    : null
 
   React.useEffect(() => {
     if (typeof window !== "undefined") setShareUrl(window.location.href)
@@ -505,6 +509,34 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
       
         <div className="my-6" />
 
+
+        {telegramEmbedSrc ? (
+          <div className="mt-4 w-full">
+            <div className="flex items-center justify-between gap-3">
+              <div className="text-sm font-medium">Telegram</div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setShowTelegramPost((p) => !p)}
+                className="shrink-0"
+              >
+                {showTelegramPost ? "Postni yashirish" : "Telegram postni ko‘rsatish"}
+              </Button>
+            </div>
+
+            {showTelegramPost ? (
+              <div className="mt-3 rounded-xl border bg-background p-3 pt-4 shadow-sm">
+                <iframe
+                  src={telegramEmbedSrc}
+                  className="mx-auto block h-[500px] w-full max-w-[520px] rounded-lg"
+                  loading="lazy"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
+            ) : null}
+          </div>
+        ) : null}
 
         <NewsEngagement slug={news.slug} newsId={newsId} />
         <section className="my-8">

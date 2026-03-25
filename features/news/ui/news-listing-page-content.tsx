@@ -76,7 +76,6 @@ export function NewsListingPageContent({
     (nextPage: number, filter: FilterType, slugs: string[]) => {
       const params = new URLSearchParams()
       params.set("status", "published")
-      if (!forceVideoOnly && !forceBreakingOnly) params.set("recentMonths", "6")
       params.set("page", String(nextPage))
       params.set("limit", String(pageSize))
       params.set("sortBy", sortByForFilter(filter))

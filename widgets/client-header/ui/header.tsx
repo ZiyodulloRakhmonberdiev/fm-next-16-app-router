@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
-import { Link, usePathname, useRouter } from '@/i18n/navigation'
+import { Link } from '@/i18n/navigation'
 import { useTheme } from 'next-themes'
 import Headline from './headline'
 import CategoryList from '@/entities/category/ui/category-list'
@@ -11,7 +11,7 @@ import { SearchBar } from '@/widgets/client-searchbar'
 import { AdSlot } from '@/features/ads/ui/ad-slot'
 import { ClientUserMenu } from '@/widgets/client-header/ui/client-user-menu'
 import { Button } from '@/shared/common/components/ui/button'
-import { ArrowLeft, Search } from 'lucide-react'
+import { Search } from 'lucide-react'
 import { LanguageSwitcher } from '@/widgets/language-switcher'
 import { cn } from '@/shared/common/lib/utils'
 import { ThemeSwitcherForHeader } from '@/widgets/theme-switcher'
@@ -27,9 +27,6 @@ function AdSlotHeader() {
 }
 
 export default function Header() {
-  const pathname = usePathname()
-  const router = useRouter()
-  const showMobileBack = pathname !== '/'
   const [searchOpen, setSearchOpen] = useState(false)
   const { resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
@@ -97,18 +94,7 @@ export default function Header() {
             </div>
           </div>
           <div className="z-[2] flex shrink-0 items-center md:hidden">
-            {showMobileBack ? (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => router.back()}
-                aria-label="Orqaga"
-              >
-                <ArrowLeft className="size-5" />
-              </Button>
-            ) : (
-              <span className="inline-flex size-9 shrink-0" aria-hidden />
-            )}
+            <span className="inline-flex size-9 shrink-0" aria-hidden />
           </div>
           <Link
             href="/"

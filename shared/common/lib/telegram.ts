@@ -4,6 +4,11 @@ import type { SiteSettingsPayload } from "./site-settings-types"
 
 const SETTINGS_PATH = join(process.cwd(), "data", "site-settings.json")
 
+const TELEGRAM_CHANNEL_INVITE = "https://t.me/ferganamedia"
+const READ_ARTICLE_LINK_TEXT = "Мақолани ўқиш"
+/** Photo/video caption HTML limit (Telegram). */
+const MAX_CAPTION_HTML_CHARS = 1000
+
 async function getTelegramSettings() {
   try {
     const raw = await readFile(SETTINGS_PATH, "utf-8")
@@ -30,6 +35,50 @@ function truncateWords(text: string, maxWords: number): string {
   return `${words.slice(0, maxWords).join(" ")}...`
 }
 
+function escapeTelegramHtml(text: string): string {
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+}
+
+/** HTML `href` uchun `&` ni qoplaydi. */
+function escapeHref(url: string): string {
+  return url.replace(/&/g, "&amp;")
+}
+
+function buildNewsTelegramHtml(input: {
+  title: string
+  description: string
+  articleUrl: string
+}): string {
+  const titleBlock = `<b>${escapeTelegramHtml(input.title)}</b>`
+  const desc = input.description.trim()
+  const descBlock = desc ? escapeTelegramHtml(desc) : ""
+  const linkLine = `<a href="${escapeHref(input.articleUrl)}">${READ_ARTICLE_LINK_TEXT}</a>`
+  const footer = `Каналга уланиш:\n👉 ${TELEGRAM_CHANNEL_INVITE}`
+  return [titleBlock, descBlock, linkLine, footer].filter(Boolean).join("\n\n")
+}
+
+/** Media caption uchun HTML uzunligini cheklash. */
+function fitNewsHtmlForCaption(
+  title: string,
+  description: string,
+  articleUrl: string,
+  maxLen: number
+): string {
+  let desc = description
+  let html = buildNewsTelegramHtml({ title, description: desc, articleUrl })
+  let guard = 0
+  while (html.length > maxLen && desc.length > 8 && guard < 24) {
+    guard += 1
+    desc = desc.slice(0, Math.floor(desc.length * 0.82)).trim()
+    if (desc.length > 0 && !desc.endsWith("…")) desc = `${desc}…`
+    html = buildNewsTelegramHtml({ title, description: desc, articleUrl })
+  }
+  if (html.length > maxLen) {
+    return buildNewsTelegramHtml({ title, description: "", articleUrl })
+  }
+  return html
+}
+
 function toAbsoluteUrl(url: string | undefined, origin: string): string | undefined {
   if (!url) return undefined
   if (url.startsWith("http://") || url.startsWith("https://")) return url
@@ -46,17 +95,17 @@ function isLocalOrigin(origin: string): boolean {
 }
 
 /**
- * Telegram inline keyboard `url` may not point to localhost/private hosts.
- * Prefer NEXT_PUBLIC_SITE_URL / SITE_URL when the request comes from local dev.
+ * Ommaviy sayt bazasi: avvalo `.env` (`NEXT_PUBLIC_SITE_URL` / `SITE_URL` / `PUBLIC_SITE_URL`),
+ * keyin so‘rov `origin`. Telegramdagi «Мақолани ўқиш» havolasi shu bazaga bog‘lanadi.
+ * Localhost + env bo‘lmasa — localhost qoladi (Telegram tugma/URL cheklovi bilan sinovda muammo bo‘lishi mumkin).
  */
 function resolvePublicBaseUrl(requestOrigin: string): string {
-  const trimmed = requestOrigin.replace(/\/$/, "")
-  if (!isLocalOrigin(trimmed)) return trimmed
   const fromEnv =
     process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
     process.env.SITE_URL?.trim() ||
     process.env.PUBLIC_SITE_URL?.trim()
   if (fromEnv) return fromEnv.replace(/\/$/, "")
+  const trimmed = requestOrigin.replace(/\/$/, "")
   return trimmed
 }
 
@@ -114,20 +163,22 @@ export async function sendNewsToTelegram(input: {
   const linkBase = resolvePublicBaseUrl(input.origin)
   const detailUrl = `${linkBase}/news/${input.slug}`
   const trimmedDescription = truncateWords(input.descriptionUzb ?? "", 56)
-  const caption = [input.titleUzb, trimmedDescription].filter(Boolean).join("\n\n")
-  /** Telegram rejects localhost in inline button URLs; omit keyboard if still local. */
-  const canUseInlineUrl = !isLocalOrigin(linkBase)
-  const replyMarkup = canUseInlineUrl
-    ? {
-        inline_keyboard: [
-          [{ text: "Батафсил бу ерда", url: detailUrl }],
-        ],
-      }
-    : undefined
+
+  const htmlMessage = buildNewsTelegramHtml({
+    title: input.titleUzb,
+    description: trimmedDescription,
+    articleUrl: detailUrl,
+  })
+  const htmlCaption = fitNewsHtmlForCaption(
+    input.titleUzb,
+    trimmedDescription,
+    detailUrl,
+    MAX_CAPTION_HTML_CHARS
+  )
 
   const basePayload: Record<string, unknown> = {
     chat_id: settings.chatId,
-    ...(replyMarkup ? { reply_markup: replyMarkup } : {}),
+    parse_mode: "HTML",
   }
   if (settings.threadId) basePayload.message_thread_id = Number(settings.threadId)
 
@@ -140,14 +191,14 @@ export async function sendNewsToTelegram(input: {
   if (input.type === "video" && absoluteVideo && canSendMediaByUrl) {
     method = "sendVideo"
     payload.video = absoluteVideo
-    payload.caption = caption
+    payload.caption = htmlCaption
   } else if (input.type === "image" && absoluteImage && canSendMediaByUrl) {
     method = "sendPhoto"
     payload.photo = absoluteImage
-    payload.caption = caption
+    payload.caption = htmlCaption
   } else {
-    payload.text = [caption, detailUrl].filter(Boolean).join("\n\n")
-    payload.disable_web_page_preview = false
+    payload.text = htmlMessage
+    payload.disable_web_page_preview = true
   }
 
   const url = `https://api.telegram.org/bot${settings.botToken}/${method}`
@@ -167,16 +218,17 @@ export async function sendNewsToTelegram(input: {
     }
   }
 
-  // Fallback: if media send fails (common in localhost/private URLs), send plain text.
   if (method !== "sendMessage") {
     const fallbackUrl = `https://api.telegram.org/bot${settings.botToken}/sendMessage`
     const fallbackRes = await fetch(fallbackUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        ...basePayload,
-        text: [caption, detailUrl].filter(Boolean).join("\n\n"),
-        disable_web_page_preview: false,
+        chat_id: settings.chatId,
+        parse_mode: "HTML",
+        text: htmlMessage,
+        disable_web_page_preview: true,
+        ...(settings.threadId ? { message_thread_id: Number(settings.threadId) } : {}),
       }),
     })
     const fallbackJson = (await fallbackRes.json().catch(() => null)) as TelegramResponse | null

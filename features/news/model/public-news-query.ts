@@ -49,7 +49,10 @@ async function fetchPublishedNews(): Promise<RawNewsItem[]> {
   const all: RawNewsItem[] = []
 
   while (page <= totalPages) {
-    const res = await fetch(`/api/news?page=${page}&limit=${pageSize}`)
+    /** Faqat published; vaqt oynasi yo‘q — barcha sahifalar bo‘yicha to‘liq ro‘yxat. */
+    const res = await fetch(
+      `/api/news?status=published&page=${page}&limit=${pageSize}`
+    )
     if (!res.ok) {
       throw new Error("Published news fetch failed")
     }

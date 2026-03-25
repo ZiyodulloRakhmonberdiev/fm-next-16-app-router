@@ -47,7 +47,6 @@ async function fetchInitial(
   const origin = `${proto}://${host}`
   const params = new URLSearchParams()
   params.set("status", "published")
-  params.set("recentMonths", "6")
   params.set("sortBy", sortBy)
   params.set("page", "1")
   params.set("limit", "4")

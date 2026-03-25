@@ -67,14 +67,14 @@ export default async function EditNewsPage({ params }: Props) {
 
   return (
     <Card>
-      <CardHeader>
+      {/* <CardHeader>
         <CardTitle>Yangilikni tahrirlash</CardTitle>
         <CardDescription>
           Create kabi 3 bosqich: ma’lumotlar, kontent, sozlamalar. Sozlamalar bosqichida
           status tugmalari orqali status o‘zgartiriladi va o‘chirish (Savatga) amalga
           oshiriladi.
         </CardDescription>
-      </CardHeader>
+      </CardHeader> */}
       <CardContent>
         <CreateNewsForm
           categories={categories}

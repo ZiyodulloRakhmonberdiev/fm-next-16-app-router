@@ -46,7 +46,7 @@ export function HeadlineSection({
       <CardContent className="space-y-4 px-4 md:px-6">
         <div className="flex items-center justify-between rounded-md border p-3">
           <div className="space-y-0.5">
-            <Label className="text-sm">Headline holati</Label>
+            <Label className="text-sm">Sarlavha holati</Label>
             <p className="text-xs text-muted-foreground">
               {enabled ? 'Yoqilgan' : "O'chirilgan"}
             </p>
@@ -65,7 +65,7 @@ export function HeadlineSection({
           </div>
         ))}
         <div className="flex justify-end pt-2">
-          <Button type="button" onClick={onSave} disabled={saving} className="gap-2">
+          <Button type="button" onClick={onSave} disabled={saving} className="gap-2 w-full sm:w-auto">
             <Save className="size-4" />
             Saqlash
           </Button>

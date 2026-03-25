@@ -1,4 +1,5 @@
 'use client'
+import { useState } from 'react'
 
 import {
   Card,
@@ -96,12 +97,16 @@ export function SettingsForm({
   const canCancel = currentStatus === 'published' || currentStatus === 'pending'
   const canMoveToTrash = currentStatus !== 'deleted'
   const canArchive = currentStatus === 'published'
+  const telegramEmbedSrc = telegramMessageLink
+    ? `${telegramMessageLink}${telegramMessageLink.includes('?') ? '&' : '?'}embed=1`
+    : null
+  const [showTelegramPost, setShowTelegramPost] = useState(false)
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Sozlamalar</CardTitle>
+        <CardTitle>Telegram ko‘rinishi va chop etish</CardTitle>
         <CardDescription>
-          Switch orqali belgilang. Saqlash — status pending, Chop etish — nashr qilingan.
+          Yuborilgach Telegramdagi haqiqiy post shu yerda ko‘rinadi.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -164,31 +169,19 @@ export function SettingsForm({
           )}
         </div>
         <div className="rounded-lg border p-4 space-y-2">
-          <p className="text-sm font-medium">Telegram monitoring</p>
-          <p className="text-xs text-muted-foreground">
-            pushedToTelegram: <span className="font-medium">{String(pushedToTelegram)}</span>
-          </p>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span>Yuborish holati:</span>
+          <p className="text-sm font-medium">Telegram holati</p>
+          <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+            <span>Yuborish:</span>
             {telegramPushStatus ? (
               <Badge variant={telegramPushStatus === 'sent' ? 'default' : 'destructive'}>
                 {telegramPushStatus}
               </Badge>
             ) : (
-              <span>{pushedToTelegram ? "kutilyapti (published bo'lganda yuboriladi)" : "hali yuborilmagan"}</span>
+              <span>{pushedToTelegram ? "kutilmoqda (published bo'lganda)" : 'yo‘q'}</span>
             )}
           </div>
           {telegramPushReason ? (
             <p className="text-xs text-destructive">Sabab: {telegramPushReason}</p>
-          ) : null}
-          {telegramLastAttemptAt ? (
-            <p className="text-xs text-muted-foreground">Oxirgi urinish: {new Date(telegramLastAttemptAt).toLocaleString()}</p>
-          ) : null}
-          {pushedToTelegramAt ? (
-            <p className="text-xs text-muted-foreground">Yuborilgan vaqt: {new Date(pushedToTelegramAt).toLocaleString()}</p>
-          ) : null}
-          {telegramMessageId ? (
-            <p className="text-xs text-muted-foreground">Message ID: {telegramMessageId}</p>
           ) : null}
           {telegramMessageLink ? (
             <a
@@ -197,17 +190,46 @@ export function SettingsForm({
               rel="noopener noreferrer"
               className="inline-flex text-xs text-primary hover:underline"
             >
-              Telegramdagi xabar havolasi
+              Telegramdagi post
             </a>
-          ) : (
-            <p className="text-xs text-muted-foreground">Telegram havolasi push muvaffaqiyatli bo'lgandan keyin chiqadi.</p>
-          )}
+          ) : null}
+          {telegramLastAttemptAt ? (
+            <p className="text-xs text-muted-foreground">
+              Oxirgi urinish: {new Date(telegramLastAttemptAt).toLocaleString()}
+            </p>
+          ) : null}
+          {pushedToTelegramAt ? (
+            <p className="text-xs text-muted-foreground">
+              Yuborilgan: {new Date(pushedToTelegramAt).toLocaleString()}
+            </p>
+          ) : null}
+          <div className="pt-2">
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              disabled={!telegramEmbedSrc}
+              onClick={() => setShowTelegramPost((prev) => !prev)}
+            >
+              {showTelegramPost ? 'Telegram postni yashirish' : 'Telegram postni ko‘rsatish'}
+            </Button>
+            {!telegramEmbedSrc ? (
+              <p className="mt-2 text-xs text-muted-foreground">
+                Post yuborilgandan keyin bu yerda haqiqiy Telegram card ochiladi.
+              </p>
+            ) : null}
+          </div>
         </div>
-        <div className="rounded-lg border border-dashed p-4">
-          <p className="text-xs text-muted-foreground">
-            Bot API limiti sabab Telegram post view statistikasini avtomatik sync qilib news views ga qo&apos;shib bo&apos;lmaydi.
-          </p>
-        </div>
+        {telegramEmbedSrc && showTelegramPost ? (
+          <div className="rounded-xl border bg-background p-3 pt-4 shadow-sm">
+            <iframe
+              src={telegramEmbedSrc}
+              className="mx-auto block h-[540px] w-full max-w-[520px] rounded-lg bg-transparent"
+              loading="lazy"
+              referrerPolicy="no-referrer"
+            />
+          </div>
+        ) : null}
         {mode === 'edit' && onStatusChange && (
           <div className="space-y-3 rounded-lg border p-4">
             <p className="text-sm font-medium">Status</p>
@@ -254,7 +276,7 @@ export function SettingsForm({
           </Button>
           <Button variant="secondary" onClick={onSavePending} className="gap-2" disabled={isSaving}>
             {isSaving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
-            Saqlash (pending)
+            Saqlash
           </Button>
           <TooltipProvider>
             <Tooltip>

@@ -706,13 +706,13 @@ export function CreateNewsForm({
   const stepTitles: Record<1 | 2 | 3, string> = {
     1: "Ma'lumotlar — sarlavha, kategoriya, media",
     2: 'Kontent — matn va bloklar',
-    3: 'Sozlamalar — status, Telegram, chop etish',
+    3: 'Telegram ko‘rinishi va chop etish',
   }
 
   return (
     <div className="space-y-6">
       {!hideStepTabs ? (
-        <div className="sticky top-14 z-20 -mx-6 border-b border-border bg-background/95 px-6 py-3 shadow-sm backdrop-blur-md supports-backdrop-filter:bg-background/85">
+        <div className="sticky top-0 z-40 -mx-6 border-b border-border bg-background/95 px-6 py-3 shadow-sm backdrop-blur-md supports-backdrop-filter:bg-background/85">
           <div className="flex items-center justify-center gap-3 sm:gap-4">
             {([1, 2, 3] as const).map((s) => (
               <button
@@ -828,21 +828,23 @@ export function CreateNewsForm({
 
       {step === 2 && (
         <div className="space-y-4">
-          <div className="flex flex-wrap gap-1 border-b border-border pb-2">
+          <div className="flex flex-wrap gap-2 rounded-lg border border-border/70 bg-muted/30 p-2">
             {LOCALES.map((loc) => (
               <button
                 key={loc}
                 type="button"
                 onClick={() => setActiveTab(loc)}
                 className={cn(
-                  'flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors',
-                  activeTab === loc ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+                  'flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
+                  activeTab === loc
+                    ? 'border-primary/30 bg-primary/10 text-primary'
+                    : 'border-transparent bg-background/80 text-muted-foreground hover:bg-background'
                 )}
               >
                 <span
                   className={cn(
                     'size-2 rounded-full',
-                    tabHasData(loc) ? 'bg-green-500' : 'bg-muted-foreground/50'
+                    tabHasData(loc) ? 'bg-emerald-500' : 'bg-muted-foreground/40'
                   )}
                   title={tabHasData(loc) ? "To'ldirilgan" : "Bo'sh"}
                 />

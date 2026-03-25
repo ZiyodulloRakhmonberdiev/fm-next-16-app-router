@@ -75,7 +75,7 @@ export function SiteConfigSection({
           ))}
         </div>
         <div className="flex justify-end pt-2">
-          <Button type="button" onClick={onSave} disabled={saving} className="gap-2">
+          <Button type="button" onClick={onSave} disabled={saving} className="gap-2 w-full sm:w-auto">
             <Save className="size-4" />
             Saqlash
           </Button>
