@@ -102,7 +102,7 @@
   "user": "Foydalanuvchi",
   "reply": "Javob berish",
   "delete": "O'chirish",
-  "pending": "kutilmoqda",
+  "pending": "Tasdiqlash kutilmoqda",
   "replying_to": "{user} izohiga javob",
   "reply_placeholder": "Javob yozing...",
   "comment_placeholder": "Izoh yozing...",

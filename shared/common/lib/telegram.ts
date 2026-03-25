@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises"
 import { join } from "node:path"
 import type { SiteSettingsPayload } from "./site-settings-types"
+import { getYoutubeVideoId } from "./youtube"
 
 const SETTINGS_PATH = join(process.cwd(), "data", "site-settings.json")
 
@@ -184,6 +185,11 @@ export async function sendNewsToTelegram(input: {
 
   const absoluteVideo = toAbsoluteUrl(input.videoUrl, input.origin)
   const absoluteImage = toAbsoluteUrl(input.imageUrl, input.origin)
+  const isYoutubeVideo = input.type === "video" && Boolean(getYoutubeVideoId(input.videoUrl ?? ""))
+  // YouTube video yuborishda thumbnail (poster) majburiy bo'lishi kerak.
+  if (isYoutubeVideo && !absoluteImage) {
+    return { status: "failed", reason: "YouTube video uchun 1 ta poster rasm kiriting" }
+  }
 
   let method = "sendMessage"
   const payload: Record<string, unknown> = { ...basePayload }
@@ -192,6 +198,9 @@ export async function sendNewsToTelegram(input: {
     method = "sendVideo"
     payload.video = absoluteVideo
     payload.caption = htmlCaption
+    if (isYoutubeVideo && absoluteImage) {
+      payload.thumb = absoluteImage
+    }
   } else if (input.type === "image" && absoluteImage && canSendMediaByUrl) {
     method = "sendPhoto"
     payload.photo = absoluteImage

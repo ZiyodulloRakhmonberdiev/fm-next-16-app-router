@@ -86,9 +86,9 @@ export const LoginForm = () => {
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label htmlFor="login-password">{t("password")}</Label>
-            <button type="button" className="text-xs text-primary hover:underline">
+            {/* <button type="button" className="text-xs text-primary hover:underline">
               {t("forgot_password")}
-            </button>
+            </button> */}
           </div>
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />

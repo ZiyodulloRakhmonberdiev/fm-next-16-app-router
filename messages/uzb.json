@@ -102,7 +102,7 @@
   "user": "Фойдаланувчи",
   "reply": "Жавоб бериш",
   "delete": "Ўчириш",
-  "pending": "кутилмоқда",
+  "pending":  "Тасдиқлаш кутилмоқда",
   "replying_to": "{user} изоҳига жавоб",
   "reply_placeholder": "Жавоб ёзинг...",
   "comment_placeholder": "Изоҳ ёзинг...",

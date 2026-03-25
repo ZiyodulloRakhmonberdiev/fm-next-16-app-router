@@ -290,7 +290,7 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
                   </button>
                 ) : null}
                 {c.status === "pending" ? (
-                  <span className="text-xs text-amber-600">({t("pending")})</span>
+                  <span className="text-xs text-amber-600 ml-2">({t("pending")})</span>
                 ) : null}
               </div>
               {repliesByParentId.get(c._id)?.length ? (
@@ -317,23 +317,26 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
                             {t("delete")}
                           </button>
                         ) : null}
+                        {reply.status === "pending" ? (
+                          <span className="text-xs text-amber-600 ml-2">({t("pending")})</span>
+                        ) : null}
                       </div>
                     </div>
                   ))}
                 </div>
               ) : null}
               {replyTo?.id === c._id ? (
-                <div className="mt-2 space-y-2 rounded-md border bg-muted/30 p-3">
-                  <p className="text-xs text-muted-foreground">
+                <div className="mt-2 space-y-2">
+                  {/* <p className="text-xs text-muted-foreground">
                     {t("replying_to", { user: replyTo.userLogin ? `@${replyTo.userLogin}` : t("user") })}
-                  </p>
+                  </p> */}
                   <Textarea
                     value={replyContent}
                     onChange={(e) => setReplyContent(e.target.value)}
                     placeholder={t("reply_placeholder")}
                     maxLength={512}
-                    rows={2}
-                    className="resize-none"
+                    rows={5}
+                    className="resize-none outline-none bg-accent min-h-[120px] border-none"
                   />
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <p className="text-xs text-muted-foreground">{replyContent.length}/512</p>

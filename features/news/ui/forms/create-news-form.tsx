@@ -534,6 +534,19 @@ export function CreateNewsForm({
 
   const handleSendToTelegram = async () => {
     try {
+      // YouTube video yuborishda albatta 1 ta poster rasm kerak.
+      // Local videoda (videoFile mavjud bo‘lsa) poster shart emas.
+      if (resolvedType === 'video' && videoUrl.trim() && !videoFile) {
+        const youtubeEmbed = getYoutubeEmbedUrl(videoUrl.trim())
+        if (youtubeEmbed) {
+          const hasPoster = imageUrls.length > 0
+          if (!hasPoster) {
+            toast.error('YouTube video uchun 1 ta poster rasm kiriting')
+            return
+          }
+        }
+      }
+
       setIsTelegramProcessing(true)
       if (!savedNewsId) {
         const ok = await savePendingWithoutRedirect(saveStatus, true)
@@ -924,7 +937,8 @@ export function CreateNewsForm({
           onSendToTelegram={() => void handleSendToTelegram()}
           onRemoveFromTelegram={() => void handleRemoveFromTelegram()}
           onSavePending={() => void savePendingWithoutRedirect(saveStatus === 'published' ? 'published' : 'pending')}
-          onPublish={() => void handleSave('published', true)}
+          // Create rejimida chop etgandan keyin redirect bo‘lmasin.
+          onPublish={() => void handleSave('published', isEditMode)}
           isSaving={isSaving}
           isTelegramProcessing={isTelegramProcessing}
           mode={isEditMode ? 'edit' : 'create'}

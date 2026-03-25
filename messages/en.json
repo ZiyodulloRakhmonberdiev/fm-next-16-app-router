@@ -102,7 +102,7 @@
     "user": "User",
     "reply": "Reply",
     "delete": "Delete",
-    "pending": "pending",
+    "pending": "Pending review",
     "replying_to": "Replying to {user}'s comment",
     "reply_placeholder": "Write a reply...",
     "comment_placeholder": "Write a comment...",

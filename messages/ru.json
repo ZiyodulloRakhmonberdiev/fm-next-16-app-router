@@ -102,7 +102,7 @@
   "user": "Пользователь",
   "reply": "Ответить",
   "delete": "Удалить",
-  "pending": "на модерации",
+  "pending": "На модерации",
   "replying_to": "Ответ на комментарий {user}",
   "reply_placeholder": "Напишите ответ...",
   "comment_placeholder": "Напишите комментарий...",

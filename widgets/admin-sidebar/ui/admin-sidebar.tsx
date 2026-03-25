@@ -18,18 +18,27 @@ import { useEffect, useMemo, useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { normalizeRole } from '@/shared/common/lib/rbac'
 import { adminMainNavItems, filterAdminNavByRole } from '../config/admin-nav-items'
+import { useIsMobile } from '@/shared/hooks/use-mobile'
 
 export default function AdminSidebar() {
   const pathname = usePathname()
   const { data: session } = useSession()
   const { resolvedTheme } = useTheme()
+  const isMobile = useIsMobile()
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
   const role = normalizeRole(session?.user?.role)
   const visibleNavItems = useMemo(
     () =>
-      filterAdminNavByRole(adminMainNavItems, role).filter((item) => !item.hideFromSidebar),
-    [role]
+      filterAdminNavByRole(adminMainNavItems, role)
+        .filter((item) => !item.hideFromSidebar)
+        .filter((item) => {
+          // Settings sahifasida mobile’da pastdagi/oxirgi "Sozlamalar" linkni ko‘rsatmaymiz.
+          if (!isMobile) return true
+          if (!pathname.startsWith('/dashboard/settings')) return true
+          return item.href !== '/dashboard/settings'
+        }),
+    [role, pathname, isMobile]
   )
 
   const logoSrc =
@@ -78,7 +87,7 @@ export default function AdminSidebar() {
             <SidebarMenu>
               {visibleNavItems.map((item) => (
                 <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton asChild isActive={isItemActive(item.href)}>
+                  <SidebarMenuButton asChild isActive={isItemActive(item.href)} tooltip={item.label}>
                     <Link href={item.href}>
                       <item.icon className="size-4" />
                       <span>{item.label}</span>
