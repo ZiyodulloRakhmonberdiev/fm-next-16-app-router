@@ -183,17 +183,17 @@ export function DashboardNewsLists({
   > = {
     top: {
       title: "Top yangiliklar ro'yxatidan olib tashlaysizmi?",
-      // description: "Yangilikda «Top» belgisi o‘chiriladi (isTop = false).",
+      description: "",
       patch: { isTop: false },
     },
     authorsChoice: {
       title: "Muallif tanlovi ro'yxatidan olib tashlaysizmi?",
-      // description: "Yangilikda «Muallif tanlovi» belgisi o‘chiriladi (authorsChoice = false).",
+      description: "",
       patch: { authorsChoice: false },
     },
     breaking: {
       title: "Breaking ro'yxatidan olib tashlaysizmi?",
-      // description: "Yangilikda «Breaking» belgisi o‘chiriladi (isBreaking = false).",
+      description: "",
       patch: { isBreaking: false },
     },
   }
