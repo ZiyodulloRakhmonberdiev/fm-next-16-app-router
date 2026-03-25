@@ -48,6 +48,14 @@ export type ClientDeliveryControl = {
   models: ClientModelSwitches
 }
 
+/** Ma’lumotlar bazasi arxivi — alohida bot / chat (yangiliklar Telegramidan mustaqil) */
+export type DatabaseBackupSettings = {
+  enabled: boolean
+  botToken: string
+  chatId: string
+  threadId?: string
+}
+
 export type SiteSettingsPayload = {
   headline: HeadlineSettings
   description: LocaleMap
@@ -55,4 +63,5 @@ export type SiteSettingsPayload = {
   siteConfig: SiteConfigSettings
   telegram: TelegramCredentials
   clientDelivery: ClientDeliveryControl
+  databaseBackup: DatabaseBackupSettings
 }

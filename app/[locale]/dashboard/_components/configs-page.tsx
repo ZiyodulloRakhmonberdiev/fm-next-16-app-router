@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/sha
 import type { AppLocale } from '@/shared/common/lib/locale-api'
 import { LOCALES, LOCALE_LABELS } from '@/shared/common/lib/locale-constants'
 import type { SiteSettingsPayload } from '@/shared/common/lib/site-settings-types'
-import { Settings } from 'lucide-react'
+import { Database, Settings } from 'lucide-react'
 import { HeadlineSection } from '@/features/dashboard/configs/ui/headline-section'
 import { DescriptionSection } from '@/features/dashboard/configs/ui/description-section'
 import { SocialMediaSection, type UiSocialItem } from '@/features/dashboard/configs/ui/social-media-section'
@@ -31,13 +31,25 @@ export function ConfigsPage() {
   const [savingConfig, setSavingConfig] = useState(false)
   const [savingTelegram, setSavingTelegram] = useState(false)
   const [savingDelivery, setSavingDelivery] = useState(false)
+  const [savingDatabaseBackup, setSavingDatabaseBackup] = useState(false)
+  const [sendingDatabaseBackup, setSendingDatabaseBackup] = useState(false)
   const [data, setData] = useState<SiteSettingsPayload | null>(null)
+
+  const defaultDatabaseBackup = (): SiteSettingsPayload['databaseBackup'] => ({
+    enabled: false,
+    botToken: '',
+    chatId: '',
+    threadId: undefined,
+  })
 
   useEffect(() => {
     fetch('/api/configs')
       .then((res) => res.json())
       .then((payload: SiteSettingsPayload) => {
-        setData(payload)
+        setData({
+          ...payload,
+          databaseBackup: payload.databaseBackup ?? defaultDatabaseBackup(),
+        })
       })
       .catch(() => toast.error('Sozlamalarni yuklashda xato'))
       .finally(() => setLoading(false))
@@ -222,6 +234,53 @@ export function ConfigsPage() {
       toast.error('Saqlashda xato')
     } finally {
       setSavingDelivery(false)
+    }
+  }
+
+  const handleSaveDatabaseBackup = async () => {
+    if (!data) return
+    setSavingDatabaseBackup(true)
+    try {
+      if (
+        data.databaseBackup.enabled &&
+        (!data.databaseBackup.botToken.trim() || !data.databaseBackup.chatId.trim())
+      ) {
+        toast.error("Avtomatik backup yoqilgan bo'lsa bot token va chat id majburiy")
+        return
+      }
+      const current = (await getCurrentFromServer()) ?? data
+      const ok = await postPayload({ ...current, databaseBackup: data.databaseBackup })
+      toast[ok ? 'success' : 'error'](ok ? 'Backup sozlamalari saqlandi' : 'Saqlashda xato')
+    } catch {
+      toast.error('Saqlashda xato')
+    } finally {
+      setSavingDatabaseBackup(false)
+    }
+  }
+
+  const handleSendDatabaseBackupNow = async () => {
+    setSendingDatabaseBackup(true)
+    try {
+      const res = await fetch('/api/admin/database-backup', { method: 'POST' })
+      const json = (await res.json().catch(() => null)) as {
+        ok?: boolean
+        error?: string
+        telegramDescription?: string
+        filename?: string
+      } | null
+      if (json?.ok && json.filename) {
+        toast.success(`Backup yuborildi: ${json.filename}`)
+        return
+      }
+      const extra =
+        typeof json?.telegramDescription === 'string' && json.telegramDescription
+          ? ` — ${json.telegramDescription}`
+          : ''
+      toast.error((json?.error ?? 'Yuborishda xato') + extra)
+    } catch {
+      toast.error('Yuborishda xato')
+    } finally {
+      setSendingDatabaseBackup(false)
     }
   }
 
@@ -439,6 +498,105 @@ export function ConfigsPage() {
                 <Button type="button" onClick={handleSaveDelivery} disabled={savingDelivery}>
                   Saqlash
                 </Button>
+              </div>
+
+              <div className="space-y-4 border-t border-border pt-6">
+                <div className="flex items-start gap-2">
+                  <Database className="mt-0.5 size-5 shrink-0 text-muted-foreground" aria-hidden />
+                  <div className="min-w-0 space-y-1">
+                    <p className="text-sm font-medium leading-none">MongoDB backup → Telegram</p>
+                    <p className="text-xs text-muted-foreground">
+                      Alohida bot va chat. Cron:{' '}
+                      <code className="rounded bg-muted px-1 py-0.5 text-[11px]">/api/cron/database-backup</code> +{' '}
+                      <code className="rounded bg-muted px-1 py-0.5 text-[11px]">Bearer</code> kalit (
+                      <code className="rounded bg-muted px-1 py-0.5 text-[11px]">CRON_SECRET</code> /{' '}
+                      <code className="rounded bg-muted px-1 py-0.5 text-[11px]">BACKUP_CRON_SECRET</code>).
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between rounded-md border p-3">
+                  <div>
+                    <Label>Avtomatik backup (cron)</Label>
+                    <p className="text-xs text-muted-foreground">Kunlik reja (Vercel: UTC 02:00).</p>
+                  </div>
+                  <Switch
+                    checked={data.databaseBackup.enabled}
+                    onCheckedChange={(checked) =>
+                      setData((prev) =>
+                        prev
+                          ? { ...prev, databaseBackup: { ...prev.databaseBackup, enabled: checked } }
+                          : prev
+                      )
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Backup bot token</Label>
+                  <Input
+                    value={data.databaseBackup.botToken}
+                    onChange={(e) =>
+                      setData((prev) =>
+                        prev
+                          ? { ...prev, databaseBackup: { ...prev.databaseBackup, botToken: e.target.value } }
+                          : prev
+                      )
+                    }
+                    placeholder="123456:AA..."
+                    autoComplete="off"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Backup chat ID</Label>
+                  <Input
+                    value={data.databaseBackup.chatId}
+                    onChange={(e) =>
+                      setData((prev) =>
+                        prev
+                          ? { ...prev, databaseBackup: { ...prev.databaseBackup, chatId: e.target.value } }
+                          : prev
+                      )
+                    }
+                    placeholder="-100..."
+                    autoComplete="off"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Thread ID (ixtiyoriy)</Label>
+                  <Input
+                    value={data.databaseBackup.threadId ?? ''}
+                    onChange={(e) =>
+                      setData((prev) =>
+                        prev
+                          ? {
+                              ...prev,
+                              databaseBackup: {
+                                ...prev.databaseBackup,
+                                threadId: e.target.value || undefined,
+                              },
+                            }
+                          : prev
+                      )
+                    }
+                    placeholder="42"
+                  />
+                </div>
+                <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => void handleSaveDatabaseBackup()}
+                    disabled={savingDatabaseBackup}
+                  >
+                    Backup sozlamalarini saqlash
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={() => void handleSendDatabaseBackupNow()}
+                    disabled={sendingDatabaseBackup}
+                  >
+                    {sendingDatabaseBackup ? 'Yuborilmoqda…' : 'Backupni hozir yuborish'}
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>

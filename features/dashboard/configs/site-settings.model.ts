@@ -62,6 +62,12 @@ const SiteSettingsSchema = new Schema<SiteSettingsDoc>(
         users: { type: Boolean, default: true },
       },
     },
+    databaseBackup: {
+      enabled: { type: Boolean, default: false },
+      botToken: { type: String, default: '' },
+      chatId: { type: String, default: '' },
+      threadId: { type: String },
+    },
   },
   { timestamps: true }
 )
@@ -69,8 +75,16 @@ const SiteSettingsSchema = new Schema<SiteSettingsDoc>(
 export const SiteSettingsModel =
   models.SiteSettings ?? model<SiteSettingsDoc>('SiteSettings', SiteSettingsSchema)
 
+const defaultDatabaseBackup = (): SiteSettingsPayload['databaseBackup'] => ({
+  enabled: false,
+  botToken: '',
+  chatId: '',
+  threadId: undefined,
+})
+
 export function leanDocToPayload(doc: SiteSettingsDoc | null | undefined): SiteSettingsPayload | null {
   if (!doc) return null
+  const dbBackup = doc.databaseBackup
   return {
     headline: doc.headline,
     description: doc.description,
@@ -78,5 +92,13 @@ export function leanDocToPayload(doc: SiteSettingsDoc | null | undefined): SiteS
     siteConfig: doc.siteConfig,
     telegram: doc.telegram,
     clientDelivery: doc.clientDelivery,
+    databaseBackup: dbBackup
+      ? {
+          enabled: Boolean(dbBackup.enabled),
+          botToken: dbBackup.botToken ?? '',
+          chatId: dbBackup.chatId ?? '',
+          threadId: dbBackup.threadId?.trim() ? dbBackup.threadId : undefined,
+        }
+      : defaultDatabaseBackup(),
   }
 }

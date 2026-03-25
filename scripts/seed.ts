@@ -198,6 +198,13 @@ export const seed = {
     },
   } as const,
 
+  databaseBackup: {
+    enabled: false,
+    botToken: "",
+    chatId: "",
+    threadId: "",
+  } as const,
+
   users: [
     {
       id: "ceo-1",

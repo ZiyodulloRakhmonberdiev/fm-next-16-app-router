@@ -42,6 +42,12 @@ export function getSeedSiteSettings(): SiteSettingsPayload {
         users: seed.clientDelivery.models.users,
       },
     },
+    databaseBackup: {
+      enabled: seed.databaseBackup.enabled,
+      botToken: seed.databaseBackup.botToken,
+      chatId: seed.databaseBackup.chatId,
+      threadId: seed.databaseBackup.threadId || undefined,
+    },
   }
 }
 
@@ -86,6 +92,10 @@ function normalizeSiteSettings(raw: unknown): SiteSettingsPayload {
         ...fallback.clientDelivery.models,
         ...(data.clientDelivery?.models ?? {}),
       },
+    },
+    databaseBackup: {
+      ...fallback.databaseBackup,
+      ...(data.databaseBackup ?? {}),
     },
   }
 }

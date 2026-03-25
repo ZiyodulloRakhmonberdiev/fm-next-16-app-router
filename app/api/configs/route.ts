@@ -6,6 +6,7 @@ import { authOptions } from '@/shared/common/lib/auth-options'
 import { normalizeRole } from '@/shared/common/lib/rbac'
 import { seed } from '@/scripts/seed'
 import type { SiteSettingsPayload } from '@/shared/common/lib/site-settings-types'
+import { redactSiteSettingsSecrets } from '@/shared/common/lib/redact-site-settings'
 import { requireAdminSession } from '@/shared/common/lib/require-admin-session'
 import { dbConnect } from '@/shared/common/lib/db'
 import {
@@ -50,6 +51,12 @@ export function getDefaultSiteSettingsPayload(): SiteSettingsPayload {
         team: seed.clientDelivery.models.team,
         users: seed.clientDelivery.models.users,
       },
+    },
+    databaseBackup: {
+      enabled: seed.databaseBackup.enabled,
+      botToken: seed.databaseBackup.botToken,
+      chatId: seed.databaseBackup.chatId,
+      threadId: seed.databaseBackup.threadId || undefined,
     },
   }
 }
@@ -109,6 +116,10 @@ function mergePartialIntoDefaults(parsed: Partial<SiteSettingsPayload>): SiteSet
         ...(parsed.clientDelivery?.models ?? {}),
       },
     },
+    databaseBackup: {
+      ...defaultPayload.databaseBackup,
+      ...(parsed.databaseBackup ?? {}),
+    },
   }
 }
 
@@ -163,10 +174,15 @@ async function ensureSiteSettingsInDb(): Promise<SiteSettingsPayload> {
 export async function GET() {
   try {
     const payload = await ensureSiteSettingsInDb()
-    return Response.json(payload)
+    const session = await getServerSession(authOptions)
+    const role = normalizeRole(session?.user?.role)
+    if (role === 'ceo') {
+      return Response.json(payload)
+    }
+    return Response.json(redactSiteSettingsSecrets(payload))
   } catch (e) {
     console.error('[api/configs GET]', e)
-    return Response.json(getDefaultSiteSettingsPayload())
+    return Response.json(redactSiteSettingsSecrets(getDefaultSiteSettingsPayload()))
   }
 }
 
@@ -209,6 +225,8 @@ export async function POST(request: NextRequest) {
         telegram: (existing.telegram ?? defaultPayload.telegram) as SiteSettingsPayload['telegram'],
         clientDelivery: (existing.clientDelivery ??
           defaultPayload.clientDelivery) as SiteSettingsPayload['clientDelivery'],
+        databaseBackup: (existing.databaseBackup ??
+          defaultPayload.databaseBackup) as SiteSettingsPayload['databaseBackup'],
       }
     }
 

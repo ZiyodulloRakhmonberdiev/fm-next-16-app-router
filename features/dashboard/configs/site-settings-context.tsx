@@ -27,6 +27,8 @@ type SiteSettingsContextValue = {
   savingConfig: boolean
   savingTelegram: boolean
   savingDelivery: boolean
+  savingDatabaseBackup: boolean
+  sendingDatabaseBackup: boolean
   updateHeadline: (locale: AppLocale, value: string) => void
   updateDescription: (locale: AppLocale, value: string) => void
   updateSiteConfig: <K extends keyof SiteSettingsPayload['siteConfig']>(
@@ -41,12 +43,15 @@ type SiteSettingsContextValue = {
   setTelegramField: (patch: Partial<SiteSettingsPayload['telegram']>) => void
   setClientDeliveryField: (patch: Partial<SiteSettingsPayload['clientDelivery']>) => void
   setClientDeliveryModel: (key: keyof SiteSettingsPayload['clientDelivery']['models'], checked: boolean) => void
+  setDatabaseBackupField: (patch: Partial<SiteSettingsPayload['databaseBackup']>) => void
   handleSaveHeadline: () => Promise<void>
   handleSaveDescription: () => Promise<void>
   handleSaveSocial: () => Promise<void>
   handleSaveConfig: () => Promise<void>
   handleSaveTelegram: () => Promise<void>
   handleSaveDelivery: () => Promise<void>
+  handleSaveDatabaseBackup: () => Promise<void>
+  handleSendDatabaseBackupNow: () => Promise<void>
 }
 
 const SiteSettingsContext = createContext<SiteSettingsContextValue | null>(null)
@@ -62,13 +67,23 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
   const [savingConfig, setSavingConfig] = useState(false)
   const [savingTelegram, setSavingTelegram] = useState(false)
   const [savingDelivery, setSavingDelivery] = useState(false)
+  const [savingDatabaseBackup, setSavingDatabaseBackup] = useState(false)
+  const [sendingDatabaseBackup, setSendingDatabaseBackup] = useState(false)
   const [data, setData] = useState<SiteSettingsPayload | null>(null)
 
   useEffect(() => {
     fetch('/api/configs')
       .then((res) => res.json())
       .then((payload: SiteSettingsPayload) => {
-        setData(payload)
+        setData({
+          ...payload,
+          databaseBackup: payload.databaseBackup ?? {
+            enabled: false,
+            botToken: '',
+            chatId: '',
+            threadId: undefined,
+          },
+        })
       })
       .catch(() => toast.error('Sozlamalarni yuklashda xato'))
       .finally(() => setLoading(false))
@@ -176,6 +191,10 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
     },
     []
   )
+
+  const setDatabaseBackupField = useCallback((patch: Partial<SiteSettingsPayload['databaseBackup']>) => {
+    setData((prev) => (prev ? { ...prev, databaseBackup: { ...prev.databaseBackup, ...patch } } : prev))
+  }, [])
 
   const getCurrentFromServer = useCallback(async (): Promise<SiteSettingsPayload | null> => {
     try {
@@ -299,6 +318,53 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
     }
   }, [data, getCurrentFromServer, postPayload])
 
+  const handleSaveDatabaseBackup = useCallback(async () => {
+    if (!data) return
+    setSavingDatabaseBackup(true)
+    try {
+      if (
+        data.databaseBackup.enabled &&
+        (!data.databaseBackup.botToken.trim() || !data.databaseBackup.chatId.trim())
+      ) {
+        toast.error("Avtomatik backup yoqilgan bo'lsa bot token va chat id majburiy")
+        return
+      }
+      const current = (await getCurrentFromServer()) ?? data
+      const ok = await postPayload({ ...current, databaseBackup: data.databaseBackup })
+      toast[ok ? 'success' : 'error'](ok ? 'Backup sozlamalari saqlandi' : 'Saqlashda xato')
+    } catch {
+      toast.error('Saqlashda xato')
+    } finally {
+      setSavingDatabaseBackup(false)
+    }
+  }, [data, getCurrentFromServer, postPayload])
+
+  const handleSendDatabaseBackupNow = useCallback(async () => {
+    setSendingDatabaseBackup(true)
+    try {
+      const res = await fetch('/api/admin/database-backup', { method: 'POST' })
+      const json = (await res.json().catch(() => null)) as {
+        ok?: boolean
+        error?: string
+        telegramDescription?: string
+        filename?: string
+      } | null
+      if (json?.ok && json.filename) {
+        toast.success(`Backup yuborildi: ${json.filename}`)
+        return
+      }
+      const extra =
+        typeof json?.telegramDescription === 'string' && json.telegramDescription
+          ? ` — ${json.telegramDescription}`
+          : ''
+      toast.error((json?.error ?? 'Yuborishda xato') + extra)
+    } catch {
+      toast.error('Yuborishda xato')
+    } finally {
+      setSendingDatabaseBackup(false)
+    }
+  }, [])
+
   const value = useMemo<SiteSettingsContextValue>(
     () => ({
       data,
@@ -310,6 +376,8 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
       savingConfig,
       savingTelegram,
       savingDelivery,
+      savingDatabaseBackup,
+      sendingDatabaseBackup,
       updateHeadline,
       updateDescription,
       updateSiteConfig,
@@ -321,12 +389,15 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
       setTelegramField,
       setClientDeliveryField,
       setClientDeliveryModel,
+      setDatabaseBackupField,
       handleSaveHeadline,
       handleSaveDescription,
       handleSaveSocial,
       handleSaveConfig,
       handleSaveTelegram,
       handleSaveDelivery,
+      handleSaveDatabaseBackup,
+      handleSendDatabaseBackupNow,
     }),
     [
       data,
@@ -338,6 +409,8 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
       savingConfig,
       savingTelegram,
       savingDelivery,
+      savingDatabaseBackup,
+      sendingDatabaseBackup,
       updateHeadline,
       updateDescription,
       updateSiteConfig,
@@ -349,12 +422,15 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
       setTelegramField,
       setClientDeliveryField,
       setClientDeliveryModel,
+      setDatabaseBackupField,
       handleSaveHeadline,
       handleSaveDescription,
       handleSaveSocial,
       handleSaveConfig,
       handleSaveTelegram,
       handleSaveDelivery,
+      handleSaveDatabaseBackup,
+      handleSendDatabaseBackupNow,
     ]
   )
 
