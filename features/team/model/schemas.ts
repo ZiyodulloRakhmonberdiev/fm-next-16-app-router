@@ -74,6 +74,7 @@ export const updateTeamMemberSchema = z
   })
   .superRefine((d, ctx) => {
     if (
+      "certificateNumber" in d &&
       typeof d.certificateNumber === "string" &&
       d.certificateNumber.length > CERT_MAX
     ) {
