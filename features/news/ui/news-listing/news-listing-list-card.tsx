@@ -45,11 +45,9 @@ export function NewsListingListCard({ item, locale, stats, imagesLabel, imageOve
             )}
           </Link>
           {showVideo ? (
-            <div className="pointer-events-none absolute inset-0 z-1 flex items-center justify-center">
-              <span className="inline-flex size-10 items-center justify-center rounded-full bg-black/50">
-                <Play className="h-5 w-5 text-white" />
-              </span>
-            </div>
+            <span className="pointer-events-none absolute bottom-2 left-2 z-10 inline-flex size-8 items-center justify-center rounded-full bg-brand text-foreground shadow-md ring-1 ring-black/5">
+              <Play className="size-4 fill-current text-white" />
+            </span>
           ) : null}
           {imageOverlay ? (
             <div className="absolute right-2 top-2 z-2">{imageOverlay}</div>

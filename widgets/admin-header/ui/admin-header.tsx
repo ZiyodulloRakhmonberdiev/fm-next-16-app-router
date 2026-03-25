@@ -21,13 +21,14 @@ import {
 } from '@/shared/common/components/ui/dialog'
 import { Input } from '@/shared/common/components/ui/input'
 import { Label } from '@/shared/common/components/ui/label'
-import { LogOut, Search, User, ExternalLink, LayoutGrid, Upload, ImageIcon, Lock, ArrowLeft } from 'lucide-react'
+import { LogOut, Search, User, ExternalLink, LayoutGrid, Upload, ImageIcon, Lock, ArrowLeft, Undo2 } from 'lucide-react'
 import { LiaUserEditSolid } from 'react-icons/lia'
 import type { NewsItem } from '@/features/news/model'
 import { useTheme } from 'next-themes'
 import { signOut, useSession } from 'next-auth/react'
 import { toast } from 'sonner'
 import { normalizeRole } from '@/shared/common/lib/rbac'
+import { ThemeSwitcherForHeader } from '@/widgets/theme-switcher'
 
 function canOpenDashboardMenuHub(role: ReturnType<typeof normalizeRole>): boolean {
   return role === 'ceo' || role === 'administrator'
@@ -215,19 +216,19 @@ export default function AdminHeader() {
   return (
     <>
       <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-border bg-background px-4 md:gap-4 md:px-6">
+        <SidebarTrigger className="-ml-1 hidden md:flex" />
         {showBack ? (
           <Button
             type="button"
             variant="ghost"
             size="icon"
-            className="-ml-1 hidden shrink-0 md:flex"
+            className="hidden shrink-0 md:flex"
             onClick={() => router.back()}
             aria-label="Orqaga"
           >
-            <ArrowLeft className="size-5" />
+            <Undo2 className="size-5" />
           </Button>
         ) : null}
-        <SidebarTrigger className="-ml-1 hidden md:flex" />
         {showBack ? (
           <Button
             type="button"
@@ -256,7 +257,7 @@ export default function AdminHeader() {
               priority
             />
           </Link>
-          <div className="relative z-[1] mx-auto hidden w-full max-w-md flex-1 md:block" ref={wrapperRef}>
+          <div className="relative z-1 mx-auto hidden w-full max-w-md flex-1 md:block" ref={wrapperRef}>
             <div className="relative">
               <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <input
@@ -296,7 +297,7 @@ export default function AdminHeader() {
             )}
           </div>
         </div>
-        <div className="relative z-[1] flex shrink-0 items-center gap-2">
+        <div className="relative z-1 flex shrink-0 items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="rounded-full" disabled={sessionStatus === 'loading'}>
@@ -338,6 +339,13 @@ export default function AdminHeader() {
                 </div>
               </div>
               <DropdownMenuSeparator />
+              <div className="px-2 py-1.5">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-xs text-muted-foreground">Tema</span>
+                  <ThemeSwitcherForHeader />
+                </div>
+              </div>
+              <DropdownMenuSeparator />
               <DropdownMenuItem className="cursor-pointer gap-2" onClick={() => void openProfileDialog()}>
                 <LiaUserEditSolid className="size-4 shrink-0" />
                 Profilni tahrirlash
@@ -350,7 +358,7 @@ export default function AdminHeader() {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem
-                className="cursor-pointer gap-2 text-destructive focus:text-destructive"
+                className="cursor-pointer gap-2"
                 onClick={() => void signOut({ callbackUrl: '/auth/login' })}
               >
                 <LogOut className="size-4" />

@@ -1,13 +1,12 @@
 import { getLocale } from 'next-intl/server'
 import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/common/components/ui/card'
-import { CreateNewsForm } from '@/features/news/ui/forms/create-news-form'
 import type { AppLocale } from '@/shared/common/lib/locale-api'
 import { rawNewsToEditInitialData } from '@/features/news/lib/raw-to-edit-initial'
 import { getServerApiUrl } from '@/shared/common/lib/server-api-url'
 import type { RawNewsItem } from '@/features/news/model'
 import type { LocaleMap } from '@/shared/common/lib/locale-types'
+import { EditNewsPageClient } from './_components/edit-news-page-client'
 
 type Props = {
   params: Promise<{ slug: string }>
@@ -66,24 +65,12 @@ export default async function EditNewsPage({ params }: Props) {
   const existingSlugs = newsData.data.map((n) => n.slug).filter((s) => s !== slug)
 
   return (
-    <Card>
-      {/* <CardHeader>
-        <CardTitle>Yangilikni tahrirlash</CardTitle>
-        <CardDescription>
-          Create kabi 3 bosqich: ma’lumotlar, kontent, sozlamalar. Sozlamalar bosqichida
-          status tugmalari orqali status o‘zgartiriladi va o‘chirish (Savatga) amalga
-          oshiriladi.
-        </CardDescription>
-      </CardHeader> */}
-      <CardContent>
-        <CreateNewsForm
-          categories={categories}
-          tags={tags}
-          authors={authors}
-          existingSlugs={existingSlugs}
-          initialData={initialData}
-        />
-      </CardContent>
-    </Card>
+    <EditNewsPageClient
+      categories={categories}
+      tags={tags}
+      authors={authors}
+      existingSlugs={existingSlugs}
+      initialData={initialData}
+    />
   )
 }

@@ -20,7 +20,7 @@ import { Link } from "@/i18n/navigation"
 import Image from "next/image"
 import { useLocale, useTranslations } from "next-intl"
 import Autoplay from "embla-carousel-autoplay"
-import { ArrowRight, ExternalLink } from "lucide-react"
+import { ArrowRight, ChevronRight, ExternalLink } from "lucide-react"
 import { cn } from "@/shared/common/lib/utils"
 
 type SlideNewsSectionProps = {
@@ -151,7 +151,7 @@ export default function SlideNewsSection({
               href={`/category/${categorySlug}`}
               className="text-sm font-medium underline-offset-4 hover:underline md:hidden flex items-center gap-2"
             >
-              <span>{t("view_all")}</span> <ArrowRight className="w-4 h-4" />
+              <span>{t("view_all")}</span> <ChevronRight className="size-5 shrink-0 rounded-full bg-foreground p-1 text-background" aria-hidden />
             </Link>
             <div className="hidden shrink-0 items-center gap-2 md:flex md:gap-3">
               <CarouselPrevious

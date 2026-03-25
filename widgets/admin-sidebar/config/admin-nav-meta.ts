@@ -107,14 +107,13 @@ export const adminMainNavMeta: AdminMainNavMeta[] = [
     // description: 'Telegram va client uzatish — faqat CEO',
     iconKey: 'CloudCog',
   },
-  // {
-  //   href: '/dashboard/settings',
-  //   label: 'Menu',
-  //   roles: ['ceo', 'administrator'],
-  //   // description: 'Boshqaruv ro‘yxati',
-  //   iconKey: 'LayoutGrid',
-  //   hideFromSidebar: true,
-  // },
+  {
+    href: '/dashboard/settings',
+    label: 'Sozlamalar',
+    roles: ['ceo', 'administrator'],
+    // description: 'Boshqaruv ro‘yxati',
+    iconKey: 'LayoutGrid',
+  },
 ]
 
 export const ADMIN_MENU_HUB_ORDER: string[] = adminMainNavMeta.map((m) => m.href)

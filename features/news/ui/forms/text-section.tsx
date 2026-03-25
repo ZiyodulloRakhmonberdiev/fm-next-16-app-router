@@ -37,14 +37,14 @@ export function TextForm({
   onChangeSlug,
 }: TextFormProps) {
   return (
-    <Card className='pt-0 md:pt-4 border-none md:border-border shadow-none md:shadow-sm'>
-      <CardHeader className='px-0 md:px-4'>
+    <Card className='pt-0 md:pt-4 border-none md:border-border shadow-none'>
+      <CardHeader className='px-0'>
         <CardTitle>Tarjimali maydonlar</CardTitle>
         <CardDescription>
           Har bir til uchun sarlavha, tavsif va slug kiriting. uz sarlavha majburiy.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4 px-0 md:px-4">
+      <CardContent className="space-y-4 px-0">
         <div className="flex flex-wrap gap-2 rounded-lg border border-border/70 bg-muted/30 p-2">
           {locales.map((loc) => (
             <button

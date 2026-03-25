@@ -712,7 +712,7 @@ export function CreateNewsForm({
   return (
     <div className="space-y-6">
       {!hideStepTabs ? (
-        <div className="sticky top-0 z-40 -mx-6 border-b border-border bg-background/95 px-6 py-3 shadow-sm backdrop-blur-md supports-backdrop-filter:bg-background/85">
+        <div className="sticky top-0 z-40 -mx-6 border-b border-border bg-background/95 px-4 md:px-6 py-3 shadow-sm backdrop-blur-md supports-backdrop-filter:bg-background/85">
           <div className="flex items-center justify-center gap-3 sm:gap-4">
             {([1, 2, 3] as const).map((s) => (
               <button
@@ -828,7 +828,7 @@ export function CreateNewsForm({
 
       {step === 2 && (
         <div className="space-y-4">
-          <div className="flex flex-wrap gap-2 rounded-lg border border-border/70 bg-muted/30 p-2">
+          <div className="flex flex-wrap gap-2 rounded-lg border border-border/70 bg-muted/30">
             {LOCALES.map((loc) => (
               <button
                 key={loc}

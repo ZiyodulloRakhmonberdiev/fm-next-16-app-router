@@ -134,11 +134,11 @@ export function TextContentRenderer({ content }: TextContentRendererProps) {
       const imageMatch = trimmed.match(/^!\[([^\]]*)\]\(((?:https?:\/\/|\/)[^\s)]+)\)$/)
       if (imageMatch) {
         elements.push(
-          <div key={keyBase} className="my-3 mx-auto w-full max-w-3xl">
+          <div key={keyBase} className="my-3 w-full">
             <img
               src={imageMatch[2]}
               alt={imageMatch[1] || "image"}
-              className="h-auto max-h-[460px] w-full rounded-md border object-cover"
+              className="h-auto w-full rounded-md border object-cover"
             />
           </div>
         )
@@ -151,7 +151,7 @@ export function TextContentRenderer({ content }: TextContentRendererProps) {
         const embedUrl = getYoutubeEmbedUrl(url)
         if (embedUrl) {
           elements.push(
-            <div key={keyBase} className="my-3 mx-auto aspect-video w-full max-w-3xl">
+            <div key={keyBase} className="my-3 aspect-video w-full">
               <iframe
                 src={embedUrl}
                 className="h-full w-full rounded-md border"
@@ -170,7 +170,7 @@ export function TextContentRenderer({ content }: TextContentRendererProps) {
               controlsList="nodownload"
               disablePictureInPicture
               onContextMenu={(e) => e.preventDefault()}
-              className="my-3 mx-auto aspect-video w-full max-w-3xl rounded-md border object-cover"
+              className="my-3 aspect-video w-full rounded-md border object-cover"
             />
           )
         }

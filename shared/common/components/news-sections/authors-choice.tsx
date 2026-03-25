@@ -15,7 +15,6 @@ import Image from "next/image"
 import { useLocale, useTranslations } from "next-intl"
 import { cn } from "@/shared/common/lib/utils"
 
-/** 2×3 grid: har bir karta kontenti uchun och pastel fon */
 const AUTHORS_CHOICE_CONTENT_BGS = [
   "bg-green-50 text-neutral-800 dark:bg-green-950/30 dark:text-green-100/95",
   "bg-orange-50 text-neutral-800 dark:bg-orange-950/30 dark:text-orange-100/95",

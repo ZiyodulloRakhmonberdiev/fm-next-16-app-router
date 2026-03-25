@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
-import { MenuIcon, PanelLeftIcon } from "lucide-react"
+import { MenuIcon, PanelLeftIcon, PanelRight } from "lucide-react"
 import { Slot } from "radix-ui"
 
 import { useIsMobile } from "@/shared/hooks/use-mobile"
@@ -265,7 +265,6 @@ function SidebarTrigger({
       data-sidebar="trigger"
       data-slot="sidebar-trigger"
       variant="ghost"
-      size="icon"
       className={cn("size-7", className)}
       onClick={(event) => {
         onClick?.(event)

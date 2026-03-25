@@ -52,8 +52,11 @@ export default function AdminSidebar() {
   }
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-border">
-      <SidebarHeader className="border-b border-border">
+    <Sidebar
+      collapsible="icon"
+      className="border-r border-border bg-background/70 backdrop-blur supports-backdrop-filter:bg-background/60"
+    >
+      <SidebarHeader className="border-b border-border bg-background/60 backdrop-blur supports-backdrop-filter:bg-background/50">
         <div className="flex h-12 items-center gap-2 px-2">
           <span className="font-semibold text-lg truncate group-data-[state=collapsed]:hidden">
             <Link href="/dashboard" className="hidden md:flex items-center gap-2 shrink-0">
@@ -70,7 +73,7 @@ export default function AdminSidebar() {
         </div>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup className="px-0">
+        <SidebarGroup className="px-1">
           <SidebarGroupContent>
             <SidebarMenu>
               {visibleNavItems.map((item) => (

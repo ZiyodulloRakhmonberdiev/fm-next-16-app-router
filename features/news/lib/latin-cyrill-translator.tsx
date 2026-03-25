@@ -255,8 +255,7 @@ export function UzUzbTranslateControls({
         <div className="flex justify-end">
           <Button
             type="button"
-            size="xs"
-            variant="outline"
+            variant="default"
             onClick={handleFromUzb}
           >
             Tarjima qilish
@@ -267,8 +266,7 @@ export function UzUzbTranslateControls({
         <div className="flex justify-end">
           <Button
             type="button"
-            size="xs"
-            variant="outline"
+            variant="default"
             onClick={handleFromUz}
           >
             Tarjima qilish

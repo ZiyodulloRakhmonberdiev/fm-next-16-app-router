@@ -15,9 +15,13 @@ import { FeaturedNewsCard } from "@/features/news/ui/featured-news-card"
 function BreakingListCard({ item, locale }: { item: NewsItem; locale: AppLocale }) {
   const categoryLabel = useCategoryLabel(item.categorySlug, locale, item.category)
   return (
-    <Card className="flex flex-col gap-2 rounded-sm border-none bg-foreground/5 p-3 shadow-none md:bg-background">
+    <Card className="flex flex-col gap-2 rounded-sm border-none p-3 shadow-none bg-card">
       <div className="flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground">
-        <span className="font-medium uppercase italic text-brand">{categoryLabel}</span>
+        <div className="flex items-center gap-1">
+          <span className="block w-2 h-2 rounded-full bg-brand"></span>
+          <span className="font-mono capitalize text-muted-foreground">{categoryLabel}</span>
+
+        </div>
         <span aria-hidden>/</span>
         <time dateTime={formatDateISO(item.publishedAt)}>{formatDateTimeLocale(item.publishedAt, locale)}</time>
       </div>
@@ -64,8 +68,8 @@ export default function BreakingSection() {
         <NewsSectionHeader
           title={t("filter_breaking")}
           viewAllHref="/news/breaking"
-          variant="brandAccent"
-          linkWrap="ghost"
+          variant="brand"
+          linkWrap="link"
         />
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="grid gap-4 md:grid-cols-2">
@@ -74,7 +78,7 @@ export default function BreakingSection() {
             ))}
           </div>
           {featured ? (
-            <div className="h-full md:col-span-1">
+            <div className="h-full hidden md:flex md:col-span-1">
               <FeaturedNewsCard item={featured} locale={locale} variant="column" />
             </div>
           ) : null}

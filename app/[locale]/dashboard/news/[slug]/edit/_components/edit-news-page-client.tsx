@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/common/components/ui/card'
+import { Card, CardContent } from '@/shared/common/components/ui/card'
 import { CreateNewsForm, type CreateNewsFormProps } from '@/features/news/ui/forms/create-news-form'
 import { cn } from '@/shared/common/lib/utils'
 
@@ -11,7 +11,7 @@ const stepTitles: Record<1 | 2 | 3, string> = {
   3: 'Sozlamalar — status, Telegram, chop etish',
 }
 
-export function CreateNewsPageClient(props: CreateNewsFormProps) {
+export function EditNewsPageClient(props: CreateNewsFormProps) {
   const [step, setStep] = useState<1 | 2 | 3>(1)
 
   return (
@@ -44,8 +44,8 @@ export function CreateNewsPageClient(props: CreateNewsFormProps) {
         </div>
       </div>
 
-      <Card className="pt-4 border-none shadow-none">
-        <CardContent className='px-0'>
+      <Card className="pt-4">
+        <CardContent className='px-4 md:px-6'>
           <CreateNewsForm
             {...props}
             controlledStep={step}
@@ -57,3 +57,4 @@ export function CreateNewsPageClient(props: CreateNewsFormProps) {
     </div>
   )
 }
+

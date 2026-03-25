@@ -37,14 +37,14 @@ export function ImageForm({
   onRemoveImageFile,
 }: ImageFormProps) {
   return (
-    <Card className='pt-0 md:pt-4 border-none md:border-border shadow-none md:shadow-sm'>
-      <CardHeader className='px-0 md:px-4'>
+    <Card className='pt-0 md:pt-4 border-none md:border-border shadow-none'>
+      <CardHeader className='px-0'>
         <CardTitle>Rasmlar</CardTitle>
         <CardDescription>
           URL kiritish yoki shaxsiy PC dan rasm yuklash. Bir nechta rasm qo&apos;shish mumkin.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4 px-0 md:px-4">
+      <CardContent className="space-y-4 px-0">
         <div className="flex flex-wrap gap-2">
           <Input
             value={imageUrlInput}
@@ -81,7 +81,7 @@ export function ImageForm({
                 <button
                   type="button"
                   onClick={() => onRemoveImageUrl(i)}
-                  className="absolute top-1 right-1 size-8 rounded-full bg-destructive/90 text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-1 right-1 size-8 rounded-full bg-destructive/90 text-white flex items-center justify-center transition-opacity"
                   aria-label="O&apos;chirish"
                 >
                   <X className="size-4" />

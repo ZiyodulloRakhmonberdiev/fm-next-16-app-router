@@ -131,6 +131,12 @@ export default async function DashboardPage() {
       href: '/dashboard/comments',
     },
     {
+      label: 'Reaksiyalar',
+      value: reactionsJson.count ?? 0,
+      icon: Heart,
+      href: '/dashboard/reactions',
+    },
+    {
       label: 'Reklama',
       value: ads.length ?? 0,
       icon: Megaphone,
@@ -141,19 +147,13 @@ export default async function DashboardPage() {
       value: adsFeedbackCount,
       icon: Inbox,
       href: '/dashboard/ads/feedback',
-    },
-    {
-      label: 'Reaksiyalar',
-      value: reactionsJson.count ?? 0,
-      icon: Heart,
-      href: '/dashboard/reactions',
-    },
+    }
   ]
 
   return (
     <div className="space-y-8 overflow-x-hidden">
       <div>
-        <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 sm:gap-4 pt-1 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           {stats.map((s) => (
             <Link key={s.label} href={s.href} className="group">
               <Card className="relative h-full overflow-hidden border border-border/60 bg-linear-to-b from-background via-background to-muted/40 transition-all duration-200 hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg">

@@ -9,6 +9,7 @@ import { useState } from "react";
 import { Eye, EyeOff, Lock, Mail, User } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { toast } from "sonner";
+import { getDefaultDashboardPath, normalizeRole } from "@/shared/common/lib/rbac";
 
 export const RegisterForm = () => {
   const t = useTranslations("auth");
@@ -44,9 +45,36 @@ export const RegisterForm = () => {
       toast.error(err?.error ?? "Ro'yxatdan o'tib bo'lmadi");
       return;
     }
-    await signIn("credentials", { login: username.trim(), password, callbackUrl: "/" });
+    const result = await signIn("credentials", {
+      login: username.trim(),
+      password,
+      redirect: false,
+    });
+
+    if (!result || result.error) {
+      toast.error(t("login_error") ?? "Login yoki parol noto'g'ri");
+      return;
+    }
+
     toast.success("Ro'yxatdan o'tdingiz");
-    router.push("/");
+    // Ro'yxatdan keyin rolga qarab redirect qilamiz.
+    try {
+      const meRes = await fetch("/api/me", { cache: "no-store" });
+      if (!meRes.ok) {
+        router.push("/");
+        return;
+      }
+      const me = (await meRes.json()) as { role?: string | null };
+      const role = normalizeRole(me.role);
+      if (role === "user") {
+        router.push("/");
+        return;
+      }
+      const dashboardPath = getDefaultDashboardPath(me.role) ?? "/dashboard";
+      router.push(dashboardPath);
+    } catch {
+      router.push("/");
+    }
   }
 
   const title = t("register_title");

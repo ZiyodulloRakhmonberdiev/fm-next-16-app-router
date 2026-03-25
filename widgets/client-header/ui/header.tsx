@@ -59,7 +59,6 @@ export default function Header() {
 
   return (
     <div>
-      {/* Ads + Headline: scroll da yuqoriga ketadi; yuqoriga scroll da yana ko‘rinadi */}
       <div ref={topBlockRef}>
         <AdSlotHeader />
         <div className="border-b border-border bg-background">
@@ -93,12 +92,12 @@ export default function Header() {
               <CategoryList />
             </div>
           </div>
-          <div className="z-[2] flex shrink-0 items-center md:hidden">
+          {/* <div className="z-[2] flex shrink-0 items-center md:hidden">
             <span className="inline-flex size-9 shrink-0" aria-hidden />
-          </div>
+          </div> */}
           <Link
             href="/"
-            className="absolute left-1/2 top-1/2 z-[1] flex h-8 -translate-x-1/2 -translate-y-1/2 items-center md:hidden"
+            className="flex h-8 items-center md:hidden"
           >
             <Image
               src={mounted ? logoSrc : '/images/fm-logo-dark.svg'}
@@ -110,7 +109,7 @@ export default function Header() {
               priority
             />
           </Link>
-          <div className="z-[2] flex shrink-0 items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2">
             <div className="flex items-center gap-2">
               <Button variant="ghost" size="icon" className="" onClick={() => setSearchOpen(true)} aria-label="Qidiruv">
                 <Search size="4" />

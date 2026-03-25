@@ -58,7 +58,7 @@ import {
   Check, CircleOff, Clock, Send, Ban, Trash2, Archive,
 } from 'lucide-react'
 
-const PER_PAGE = 40
+const PER_PAGE = 50
 
 const STATUS_OPTIONS: { value: '' | NewsStatus; label: string }[] = [
   { value: '', label: 'Barcha statuslar' },
@@ -75,7 +75,7 @@ const STATUS_ICONS: Record<NewsStatus, React.ComponentType<{ className?: string 
 
 const TOP_OPTIONS: { value: '' | 'yes' | 'no'; label: string }[] = [
   { value: '', label: 'Barchasi' },
-  { value: 'yes', label: 'Ha (Top)' },
+  { value: 'yes', label: 'Ha' },
   { value: 'no', label: "Yo'q" },
 ]
 
@@ -668,7 +668,7 @@ export function DashboardNewsListPage({
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="font-medium">Field</TableHead>
+                    <TableHead className="font-medium">Tillar</TableHead>
                     {LOCALES.map((loc) => (
                       <TableHead key={loc} className="text-center capitalize">{loc}</TableHead>
                     ))}
@@ -682,7 +682,7 @@ export function DashboardNewsListPage({
                     return (
                       <>
                         <TableRow>
-                          <TableCell className="font-medium">title</TableCell>
+                          <TableCell className="font-medium">Sarlavha</TableCell>
                           {LOCALES.map((loc) => (
                             <TableCell key={loc} className="text-center">
                               {hasTitle(loc) ? <Check className="size-5 text-green-600 inline-block" /> : <CircleOff className="size-5 text-muted-foreground inline-block" />}
@@ -690,7 +690,7 @@ export function DashboardNewsListPage({
                           ))}
                         </TableRow>
                         <TableRow>
-                          <TableCell className="font-medium">description</TableCell>
+                          <TableCell className="font-medium">Tavsif</TableCell>
                           {LOCALES.map((loc) => (
                             <TableCell key={loc} className="text-center">
                               {hasDesc(loc) ? <Check className="size-5 text-green-600 inline-block" /> : <CircleOff className="size-5 text-muted-foreground inline-block" />}
@@ -698,7 +698,7 @@ export function DashboardNewsListPage({
                           ))}
                         </TableRow>
                         <TableRow>
-                          <TableCell className="font-medium">content</TableCell>
+                          <TableCell className="font-medium">Batafsil</TableCell>
                           {LOCALES.map((loc) => (
                             <TableCell key={loc} className="text-center">
                               {t.content[loc] ? <Check className="size-5 text-green-600 inline-block" /> : <CircleOff className="size-5 text-muted-foreground inline-block" />}

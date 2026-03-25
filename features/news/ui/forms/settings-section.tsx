@@ -102,14 +102,8 @@ export function SettingsForm({
     : null
   const [showTelegramPost, setShowTelegramPost] = useState(false)
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Telegram ko‘rinishi va chop etish</CardTitle>
-        <CardDescription>
-          Yuborilgach Telegramdagi haqiqiy post shu yerda ko‘rinadi.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
+    <Card className="p-0 border-none shadow-none">
+      <CardContent className="space-y-6 px-0">
         <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border p-4">
           <Label htmlFor="authorsChoice" className="cursor-pointer">
             Muallif tanlovi

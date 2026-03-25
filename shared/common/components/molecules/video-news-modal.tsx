@@ -64,7 +64,7 @@ export default function VideoNewsModal({ item, open, onOpenChange }: VideoNewsMo
           const youtubeEmbed = getYoutubeEmbedUrl(item.videoUrl ?? "")
           return (
             <>
-              <div className="relative aspect-video p-2 w-full bg-muted">
+              <div className="relative aspect-video w-full bg-muted">
                 {youtubeEmbed ? (
                   <iframe
                     src={youtubeEmbed}
@@ -81,7 +81,7 @@ export default function VideoNewsModal({ item, open, onOpenChange }: VideoNewsMo
                     controlsList="nodownload"
                     disablePictureInPicture
                     onContextMenu={(e) => e.preventDefault()}
-                    className="h-full w-full object-contain rounded-md"
+                    className="h-full w-full object-cover rounded-md"
                     poster={getVideoPoster(item) || undefined}
                   >
                     {t("your_browser_does_not_support_the_video_tag")}
@@ -100,7 +100,7 @@ export default function VideoNewsModal({ item, open, onOpenChange }: VideoNewsMo
                   </time>
                 </div>
                 <DialogHeader className="">
-                  <DialogTitle className="text-start line-clamp-2 md:line-clamp-3">{item.title}</DialogTitle>
+                  <DialogTitle className="text-start line-clamp-2 md:line-clamp-3 leading-snug">{item.title}</DialogTitle>
                   {item.description && (
                     <DialogDescription className="mt-1 text-start line-clamp-2 md:line-clamp-3">
                       {item.description}

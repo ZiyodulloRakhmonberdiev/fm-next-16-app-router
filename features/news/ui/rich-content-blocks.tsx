@@ -36,7 +36,7 @@ function Block({ block }: { block: RichContentBlock }) {
       const embedUrl =
         block.source === "youtube" ? getYoutubeEmbedUrl(block.url) : null
       return (
-        <div className="my-4 mx-auto aspect-video w-full max-w-3xl overflow-hidden rounded-lg bg-muted">
+        <div className="my-4 aspect-video w-full overflow-hidden rounded-lg bg-muted">
           {embedUrl ? (
             <iframe
               src={embedUrl}

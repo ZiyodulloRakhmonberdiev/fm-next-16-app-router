@@ -18,7 +18,7 @@ import {
   TableRow,
 } from "@/shared/common/components/ui/table"
 import { toast } from "sonner"
-import { Loader2 } from "lucide-react"
+import { Ban, CheckLine, Loader2, Trash2 } from "lucide-react"
 import { Link } from "@/i18n/navigation"
 import { truncateChars } from "@/shared/common/lib/truncate"
 import { cn } from "@/shared/common/lib/utils"
@@ -205,13 +205,13 @@ export default function DashboardCommentsPage() {
                     </TableCell>
                     <TableCell className="align-top text-sm text-muted-foreground">
                       {item.confirmedByUserName?.trim() ? (
-                        <span title={item.confirmedByUserId}>{item.confirmedByUserName}</span>
+                        <span title={item.confirmedByUserId}>{item.confirmedByUserName.trim()}</span>
                       ) : (
                         <span>—</span>
                       )}
                       {item.confirmedAt ? (
                         <p className="mt-1 text-xs text-muted-foreground/80">
-                          {new Date(item.confirmedAt).toLocaleString()}
+                         {new Date(item.confirmedAt).toLocaleString()}
                         </p>
                       ) : null}
                     </TableCell>
@@ -219,7 +219,7 @@ export default function DashboardCommentsPage() {
                       {new Date(item.createdAt).toLocaleString()}
                     </TableCell>
                     <TableCell className="align-top text-right">
-                      <div className="flex flex-wrap justify-end gap-1.5">
+                      <div className="flex justify-end gap-1.5">
                         <Button
                           size="sm"
                           variant="secondary"
@@ -230,7 +230,7 @@ export default function DashboardCommentsPage() {
                           {moderatingKey === `${item._id}:confirmed` ? (
                             <Loader2 className="size-3.5 animate-spin" />
                           ) : (
-                            "Tasdiq"
+                            <CheckLine />
                           )}
                         </Button>
                         <Button
@@ -243,20 +243,20 @@ export default function DashboardCommentsPage() {
                           {moderatingKey === `${item._id}:rejected` ? (
                             <Loader2 className="size-3.5 animate-spin" />
                           ) : (
-                            "Rad"
+                            <Ban />
                           )}
                         </Button>
                         <Button
                           size="sm"
-                          variant="ghost"
-                          className="h-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                          variant="outline"
+                          className=""
                           disabled={deletingId === item._id}
                           onClick={() => void remove(item._id)}
                         >
                           {deletingId === item._id ? (
                             <Loader2 className="size-3.5 animate-spin" />
                           ) : (
-                            "O'chirish"
+                            <Trash2 />
                           )}
                         </Button>
                       </div>
@@ -295,3 +295,4 @@ export default function DashboardCommentsPage() {
     </div>
   )
 }
+

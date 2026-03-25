@@ -9,6 +9,7 @@ import { useState } from "react";
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { toast } from "sonner";
+import { getDefaultDashboardPath, normalizeRole } from "@/shared/common/lib/rbac";
 
 export const LoginForm = () => {
   const t = useTranslations("auth");
@@ -33,7 +34,24 @@ export const LoginForm = () => {
       return;
     }
     toast.success("Muvaffaqiyatli kirdingiz");
-    router.push("/dashboard");
+    // Session roli backenddan aniq bo'lgani uchun /api/me orqali tekshirib olamiz.
+    try {
+      const meRes = await fetch("/api/me", { cache: "no-store" });
+      if (!meRes.ok) {
+        router.push("/");
+        return;
+      }
+      const me = (await meRes.json()) as { role?: string | null };
+      const role = normalizeRole(me.role);
+      if (role === "user") {
+        router.push("/");
+        return;
+      }
+      const dashboardPath = getDefaultDashboardPath(me.role) ?? "/dashboard";
+      router.push(dashboardPath);
+    } catch {
+      router.push("/");
+    }
   };
 
   const title = t("sign_in_with_email") as string;

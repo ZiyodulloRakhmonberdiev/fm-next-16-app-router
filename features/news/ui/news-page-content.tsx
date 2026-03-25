@@ -101,9 +101,35 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
   const [commentTotal, setCommentTotal] = React.useState(0)
   const [showTelegramPost, setShowTelegramPost] = React.useState(false)
   const newsRef = newsId ?? news.slug
-  const telegramEmbedSrc = news.telegramMessageLink
-    ? `${news.telegramMessageLink}${news.telegramMessageLink.includes("?") ? "&" : "?"}embed=1`
-    : null
+  const telegramWidgetPost = React.useMemo(() => {
+    if (!news.telegramMessageLink) return null
+    try {
+      const u = new URL(news.telegramMessageLink)
+      const parts = u.pathname.split("/").filter(Boolean)
+      if (parts.length < 2) return null
+      // Telegram widget "data-telegram-post" expects something like: channel/POST_ID
+      // For private channels it often looks like: c/CHANNEL_ID/POST_ID.
+      return parts.join("/")
+    } catch {
+      return null
+    }
+  }, [news.telegramMessageLink])
+  const telegramWidgetHostRef = React.useRef<HTMLDivElement | null>(null)
+
+  React.useEffect(() => {
+    if (!showTelegramPost || !telegramWidgetPost) return
+    const host = telegramWidgetHostRef.current
+    if (!host) return
+
+    // Clear old widget iframe/script when toggling or switching posts.
+    host.innerHTML = ""
+    const script = document.createElement("script")
+    script.async = true
+    script.src = "https://telegram.org/js/telegram-widget.js?4"
+    script.dataset.telegramPost = telegramWidgetPost
+    script.dataset.width = "100%"
+    host.appendChild(script)
+  }, [showTelegramPost, telegramWidgetPost])
 
   React.useEffect(() => {
     if (typeof window !== "undefined") setShareUrl(window.location.href)
@@ -342,7 +368,7 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
                   controlsList="nodownload"
                   disablePictureInPicture
                   onContextMenu={(e) => e.preventDefault()}
-                  className="h-full w-full object-contain"
+                  className="h-full w-full object-cover"
                   poster={videoPoster}
                 >
                   {t("your_browser_does_not_support_the_video_tag")}
@@ -510,7 +536,7 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
         <div className="my-6" />
 
 
-        {telegramEmbedSrc ? (
+        {telegramWidgetPost ? (
           <div className="mt-4 w-full">
             <div className="flex items-center justify-between gap-3">
               <div className="text-sm font-medium">Telegram</div>
@@ -527,12 +553,7 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
 
             {showTelegramPost ? (
               <div className="mt-3 rounded-xl border bg-background p-3 pt-4 shadow-sm">
-                <iframe
-                  src={telegramEmbedSrc}
-                  className="mx-auto block h-[500px] w-full max-w-[520px] rounded-lg"
-                  loading="lazy"
-                  referrerPolicy="no-referrer"
-                />
+                <div ref={telegramWidgetHostRef} className="w-full" />
               </div>
             ) : null}
           </div>

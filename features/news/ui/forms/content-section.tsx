@@ -607,16 +607,7 @@ export function ContentForm({
             <PlaySquareIcon className="size-3.5" />
             Video
           </button>
-          <Button
-            type="button"
-            size="xs"
-            variant="outline"
-            onClick={handleGenerate}
-            disabled={!canGenerate}
-            className="ml-1"
-          >
-            Generate
-          </Button>
+          
         </div>
       </div>
 
@@ -779,6 +770,14 @@ export function ContentForm({
             placeholder={placeholder}
             className="min-h-64 w-full resize-vertical rounded-md border bg-background px-3 py-2 text-sm  outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40"
           />
+          <Button
+            type="button"
+            variant="default"
+            onClick={handleGenerate}
+            disabled={!canGenerate}
+          >
+            Tarjima qilish
+          </Button>
         </div>
 
         <div className="space-y-3 rounded-md border bg-muted/30 p-3">

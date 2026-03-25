@@ -31,6 +31,8 @@ import {
 import { cn } from "@/shared/common/lib/utils"
 import { useTranslations } from "next-intl"
 import { resizeImageToSquareJpeg } from "@/shared/common/lib/resize-profile-avatar"
+import { getDefaultDashboardPath, normalizeRole } from "@/shared/common/lib/rbac"
+import { LayoutGrid } from "lucide-react"
 
 const AVATAR_SIZE = 100
 
@@ -38,6 +40,8 @@ export function ClientUserMenu() {
   const { data: session } = useSession()
   const t = useTranslations("auth")
   const tc = useTranslations("common")
+  const role = normalizeRole(session?.user?.role)
+  const adminDashboardPath = role !== "user" ? getDefaultDashboardPath(session?.user?.role) : null
   const [profileOpen, setProfileOpen] = useState(false)
   const [profileLoading, setProfileLoading] = useState(false)
   const [avatarUploading, setAvatarUploading] = useState(false)
@@ -149,6 +153,18 @@ export function ClientUserMenu() {
                   {t("my_reactions")}
                 </Link>
               </DropdownMenuItem>
+              <span className="my-1 block h-[0.5px] w-full bg-foreground/10"></span>
+              {adminDashboardPath ? (
+                <DropdownMenuItem asChild>
+                  <Link
+                    href={adminDashboardPath}
+                    className="flex cursor-pointer items-center gap-2"
+                  >
+                    <LayoutGrid className="size-4" />
+                    Admin panelga o‘tish
+                  </Link>
+                </DropdownMenuItem>
+              ) : null}
               <span className="my-1 block h-[0.5px] w-full bg-foreground/10"></span>
               <DropdownMenuItem onClick={() => void signOut({ callbackUrl: "/" })}>
                 <LogOut className="size-4" />
