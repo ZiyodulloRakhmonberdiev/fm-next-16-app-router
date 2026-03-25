@@ -81,16 +81,37 @@ export async function POST(req: NextRequest) {
     const base = sanitizeBaseName(path.basename(file.name, ext)) || "media"
     const filename = `${base}-${randomUUID()}${ext}`
 
-    // Production / serverless da fayl tizimi read-only — Cloudinary kerak
+    // Production / serverless da fayl tizimi read-only bo‘lishi mumkin,
+    // lekin dev/lokalda videolarni baribir saqlab qolish uchun filesystemga fallback qilamiz.
     const isProduction = process.env.NODE_ENV === "production" || !!process.env.VERCEL
-    if (isProduction && !isCloudinaryConfigured()) {
-      return Response.json(
-        {
-          error:
-            "Production da rasm va video yuklash uchun Cloudinary sozlang: NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME, NEXT_PUBLIC_CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET",
-        },
-        { status: 503 }
+
+    const uploadToFilesystem = async () => {
+      const folder = path.join(
+        process.cwd(),
+        "public",
+        "uploads",
+        kind === "image" ? "images" : "videos"
       )
+      await mkdir(folder, { recursive: true })
+      const filenameToWrite = filename
+      await writeFile(path.join(folder, filenameToWrite), buffer)
+      const url = `/uploads/${kind === "image" ? "images" : "videos"}/${filenameToWrite}`
+      return url
+    }
+
+    if (isProduction && !isCloudinaryConfigured()) {
+      try {
+        const url = await uploadToFilesystem()
+        return Response.json({ url })
+      } catch (err) {
+        return Response.json(
+          {
+            error:
+              "Cloudinary sozlanmagan va filesystemga ham saqlash bo‘lmadi. Cloudinary sozlang: NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME, NEXT_PUBLIC_CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET",
+          },
+          { status: 503 }
+        )
+      }
     }
 
     // if (isContaboConfigured()) {
@@ -105,49 +126,62 @@ export async function POST(req: NextRequest) {
     // }
 
     if (isCloudinaryConfigured()) {
-      cloudinary.config({
-        cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-        api_key: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY,
-        api_secret: process.env.CLOUDINARY_API_SECRET,
-      })
-      const mime = EXT_TO_MIME[ext] || (kind === "image" ? "image/jpeg" : "video/mp4")
-      const dataUri = `data:${mime};base64,${buffer.toString("base64")}`
-      const folder = process.env.CLOUDINARY_UPLOAD_FOLDER?.replace(/\/$/, "") || "uploads"
-      const uniqueId = randomUUID()
-      const publicId = `${folder}/${kind === "image" ? "images" : "videos"}/${base}-${uniqueId}`
-      const resourceType = kind === "image" ? "image" : "video"
-      const uploadOptions: Record<string, unknown> = {
-        resource_type: resourceType,
-        public_id: publicId,
+      try {
+        cloudinary.config({
+          cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+          api_key: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY,
+          api_secret: process.env.CLOUDINARY_API_SECRET,
+        })
+        const mime = EXT_TO_MIME[ext] || (kind === "image" ? "image/jpeg" : "video/mp4")
+        const dataUri = `data:${mime};base64,${buffer.toString("base64")}`
+        const folder = process.env.CLOUDINARY_UPLOAD_FOLDER?.replace(/\/$/, "") || "uploads"
+        const uniqueId = randomUUID()
+        const publicId = `${folder}/${kind === "image" ? "images" : "videos"}/${base}-${uniqueId}`
+        const resourceType = kind === "image" ? "image" : "video"
+        const uploadOptions: Record<string, unknown> = {
+          resource_type: resourceType,
+          public_id: publicId,
+        }
+        if (kind === "image") {
+          uploadOptions.eager = [
+            { width: 1200, crop: "scale", quality: "auto", fetch_format: "auto" },
+          ]
+          uploadOptions.eager_async = false
+        }
+        type UploadResult = {
+          secure_url?: string
+          url?: string
+          eager?: Array<{ secure_url?: string; url?: string }>
+        }
+        const result = await new Promise<UploadResult>((resolve, reject) => {
+          cloudinary.uploader.upload(dataUri, uploadOptions, (err, res) =>
+            err ? reject(err) : resolve(res as UploadResult)
+          )
+        })
+        const url =
+          kind === "image" && result?.eager?.[0]?.secure_url
+            ? result.eager[0].secure_url
+            : result?.secure_url ?? result?.url ?? ""
+        if (!url) return Response.json({ error: "Cloudinary javob bermadi" }, { status: 500 })
+        return Response.json({ url })
+      } catch (err) {
+        console.error("[api/uploads] Cloudinary upload failed, fallback to filesystem:", err)
+        try {
+          const url = await uploadToFilesystem()
+          return Response.json({ url })
+        } catch (fallbackErr) {
+          const message =
+            fallbackErr instanceof Error
+              ? fallbackErr.message
+              : err instanceof Error
+                ? err.message
+                : "Cloudinary upload va filesystem fallback xatoligi"
+          return Response.json({ error: message }, { status: 500 })
+        }
       }
-      if (kind === "image") {
-        uploadOptions.eager = [
-          { width: 1200, crop: "scale", quality: "auto", fetch_format: "auto" },
-        ]
-        uploadOptions.eager_async = false
-      }
-      type UploadResult = {
-        secure_url?: string
-        url?: string
-        eager?: Array<{ secure_url?: string; url?: string }>
-      }
-      const result = await new Promise<UploadResult>((resolve, reject) => {
-        cloudinary.uploader.upload(dataUri, uploadOptions, (err, res) =>
-          err ? reject(err) : resolve(res as UploadResult)
-        )
-      })
-      const url =
-        kind === "image" && result?.eager?.[0]?.secure_url
-          ? result.eager[0].secure_url
-          : result?.secure_url ?? result?.url ?? ""
-      if (!url) return Response.json({ error: "Cloudinary javob bermadi" }, { status: 500 })
-      return Response.json({ url })
     }
 
-    const folder = path.join(process.cwd(), "public", "uploads", kind === "image" ? "images" : "videos")
-    await mkdir(folder, { recursive: true })
-    await writeFile(path.join(folder, filename), buffer)
-    const url = `/uploads/${kind === "image" ? "images" : "videos"}/${filename}`
+    const url = await uploadToFilesystem()
     return Response.json({ url })
   } catch (error) {
     const err = error as { message?: string; error?: { message?: string } }

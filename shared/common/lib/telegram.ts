@@ -183,24 +183,31 @@ export async function sendNewsToTelegram(input: {
   }
   if (settings.threadId) basePayload.message_thread_id = Number(settings.threadId)
 
-  const absoluteVideo = toAbsoluteUrl(input.videoUrl, input.origin)
-  const absoluteImage = toAbsoluteUrl(input.imageUrl, input.origin)
+  const absoluteVideo = toAbsoluteUrl(input.videoUrl, linkBase)
+  const absoluteImage = toAbsoluteUrl(input.imageUrl, linkBase)
   const isYoutubeVideo = input.type === "video" && Boolean(getYoutubeVideoId(input.videoUrl ?? ""))
-  // YouTube video yuborishda thumbnail (poster) majburiy bo'lishi kerak.
+  // YouTube video Telegram uchun video emas (yuklab bera olmaydi),
+  // shuning uchun poster rasmni albatta yuborish kerak.
   if (isYoutubeVideo && !absoluteImage) {
     return { status: "failed", reason: "YouTube video uchun 1 ta poster rasm kiriting" }
   }
 
   let method = "sendMessage"
   const payload: Record<string, unknown> = { ...basePayload }
-  const canSendMediaByUrl = !isLocalOrigin(input.origin)
-  if (input.type === "video" && absoluteVideo && canSendMediaByUrl) {
+  // Telegram media URL ochiq internetdan yuklanishi kerak.
+  // `origin` localhost bo‘lsa ham, media URL’larini `.env` public bazaga bog‘lab berdik (`linkBase`).
+  const canSendMediaByUrl = !isLocalOrigin(linkBase)
+  if (isYoutubeVideo && absoluteImage && canSendMediaByUrl) {
+    // YouTube video URL'dan Telegram video yuklab bera olmaydi,
+    // shuning uchun poster rasmni `sendPhoto` bilan yuboramiz.
+    method = "sendPhoto"
+    payload.photo = absoluteImage
+    payload.caption = htmlCaption
+    payload.disable_web_page_preview = true
+  } else if (input.type === "video" && absoluteVideo && canSendMediaByUrl) {
     method = "sendVideo"
     payload.video = absoluteVideo
     payload.caption = htmlCaption
-    if (isYoutubeVideo && absoluteImage) {
-      payload.thumb = absoluteImage
-    }
   } else if (input.type === "image" && absoluteImage && canSendMediaByUrl) {
     method = "sendPhoto"
     payload.photo = absoluteImage

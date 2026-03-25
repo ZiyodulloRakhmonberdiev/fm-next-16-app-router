@@ -46,7 +46,13 @@ export async function uploadVideoViaApiOrCloudinary(
   options?: { credentials?: RequestCredentials }
 ): Promise<string> {
   if (isCloudinaryDirectVideoUploadConfigured()) {
-    return uploadVideoToCloudinaryDirect(file)
+    // Cloudinary direct ba'zan preset yoki tarmoq sabab fail bo'lishi mumkin.
+    // Shunda ham `/api/uploads` orqali fallback qilamiz.
+    try {
+      return await uploadVideoToCloudinaryDirect(file)
+    } catch {
+      // Fallback quyida davom etadi.
+    }
   }
   const formData = new FormData()
   formData.append("file", file)
