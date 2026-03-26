@@ -82,7 +82,10 @@ export default function BannerSection({
           </div>
 
           <div className="grid grid-cols-1 gap-2 md:hidden">
-            {([featured, ...leftItems, ...rightItems].filter(Boolean) as NewsItem[])
+            {featured ? (
+              <FeaturedNewsCard item={featured} locale={locale} variant="banner" />
+            ) : null}
+            {([ ...leftItems, ...rightItems].filter(Boolean) as NewsItem[])
               .slice(0, 12)
               .map((item) => (
                 <MiniNewsCard

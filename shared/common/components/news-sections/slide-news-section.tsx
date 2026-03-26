@@ -4,7 +4,7 @@ import * as React from "react"
 import { getNewsListForLocale, isImageTypeRawNews, type NewsItem } from "@/features/news/model"
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
 import { getCategoryNameFromApi, usePublicCategoriesQuery } from "@/features/category/model/public-categories-query"
-import { getCategoryLabelForNewsItem } from "@/features/category/model/use-category-label"
+import { getCategoryLabelForNewsItem, useCategoryLabel } from "@/features/category/model/use-category-label"
 import { Card } from "@/shared/common/components/ui/card"
 import {
   Carousel,
@@ -22,6 +22,7 @@ import { useLocale, useTranslations } from "next-intl"
 import Autoplay from "embla-carousel-autoplay"
 import { ArrowRight, ChevronRight, ExternalLink } from "lucide-react"
 import { cn } from "@/shared/common/lib/utils"
+import { NewsCardContent } from "./news-card-content"
 
 type SlideNewsSectionProps = {
   categorySlug?: string
@@ -194,27 +195,7 @@ export default function SlideNewsSection({
                           />
                         </Link>
                         <div className="flex flex-col gap-2 p-4">
-                          <div className="flex items-center justify-start gap-2">
-                            <Link href={`/category/${item.categorySlug}`} className="capitalize  text-muted-foreground flex items-center gap-1 hover:underline">
-                              <span className="block w-2 h-2 bg-brand rounded-full"></span>
-                              <span className="text-xs capitalize">
-                                {getCategoryLabelForNewsItem(categories, categoriesPending, item, locale)}
-                              </span>
-                            </Link>
-                            <span className="text-muted-foreground text-xs">/</span>
-                            <time
-                              dateTime={formatDateISO(item.publishedAt)}
-                              className="text-xs text-muted-foreground"
-                            >
-                              {formatDate(item.publishedAt, locale)}
-                            </time>
-                          </div>
-                          <Link href={`/news/${item.slug}`} className="line-clamp-3 text-sm font-semibold leading-tight hover:underline">
-                            {item.title}
-                          </Link>
-                          <p className="line-clamp-3 text-xs text-muted-foreground">
-                            {item.description}
-                          </p>
+                          <NewsCardContent item={item} locale={locale} categoryLabel={useCategoryLabel(item.categorySlug, locale, item.category)} variant="inline" dateVariant="dateTimeSlash" descriptionClassName="" titleClassName="line-clamp-2" />
                         </div>
                       </Card>
                     </div>

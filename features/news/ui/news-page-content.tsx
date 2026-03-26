@@ -44,6 +44,7 @@ import {
 } from "@/shared/common/components/ui/tooltip"
 import { SOCIAL_ICONS } from "@/shared/common/components/ui/social-media-buttons"
 import { useCategoryLabel } from "@/features/category/model/use-category-label"
+import type { LocaleMap } from "@/shared/common/lib/locale-types"
 
 export type { NewsItem }
 
@@ -100,6 +101,7 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
   const [shareUrl, setShareUrl] = React.useState("")
   const [reactionTotal, setReactionTotal] = React.useState(0)
   const [commentTotal, setCommentTotal] = React.useState(0)
+  const [tagsCatalog, setTagsCatalog] = React.useState<Array<{ slug: string; name: LocaleMap }>>([])
   const [showTelegramPost, setShowTelegramPost] = React.useState(false)
   const newsRef = newsId ?? news.slug
   const telegramWidgetPost = React.useMemo(() => {
@@ -137,6 +139,33 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
   }, [])
 
   React.useEffect(() => {
+    let cancelled = false
+    void fetch("/api/tags", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : []))
+      .then((rows) => {
+        if (cancelled) return
+        const list = Array.isArray(rows) ? rows : []
+        setTagsCatalog(
+          list
+            .map((row) => {
+              const r = row as { slug?: unknown; name?: unknown }
+              const slug = typeof r.slug === "string" ? r.slug : ""
+              const name = (r.name ?? {}) as LocaleMap
+              return slug ? { slug, name } : null
+            })
+            .filter((x): x is { slug: string; name: LocaleMap } => x !== null)
+        )
+      })
+      .catch(() => {
+        if (!cancelled) setTagsCatalog([])
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  React.useEffect(() => {
     if (!newsRef) return
     const ac = new AbortController()
     Promise.all([
@@ -166,6 +195,28 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
     const name = categoryLabelRaw
     return name ? name.charAt(0).toUpperCase() + name.slice(1) : name
   }, [categoryLabelRaw])
+
+  const localizedTags = React.useMemo(() => {
+    if (!Array.isArray(news.tags) || news.tags.length === 0) return []
+    if (tagsCatalog.length === 0) return news.tags
+
+    const allLocales: AppLocale[] = ["uz", "uzb", "ru", "en"]
+    return news.tags.map((raw) => {
+      const normalized = String(raw ?? "").trim()
+      if (!normalized) return normalized
+      const bySlug = tagsCatalog.find((t) => t.slug === normalized)
+      if (bySlug) {
+        return bySlug.name[locale] || bySlug.name.uz || bySlug.slug
+      }
+      const byAnyName = tagsCatalog.find((t) =>
+        allLocales.some((loc) => (t.name?.[loc] ?? "").trim() === normalized)
+      )
+      if (byAnyName) {
+        return byAnyName.name[locale] || byAnyName.name.uz || normalized
+      }
+      return normalized
+    })
+  }, [locale, news.tags, tagsCatalog])
 
   const openShare = React.useCallback(
     async (type: "telegram" | "facebook" | "whatsapp" | "instagram") => {
@@ -491,7 +542,7 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
           )
         )}
         <div className="flex flex-wrap gap-2 mt-4">
-          {tagsEnabled && news.tags && news.tags.length > 0 && news.tags.map((tag) => (
+          {tagsEnabled && localizedTags.length > 0 && localizedTags.map((tag) => (
             <span key={tag} className="text-sm text-muted-foreground bg-muted px-2 py-1 rounded-xs">
               #{" "}{tag}
             </span>

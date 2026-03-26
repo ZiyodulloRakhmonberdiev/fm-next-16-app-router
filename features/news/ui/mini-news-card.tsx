@@ -8,8 +8,8 @@ import { resolveNewsImageSrc } from "@/features/news/lib/resolve-news-image-src"
 import { getVideoPoster } from "@/features/news/ui/news-listing/news-listing-utils"
 import { Card } from "@/shared/common/components/ui/card"
 import { cn } from "@/shared/common/lib/utils"
-import { formatDateISO, formatDateTimeLocale } from "@/shared/common/lib/formatter"
 import type { AppLocale } from "@/shared/common/lib/formatter"
+import { NewsCardContent } from "@/shared/common/components/news-sections/news-card-content"
 
 export type MiniNewsCardVariant =
   | "banner-side"
@@ -55,22 +55,8 @@ export function MiniNewsCard({
           ) : null}
         </Link>
 
-        <div className="flex min-w-0 flex-1 flex-col justify-evenly gap-1 py-1">
-          <Link
-            href={`/category/${item.categorySlug}`}
-            className="flex items-center gap-1  capitalize text-muted-foreground hover:underline"
-          >
-            <span className="block size-2 shrink-0 rounded-full bg-brand" />
-            <span className="text-xs capitalize">{categoryLabel}</span>
-          </Link>
-          <Link href={`/news/${item.slug}`} className="line-clamp-2 text-sm font-medium hover:underline">
-            {item.title}
-          </Link>
-          <div className="flex items-center justify-start gap-1 text-xs text-muted-foreground">
-            <time dateTime={formatDateISO(item.publishedAt)} className="shrink-0">
-              {formatDateTimeLocale(item.publishedAt, locale)}
-            </time>
-          </div>
+        <div className="flex flex-col justify-between gap-0.5 py-1">
+          <NewsCardContent item={item} locale={locale} categoryLabel={categoryLabel} variant="stacked" dateVariant="dateTimeSlash" descriptionClassName="hidden" titleClassName="line-clamp-2" />
         </div>
       </div>
     </Card>

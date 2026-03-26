@@ -18,8 +18,6 @@ import { formatDateTimeLocale } from "@/shared/common/lib/formatter"
 import type { AppLocale } from "@/shared/common/lib/formatter"
 import { useTranslations } from "next-intl"
 import { useLocale } from "next-intl"
-import { Input } from "@/shared/common/components/ui/input"
-import { Label } from "@/shared/common/components/ui/label"
 import { AuthModal } from "@/features/auth/ui/auth-modal"
 import { LoadMoreButton } from "@/shared/common/components/molecules/load-more-button"
 
@@ -134,7 +132,7 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
   }
 
   async function loadComments(offset = 0, append = false) {
-    const res = await fetch(`/api/news/${newsRef}/comments?limit=5&offset=${offset}`, { cache: "no-store" })
+    const res = await fetch(`/api/news/${newsRef}/comments?limit=12&offset=${offset}`, { cache: "no-store" })
     if (!res.ok) return
     const data = await res.json()
     const next = (data.comments ?? []) as CommentItem[]
@@ -307,7 +305,6 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
           </Button>
           <h3 className="text-lg font-semibold">{t("comments")}</h3>
         </div>
-        {/* ({totalComments})  */}
         {rootComments.map((c) => (
           <div key={c._id} className="flex gap-3">
             <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-medium text-primary-foreground">

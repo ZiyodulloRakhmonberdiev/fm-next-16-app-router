@@ -25,7 +25,7 @@ export default function RowSection({ categorySlug }: RowSectionProps) {
       .filter(isImageTypeRawNews)
       .filter((n) => n.categorySlug === categorySlug)
       .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
-      .slice(0, 6)
+      .slice(0, 28)
     return getNewsListForLocale(raw, locale)
   }, [publicNews, locale, categorySlug])
 

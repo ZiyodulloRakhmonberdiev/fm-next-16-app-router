@@ -5,34 +5,27 @@ import { getNewsListForLocale, isImageTypeRawNews, type NewsItem, type RawNewsIt
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
 import { useCategoryLabel } from "@/features/category/model/use-category-label"
 import { Card } from "@/shared/common/components/ui/card"
-import { formatDateISO, formatDateTimeLocale } from "@/shared/common/lib/formatter"
 import type { AppLocale } from "@/shared/common/lib/formatter"
-import { Link } from "@/i18n/navigation"
 import { useLocale, useTranslations } from "next-intl"
 import { NewsSectionHeader } from "@/shared/common/components/news-sections/news-section-header"
 import { FeaturedNewsCard } from "@/features/news/ui/featured-news-card"
+import { NewsCardContent } from "@/shared/common/components/news-sections/news-card-content"
 
 function BreakingListCard({ item, locale }: { item: NewsItem; locale: AppLocale }) {
   const categoryLabel = useCategoryLabel(item.categorySlug, locale, item.category)
   return (
     <Card className="flex flex-col gap-2 rounded-sm border-none p-3 shadow-none bg-card">
-      <div className="flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground">
-        <div className="flex items-center gap-1">
-          <span className="block w-2 h-2 rounded-full bg-brand"></span>
-          <span className="font-mono capitalize text-muted-foreground">{categoryLabel}</span>
-
-        </div>
-        <span aria-hidden>/</span>
-        <time dateTime={formatDateISO(item.publishedAt)}>{formatDateTimeLocale(item.publishedAt, locale)}</time>
-      </div>
-      <h4 className="text-sm font-semibold leading-tight">
-        <Link href={`/news/${item.slug}`} className="hover:underline">
-          <span className="line-clamp-2 md:line-clamp-3">{item.title ?? ""}</span>
-        </Link>
-      </h4>
-      <p className="text-sm text-muted-foreground">
-        <span className="line-clamp-2 md:line-clamp-3">{item.description ?? ""}</span>
-      </p>
+      <NewsCardContent
+        item={item}
+        locale={locale}
+        categoryLabel={categoryLabel}
+        titleClassName="text-sm"
+        categoryClassName="font-mono"
+        titleLineClampClassName="line-clamp-2 md:line-clamp-3"
+        descriptionLineClampClassName="line-clamp-2 md:line-clamp-3"
+        variant="inline"
+        dateVariant="dateTimeSlash"
+      />
     </Card>
   )
 }

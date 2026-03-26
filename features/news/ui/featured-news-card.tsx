@@ -6,12 +6,9 @@ import type { NewsItem } from "@/features/news/model"
 import { resolveNewsImageSrc } from "@/features/news/lib/resolve-news-image-src"
 import { Card } from "@/shared/common/components/ui/card"
 import { cn } from "@/shared/common/lib/utils"
-import {
-  formatDateISO,
-  formatDateTimeLocale,
-} from "@/shared/common/lib/formatter"
 import type { AppLocale } from "@/shared/common/lib/formatter"
 import { useCategoryLabel } from "@/features/category/model/use-category-label"
+import { NewsCardContent } from "@/shared/common/components/news-sections/news-card-content"
 
 export type FeaturedNewsCardVariant = "banner" | "column"
 
@@ -30,6 +27,7 @@ export function FeaturedNewsCard({
   className,
 }: FeaturedNewsCardProps) {
   const img = resolveNewsImageSrc(item.images?.[0])
+  const categoryLabel = useCategoryLabel(item.categorySlug, locale, item.category)
 
   if (variant === "column") {
     return (
@@ -52,23 +50,14 @@ export function FeaturedNewsCard({
           </div>
         </Link>
         <div className="flex flex-col gap-2 p-4">
-          <div className="flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground">
-            <span className="font-medium uppercase italic text-brand">
-              {useCategoryLabel(item.categorySlug, locale, item.category)}
-            </span>
-            <span aria-hidden>/</span>
-            <time dateTime={formatDateISO(item.publishedAt)}>
-              {formatDateTimeLocale(item.publishedAt, locale)}
-            </time>
-          </div>
-          <h3 className="text-lg font-semibold leading-tight">
-            <Link href={`/news/${item.slug}`} className="hover:underline">
-              <span className="line-clamp-3">{item.title}</span>
-            </Link>
-          </h3>
-          <p className="text-sm text-muted-foreground">
-            <span className="line-clamp-3">{item.description ?? ""}</span>
-          </p>
+          <NewsCardContent
+            item={item}
+            locale={locale}
+            categoryLabel={categoryLabel}
+            titleClassName="text-lg"
+            variant="inline"
+            dateVariant="dateTimeSlash"
+          />
         </div>
       </Card>
     )
@@ -88,28 +77,15 @@ export function FeaturedNewsCard({
         ) : null}
       </Link>
       <div className="flex flex-col gap-2 p-3">
-       <div className="flex items-center justify-start gap-1">
-       <Link href={`/category/${item.categorySlug}`} className="text-xs text-muted-foreground  capitalize hover:underline flex items-center gap-1">
-          <span className="block w-2 h-2 bg-brand rounded-full"></span>
-          <span className="text-xs capitalize">{useCategoryLabel(item.categorySlug, locale, item.category)}</span>
-        </Link>
-        <span aria-hidden className="text-muted-foreground text-xs">/</span>
-        <time
-          dateTime={formatDateISO(item.publishedAt)}
-          className="text-xs text-muted-foreground"
-        >
-          {formatDateTimeLocale(item.publishedAt, locale)}
-        </time>
-       </div>
-        <h3 className="line-clamp-3 text-base font-semibold leading-tight hover:underline">
-          <Link href={`/news/${item.slug}`} className="hover:underline">
-            {item.title}
-          </Link>
-        </h3>
-        <span className="line-clamp-3 text-sm leading-tight text-muted-foreground">
-          {item.description}
-        </span>
-        
+        <NewsCardContent
+          item={item}
+          locale={locale}
+          categoryLabel={categoryLabel}
+          variant="inline"
+          dateVariant="dateTimeSlash"
+          titleClassName="text-base"
+          descriptionClassName="leading-tight"
+        />
       </div>
     </Card>
   )

@@ -23,7 +23,7 @@ export default function RelatedNews(props: RelatedNewsProps) {
   const sectionTitle = isLatestMode ? t("latest_news") : t("related_news")
 
   const [visibleCount, setVisibleCount] = React.useState(
-    isLatestMode && latestLimit ? latestLimit : 4
+    isLatestMode && latestLimit ? latestLimit : 12
   )
 
   const items = React.useMemo(() => {
