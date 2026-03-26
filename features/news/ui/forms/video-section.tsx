@@ -29,7 +29,7 @@ export function VideoForm({
     (!youtubeEmbedUrl && videoUrl.trim() ? videoUrl.trim() : '') ||
     (!youtubeEmbedUrl && videoDisplayUrl ? videoDisplayUrl : '')
   return (
-    <Card className='pt-0 md:pt-4 border-none md:border-border shadow-none'>
+    <Card className='pt-0 md:pt-4 border-none bg-transparent md:border-border shadow-none'>
       <CardHeader className='px-0'>
         <CardTitle>Video</CardTitle>
         <CardDescription>URL yoki qurilmangizdan dan kiriting. Video kiritilsa yangilik turi «video» deb saqlanadi.</CardDescription>

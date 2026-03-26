@@ -47,6 +47,7 @@ export function getSeedSiteSettings(): SiteSettingsPayload {
       botToken: seed.databaseBackup.botToken,
       chatId: seed.databaseBackup.chatId,
       threadId: seed.databaseBackup.threadId || undefined,
+      commentThreadId: seed.databaseBackup.commentThreadId || undefined,
     },
   }
 }

@@ -184,3 +184,69 @@ export async function runDatabaseBackupToTelegram(
     gzipBytes: archive.gzipBytes,
   }
 }
+
+function escapeTelegramHtml(text: string): string {
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+}
+
+function resolvePublicBaseUrl(requestOrigin: string): string {
+  const fromEnv =
+    process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
+    process.env.SITE_URL?.trim() ||
+    process.env.PUBLIC_SITE_URL?.trim()
+  if (fromEnv) return fromEnv.replace(/\/$/, '')
+  return requestOrigin.replace(/\/$/, '')
+}
+
+export async function sendPendingCommentAlertToTelegram(input: {
+  settings: DatabaseBackupSettings
+  requestOrigin: string
+  newsTitle: string
+  commentText: string
+}): Promise<{ ok: true } | { ok: false; error: string; telegramDescription?: string }> {
+  const token = input.settings.botToken.trim()
+  const chatId = input.settings.chatId.trim()
+  if (!token || !chatId) {
+    return { ok: false, error: "Comment alert uchun bot token/chat id bo'sh" }
+  }
+
+  const threadRaw = input.settings.commentThreadId?.trim() || input.settings.threadId?.trim()
+  const threadId = threadRaw ? Number(threadRaw) : undefined
+  const base = resolvePublicBaseUrl(input.requestOrigin)
+  const reviewUrl = `${base}/dashboard/comments`
+
+  const text = [
+    `<b>${escapeTelegramHtml(input.newsTitle)}</b>`,
+    escapeTelegramHtml(input.commentText),
+  ].join('\n\n')
+
+  const payload: Record<string, unknown> = {
+    chat_id: chatId,
+    parse_mode: 'HTML',
+    text,
+    disable_web_page_preview: true,
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: 'Preview', url: reviewUrl }],
+      ],
+    },
+  }
+  if (threadId != null && Number.isFinite(threadId)) {
+    payload.message_thread_id = Math.floor(threadId)
+  }
+
+  const url = `https://api.telegram.org/bot${token}/sendMessage`
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  const data = (await res.json().catch(() => null)) as
+    | { ok?: boolean; description?: string }
+    | null
+  if (!res.ok || !data?.ok) {
+    const desc = typeof data?.description === 'string' ? data.description : res.statusText
+    return { ok: false, error: 'Telegram xatosi', telegramDescription: desc }
+  }
+  return { ok: true }
+}

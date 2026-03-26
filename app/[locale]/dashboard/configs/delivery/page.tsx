@@ -1,5 +1,6 @@
 'use client'
 
+import * as React from 'react'
 import {
   Card,
   CardContent,
@@ -22,6 +23,7 @@ import type { SiteSettingsPayload } from '@/shared/common/lib/site-settings-type
 import { useSiteSettings } from '@/features/dashboard/configs/site-settings-context'
 import { ConfigsLoading, ConfigsPageShell } from '../_components/configs-page-shell'
 import { Database } from 'lucide-react'
+import { toast } from 'sonner'
 
 const MODEL_KEYS = [
   'news',
@@ -52,7 +54,44 @@ export default function ConfigsContentDeliveryPage() {
     handleSaveDatabaseBackup,
     handleSendDatabaseBackupNow,
   } = useSiteSettings()
+  const [restoreFile, setRestoreFile] = React.useState<File | null>(null)
+  const [restoringDatabase, setRestoringDatabase] = React.useState(false)
+
   if (loading || !data) return <ConfigsLoading />
+
+  const handleRestoreNow = async () => {
+    if (!restoreFile) {
+      toast.error('Backup fayl tanlang')
+      return
+    }
+
+    setRestoringDatabase(true)
+    try {
+      const form = new FormData()
+      form.append('file', restoreFile, restoreFile.name)
+
+      const res = await fetch('/api/admin/database-restore', {
+        method: 'POST',
+        body: form,
+      })
+
+      const json = (await res.json().catch(() => null)) as
+        | { ok?: boolean; error?: string; inserted?: Record<string, number> }
+        | null
+
+      if (res.ok && json?.ok) {
+        toast.success('Tiklash tugadi')
+        setRestoreFile(null)
+        return
+      }
+
+      toast.error((json?.error ?? 'Tiklashda xato') as string)
+    } catch {
+      toast.error('Tiklashda xato')
+    } finally {
+      setRestoringDatabase(false)
+    }
+  }
 
   return (
     <ConfigsPageShell>
@@ -188,26 +227,28 @@ export default function ConfigsContentDeliveryPage() {
                 </Button>
               </div>
 
-              <div className="space-y-4 border-t border-border pt-6">
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent>
+              <div className="space-y-4">
                 <div className="flex items-start gap-2">
                   <Database className="mt-0.5 size-5 shrink-0 text-muted-foreground" aria-hidden />
                   <div className="min-w-0 space-y-1">
                     <p className="text-sm font-medium leading-none">MongoDB backup → Telegram</p>
-                    <p className="text-xs text-muted-foreground">
-                      Alohida bot va chat (yangiliklar Telegramidan mustaqil). Avtomatik: Vercel cron{' '}
-                      <code className="rounded bg-muted px-1 py-0.5 text-[11px]">/api/cron/database-backup</code>{' '}
-                      — har kuni UTC 02:00. Maxfiy kalit:{' '}
-                      <code className="rounded bg-muted px-1 py-0.5 text-[11px]">CRON_SECRET</code> yoki{' '}
-                      <code className="rounded bg-muted px-1 py-0.5 text-[11px]">BACKUP_CRON_SECRET</code>{' '}
-                      (so‘rov sarlavhasi:{' '}
-                      <code className="rounded bg-muted px-1 py-0.5 text-[11px]">Authorization: Bearer …</code>).
-                    </p>
                   </div>
                 </div>
                 <div className="flex items-center justify-between rounded-md border p-3">
                   <div>
                     <Label>Avtomatik backup (cron)</Label>
-                    <p className="text-xs text-muted-foreground">Yoqilganda reja bo‘yicha yuboriladi.</p>
+                    <p className="text-xs text-muted-foreground">
+                      Har kuni 03:00 Tashkent (Vercel cron: UTC 22:00). Variantlar:
+                      taxminan 72 soat (har 3-kun oraligi):{" "}
+                      <code className="rounded bg-muted px-1 py-0.5 text-[11px]">0 22 */3 * *</code>; har
+                      haftada:{" "}
+                      <code className="rounded bg-muted px-1 py-0.5 text-[11px]">0 22 * * 1</code>{" "}
+                      (dushanba; kunni o'zingizcha o'zgartiring).
+                    </p>
                   </div>
                   <Switch
                     checked={data.databaseBackup.enabled}
@@ -242,6 +283,16 @@ export default function ConfigsContentDeliveryPage() {
                     placeholder="42"
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label>Comment thread ID (ixtiyoriy)</Label>
+                  <Input
+                    value={data.databaseBackup.commentThreadId ?? ''}
+                    onChange={(e) =>
+                      setDatabaseBackupField({ commentThreadId: e.target.value || undefined })
+                    }
+                    placeholder="Masalan: 77"
+                  />
+                </div>
                 <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
                   <Button
                     type="button"
@@ -259,6 +310,46 @@ export default function ConfigsContentDeliveryPage() {
                     disabled={sendingDatabaseBackup}
                   >
                     {sendingDatabaseBackup ? 'Yuborilmoqda…' : 'Backupni hozir yuborish'}
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-background/40">
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-start gap-2">
+                  <Database className="mt-0.5 size-5 shrink-0 text-muted-foreground" aria-hidden />
+                  <div className="min-w-0 space-y-1">
+                    <p className="text-sm font-medium leading-none">MongoDB restore</p>
+                    <p className="text-xs text-muted-foreground">
+                      Backup arxivini yuklab, DB ni to&apos;liq almashtiradi.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Backup fayl (.json / .json.gz / .gz)</Label>
+                  <Input
+                    type="file"
+                    accept=".json,.gz,.json.gz,application/gzip,application/json"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0] ?? null
+                      setRestoreFile(f)
+                    }}
+                    autoComplete="off"
+                    disabled={restoringDatabase}
+                  />
+                </div>
+
+                <div className="flex justify-end">
+                  <Button
+                    type="button"
+                    onClick={() => void handleRestoreNow()}
+                    disabled={!restoreFile || restoringDatabase}
+                  >
+                    {restoringDatabase ? 'Tiklanmoqda…' : 'Backupdan tiklash'}
                   </Button>
                 </div>
               </div>

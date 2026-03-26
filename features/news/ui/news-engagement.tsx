@@ -47,6 +47,57 @@ const reactionButtons: { type: ReactionType; label: string }[] = [
   { type: "angry", label: "😡" },
 ]
 
+const COMMENT_RULES_TEXT: Record<"uz" | "uzb" | "ru" | "en", { title: string; body: string }> = {
+  uz: {
+    title: "Diqqat!",
+    body:
+      "Izoh qoldiruvchilarga eslatma!\n" +
+      "• O'zbekiston Respublikasi qonunchiligiga ko'ra tarqatilishi taqiqlangan ma'lumotlar;\n" +
+      "• Davlat axborot xavfsizligiga tahdid soluvchi buzg'unchi sharhlar;\n" +
+      "• Tahqirlashlar, so'kinishlar, uyatli so'zlar;\n" +
+      "• Asoslanmagan, tasdiqlanmagan ma'lumotlarni saqlovchi izohlar;\n" +
+      "• Muayyan shaxs yoki uning yaqinlariga qaratilgan haqoratli so'zlar ogohlantirishsiz o'chiriladi.\n\n" +
+      "Bunday xarakterdagi sharhlar qoldirishni muntazam davom ettirish akkauntning butunlay bloklanishiga olib kelishi mumkin.\n\n" +
+      "Aziz obunachilar! Bahslarda, izoh hamda fikr bildirishda o'zaro hurmatni saqlang!",
+  },
+  uzb: {
+    title: "Diqqat!",
+    body:
+      "Izoh qoldiruvchilarga eslatma!\n" +
+      "• O‘zbekiston Respublikasi qonunchiligiga ko‘ra tarqatilishi taqiqlangan ma’lumotlar;\n" +
+      "• Davlat axborot xavfsizligiga tahdid soluvchi buzg‘unchi sharhlar;\n" +
+      "• Tahqirlashlar, so‘kinishlar, uyatli so‘zlar;\n" +
+      "• Asoslanmagan, tasdiqlanmagan ma’lumotlarni saqlovchi izohlar;\n" +
+      "• Muayyan shaxs yoki uning yaqinlariga qaratilgan haqoratli so‘zlar ogohlantirishsiz o‘chiriladi.\n\n" +
+      "Bunday xarakterdagi sharhlar qoldirishni muntazam davom ettirish akkauntning butunlay bloklanishiga olib kelishi mumkin.\n\n" +
+      "Aziz obunachilar! Bahslarda, izoh hamda fikr bildirishda o‘zaro hurmatni saqlang!",
+  },
+  ru: {
+    title: "Внимание!",
+    body:
+      "Напоминание для оставляющих комментарии!\n" +
+      "• Материалы, распространение которых запрещено законодательством Республики Узбекистан;\n" +
+      "• Деструктивные комментарии, угрожающие информационной безопасности государства;\n" +
+      "• Оскорбления, нецензурная брань и непристойные выражения;\n" +
+      "• Неподтверждённые и необоснованные сведения;\n" +
+      "• Оскорбления, направленные на конкретное лицо или его близких, удаляются без предупреждения.\n\n" +
+      "Систематическое размещение подобных комментариев может привести к полной блокировке аккаунта.\n\n" +
+      "Уважаемые подписчики! Соблюдайте взаимное уважение в спорах, комментариях и обсуждениях.",
+  },
+  en: {
+    title: "Attention!",
+    body:
+      "Reminder for commenters!\n" +
+      "• Information prohibited by the laws of the Republic of Uzbekistan;\n" +
+      "• Destructive comments threatening national information security;\n" +
+      "• Insults, profanity, and obscene language;\n" +
+      "• Unfounded or unverified information;\n" +
+      "• Offensive remarks directed at a specific person or their relatives will be removed without warning.\n\n" +
+      "Repeated posting of such comments may result in permanent account suspension.\n\n" +
+      "Dear subscribers! Please maintain mutual respect in debates, comments, and discussions.",
+  },
+}
+
 export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string }) {
   const t = useTranslations("common")
   const ta = useTranslations("auth")
@@ -68,6 +119,7 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
 
   const [authModalOpen, setAuthModalOpen] = useState(false)
   const [authMode, setAuthMode] = useState<"login" | "register">("login")
+  const [rulesOpen, setRulesOpen] = useState(false)
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
   const [deletingComment, setDeletingComment] = useState(false)
 
@@ -222,6 +274,8 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
   }, [visibleComments])
 
   const totalReactions = (counts.like ?? 0) + (counts.love ?? 0) + (counts.laugh ?? 0) + (counts.sad ?? 0) + (counts.angry ?? 0)
+  const rulesLocale = (["uz", "uzb", "ru", "en"].includes(locale) ? locale : "uz") as "uz" | "uzb" | "ru" | "en"
+  const rulesText = COMMENT_RULES_TEXT[rulesLocale]
 
   return (
     <section className="mt-8 space-y-8">
@@ -247,7 +301,12 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
         </div>
       </div>
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold">{t("comments")} </h3>
+        <div className="flex items-center justify-between gap-3">
+          <h3 className="text-lg font-semibold">{t("comments")}</h3>
+          <Button type="button" variant="outline" size="sm" onClick={() => setRulesOpen(true)}>
+            Izoh qoidalari
+          </Button>
+        </div>
         {/* ({totalComments})  */}
         {rootComments.map((c) => (
           <div key={c._id} className="flex gap-3">
@@ -403,6 +462,18 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
         defaultMode={authMode}
         onSuccess={() => setAuthModalOpen(false)}
       />
+
+      <Dialog
+        open={rulesOpen}
+        onOpenChange={setRulesOpen}
+      >
+        <DialogContent className="sm:max-w-xl">
+          <DialogHeader>
+            <DialogTitle>{rulesText.title}</DialogTitle>
+          </DialogHeader>
+          <div className="whitespace-pre-line text-sm leading-6 text-muted-foreground">{rulesText.body}</div>
+        </DialogContent>
+      </Dialog>
 
       <Dialog
         open={pendingDeleteId !== null}

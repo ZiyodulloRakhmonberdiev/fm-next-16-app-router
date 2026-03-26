@@ -6,6 +6,12 @@ import { NewsCommentModel } from "@/features/news/model/comment.model"
 import { UserModel } from "@/features/users/model/user.model"
 import { NewsModel } from "@/features/news/model/news.model"
 import { normalizeRole } from "@/shared/common/lib/rbac"
+import {
+  SiteSettingsModel,
+  SITE_SETTINGS_DOCUMENT_ID,
+  leanDocToPayload,
+} from "@/features/dashboard/configs/site-settings.model"
+import { sendPendingCommentAlertToTelegram } from "@/shared/common/lib/database-backup"
 
 const newsFilter = (id: string) => ({
   $or: [{ newsId: id }, { newsSlug: id }],
@@ -74,7 +80,7 @@ export async function POST(
   const me = await UserModel.findById(session.user.id).lean()
   const newsId = (await params).id
 
-  const news = await NewsModel.findById(newsId).select("slug").lean()
+  const news = await NewsModel.findById(newsId).select("slug title").lean()
   if (!news) return Response.json({ error: "Yangilik topilmadi" }, { status: 404 })
   const newsSlug = news.slug
 
@@ -112,5 +118,28 @@ export async function POST(
     replyToUserLogin,
   })
   const plain = comment.toObject ? comment.toObject() : (comment as unknown as Record<string, unknown>)
+
+  if (status === "pending") {
+    const titleObj = (news as { title?: Record<string, string | undefined> }).title
+    const title =
+      titleObj?.uzb?.trim() ||
+      titleObj?.uz?.trim() ||
+      titleObj?.ru?.trim() ||
+      titleObj?.en?.trim() ||
+      "Yangilik"
+    const origin = new URL(req.url).origin
+    const settingsDoc = await SiteSettingsModel.findById(SITE_SETTINGS_DOCUMENT_ID).lean()
+    const settingsPayload = leanDocToPayload(settingsDoc)
+    const backupSettings = settingsPayload?.databaseBackup
+    if (backupSettings?.botToken?.trim() && backupSettings?.chatId?.trim()) {
+      void sendPendingCommentAlertToTelegram({
+        settings: backupSettings,
+        requestOrigin: origin,
+        newsTitle: title,
+        commentText: content,
+      })
+    }
+  }
+
   return Response.json(plain, { status: 201 })
 }

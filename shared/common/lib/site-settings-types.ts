@@ -54,6 +54,8 @@ export type DatabaseBackupSettings = {
   botToken: string
   chatId: string
   threadId?: string
+  /** Pending izohlar alerti uchun alohida thread */
+  commentThreadId?: string
 }
 
 export type SiteSettingsPayload = {

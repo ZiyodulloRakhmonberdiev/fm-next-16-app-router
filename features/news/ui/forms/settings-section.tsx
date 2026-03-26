@@ -102,7 +102,7 @@ export function SettingsForm({
     : null
   const [showTelegramPost, setShowTelegramPost] = useState(false)
   return (
-    <Card className="p-0 border-none shadow-none">
+    <Card className="p-0 border-none shadow-none bg-transparent">
       <CardContent className="space-y-6 px-0">
         <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border p-4">
           <Label htmlFor="authorsChoice" className="cursor-pointer">

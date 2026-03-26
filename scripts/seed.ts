@@ -203,6 +203,7 @@ export const seed = {
     botToken: "",
     chatId: "",
     threadId: "",
+    commentThreadId: "",
   } as const,
 
   users: [

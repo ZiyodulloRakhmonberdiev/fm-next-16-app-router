@@ -67,6 +67,7 @@ const SiteSettingsSchema = new Schema<SiteSettingsDoc>(
       botToken: { type: String, default: '' },
       chatId: { type: String, default: '' },
       threadId: { type: String },
+      commentThreadId: { type: String },
     },
   },
   { timestamps: true }
@@ -80,6 +81,7 @@ const defaultDatabaseBackup = (): SiteSettingsPayload['databaseBackup'] => ({
   botToken: '',
   chatId: '',
   threadId: undefined,
+  commentThreadId: undefined,
 })
 
 export function leanDocToPayload(doc: SiteSettingsDoc | null | undefined): SiteSettingsPayload | null {
@@ -98,6 +100,9 @@ export function leanDocToPayload(doc: SiteSettingsDoc | null | undefined): SiteS
           botToken: dbBackup.botToken ?? '',
           chatId: dbBackup.chatId ?? '',
           threadId: dbBackup.threadId?.trim() ? dbBackup.threadId : undefined,
+          commentThreadId: dbBackup.commentThreadId?.trim()
+            ? dbBackup.commentThreadId
+            : undefined,
         }
       : defaultDatabaseBackup(),
   }

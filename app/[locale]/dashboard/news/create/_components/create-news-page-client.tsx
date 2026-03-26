@@ -44,7 +44,7 @@ export function CreateNewsPageClient(props: CreateNewsFormProps) {
         </div>
       </div>
 
-      <Card className="pt-4 border-none shadow-none">
+      <Card className="pt-4 border-none bg-transparent shadow-none">
         <CardContent className='px-0'>
           <CreateNewsForm
             {...props}

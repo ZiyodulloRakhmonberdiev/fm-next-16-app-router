@@ -40,6 +40,7 @@ export function ConfigsPage() {
     botToken: '',
     chatId: '',
     threadId: undefined,
+    commentThreadId: undefined,
   })
 
   useEffect(() => {
@@ -517,7 +518,13 @@ export function ConfigsPage() {
                 <div className="flex items-center justify-between rounded-md border p-3">
                   <div>
                     <Label>Avtomatik backup (cron)</Label>
-                    <p className="text-xs text-muted-foreground">Kunlik reja (Vercel: UTC 02:00).</p>
+                    <p className="text-xs text-muted-foreground">
+                      Har kuni 03:00 Tashkent (Vercel cron: UTC 22:00). Variantlar: har 72 soatda:
+                      <code className="rounded bg-muted px-1 py-0.5 text-[11px]">0 22 */3 * *</code>; har
+                      haftada:
+                      <code className="rounded bg-muted px-1 py-0.5 text-[11px]">0 22 * * 1</code>{" "}
+                      (dushanba; kunni o'zingizcha o'zgartiring).
+                    </p>
                   </div>
                   <Switch
                     checked={data.databaseBackup.enabled}
@@ -578,6 +585,26 @@ export function ConfigsPage() {
                       )
                     }
                     placeholder="42"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Comment thread ID (ixtiyoriy)</Label>
+                  <Input
+                    value={data.databaseBackup.commentThreadId ?? ''}
+                    onChange={(e) =>
+                      setData((prev) =>
+                        prev
+                          ? {
+                              ...prev,
+                              databaseBackup: {
+                                ...prev.databaseBackup,
+                                commentThreadId: e.target.value || undefined,
+                              },
+                            }
+                          : prev
+                      )
+                    }
+                    placeholder="Masalan: 77"
                   />
                 </div>
                 <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
