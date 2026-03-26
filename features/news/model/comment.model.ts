@@ -20,6 +20,8 @@ export interface INewsComment {
   confirmedByUserName?: string
   replyToCommentId?: string
   replyToUserLogin?: string
+  /** Pending holatda Telegram alert xabari ID si */
+  pendingTelegramMessageId?: number
   createdAt: Date
   updatedAt: Date
 }
@@ -46,6 +48,7 @@ const NewsCommentSchema = new Schema<INewsComment>(
     confirmedByUserName: String,
     replyToCommentId: String,
     replyToUserLogin: String,
+    pendingTelegramMessageId: Number,
   },
   { timestamps: true }
 )

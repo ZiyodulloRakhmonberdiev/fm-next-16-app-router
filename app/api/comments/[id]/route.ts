@@ -4,6 +4,12 @@ import { authOptions } from "@/shared/common/lib/auth-options"
 import { dbConnect } from "@/shared/common/lib/db"
 import { NewsCommentModel } from "@/features/news/model/comment.model"
 import { normalizeRole } from "@/shared/common/lib/rbac"
+import {
+  SiteSettingsModel,
+  SITE_SETTINGS_DOCUMENT_ID,
+  leanDocToPayload,
+} from "@/features/dashboard/configs/site-settings.model"
+import { deletePendingCommentAlertFromTelegram } from "@/shared/common/lib/database-backup"
 
 export async function DELETE(
   _req: NextRequest,
@@ -20,6 +26,18 @@ export async function DELETE(
   const canDeleteAsStaff = role === "ceo" || role === "administrator" || role === "moderator"
   if (!canDeleteAsStaff && comment.userId !== session.user.id) {
     return Response.json({ error: "Forbidden" }, { status: 403 })
+  }
+
+  if (comment.status === "pending" && comment.pendingTelegramMessageId) {
+    const settingsDoc = await SiteSettingsModel.findById(SITE_SETTINGS_DOCUMENT_ID).lean()
+    const settingsPayload = leanDocToPayload(settingsDoc)
+    const backupSettings = settingsPayload?.databaseBackup
+    if (backupSettings?.botToken?.trim() && backupSettings?.chatId?.trim()) {
+      await deletePendingCommentAlertFromTelegram({
+        settings: backupSettings,
+        messageId: comment.pendingTelegramMessageId,
+      })
+    }
   }
 
   await comment.deleteOne()

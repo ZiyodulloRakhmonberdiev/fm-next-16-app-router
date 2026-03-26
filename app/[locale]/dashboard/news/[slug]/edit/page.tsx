@@ -7,11 +7,12 @@ import { getServerApiUrl } from '@/shared/common/lib/server-api-url'
 import type { RawNewsItem } from '@/features/news/model'
 import type { LocaleMap } from '@/shared/common/lib/locale-types'
 import { EditNewsPageClient } from './_components/edit-news-page-client'
+import { normalizeRole } from '@/shared/common/lib/rbac'
 
 type Props = {
   params: Promise<{ slug: string }>
 }
-type UserRow = { full_name: string }
+type UserRow = { full_name: string; role: string }
 
 function getFetchOptions(cookie: string | null): RequestInit {
   return {
@@ -61,7 +62,17 @@ export default async function EditNewsPage({ params }: Props) {
     slug: t.slug,
     name: t.name[locale] ?? t.name.uz ?? t.slug,
   }))
-  const authors = Array.from(new Set(usersData.map((u) => u.full_name).filter(Boolean))).sort()
+  const authors = Array.from(
+    new Set(
+      usersData
+        .filter((u) => {
+          const role = normalizeRole(u.role)
+          return role === 'ceo' || role === 'administrator' || role === 'moderator'
+        })
+        .map((u) => u.full_name)
+        .filter(Boolean)
+    )
+  ).sort()
   const existingSlugs = newsData.data.map((n) => n.slug).filter((s) => s !== slug)
 
   return (

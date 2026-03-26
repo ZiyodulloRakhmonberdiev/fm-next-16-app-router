@@ -4,7 +4,7 @@ import * as React from "react"
 import { Link } from "@/i18n/navigation"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { Calendar, Clock, Eye, Facebook, Heart, Link2, MessageSquare, Send, Share2 } from "lucide-react"
+import { Calendar, Clock, Eye, EyeOff, Facebook, Heart, Link2, MessageSquare, Send, Share2 } from "lucide-react"
 import { Button } from "@/shared/common/components/ui/button"
 import { formatDateISO, formatDateTimeLocale } from "@/shared/common/lib/formatter"
 import type { AppLocale } from "@/shared/common/lib/formatter"
@@ -95,6 +95,7 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
   )
 
   const hasVideo = Boolean(news.videoUrl?.trim())
+  const hasManyImages = displayImages.length > 1
 
   const [shareUrl, setShareUrl] = React.useState("")
   const [reactionTotal, setReactionTotal] = React.useState(0)
@@ -341,11 +342,11 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
           <div className="inline-flex items-center gap-2 md:px-1">
             <MessageSquare className="h-4 w-4" />
             {commentTotal} <span className="hidden md:inline-block">{t("comments")}</span>
-          <span aria-hidden className="select-none px-1 md:px-2">·</span>
-          <div className="inline-flex items-center gap-2 md:px-1">
-            <Heart className="h-4 w-4" />
-            {reactionTotal} <span className="hidden md:inline-block">{t("reactions")}</span>
-          </div>
+            <span aria-hidden className="select-none px-1 md:px-2">·</span>
+            <div className="inline-flex items-center gap-2 md:px-1">
+              <Heart className="h-4 w-4" />
+              {reactionTotal} <span className="hidden md:inline-block">{t("reactions")}</span>
+            </div>
           </div>
         </div>
         {hasVideo && (() => {
@@ -401,71 +402,35 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
             )}
           </div>
         )}
-        {!hasVideo && displayImages.length > 1 && (
+        {!hasVideo && hasManyImages && (
           <div className="relative mb-6 w-full">
-            {/* Mobile: carousel */}
-            <div className="md:hidden">
-              <Carousel opts={{ align: "start", loop: true }} className="w-full">
-                <CarouselContent className="ml-0">
-                  {displayImages.map((src, i) => (
-                    <CarouselItem key={src} className="pl-0">
-                      <div className="relative aspect-video w-full overflow-hidden rounded-lg">
-                        {getSafeImageSrc(src) ? (
-                          <Image
-                            src={getSafeImageSrc(src)}
-                            alt={`${news.title} — ${i + 1}`}
-                            fill
-                            className="object-cover"
-                            priority={i === 0}
-                          />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center px-2 text-xs text-muted-foreground text-center">
-                            Rasmni yuklab bo&apos;lmadi
-                          </div>
-                        )}
-                        {/* {i === 0 ? (
-                          <div className="absolute right-3 top-3 z-10">
-                            <SavedNewsActions slug={news.slug} newsId={newsId} overlay />
-                          </div>
-                        ) : null} */}
-                      </div>
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-                <div className="absolute right-2 top-2 z-10 flex translate-y-0 gap-2">
-                  <CarouselPrevious className="static size-10 translate-x-0 translate-y-0 rounded-sm border-none bg-background/90 hover:bg-background" />
-                  <CarouselNext className="static size-10 translate-x-0 translate-y-0 rounded-sm border-none bg-background/90 hover:bg-background" />
-                </div>
-              </Carousel>
-            </div>
-            <div className="hidden md:grid md:grid-cols-2 gap-3">
-              {displayImages.map((src, i) => (
-                <div
-                  key={src || i}
-                  className="relative aspect-video w-full overflow-hidden rounded-lg bg-muted"
-                >
-                  {getSafeImageSrc(src) ? (
-                    <Image
-                      src={getSafeImageSrc(src)}
-                      alt={`${news.title} — ${i + 1}`}
-                      fill
-                      className="object-cover"
-                      priority={i === 0}
-                      sizes="(max-width: 1024px) 100vw, 50vw"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center px-2 text-xs text-muted-foreground text-center">
-                      Rasmni yuklab bo'lmadi
+            <Carousel opts={{ align: "start", loop: true }} className="w-full">
+              <CarouselContent className="ml-0">
+                {displayImages.map((src, i) => (
+                  <CarouselItem key={`${src}-${i}`} className="pl-0">
+                    <div className="relative aspect-video w-full overflow-hidden rounded-lg">
+                      {getSafeImageSrc(src) ? (
+                        <Image
+                          src={getSafeImageSrc(src)}
+                          alt={`${news.title} — ${i + 1}`}
+                          fill
+                          className="object-cover"
+                          priority={i === 0}
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center px-2 text-xs text-muted-foreground text-center">
+                          Rasmni yuklab bo&apos;lmadi
+                        </div>
+                      )}
                     </div>
-                  )}
-                  {/* {i === 0 ? (
-                    <div className="absolute right-3 top-3 z-10">
-                      <SavedNewsActions slug={news.slug} newsId={newsId} overlay />
-                    </div>
-                  ) : null} */}
-                </div>
-              ))}
-            </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <div className="absolute right-2 top-2 z-10 flex translate-y-0 gap-2">
+                <CarouselPrevious className="static size-10 translate-x-0 translate-y-0 rounded-sm border-none bg-background/90 hover:bg-background" />
+                <CarouselNext className="static size-10 translate-x-0 translate-y-0 rounded-sm border-none bg-background/90 hover:bg-background" />
+              </div>
+            </Carousel>
           </div>
         )}
 
@@ -486,28 +451,32 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
                 </div>
               )
             ) : (
-              <div className="grid grid-cols-2 gap-3 w-full">
-                {displayImages.map((src, i) => (
-                  <div
-                    key={src || i}
-                    className="relative aspect-video w-full overflow-hidden rounded-lg bg-muted"
-                  >
-                    {getSafeImageSrc(src) ? (
-                      <Image
-                        src={getSafeImageSrc(src)}
-                        alt={`${news.title} — ${i + 1}`}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 768px) 50vw, 50vw"
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center px-2 text-xs text-muted-foreground text-center">
-                        Rasmni yuklab bo&apos;lmadi
+              <Carousel opts={{ align: "start", loop: true }} className="w-full">
+                <CarouselContent className="ml-0">
+                  {displayImages.map((src, i) => (
+                    <CarouselItem key={`${src}-${i}`} className="pl-0">
+                      <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-muted">
+                        {getSafeImageSrc(src) ? (
+                          <Image
+                            src={getSafeImageSrc(src)}
+                            alt={`${news.title} — ${i + 1}`}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center px-2 text-xs text-muted-foreground text-center">
+                            Rasmni yuklab bo&apos;lmadi
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                ))}
-              </div>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <div className="absolute right-2 top-2 z-10 flex translate-y-0 gap-2">
+                  <CarouselPrevious className="static size-10 translate-x-0 translate-y-0 rounded-sm border-none bg-background/90 hover:bg-background" />
+                  <CarouselNext className="static size-10 translate-x-0 translate-y-0 rounded-sm border-none bg-background/90 hover:bg-background" />
+                </div>
+              </Carousel>
             )}
           </div>
         )}
@@ -532,24 +501,26 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
           <CreatedBy author={news.author} />
         </div>
 
-      
+
         <div className="my-6" />
 
 
         {telegramWidgetPost ? (
           <div className="mt-4 w-full">
             <div className="flex items-center justify-between gap-3">
-              <div className="text-sm font-medium">Telegram</div>
               <Button
                 type="button"
-                variant="outline"
+                variant="secondary"
                 size="sm"
                 onClick={() => setShowTelegramPost((p) => !p)}
-                className="shrink-0"
+                className="flex items-center gap-2 justify-center h-auto py-2"
               >
-                {showTelegramPost ? "Postni yashirish" : "Telegram postni ko‘rsatish"}
+                <Send className="size-4" />
+                <span>Telegram Post</span>
+                {/* {showTelegramPost ? <Eye /> : <EyeOff />} */}
               </Button>
-            </div>
+              </div>
+
 
             {showTelegramPost ? (
               <div className="mt-3 rounded-xl border bg-background p-3 pt-4 shadow-sm">

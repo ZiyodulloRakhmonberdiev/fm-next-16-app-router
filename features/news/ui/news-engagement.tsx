@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { useSession } from "next-auth/react"
-import { Loader2 } from "lucide-react"
+import { Info, Loader2 } from "lucide-react"
 import { Button } from "@/shared/common/components/ui/button"
 import {
   Dialog,
@@ -301,11 +301,11 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
         </div>
       </div>
       <div className="space-y-4">
-        <div className="flex items-center justify-between gap-3">
-          <h3 className="text-lg font-semibold">{t("comments")}</h3>
-          <Button type="button" variant="outline" size="sm" onClick={() => setRulesOpen(true)}>
-            Izoh qoidalari
+        <div className="flex items-center justify-start gap-1.5">
+          <Button type="button" variant="secondary" size="sm" className="rounded-full" onClick={() => setRulesOpen(true)}>
+            <Info />
           </Button>
+          <h3 className="text-lg font-semibold">{t("comments")}</h3>
         </div>
         {/* ({totalComments})  */}
         {rootComments.map((c) => (

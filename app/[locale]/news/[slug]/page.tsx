@@ -15,6 +15,11 @@ import ClientSiteNothingGate from "../../_components/client-site-nothing-gate"
 import ClientServerOffGate from "../../_components/client-server-off-gate"
 import { Flame, History, HomeIcon, Lightbulb, TrendingUpIcon, VideoIcon } from "lucide-react"
 import { getTranslations } from "next-intl/server"
+import {
+  SiteSettingsModel,
+  SITE_SETTINGS_DOCUMENT_ID,
+  leanDocToPayload,
+} from "@/features/dashboard/configs/site-settings.model"
 
 type Props = {
   params: Promise<{ locale: string; slug: string }>
@@ -36,6 +41,17 @@ export default async function NewsPage({ params }: Props) {
     rawObj._id != null && rawObj._id !== ""
       ? String(rawObj._id)
       : undefined
+  const settingsDoc = await SiteSettingsModel.findById(SITE_SETTINGS_DOCUMENT_ID).lean()
+  const settingsPayload = leanDocToPayload(settingsDoc)
+  const socialMap = new Map(
+    (settingsPayload?.socialMedia ?? []).map((item) => [item.slug, item.href])
+  )
+  const socialLinks = [
+    { label: "Telegram", href: socialMap.get("telegram") ?? "" },
+    { label: "Instagram", href: socialMap.get("instagram") ?? "" },
+    { label: "Facebook", href: socialMap.get("facebook") ?? "" },
+    { label: "YouTube", href: socialMap.get("youtube") ?? "" },
+  ].filter((item) => item.href.trim())
 
   return (
     <ClientSiteNothingGate>
@@ -69,18 +85,11 @@ export default async function NewsPage({ params }: Props) {
                 </div>
                 <div className="px-4 text-sm">
                   <nav className="flex flex-col gap-2">
-                    <Link href="/" className="flex items-center gap-3">
-                      <span className="text-lg">Telegram</span>
-                    </Link>
-                    <Link href="/" className="flex items-center gap-3">
-                      <span className="text-lg">Instagram</span>
-                    </Link>
-                    <Link href="/" className="flex items-center gap-3">
-                      <span className="text-lg">Facebook</span>
-                    </Link>
-                    <Link href="/" className="flex items-center gap-3">
-                      <span className="text-lg">YouTube</span>
-                    </Link>
+                    {socialLinks.map((item) => (
+                      <a key={item.label} href={item.href} target="_blank" rel="noreferrer" className="flex items-center gap-3">
+                        <span className="text-lg">{item.label}</span>
+                      </a>
+                    ))}
                   </nav>
                 </div>
               </aside>

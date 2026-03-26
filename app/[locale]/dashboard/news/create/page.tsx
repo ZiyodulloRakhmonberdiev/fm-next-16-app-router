@@ -5,6 +5,7 @@ import type { AppLocale } from '@/shared/common/lib/locale-api'
 import { getServerApiUrl } from '@/shared/common/lib/server-api-url'
 import type { RawNewsItem } from '@/features/news/model'
 import type { LocaleMap } from '@/shared/common/lib/locale-types'
+import { normalizeRole } from '@/shared/common/lib/rbac'
 
 type NamedSlug = { slug: string; name: LocaleMap }
 type UserRow = { full_name: string; role: string }
@@ -54,7 +55,10 @@ export default async function CreateNewsPage() {
   const authors = Array.from(
     new Set(
       usersData
-        .filter((u) => u.role && u.role !== "user")
+        .filter((u) => {
+          const role = normalizeRole(u.role)
+          return role === "ceo" || role === "administrator" || role === "moderator"
+        })
         .map((u) => u.full_name)
         .filter(Boolean)
     )

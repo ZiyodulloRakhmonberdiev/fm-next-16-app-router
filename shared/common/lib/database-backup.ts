@@ -203,7 +203,7 @@ export async function sendPendingCommentAlertToTelegram(input: {
   requestOrigin: string
   newsTitle: string
   commentText: string
-}): Promise<{ ok: true } | { ok: false; error: string; telegramDescription?: string }> {
+}): Promise<{ ok: true; messageId?: number } | { ok: false; error: string; telegramDescription?: string }> {
   const token = input.settings.botToken.trim()
   const chatId = input.settings.chatId.trim()
   if (!token || !chatId) {
@@ -240,6 +240,36 @@ export async function sendPendingCommentAlertToTelegram(input: {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
+  })
+  const data = (await res.json().catch(() => null)) as
+    | { ok?: boolean; description?: string; result?: { message_id?: number } }
+    | null
+  if (!res.ok || !data?.ok) {
+    const desc = typeof data?.description === 'string' ? data.description : res.statusText
+    return { ok: false, error: 'Telegram xatosi', telegramDescription: desc }
+  }
+  return { ok: true, messageId: data?.result?.message_id }
+}
+
+export async function deletePendingCommentAlertFromTelegram(input: {
+  settings: DatabaseBackupSettings
+  messageId?: number
+}): Promise<{ ok: true } | { ok: false; error: string; telegramDescription?: string }> {
+  if (!input.messageId) return { ok: true }
+  const token = input.settings.botToken.trim()
+  const chatId = input.settings.chatId.trim()
+  if (!token || !chatId) {
+    return { ok: false, error: "Comment alert delete uchun bot token/chat id bo'sh" }
+  }
+
+  const url = `https://api.telegram.org/bot${token}/deleteMessage`
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      chat_id: chatId,
+      message_id: input.messageId,
+    }),
   })
   const data = (await res.json().catch(() => null)) as
     | { ok?: boolean; description?: string }

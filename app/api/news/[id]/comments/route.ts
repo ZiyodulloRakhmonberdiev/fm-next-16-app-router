@@ -117,8 +117,6 @@ export async function POST(
     replyToCommentId: body?.replyToCommentId || undefined,
     replyToUserLogin,
   })
-  const plain = comment.toObject ? comment.toObject() : (comment as unknown as Record<string, unknown>)
-
   if (status === "pending") {
     const titleObj = (news as { title?: Record<string, string | undefined> }).title
     const title =
@@ -132,14 +130,20 @@ export async function POST(
     const settingsPayload = leanDocToPayload(settingsDoc)
     const backupSettings = settingsPayload?.databaseBackup
     if (backupSettings?.botToken?.trim() && backupSettings?.chatId?.trim()) {
-      void sendPendingCommentAlertToTelegram({
+      const tg = await sendPendingCommentAlertToTelegram({
         settings: backupSettings,
         requestOrigin: origin,
         newsTitle: title,
         commentText: content,
       })
+      if (tg.ok && tg.messageId) {
+        comment.pendingTelegramMessageId = tg.messageId
+        await comment.save()
+      }
     }
   }
+
+  const plain = comment.toObject ? comment.toObject() : (comment as unknown as Record<string, unknown>)
 
   return Response.json(plain, { status: 201 })
 }

@@ -4,6 +4,12 @@ import { dbConnect } from "@/shared/common/lib/db"
 import { authOptions } from "@/shared/common/lib/auth-options"
 import { NewsCommentModel } from "@/features/news/model/comment.model"
 import { requireAdminSession } from "@/shared/common/lib/require-admin-session"
+import {
+  SiteSettingsModel,
+  SITE_SETTINGS_DOCUMENT_ID,
+  leanDocToPayload,
+} from "@/features/dashboard/configs/site-settings.model"
+import { deletePendingCommentAlertFromTelegram } from "@/shared/common/lib/database-backup"
 
 function moderatorDisplayName(user: {
   name?: string | null
@@ -67,5 +73,21 @@ export async function PATCH(
     new: true,
   }).lean()
   if (!updated) return Response.json({ error: "Izoh topilmadi" }, { status: 404 })
+
+  if (updated.status !== "pending" && updated.pendingTelegramMessageId) {
+    const settingsDoc = await SiteSettingsModel.findById(SITE_SETTINGS_DOCUMENT_ID).lean()
+    const settingsPayload = leanDocToPayload(settingsDoc)
+    const backupSettings = settingsPayload?.databaseBackup
+    if (backupSettings?.botToken?.trim() && backupSettings?.chatId?.trim()) {
+      await deletePendingCommentAlertFromTelegram({
+        settings: backupSettings,
+        messageId: updated.pendingTelegramMessageId,
+      })
+    }
+    await NewsCommentModel.findByIdAndUpdate(updated._id, {
+      $unset: { pendingTelegramMessageId: 1 },
+    })
+  }
+
   return Response.json(updated)
 }
