@@ -19,7 +19,7 @@ import {
   TableRow,
 } from "@/shared/common/components/ui/table"
 import { toast } from "sonner"
-import { Loader2 } from "lucide-react"
+import { Loader2, Trash2 } from "lucide-react"
 import { Link } from "@/i18n/navigation"
 import { useReactionsQuery, useDeleteReactionMutation } from "@/features/dashboard/model/admin-hooks"
 import type { ReactionType, ReactionRow } from "@/features/dashboard/model/admin-api"
@@ -176,16 +176,15 @@ export default function DashboardReactionsPage() {
                     </TableCell>
                     <TableCell className="align-top text-right">
                       <Button
-                        size="sm"
-                        variant="destructive"
-                        className="h-8 text-white hover:text-white"
+                        variant="secondary"
+                        className=""
                         disabled={deleteMutation.isPending && deleteMutation.variables === item._id}
                         onClick={() => remove(item._id)}
                       >
                         {deleteMutation.isPending && deleteMutation.variables === item._id ? (
                           <Loader2 className="size-3.5 animate-spin" />
                         ) : (
-                          "O'chirish"
+                          <Trash2 className="size-4" />
                         )}
                       </Button>
                     </TableCell>

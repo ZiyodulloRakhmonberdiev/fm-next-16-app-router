@@ -5,20 +5,19 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { normalizeRole } from '@/shared/common/lib/rbac'
 import { toast } from 'sonner'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/common/components/ui/card'
+import { Card, CardDescription, CardHeader, CardTitle } from '@/shared/common/components/ui/card'
 import type { AppLocale } from '@/shared/common/lib/locale-api'
 import { LOCALES, LOCALE_LABELS } from '@/shared/common/lib/locale-constants'
 import type { SiteSettingsPayload } from '@/shared/common/lib/site-settings-types'
-import { Database, Settings } from 'lucide-react'
-import { HeadlineSection } from '@/features/dashboard/configs/ui/headline-section'
-import { DescriptionSection } from '@/features/dashboard/configs/ui/description-section'
-import { SocialMediaSection, type UiSocialItem } from '@/features/dashboard/configs/ui/social-media-section'
-import { SiteConfigSection } from '@/features/dashboard/configs/ui/site-config-section'
-import { Label } from '@/shared/common/components/ui/label'
-import { Input } from '@/shared/common/components/ui/input'
-import { Button } from '@/shared/common/components/ui/button'
-import { Switch } from '@/shared/common/components/ui/switch'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/common/components/ui/select'
+import { Settings } from 'lucide-react'
+import { HeadlineSection } from '../configs/_components/headline-section'
+import { DescriptionSection } from '../configs/_components/description-section'
+import { SocialMediaSection, type UiSocialItem } from '../configs/_components/social-media-section'
+import { SiteConfigSection } from '../configs/_components/site-config-section'
+import { ConfigsDeliveryTelegramSection } from '../configs/_components/configs-delivery-telegram-section'
+import { ConfigsDeliveryClientSection } from '../configs/_components/configs-delivery-client-section'
+import { ConfigsDeliveryDatabaseBackupSection } from '../configs/_components/configs-delivery-database-backup-section'
+import type { ClientDeliveryModelKey } from '../configs/_components/configs-delivery-constants'
 
 export function ConfigsPage() {
   const { data: session } = useSession()
@@ -350,283 +349,101 @@ export function ConfigsPage() {
 
       {isCeo ? (
         <>
-          <Card className="border-destructive/40 bg-destructive/5">
-            <CardHeader>
-              <CardTitle className="text-base text-destructive">Danger zone: Telegram credentiallar</CardTitle>
-              <CardDescription>News create/publish bo'lganda Telegramga yuborish uchun sozlamalar. Faqat CEO o&apos;zgartira oladi.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between rounded-md border p-3">
-                <div>
-                  <Label>Telegram yuborishni yoqish</Label>
-                  <p className="text-xs text-muted-foreground">Faqat yoqilganda ishlaydi.</p>
-                </div>
-                <Switch
-                  checked={data.telegram.enabled}
-                  onCheckedChange={(checked) =>
-                    setData((prev) => (prev ? { ...prev, telegram: { ...prev.telegram, enabled: checked } } : prev))
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Bot token</Label>
-                <Input
-                  value={data.telegram.botToken}
-                  onChange={(e) =>
-                    setData((prev) =>
-                      prev ? { ...prev, telegram: { ...prev.telegram, botToken: e.target.value } } : prev
-                    )
-                  }
-                  placeholder="123456:AA..."
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Chat ID</Label>
-                <Input
-                  value={data.telegram.chatId}
-                  onChange={(e) =>
-                    setData((prev) =>
-                      prev ? { ...prev, telegram: { ...prev.telegram, chatId: e.target.value } } : prev
-                    )
-                  }
-                  placeholder="-1001234567890"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Thread ID (ixtiyoriy)</Label>
-                <Input
-                  value={data.telegram.threadId ?? ''}
-                  onChange={(e) =>
-                    setData((prev) =>
-                      prev ? { ...prev, telegram: { ...prev.telegram, threadId: e.target.value || undefined } } : prev
-                    )
-                  }
-                  placeholder="42"
-                />
-              </div>
-              <div className="flex justify-end">
-                <Button type="button" onClick={handleSaveTelegram} disabled={savingTelegram}>
-                  Saqlash
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <ConfigsDeliveryTelegramSection
+            title="Danger zone: Telegram credentiallar"
+            description="Yangiliklar yaratish/chop etishda Telegramga yuborish uchun sozlamalar. Faqat CEO o'zgartira oladi."
+            enabled={data.telegram.enabled}
+            botToken={data.telegram.botToken}
+            chatId={data.telegram.chatId}
+            threadId={data.telegram.threadId}
+            onEnabledChange={(checked) =>
+              setData((prev) => (prev ? { ...prev, telegram: { ...prev.telegram, enabled: checked } } : prev))
+            }
+            onBotTokenChange={(v) =>
+              setData((prev) => (prev ? { ...prev, telegram: { ...prev.telegram, botToken: v } } : prev))
+            }
+            onChatIdChange={(v) =>
+              setData((prev) => (prev ? { ...prev, telegram: { ...prev.telegram, chatId: v } } : prev))
+            }
+            onThreadIdChange={(v) =>
+              setData((prev) => (prev ? { ...prev, telegram: { ...prev.telegram, threadId: v } } : prev))
+            }
+            onSave={handleSaveTelegram}
+            saving={savingTelegram}
+            saveButtonLabel="Saqlash"
+          />
 
-          <Card className="border-destructive/40 bg-destructive/5">
-            <CardHeader>
-              <CardTitle className="text-base text-destructive">Danger zone: Client uzatish boshqaruvi</CardTitle>
-              <CardDescription>Faqat client saytga ta'sir qiladi. Admin dashboard ishlashda davom etadi. Faqat CEO o&apos;zgartira oladi.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label>Rejim</Label>
-                <Select
-                  value={data.clientDelivery.mode}
-                  onValueChange={(value) =>
-                    setData((prev) =>
-                      prev
-                        ? {
-                            ...prev,
-                            clientDelivery: {
-                              ...prev.clientDelivery,
-                              mode: value as SiteSettingsPayload['clientDelivery']['mode'],
-                            },
-                          }
-                        : prev
-                    )
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="normal">normal</SelectItem>
-                    <SelectItem value="nothing">nothing</SelectItem>
-                    <SelectItem value="server-off">server-off</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Title</Label>
-                <Input
-                  value={data.clientDelivery.title}
-                  onChange={(e) =>
-                    setData((prev) =>
-                      prev ? { ...prev, clientDelivery: { ...prev.clientDelivery, title: e.target.value } } : prev
-                    )
-                  }
-                  placeholder="Texnik ishlar"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Description</Label>
-                <Input
-                  value={data.clientDelivery.description}
-                  onChange={(e) =>
-                    setData((prev) =>
-                      prev
-                        ? { ...prev, clientDelivery: { ...prev.clientDelivery, description: e.target.value } }
-                        : prev
-                    )
-                  }
-                  placeholder="Qisqacha tushuntirish"
-                />
-              </div>
-              <div className="grid gap-3 sm:grid-cols-3">
-                {(['news', 'categories', 'tags', 'comments', 'reactions', 'ads', 'team', 'users'] as const).map((key) => (
-                  <div key={key} className="flex items-center justify-between rounded-md border p-3">
-                    <Label className="capitalize">{key}</Label>
-                    <Switch
-                      checked={data.clientDelivery.models[key] ?? true}
-                      onCheckedChange={(checked) =>
-                        setData((prev) =>
-                          prev
-                            ? {
-                                ...prev,
-                                clientDelivery: {
-                                  ...prev.clientDelivery,
-                                  models: { ...prev.clientDelivery.models, [key]: checked },
-                                },
-                              }
-                            : prev
-                        )
-                      }
-                    />
-                  </div>
-                ))}
-              </div>
-              <div className="flex justify-end">
-                <Button type="button" onClick={handleSaveDelivery} disabled={savingDelivery}>
-                  Saqlash
-                </Button>
-              </div>
+          <ConfigsDeliveryClientSection
+            title="Danger zone: Ma'lumot uzatish boshqaruvi"
+            description="Faqat client saytga ta'sir qiladi. Admin dashboard ishlashda davom etadi. Faqat CEO o'zgartira oladi."
+            mode={data.clientDelivery.mode}
+            titleValue={data.clientDelivery.title}
+            descriptionValue={data.clientDelivery.description}
+            models={data.clientDelivery.models}
+            onModeChange={(mode) =>
+              setData((prev) =>
+                prev ? { ...prev, clientDelivery: { ...prev.clientDelivery, mode } } : prev
+              )
+            }
+            onTitleChange={(v) =>
+              setData((prev) =>
+                prev ? { ...prev, clientDelivery: { ...prev.clientDelivery, title: v } } : prev
+              )
+            }
+            onDescriptionChange={(v) =>
+              setData((prev) =>
+                prev ? { ...prev, clientDelivery: { ...prev.clientDelivery, description: v } } : prev
+              )
+            }
+            onModelToggle={(key: ClientDeliveryModelKey, checked) =>
+              setData((prev) =>
+                prev
+                  ? {
+                      ...prev,
+                      clientDelivery: {
+                        ...prev.clientDelivery,
+                        models: { ...prev.clientDelivery.models, [key]: checked },
+                      },
+                    }
+                  : prev
+              )
+            }
+            onSave={handleSaveDelivery}
+            saving={savingDelivery}
+            saveButtonLabel="Saqlash"
+          />
 
-              <div className="space-y-4 border-t border-border pt-6">
-                <div className="flex items-start gap-2">
-                  <Database className="mt-0.5 size-5 shrink-0 text-muted-foreground" aria-hidden />
-                  <div className="min-w-0 space-y-1">
-                    <p className="text-sm font-medium leading-none">MongoDB backup → Telegram</p>
-                    <p className="text-xs text-muted-foreground">
-                      Alohida bot va chat. Cron:{' '}
-                      <code className="rounded bg-muted px-1 py-0.5 text-[11px]">/api/cron/database-backup</code> +{' '}
-                      <code className="rounded bg-muted px-1 py-0.5 text-[11px]">Bearer</code> kalit (
-                      <code className="rounded bg-muted px-1 py-0.5 text-[11px]">CRON_SECRET</code> /{' '}
-                      <code className="rounded bg-muted px-1 py-0.5 text-[11px]">BACKUP_CRON_SECRET</code>).
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between rounded-md border p-3">
-                  <div>
-                    <Label>Avtomatik backup (cron)</Label>
-                    <p className="text-xs text-muted-foreground">
-                      Har kuni 03:00 Tashkent (Vercel cron: UTC 22:00). Variantlar: har 72 soatda:
-                      <code className="rounded bg-muted px-1 py-0.5 text-[11px]">0 22 */3 * *</code>; har
-                      haftada:
-                      <code className="rounded bg-muted px-1 py-0.5 text-[11px]">0 22 * * 1</code>{" "}
-                      (dushanba; kunni o'zingizcha o'zgartiring).
-                    </p>
-                  </div>
-                  <Switch
-                    checked={data.databaseBackup.enabled}
-                    onCheckedChange={(checked) =>
-                      setData((prev) =>
-                        prev
-                          ? { ...prev, databaseBackup: { ...prev.databaseBackup, enabled: checked } }
-                          : prev
-                      )
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Backup bot token</Label>
-                  <Input
-                    value={data.databaseBackup.botToken}
-                    onChange={(e) =>
-                      setData((prev) =>
-                        prev
-                          ? { ...prev, databaseBackup: { ...prev.databaseBackup, botToken: e.target.value } }
-                          : prev
-                      )
-                    }
-                    placeholder="123456:AA..."
-                    autoComplete="off"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Backup chat ID</Label>
-                  <Input
-                    value={data.databaseBackup.chatId}
-                    onChange={(e) =>
-                      setData((prev) =>
-                        prev
-                          ? { ...prev, databaseBackup: { ...prev.databaseBackup, chatId: e.target.value } }
-                          : prev
-                      )
-                    }
-                    placeholder="-100..."
-                    autoComplete="off"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Thread ID (ixtiyoriy)</Label>
-                  <Input
-                    value={data.databaseBackup.threadId ?? ''}
-                    onChange={(e) =>
-                      setData((prev) =>
-                        prev
-                          ? {
-                              ...prev,
-                              databaseBackup: {
-                                ...prev.databaseBackup,
-                                threadId: e.target.value || undefined,
-                              },
-                            }
-                          : prev
-                      )
-                    }
-                    placeholder="42"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Comment thread ID (ixtiyoriy)</Label>
-                  <Input
-                    value={data.databaseBackup.commentThreadId ?? ''}
-                    onChange={(e) =>
-                      setData((prev) =>
-                        prev
-                          ? {
-                              ...prev,
-                              databaseBackup: {
-                                ...prev.databaseBackup,
-                                commentThreadId: e.target.value || undefined,
-                              },
-                            }
-                          : prev
-                      )
-                    }
-                    placeholder="Masalan: 77"
-                  />
-                </div>
-                <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={() => void handleSaveDatabaseBackup()}
-                    disabled={savingDatabaseBackup}
-                  >
-                    Backup sozlamalarini saqlash
-                  </Button>
-                  <Button
-                    type="button"
-                    onClick={() => void handleSendDatabaseBackupNow()}
-                    disabled={sendingDatabaseBackup}
-                  >
-                    {sendingDatabaseBackup ? 'Yuborilmoqda…' : 'Backupni hozir yuborish'}
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <ConfigsDeliveryDatabaseBackupSection
+            heading="MongoDB backup — Telegram"
+            extraHelp={
+              <>
+                Alohida bot va chat. Cron:{' '}
+                <code className="rounded bg-muted px-1 py-0.5 text-[11px]">/api/cron/database-backup</code> +{' '}
+                <code className="rounded bg-muted px-1 py-0.5 text-[11px]">Bearer</code> kalit (
+                <code className="rounded bg-muted px-1 py-0.5 text-[11px]">CRON_SECRET</code> /{' '}
+                <code className="rounded bg-muted px-1 py-0.5 text-[11px]">BACKUP_CRON_SECRET</code>).
+              </>
+            }
+            enabled={data.databaseBackup.enabled}
+            botToken={data.databaseBackup.botToken}
+            chatId={data.databaseBackup.chatId}
+            threadId={data.databaseBackup.threadId}
+            commentThreadId={data.databaseBackup.commentThreadId}
+            onEnabledChange={(checked) =>
+              setData((prev) =>
+                prev ? { ...prev, databaseBackup: { ...prev.databaseBackup, enabled: checked } } : prev
+              )
+            }
+            onPatch={(patch) =>
+              setData((prev) =>
+                prev ? { ...prev, databaseBackup: { ...prev.databaseBackup, ...patch } } : prev
+              )
+            }
+            onSaveSettings={() => void handleSaveDatabaseBackup()}
+            onSendNow={() => void handleSendDatabaseBackupNow()}
+            savingSettings={savingDatabaseBackup}
+            sending={sendingDatabaseBackup}
+          />
         </>
       ) : (
         <Card className="border-muted">

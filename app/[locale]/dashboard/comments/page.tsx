@@ -224,6 +224,7 @@ export default function DashboardCommentsPage() {
                           size="sm"
                           variant="secondary"
                           className="h-8"
+                          title="Tasdiqlash"
                           disabled={moderatingKey !== null}
                           onClick={() => void moderate(item._id, "confirmed")}
                         >
@@ -235,8 +236,9 @@ export default function DashboardCommentsPage() {
                         </Button>
                         <Button
                           size="sm"
-                          variant="outline"
+                          variant="secondary"
                           className="h-8"
+                          title="Rad etish"
                           disabled={moderatingKey !== null}
                           onClick={() => void moderate(item._id, "rejected")}
                         >
@@ -248,8 +250,9 @@ export default function DashboardCommentsPage() {
                         </Button>
                         <Button
                           size="sm"
-                          variant="outline"
+                          variant="secondary"
                           className=""
+                          title="O'chirish"
                           disabled={deletingId === item._id}
                           onClick={() => void remove(item._id)}
                         >

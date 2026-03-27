@@ -514,7 +514,7 @@ export function DashboardNewsListPage({
                         )}
                         {columnVisibility.sarlavha !== false && (
                           <TableCell>
-                            <Link href={`/dashboard/news/${item.slug}/edit`} className="font-medium line-clamp-2 text-primary hover:underline">
+                            <Link href={`/dashboard/news/${item.slug}/edit`} className="font-medium line-clamp-2 text-primary hover:underline truncate max-w-[200px]">
                               {item.title}
                             </Link>
                           </TableCell>
@@ -571,11 +571,6 @@ export function DashboardNewsListPage({
                                 >
                                   {item.telegramPushStatus}
                                 </span>
-                                {item.telegramPushReason ? (
-                                  <p className="max-w-[180px] truncate text-muted-foreground" title={item.telegramPushReason}>
-                                    {item.telegramPushReason}
-                                  </p>
-                                ) : null}
                               </div>
                             ) : (
                               <span className="text-muted-foreground">—</span>
@@ -584,26 +579,25 @@ export function DashboardNewsListPage({
                         )}
                         {columnVisibility.tarjimalar !== false && (
                           <TableCell className="text-center">
-                            <Button variant="ghost" size="icon" className="size-9" onClick={() => setTranslationsModalSlug(item.slug)}>
-                              <Languages className="size-5" />
+                            <Button variant="secondary" size="sm"  onClick={() => setTranslationsModalSlug(item.slug)}>
+                              <Languages />
                             </Button>
                           </TableCell>
                         )}
                         {columnVisibility.amallar !== false && (
                           <TableCell className="text-right">
                             <div className="flex flex-wrap items-center justify-end gap-1">
-                              <Button variant="outline" size="sm" asChild onClick={() => toast.info('Tahrirlash sahifasi ochildi')}>
+                              <Button variant="secondary" size="sm" asChild onClick={() => toast.info('Tahrirlash sahifasi ochildi')}>
                                 <Link href={`/dashboard/news/${item.slug}/edit`}><Pencil className="size-4" /></Link>
                               </Button>
-                              <Button variant="ghost" size="sm" asChild>
+                              <Button variant="secondary" size="sm" asChild>
                                 <Link href={`/news/${item.slug}`} target="_blank" rel="noopener noreferrer"><ExternalLink className="size-4" /></Link>
                               </Button>
                               {isCeo ? (
                                 <Button
                                   type="button"
-                                  variant="ghost"
+                                  variant="secondary"
                                   size="sm"
-                                  className="text-destructive hover:bg-destructive/10 hover:text-destructive"
                                   onClick={() => setPermanentDeleteSlug(item.slug)}
                                   title="Bazadan butunlay o‘chirish"
                                 >

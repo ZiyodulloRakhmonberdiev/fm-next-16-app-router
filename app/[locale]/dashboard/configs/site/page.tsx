@@ -1,9 +1,9 @@
 'use client'
 
-import { HeadlineSection } from '@/features/dashboard/configs/ui/headline-section'
-import { DescriptionSection } from '@/features/dashboard/configs/ui/description-section'
-import { SiteConfigSection } from '@/features/dashboard/configs/ui/site-config-section'
-import { SocialMediaSection, type UiSocialItem } from '@/features/dashboard/configs/ui/social-media-section'
+import { HeadlineSection } from '../_components/headline-section'
+import { DescriptionSection } from '../_components/description-section'
+import { SiteConfigSection } from '../_components/site-config-section'
+import { SocialMediaSection, type UiSocialItem } from '../_components/social-media-section'
 import { LOCALES, LOCALE_LABELS } from '@/shared/common/lib/locale-constants'
 import { useSiteSettings } from '@/features/dashboard/configs/site-settings-context'
 import { ConfigsLoading, ConfigsPageShell } from '../_components/configs-page-shell'
@@ -41,8 +41,6 @@ export default function ConfigsSiteSettingsPage() {
       </div>
 
       <section className="space-y-3">
-        {/* <h2 className="text-base font-semibold tracking-tight">Demo (headline)</h2>
-        <p className="text-sm text-muted-foreground">Bosh sahifadagi yuqori banner xabari — tillar bo&apos;yicha.</p> */}
         <HeadlineSection
           locales={LOCALES}
           localeLabels={LOCALE_LABELS}
@@ -56,8 +54,6 @@ export default function ConfigsSiteSettingsPage() {
       </section>
 
       <section className="space-y-4">
-        {/* <h2 className="text-base font-semibold tracking-tight">Sayt haqida</h2>
-        <p className="text-sm text-muted-foreground">Tavsif, manzil, email va telefon.</p> */}
         <DescriptionSection
           locales={LOCALES}
           localeLabels={LOCALE_LABELS}
@@ -78,8 +74,6 @@ export default function ConfigsSiteSettingsPage() {
       </section>
 
       <section className="space-y-3">
-        {/* <h2 className="text-base font-semibold tracking-tight">Ijtimoiy tarmoqlar</h2>
-        <p className="text-sm text-muted-foreground">Havolalar va tartib.</p> */}
         <SocialMediaSection
           items={data.socialMedia as UiSocialItem[]}
           onAdd={addSocialItem}

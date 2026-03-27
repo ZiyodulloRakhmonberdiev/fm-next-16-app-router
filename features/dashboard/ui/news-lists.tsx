@@ -247,7 +247,6 @@ export function DashboardNewsLists({
     <Card className="shadow-sm">
       <CardHeader className="space-y-1 px-4 py-0">
         <CardTitle className="flex items-center gap-2 text-base">{title}</CardTitle>
-        {/* <CardDescription className="text-xs md:text-sm">{description}</CardDescription> */}
       </CardHeader>
       <CardContent className="space-y-2 px-4 py-0 md:space-y-3">
         {items.length === 0 ? (
@@ -291,7 +290,6 @@ export function DashboardNewsLists({
     <Card className="shadow-sm">
       <CardHeader className="space-y-1 px-4">
         <CardTitle className="flex items-center gap-2 text-base">{title}</CardTitle>
-        {/* <CardDescription className="text-xs md:text-sm">{description}</CardDescription> */}
       </CardHeader>
       <CardContent className="space-y-2 px-4 py-0 md:space-y-3">
         {total === 0 ? (

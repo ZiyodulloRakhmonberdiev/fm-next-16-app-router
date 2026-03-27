@@ -300,7 +300,7 @@ export default function AdminHeader() {
         <div className="relative z-1 flex shrink-0 items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full" disabled={sessionStatus === 'loading'}>
+              <Button variant="secondary" className="w-auto px-0 pr-1" disabled={sessionStatus === 'loading'}>
                 {avatarUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -313,7 +313,10 @@ export default function AdminHeader() {
                     <User className="size-4" />
                   </span>
                 )}
-                <span className="sr-only">Foydalanuvchi menyu</span>
+                <div className='flex flex-col  justify-center items-start'>
+                  <span className="text-xs truncate max-w-28 hidden md:block">{displayName}</span>
+                  <span className="text-xs text-muted-foreground truncate max-w-28 hidden md:block">{displayRole}</span>
+                </div>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-60">
@@ -331,7 +334,7 @@ export default function AdminHeader() {
                   </span>
                 )}
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium">{displayName}</p>
+                  <p className="text-sm font-medium">{displayName}</p>
                   <p className="text-xs text-muted-foreground">{displayRole}</p>
                   {session?.user?.email ? (
                     <p className="truncate text-xs text-muted-foreground">{session.user.email}</p>

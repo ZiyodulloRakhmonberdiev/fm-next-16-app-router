@@ -9,43 +9,58 @@ import {
   CardContent,
 } from '@/shared/common/components/ui/card'
 import { Label } from '@/shared/common/components/ui/label'
+import { Input } from '@/shared/common/components/ui/input'
 import { Button } from '@/shared/common/components/ui/button'
 import { Save } from 'lucide-react'
+import { Switch } from '@/shared/common/components/ui/switch'
 
-type DescriptionSectionProps = {
+type HeadlineSectionProps = {
   locales: AppLocale[]
   localeLabels: Record<AppLocale, string>
+  enabled: boolean
   values: Record<AppLocale, string>
+  onToggleEnabled: (enabled: boolean) => void
   onChange: (locale: AppLocale, value: string) => void
   onSave: () => void
   saving: boolean
 }
 
-export function DescriptionSection({
+export function HeadlineSection({
   locales,
   localeLabels,
+  enabled,
   values,
+  onToggleEnabled,
   onChange,
   onSave,
   saving,
-}: DescriptionSectionProps) {
+}: HeadlineSectionProps) {
   return (
     <Card className="py-4 md:py-6 gap-2 md:gap-4">
       <CardHeader className="px-4 md:px-6">
-        <CardTitle className="text-base">Tavsif</CardTitle>
+        <CardTitle className="text-base">Sarlavha</CardTitle>
         <CardDescription className="hidden md:block">
-          Sayt haqida qisqacha.
+          Yoqilsa banner ko'rsatiladi, o'chirilsa client saytda yashiriladi.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4 px-4 md:px-6">
+        <div className="flex items-center justify-between rounded-md border p-3">
+          <div className="space-y-0.5">
+            <Label className="text-sm">Sarlavha holati</Label>
+            <p className="text-xs text-muted-foreground">
+              {enabled ? 'Yoqilgan' : "O'chirilgan"}
+            </p>
+          </div>
+          <Switch checked={enabled} onCheckedChange={onToggleEnabled} />
+        </div>
         {locales.map((locale) => (
           <div key={locale} className="space-y-2">
             <Label>{localeLabels[locale]}</Label>
-            <textarea
-              className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            <Input
               value={values[locale] ?? ''}
               onChange={(e) => onChange(locale, e.target.value)}
-              placeholder={`Description (${locale})`}
+              placeholder={`Headline (${locale})`}
+              disabled={!enabled}
             />
           </div>
         ))}
@@ -59,4 +74,3 @@ export function DescriptionSection({
     </Card>
   )
 }
-

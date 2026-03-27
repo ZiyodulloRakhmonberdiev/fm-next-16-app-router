@@ -228,10 +228,10 @@ export function TagsPage({ locale }: TagsPageProps) {
                       <TableCell>{row.name.en ?? '—'}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <Button variant="outline" size="sm" onClick={() => setEditId(row._id)}>
+                          <Button variant="secondary" title="Tahrirlash" size="sm" onClick={() => setEditId(row._id)}>
                             <Pencil className="size-4" />
                           </Button>
-                          <Button variant="outline" size="sm" onClick={() => setDeleteId(row._id)}>
+                          <Button variant="secondary" title="O'chirish" size="sm" onClick={() => setDeleteId(row._id)}>
                             <Trash2 className="size-4" />
                           </Button>
                         </div>

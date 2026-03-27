@@ -245,7 +245,7 @@ export function ClientUserMenu() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
+                {/* <div className="space-y-2">
                   <Label>{t("image_url")}</Label>
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
                     <div className="shrink-0">
@@ -300,7 +300,7 @@ export function ClientUserMenu() {
                       </div>
                     </div>
                   </div>
-                </div>
+                </div> */}
 
                 <div className="space-y-1.5">
                   <Label htmlFor="profile-current-password">{t("current_password")}</Label>

@@ -1,10 +1,9 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/shared/common/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/common/components/ui/card'
 import { Input } from '@/shared/common/components/ui/input'
-import { Textarea } from '@/shared/common/components/ui/textarea'
 import { Button } from '@/shared/common/components/ui/button'
-import { Minus, Plus, Save, Trash2 } from 'lucide-react'
+import { Minus, Plus, Save } from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -23,7 +22,6 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -66,9 +64,6 @@ export function SocialMediaSection({
   const [selectedSlug, setSelectedSlug] = useState<string>('')
   const [newHref, setNewHref] = useState('')
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null)
-
-  const pendingDeleteItem =
-    deleteIndex !== null ? items[deleteIndex] : undefined
 
   const availablePlatforms = useMemo(
     () =>
@@ -144,7 +139,6 @@ export function SocialMediaSection({
           </div>
         </div>
 
-        {/* Mobil: kartalar — havola to‘liq */}
         <div className="space-y-3 sm:hidden">
           {items.length === 0 ? (
             <p className="py-4 text-center text-sm text-muted-foreground">
@@ -191,7 +185,6 @@ export function SocialMediaSection({
           )}
         </div>
 
-        {/* Desktop: jadval — havola to‘liq (wrap + textarea) */}
         <div className="hidden sm:block">
           <div className="max-w-full overflow-x-auto rounded-md border">
             <Table className="w-full min-w-[36rem]">
@@ -199,7 +192,6 @@ export function SocialMediaSection({
                 <TableRow>
                   <TableHead className="w-10">#</TableHead>
                   <TableHead className="w-[7rem]">Platforma</TableHead>
-                  {/* <TableHead className="w-[6rem]">Slug</TableHead> */}
                   <TableHead className="min-w-[16rem]">Havola</TableHead>
                   <TableHead className="w-14 text-right">Amal</TableHead>
                 </TableRow>
@@ -221,9 +213,6 @@ export function SocialMediaSection({
                         {SOCIAL_PLATFORMS.find((p) => p.slug === item.slug)?.label ??
                           item.name}
                       </TableCell>
-                      {/* <TableCell className="align-top text-xs text-muted-foreground">
-                        {item.slug}
-                      </TableCell> */}
                       <TableCell className="align-top">
                         <Input
                           value={item.href}

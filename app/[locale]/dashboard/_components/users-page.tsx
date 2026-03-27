@@ -93,8 +93,25 @@ export function UsersPage({ users: initialUsers }: UsersPageProps) {
 
   const [createRole, setCreateRole] = useState<UserRole | ''>('')
   const [editRole, setEditRole] = useState<UserRole | ''>('')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [roleFilter, setRoleFilter] = useState<UserRole | 'all'>('all')
   const editUser = useMemo(() => users.find((u) => u.id === editId) ?? null, [users, editId])
   const deleteUser = useMemo(() => users.find((u) => u.id === deleteId) ?? null, [users, deleteId])
+  const filteredUsers = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase()
+
+    return users.filter((row) => {
+      const matchesRole = roleFilter === 'all' || row.role === roleFilter
+      if (!matchesRole) return false
+      if (!query) return true
+
+      return (
+        row.full_name.toLowerCase().includes(query) ||
+        row.login.toLowerCase().includes(query) ||
+        row.position.toLowerCase().includes(query)
+      )
+    })
+  }, [users, roleFilter, searchQuery])
 
   const editRoleOptions = useMemo(() => {
     if (canAssignCeo) return USER_ROLES
@@ -247,9 +264,31 @@ export function UsersPage({ users: initialUsers }: UsersPageProps) {
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Ro'yxat</CardTitle>
-          <CardDescription>Jami: {users.length} ta foydalanuvchi</CardDescription>
+          <CardDescription>
+            Jami: {users.length} ta foydalanuvchi. Ko'rsatilmoqda: {filteredUsers.length} ta
+          </CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="mb-4 grid gap-3 md:grid-cols-2">
+            <Input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Ism, login yoki lavozim bo'yicha qidirish..."
+            />
+            <Select value={roleFilter} onValueChange={(v) => setRoleFilter(v as UserRole | 'all')}>
+              <SelectTrigger>
+                <SelectValue placeholder="Rol bo'yicha filter" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Barcha rollar</SelectItem>
+                {USER_ROLES.map((role) => (
+                  <SelectItem key={role.value} value={role.value}>
+                    {role.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           {isLoading ? (
             <p className="text-sm text-muted-foreground">Yuklanmoqda...</p>
           ) : error ? (
@@ -268,14 +307,14 @@ export function UsersPage({ users: initialUsers }: UsersPageProps) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {users.length === 0 ? (
+                {filteredUsers.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
-                      Foydalanuvchi topilmadi
+                      {users.length === 0 ? 'Foydalanuvchi topilmadi' : "Filter bo'yicha natija topilmadi"}
                     </TableCell>
                   </TableRow>
                 ) : (
-                  users.map((row) => (
+                  filteredUsers.map((row) => (
                     <TableRow key={row.id}>
                       <TableCell>
                         {row.image ? (
@@ -302,7 +341,8 @@ export function UsersPage({ users: initialUsers }: UsersPageProps) {
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Button
-                            variant="outline"
+                            variant="secondary"
+                            title="Tahrirlash"
                             size="sm"
                             onClick={() => {
                               setEditRole(row.role)
@@ -311,7 +351,7 @@ export function UsersPage({ users: initialUsers }: UsersPageProps) {
                           >
                             <Pencil className="size-4" />
                           </Button>
-                          <Button variant="outline" size="sm" onClick={() => setDeleteId(row.id)}>
+                          <Button variant="secondary" title="O'chirish" size="sm" onClick={() => setDeleteId(row.id)}>
                             <Trash2 className="size-4" />
                           </Button>
                         </div>
