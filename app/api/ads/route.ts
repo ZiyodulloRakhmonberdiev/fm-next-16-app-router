@@ -25,7 +25,9 @@ export async function GET(req: NextRequest) {
         { $or: [{ endAt: { $exists: false } }, { endAt: null }, { endAt: { $gte: now } }] },
       ],
     }
-    if (placement) filter.placement = placement
+    if (placement) {
+      filter.$or = [{ placements: placement }, { placement }]
+    }
     const ads = await AdModel.find(filter).sort({ priority: -1, createdAt: -1 }).lean()
     return Response.json(ads)
   }
@@ -34,7 +36,9 @@ export async function GET(req: NextRequest) {
   if (unauthorized) return unauthorized
 
   const filter: Record<string, unknown> = {}
-  if (placement) filter.placement = placement
+  if (placement) {
+    filter.$or = [{ placements: placement }, { placement }]
+  }
   const ads = await AdModel.find(filter).sort({ createdAt: -1 }).lean()
   return Response.json(ads)
 }

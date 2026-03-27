@@ -59,6 +59,8 @@ export function AdSlotHide({ ad, placement, onClose, onAdSectionClosed }: AdSlot
   const advertiserHref = toAbsoluteExternalHref(ad.advertiserUrl)
   const adInfoHref = toAbsoluteExternalHref(ad.adInfoUrl)
   const advertiseWithUsHref = toAbsoluteExternalHref(ad.advertiseWithUsUrl)
+  const hideExtraLinks =
+    placement === "sidebar_widget" || placement === "article_bottom_full"
 
   return (
     <div className="h-full p-4">
@@ -99,7 +101,7 @@ export function AdSlotHide({ ad, placement, onClose, onAdSectionClosed }: AdSlot
             <AlertTriangleIcon className="size-4" />
             <span>Arz qilish</span>
           </Button>
-          {advertiserHref ? (
+          {!hideExtraLinks && advertiserHref ? (
             <Button asChild variant="secondary" className="text-xs p-2 rounded-xs py-1.5 h-auto">
               <a href={advertiserHref} target="_blank" rel="noopener noreferrer sponsored nofollow">
                 <Info className="size-4" />
@@ -108,7 +110,7 @@ export function AdSlotHide({ ad, placement, onClose, onAdSectionClosed }: AdSlot
               </a>
             </Button>
           ) : null}
-          {adInfoHref ? (
+          {!hideExtraLinks && adInfoHref ? (
             <Button asChild variant="secondary" className="text-xs p-2 rounded-xs py-1.5 h-auto">
               <a href={adInfoHref} target="_blank" rel="noopener noreferrer sponsored nofollow">
                 <Megaphone className="size-4" />
@@ -117,7 +119,7 @@ export function AdSlotHide({ ad, placement, onClose, onAdSectionClosed }: AdSlot
               </a>
             </Button>
           ) : null}
-          {advertiseWithUsHref ? (
+          {!hideExtraLinks && advertiseWithUsHref ? (
             <Button asChild variant="secondary" className="text-xs p-2 rounded-xs py-1.5 h-auto">
               <a href={advertiseWithUsHref} target="_blank" rel="noopener noreferrer sponsored nofollow">
                 <Wallet className="size-4" />

@@ -1,7 +1,10 @@
+export type AdPlacement = "header_top_full" | "sidebar_widget" | "home_bottom_full" | "article_bottom_full"
+
 export type AdItem = {
   _id: string
   type: "content" | "image"
-  placement: "header_top_full" | "sidebar_widget" | "home_bottom_full" | "article_bottom_full"
+  placement?: AdPlacement
+  placements?: AdPlacement[]
   media?: string | string[]
   mediaMobile?: string | string[]
   logo?: string
@@ -20,7 +23,7 @@ export type AdItem = {
 
 export type AdFormState = {
   type: AdItem["type"]
-  placement: AdItem["placement"]
+  placements: AdPlacement[]
   media: string[]
   logo: string
   siteName: string
@@ -36,7 +39,7 @@ export type AdFormState = {
   displaySeconds: number
 }
 
-export const AD_PLACEMENTS: Array<{ value: AdItem["placement"]; label: string }> = [
+export const AD_PLACEMENTS: Array<{ value: AdPlacement; label: string }> = [
   { value: "header_top_full", label: "Yuqori (full)" },
   { value: "sidebar_widget", label: "Sidebar widget" },
   { value: "home_bottom_full", label: "Bosh sahifa pasti (full)" },
@@ -50,7 +53,7 @@ export const AD_TYPES: Array<{ value: AdItem["type"]; label: string }> = [
 
 export const emptyForm: AdFormState = {
   type: "content",
-  placement: "header_top_full",
+  placements: ["header_top_full"],
   media: [""],
   logo: "",
   siteName: "",
@@ -67,9 +70,15 @@ export const emptyForm: AdFormState = {
 }
 
 export function applyAdItemToForm(item: AdItem): AdFormState {
+  const placements: AdPlacement[] =
+    item.placements?.length
+      ? item.placements
+      : item.placement
+        ? [item.placement]
+        : ["header_top_full"]
   return {
     type: item.type ?? "content",
-    placement: item.placement ?? "header_top_full",
+    placements,
     media: Array.isArray(item.media) ? item.media : item.media ? [item.media] : [""],
     logo: item.logo ?? "",
     siteName: item.siteName ?? "",

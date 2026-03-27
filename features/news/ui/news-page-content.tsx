@@ -571,7 +571,7 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
                 <span>Telegram Post</span>
                 {/* {showTelegramPost ? <Eye /> : <EyeOff />} */}
               </Button>
-              </div>
+            </div>
 
 
             {showTelegramPost ? (
@@ -582,12 +582,8 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
           </div>
         ) : null}
 
-        <div className="mt-6">
-          <AdSlot placement="article_bottom_full" />
-        </div>
-
         <NewsEngagement slug={news.slug} newsId={newsId} />
-        <section className="my-8">
+        {/* <section className="my-8">
           <div className="rounded-lg border border-border px-4 py-3 md:px-6 md:py-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-3">
               <Image src="/images/icons/telegram.png" alt="Telegram" width={48} height={48} />
@@ -618,7 +614,10 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
               </Button>
             </div>
           </div>
-        </section>
+        </section> */}
+        <div className="mt-6">
+          <AdSlot placement="article_bottom_full" />
+        </div>
       </article>
       <RelatedNews categorySlug={news.categorySlug} excludeSlug={news.slug} />
     </div>

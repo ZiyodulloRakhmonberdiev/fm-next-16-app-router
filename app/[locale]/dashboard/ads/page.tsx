@@ -163,6 +163,10 @@ function DashboardAdsPage() {
       toast.error("Sayt nomi majburiy")
       return
     }
+    if (!form.placements.length) {
+      toast.error("Kamida bitta joylashuv (placement) tanlang")
+      return
+    }
     setLoading(true)
     const url = editId ? `/api/ads/${editId}` : "/api/ads"
     const method = editId ? "PUT" : "POST"
@@ -175,7 +179,8 @@ function DashboardAdsPage() {
         priority: Number(form.priority) || 0,
         displaySeconds: Number(form.displaySeconds) || 12,
         type: form.type ?? "content",
-        placement: form.placement ?? "header_top_full",
+        placements: form.placements.length ? form.placements : ["header_top_full"],
+        placement: form.placements[0] ?? "header_top_full",
         links: form.links.filter((item) => item.label.trim() && item.href.trim()),
       }),
     })

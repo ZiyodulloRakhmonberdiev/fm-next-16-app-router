@@ -9,9 +9,16 @@ export const adPlacementSchema = z.enum([
 
 export const adTypeSchema = z.enum(["content", "image"])
 
-export const createAdSchema = z.object({
+export const createAdSchemaInput = z.object({
   type: adTypeSchema.default("content"),
-  placement: adPlacementSchema.default("header_top_full"),
+  placement: adPlacementSchema.optional(),
+  placements: z
+    .union([adPlacementSchema, z.array(adPlacementSchema).min(1)])
+    .optional()
+    .transform((v) => {
+      if (!v) return undefined
+      return Array.isArray(v) ? v : [v]
+    }),
   media: z
     .union([
       z.string().min(1, "Media majburiy"),
@@ -47,6 +54,28 @@ export const createAdSchema = z.object({
   displaySeconds: z.coerce.number().int().min(3).max(120).default(12),
   startAt: z.coerce.date().optional(),
   endAt: z.coerce.date().optional(),
+})
+
+export const createAdSchema = createAdSchemaInput.superRefine((value, ctx) => {
+  const hasPlacement = Boolean(value.placement)
+  const hasPlacements = Array.isArray(value.placements) && value.placements.length > 0
+  if (!hasPlacement && !hasPlacements) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["placements"],
+      message: "Kamida bitta placement tanlang",
+    })
+  }
+}).transform((value) => {
+  const source = (value.placements?.length ? value.placements : value.placement ? [value.placement] : []) as Array<
+    z.infer<typeof adPlacementSchema>
+  >
+  const placements = Array.from(new Set(source))
+  return {
+    ...value,
+    placements,
+    placement: placements[0] ?? "header_top_full",
+  }
 })
 
 export type CreateAdInput = z.infer<typeof createAdSchema>

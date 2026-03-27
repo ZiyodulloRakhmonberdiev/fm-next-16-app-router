@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server"
 import { dbConnect } from "@/shared/common/lib/db"
 import { AdModel } from "@/features/ads/model/ads.model"
-import { createAdSchema } from "@/features/ads/model/schemas"
+import { createAdSchema, createAdSchemaInput } from "@/features/ads/model/schemas"
 import { requireAdminSession } from "@/shared/common/lib/require-admin-session"
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -15,10 +15,11 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const msg = Object.values(issues.fieldErrors).flat().join("; ") || issues.formErrors?.join("; ") || "Validatsiya xatosi"
     return Response.json({ error: msg, issues }, { status: 400 })
   }
-  const { type, placement, siteName, title, active, priority, displaySeconds } = parsed.data
+  const { type, placements, placement, siteName, title, active, priority, displaySeconds } = parsed.data
   const links = parsed.data.links ?? []
   const update: Record<string, unknown> = {
     type,
+    placements,
     placement,
     siteName,
     title,
@@ -45,11 +46,17 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (unauthorized) return unauthorized
 
   await dbConnect()
-  const parsed = createAdSchema.partial().safeParse(await req.json())
+  const parsed = createAdSchemaInput.partial().safeParse(await req.json())
   if (!parsed.success) {
     return Response.json({ error: "Validation error", issues: parsed.error.flatten() }, { status: 400 })
   }
   const payload = { ...parsed.data } as Record<string, unknown>
+  if (!Array.isArray(payload.placements) && typeof payload.placement === "string") {
+    payload.placements = [payload.placement]
+  }
+  if (Array.isArray(payload.placements) && payload.placements.length > 0) {
+    payload.placement = String(payload.placements[0])
+  }
   if (payload.media === "") payload.media = undefined
   if (payload.logo === "") payload.logo = undefined
   if (payload.description === "") payload.description = undefined

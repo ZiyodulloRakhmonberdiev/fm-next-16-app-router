@@ -85,7 +85,7 @@ export function AdSlot({ placement }: Props) {
   if (ads.length < 1) {
     return (
       <div data-ad-slot className="relative w-full py-2">
-        <AdSlotPlaceholder />
+        <AdSlotPlaceholder placement={placement} />
       </div>
     )
   }
@@ -103,13 +103,15 @@ export function AdSlot({ placement }: Props) {
   }
 
   const adHref = toAbsoluteExternalHref(ad.adUrl)
+  const hideExtraLinks =
+    placement === "sidebar_widget" || placement === "article_bottom_full"
 
   return (
     <div data-ad-slot className="relative w-full py-2">
       <div className={cn("relative w-full overflow-hidden rounded-xl border bg-card shadow-sm aspect-video max-h-[120px] md:max-h-[140px] lg:max-h-[200px]")}>
-        {/* <span className="absolute left-2 top-2 z-10 rounded bg-black/60 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-white/95" aria-hidden>
+         <span className="absolute left-2 top-2 z-10 rounded bg-black/60 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-white/95" aria-hidden>
           Reklama
-        </span> */}
+        </span> 
         {panelOpen ? (
           <AdSlotHide
             ad={ad}
@@ -232,7 +234,7 @@ export function AdSlot({ placement }: Props) {
                       </div>
                     ) : null}
                   </div>
-                  {ad.links?.length ? (
+                  {!hideExtraLinks && ad.links?.length ? (
                     <div className="hidden flex-wrap gap-x-4 gap-y-1 text-sm text-foreground/80 md:flex">
                       {ad.links.map((item, index) => {
                         const href = toAbsoluteExternalHref(item.href)

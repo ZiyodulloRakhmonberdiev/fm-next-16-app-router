@@ -5,7 +5,8 @@ import { useQuery } from "@tanstack/react-query"
 export type PublicAd = {
   _id: string
   type: "content" | "image"
-  placement: "header_top_full" | "sidebar_widget" | "home_bottom_full" | "article_bottom_full"
+  placement?: "header_top_full" | "sidebar_widget" | "home_bottom_full" | "article_bottom_full"
+  placements?: Array<"header_top_full" | "sidebar_widget" | "home_bottom_full" | "article_bottom_full">
   media?: string | string[]
   mediaMobile?: string | string[]
   logo?: string
@@ -25,11 +26,12 @@ export type PublicAd = {
   displaySeconds?: number
 }
 
-export function usePublicAdsQuery(placement: PublicAd["placement"]) {
+export function usePublicAdsQuery(placement?: NonNullable<PublicAd["placement"]>) {
   return useQuery({
     queryKey: ["public-ads", placement],
     queryFn: async () => {
-      const res = await fetch(`/api/ads?public=1&placement=${placement}`, { cache: "no-store" })
+      const qs = placement ? `&placement=${placement}` : ""
+      const res = await fetch(`/api/ads?public=1${qs}`, { cache: "no-store" })
       if (!res.ok) throw new Error("Ads fetch failed")
       return (await res.json()) as PublicAd[]
     },

@@ -12,6 +12,7 @@ import {
   usePublicCategoriesQuery,
 } from "@/features/category/model/public-categories-query"
 import {
+  AdsShowcaseSection,
   BannerSection,
   BreakingSection,
   ColumnSection,
@@ -93,8 +94,8 @@ export default function HomeMainContent() {
       <BreakingSection />
       <BannerSection categorySlug={secondCategorySlug} featuredPosition="left" />
       <TextNewsSection />
-      {/* <VideoNewsSection /> */}
       <VideoNewsSection2 />
+      <AdSlot placement="home_bottom_full" />
       <RowSection categorySlug={thirdCategorySlug} />
       <SlideNewsSection categorySlug={fifthCategorySlug} />
       <ColumnSection categorySlug={sixthCategorySlug} />
@@ -102,7 +103,6 @@ export default function HomeMainContent() {
       <BannerSection categorySlug={eighthCategorySlug} featuredPosition="right" />
       <SlideNewsSection categorySlug={ninthCategorySlug} />
       <ColumnSection categorySlug={tenthCategorySlug} />
-      <AdSlot placement="home_bottom_full" />
     </>
   )
 }

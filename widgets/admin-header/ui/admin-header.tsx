@@ -303,8 +303,8 @@ export default function AdminHeader() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
-                variant="secondary"
-                className="h-9 w-auto gap-2 rounded-full border border-border/60 bg-background px-1 pr-2 shadow-sm md:pr-3"
+                variant="ghost"
+                className="h-9 md:w-auto md:gap-2 md:rounded-full md:border md:border-border/60 md:bg-background md:px-1 md:pr-3 md:shadow-sm p-0"
                 disabled={sessionStatus === 'loading'}
               >
                 {avatarUrl ? (

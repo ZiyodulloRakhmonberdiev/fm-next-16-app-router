@@ -12,7 +12,8 @@ export type AdType = "content" | "image"
 export interface IAd {
   _id: string
   type: AdType
-  placement: AdPlacement
+  placements: AdPlacement[]
+  placement?: AdPlacement
   media?: string | string[]
   mediaMobile?: string | string[]
   logo?: string
@@ -40,10 +41,22 @@ const AdSchema = new Schema<IAd>(
   {
     _id: { type: String, required: true, default: () => uuidv4() },
     type: { type: String, enum: ["content", "image"], default: "content", required: true },
+    // Keep legacy `placement` for backward compatibility with old documents.
     placement: {
       type: String,
       enum: ["header_top_full", "sidebar_widget", "home_bottom_full", "article_bottom_full"],
+      required: false,
+    },
+    // Har bir element alohida enum — `type: [String], enum: [...]` noto‘g‘ri, bitta qiymat saqlanadi.
+    placements: {
+      type: [
+        {
+          type: String,
+          enum: ["header_top_full", "sidebar_widget", "home_bottom_full", "article_bottom_full"],
+        },
+      ],
       required: true,
+      default: () => ["header_top_full"],
     },
     media: [String],
     mediaMobile: [String],
@@ -76,6 +89,6 @@ const AdSchema = new Schema<IAd>(
   { timestamps: true }
 )
 
-AdSchema.index({ placement: 1, active: 1, priority: -1 })
+AdSchema.index({ placements: 1, active: 1, priority: -1 })
 
 export const AdModel = models.Ad || model<IAd>("Ad", AdSchema)

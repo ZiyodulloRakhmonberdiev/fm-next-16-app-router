@@ -10,7 +10,10 @@ type AdsFormOptionalUrlsProps = {
 }
 
 export function AdsFormOptionalUrls({ form, setForm }: AdsFormOptionalUrlsProps) {
-  if (form.placement === "sidebar_widget") {
+  const onlySidebar =
+    form.placements.length > 0 && form.placements.every((placement) => placement === "sidebar_widget")
+
+  if (onlySidebar) {
     return (
       <div className="rounded-md border border-dashed p-3 text-xs text-muted-foreground md:col-span-2">
         Sidebar placement tanlanganda qo&apos;shimcha URL maydonlari ko&apos;rsatilmaydi.
