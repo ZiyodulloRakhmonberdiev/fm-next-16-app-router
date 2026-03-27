@@ -16,7 +16,7 @@ import { useLocale, useTranslations } from "next-intl"
 import type { AppLocale } from "@/shared/common/lib/formatter"
 import { useCategoryLabel } from "@/features/category/model/use-category-label"
 import { ChevronRight } from "lucide-react"
-import { formatDate } from "../../lib/formatter"
+import { formatDateISO, formatDateTimeDotSlash } from "@/shared/common/lib/formatter"
 
 function getSafeImageSrc(raw?: string): string {
   if (!raw?.trim()) return ""
@@ -95,8 +95,8 @@ export default function VideoNewsModal({ item, open, onOpenChange }: VideoNewsMo
                     <span className="text-xs capitalize">{categoryLabel}</span>
                   </Link>
                   <span className="text-muted-foreground text-xs">/</span>
-                  <time dateTime={formatDate(item.publishedAt)} className="text-xs text-muted-foreground">
-                    {formatDate(item.publishedAt)}
+                  <time dateTime={formatDateISO(item.publishedAt)} className="text-xs text-muted-foreground">
+                    {formatDateTimeDotSlash(item.publishedAt)}
                   </time>
                 </div>
                 <DialogHeader className="">

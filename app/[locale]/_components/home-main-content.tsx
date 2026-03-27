@@ -22,6 +22,7 @@ import {
 import RowSection from "@/shared/common/components/news-sections/row-section"
 import VideoNewsSection2 from "@/shared/common/components/news-sections/video-news-section-2"
 import HomePageSkeleton from "./home-page-skeleton"
+import { AdSlot } from "@/features/ads/ui/ad-slot"
 
 export default function HomeMainContent() {
   const { data: publicNews = [], isError, isLoading, isFetching } = usePublicNewsQuery()
@@ -100,7 +101,8 @@ export default function HomeMainContent() {
       <RowSection categorySlug={seventhCategorySlug} />
       <BannerSection categorySlug={eighthCategorySlug} featuredPosition="right" />
       <SlideNewsSection categorySlug={ninthCategorySlug} />
-      <ColumnSection categorySlug={tenthCategorySlug} />      
+      <ColumnSection categorySlug={tenthCategorySlug} />
+      <AdSlot placement="home_bottom_full" />
     </>
   )
 }

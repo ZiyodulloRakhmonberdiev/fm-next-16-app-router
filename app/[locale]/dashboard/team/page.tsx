@@ -5,45 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/shared/common/compon
 import { Button } from "@/shared/common/components/ui/button"
 import { Input } from "@/shared/common/components/ui/input"
 import { Label } from "@/shared/common/components/ui/label"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/common/components/ui/table"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/shared/common/components/ui/dialog"
 import { toast } from "sonner"
-
-type TeamRow = {
-  _id: string
-  order: string
-  certificateNumber?: string
-  image?: string
-  fullName: string
-  position: string
-  qrCode?: string
-  badgeImage?: string
-}
-
-type TeamForm = {
-  certificateNumber: string
-  image: string
-  fullName: string
-  position: string
-  qrCode: string
-  badgeImage: string
-}
-
-const emptyForm: TeamForm = {
-  certificateNumber: "",
-  image: "",
-  fullName: "",
-  position: "",
-  qrCode: "",
-  badgeImage: "",
-}
+import { TeamTable } from "./_components/team-table"
+import { TeamDeleteDialog } from "./_components/team-delete-dialog"
+import { emptyForm, type TeamForm, type TeamRow } from "./_components/team-types"
 
 export default function DashboardTeamPage() {
   const [items, setItems] = useState<TeamRow[]>([])
@@ -175,7 +140,7 @@ export default function DashboardTeamPage() {
               onChange={(e) =>
                 setForm((p) => ({ ...p, certificateNumber: e.target.value }))
               }
-              placeholder="Matn — qanday kirsangiz shunday saqlanadi"
+              placeholder="Raqam"
             />
             <p className="text-xs text-muted-foreground">Maksimal 24 belgi</p>
           </div>
@@ -301,81 +266,20 @@ export default function DashboardTeamPage() {
           )}
         </div>
 
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Guvohnoma</TableHead>
-                <TableHead>Rasm</TableHead>
-                <TableHead>Ism</TableHead>
-                <TableHead>Lavozim</TableHead>
-                <TableHead>QR</TableHead>
-                <TableHead>Badge</TableHead>
-                <TableHead>Amallar</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {items.map((m) => (
-                <TableRow key={m._id}>
-                  <TableCell>{m.order}</TableCell>
-                  <TableCell>{m.image ? <span className="text-xs text-muted-foreground">Rasm bor</span> : "-"}</TableCell>
-                  <TableCell>{m.fullName}</TableCell>
-                  <TableCell>{m.position}</TableCell>
-                  <TableCell>{m.qrCode ? "Bor" : "-"}</TableCell>
-                  <TableCell>{m.badgeImage ? "Bor" : "-"}</TableCell>
-                  <TableCell className="space-x-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        setEditId(m._id)
-                        setForm({
-                          certificateNumber: m.order,
-                          image: m.image ?? "",
-                          fullName: m.fullName,
-                          position: m.position,
-                          qrCode: m.qrCode ?? "",
-                          badgeImage: m.badgeImage ?? "",
-                        })
-                      }}
-                    >
-                      Tahrirlash
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => setDeleteTargetId(m._id)}
-                    >
-                      O'chirish
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+        <TeamTable
+          items={items}
+          onEdit={(id, nextForm) => {
+            setEditId(id)
+            setForm(nextForm)
+          }}
+          onDelete={setDeleteTargetId}
+        />
 
-        <Dialog open={deleteTargetId !== null} onOpenChange={(open) => !open && setDeleteTargetId(null)}>
-          <DialogContent showCloseButton={true}>
-            <DialogHeader>
-              <DialogTitle>O&apos;chirishni tasdiqlaysizmi?</DialogTitle>
-              <DialogDescription>
-                Bu team a&apos;zosini ro&apos;yxatdan o&apos;chiradi. Amalni qaytarib bo&apos;lmaydi.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter showCloseButton={false}>
-              <Button variant="outline" onClick={() => setDeleteTargetId(null)}>
-                Bekor qilish
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={() => deleteTargetId && void remove(deleteTargetId)}
-              >
-                O&apos;chirish
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <TeamDeleteDialog
+          open={deleteTargetId !== null}
+          onOpenChange={(open) => !open && setDeleteTargetId(null)}
+          onConfirm={() => deleteTargetId && void remove(deleteTargetId)}
+        />
       </CardContent>
     </Card>
   )

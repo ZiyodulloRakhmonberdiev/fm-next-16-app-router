@@ -124,6 +124,16 @@ export function formatDateTime(
 }
 
 /**
+ * Qisqa sana + vaqt.
+ * @example formatDateTimeDotSlash("2026-03-21T12:11:00Z") -> "21.03.2026 / 17.11"
+ */
+export function formatDateTimeDotSlash(date: DateInput): string {
+  const { year, month, day, hour, minute } = getTashkentParts(date)
+  const pad = (n: number) => String(n).padStart(2, "0")
+  return `${pad(day)}.${pad(month)}.${year} / ${pad(hour)}.${pad(minute)}`
+}
+
+/**
  * Qisqa sana (kun.oy.yil).
  * @example formatDateShort("2024-03-15") → "15.03.2024"
  */

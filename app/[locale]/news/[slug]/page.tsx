@@ -20,6 +20,7 @@ import {
   SITE_SETTINGS_DOCUMENT_ID,
   leanDocToPayload,
 } from "@/features/dashboard/configs/site-settings.model"
+import { AdSlot } from "@/features/ads/ui/ad-slot"
 
 type Props = {
   params: Promise<{ locale: string; slug: string }>
@@ -99,6 +100,7 @@ export default async function NewsPage({ params }: Props) {
               </div>
 
               <aside className="hidden md:flex flex-col gap-6 lg:col-span-2">
+                <AdSlot placement="sidebar_widget" />
                 <LatestNews excludeSlug={news.slug} />
               </aside>
             </div>

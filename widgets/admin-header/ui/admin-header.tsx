@@ -21,7 +21,7 @@ import {
 } from '@/shared/common/components/ui/dialog'
 import { Input } from '@/shared/common/components/ui/input'
 import { Label } from '@/shared/common/components/ui/label'
-import { LogOut, Search, User, ExternalLink, LayoutGrid, Upload, ImageIcon, Lock, ArrowLeft, Undo2 } from 'lucide-react'
+import { LogOut, Search, User, ExternalLink, LayoutGrid, Upload, ImageIcon, Lock, ArrowLeft, Undo2, Loader2 } from 'lucide-react'
 import { LiaUserEditSolid } from 'react-icons/lia'
 import type { NewsItem } from '@/features/news/model'
 import { useTheme } from 'next-themes'
@@ -29,12 +29,14 @@ import { signOut, useSession } from 'next-auth/react'
 import { toast } from 'sonner'
 import { normalizeRole } from '@/shared/common/lib/rbac'
 import { ThemeSwitcherForHeader } from '@/widgets/theme-switcher'
+import { resizeImageToSquareJpeg } from '@/shared/common/lib/resize-profile-avatar'
 
 function canOpenDashboardMenuHub(role: ReturnType<typeof normalizeRole>): boolean {
   return role === 'ceo' || role === 'administrator'
 }
 
 const DEBOUNCE_MS = 200
+const AVATAR_SIZE = 100
 
 type MePayload = {
   full_name?: string
@@ -158,16 +160,16 @@ export default function AdminHeader() {
   async function uploadProfileImage(file: File) {
     setImageUploading(true)
     try {
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('kind', 'image')
-      const res = await fetch('/api/uploads', { method: 'POST', credentials: 'include', body: formData })
+      const blob = await resizeImageToSquareJpeg(file, AVATAR_SIZE)
+      const fd = new FormData()
+      fd.append('file', new File([blob], 'avatar.jpg', { type: 'image/jpeg' }))
+      const res = await fetch('/api/me/avatar', { method: 'POST', credentials: 'include', body: fd })
       const data = (await res.json().catch(() => null)) as { url?: string; error?: string } | null
-      if (!res.ok || !data?.url) {
+      if (!res.ok) {
         toast.error(data?.error ?? "Rasm yuklab bo'lmadi")
         return
       }
-      setImage(data.url)
+      if (data?.url) setImage(data.url)
       toast.success('Rasm yuklandi')
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Rasm yuklab bo'lmadi")
@@ -300,7 +302,11 @@ export default function AdminHeader() {
         <div className="relative z-1 flex shrink-0 items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="secondary" className="w-auto px-0 pr-1" disabled={sessionStatus === 'loading'}>
+              <Button
+                variant="secondary"
+                className="h-9 w-auto gap-2 rounded-full border border-border/60 bg-background px-1 pr-2 shadow-sm md:pr-3"
+                disabled={sessionStatus === 'loading'}
+              >
                 {avatarUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -313,13 +319,13 @@ export default function AdminHeader() {
                     <User className="size-4" />
                   </span>
                 )}
-                <div className='flex flex-col  justify-center items-start'>
+                <div className='flex min-w-0 flex-col justify-center items-start'>
                   <span className="text-xs truncate max-w-28 hidden md:block">{displayName}</span>
                   <span className="text-xs text-muted-foreground truncate max-w-28 hidden md:block">{displayRole}</span>
                 </div>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-60">
+            <DropdownMenuContent align="end" className="w-[92vw] max-w-72 p-1 md:w-64">
               <div className="flex items-center gap-3 px-2 py-2">
                 {avatarUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -349,19 +355,19 @@ export default function AdminHeader() {
                 </div>
               </div>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="cursor-pointer gap-2" onClick={() => void openProfileDialog()}>
+              <DropdownMenuItem className="min-h-10 cursor-pointer gap-2" onClick={() => void openProfileDialog()}>
                 <LiaUserEditSolid className="size-4 shrink-0" />
                 Profilni tahrirlash
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link href="/" className="flex cursor-pointer items-center gap-2">
+                <Link href="/" className="flex min-h-10 cursor-pointer items-center gap-2">
                   <ExternalLink className="size-4" />
                   Asosiy saytga qaytish
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem
-                className="cursor-pointer gap-2"
+                className="min-h-10 cursor-pointer gap-2"
                 onClick={() => void signOut({ callbackUrl: '/auth/login' })}
               >
                 <LogOut className="size-4" />
@@ -380,7 +386,7 @@ export default function AdminHeader() {
       </header>
 
       <Dialog open={profileOpen} onOpenChange={setProfileOpen}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md">
+        <DialogContent className="max-h-[90vh] w-[calc(100vw-1.25rem)] overflow-y-auto rounded-2xl p-5 sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Profilni tahrirlash</DialogTitle>
           </DialogHeader>
@@ -408,38 +414,63 @@ export default function AdminHeader() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="admin-profile-image">Profil rasmi</Label>
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                <div className="relative min-w-0 flex-1">
-                  <ImageIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    id="admin-profile-image"
-                    value={image}
-                    onChange={(e) => setImage(e.target.value)}
-                    placeholder="URL"
-                    className="min-w-0 pl-9"
-                  />
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+                <div className="shrink-0">
+                  {image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={image}
+                      alt=""
+                      width={AVATAR_SIZE}
+                      height={AVATAR_SIZE}
+                      className="size-[100px] rounded-md border border-border object-cover"
+                    />
+                  ) : (
+                    <div className="flex size-[100px] items-center justify-center rounded-md border border-dashed border-border bg-muted/40 text-muted-foreground">
+                      <ImageIcon className="size-8 opacity-50" aria-hidden />
+                    </div>
+                  )}
                 </div>
-                <input
-                  ref={imageFileRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0]
-                    if (f) void uploadProfileImage(f)
-                  }}
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  className="shrink-0"
-                  disabled={imageUploading}
-                  onClick={() => imageFileRef.current?.click()}
-                  title="Yuklash"
-                >
-                  <Upload className="size-4" />
-                </Button>
+                <div className="min-w-0 flex-1 space-y-2">
+                  <input
+                    ref={imageFileRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    className="sr-only"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0]
+                      if (f) void uploadProfileImage(f)
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="w-full gap-2 sm:w-auto"
+                    disabled={imageUploading}
+                    onClick={() => imageFileRef.current?.click()}
+                  >
+                    {imageUploading ? (
+                      <Loader2 className="size-4 animate-spin" aria-hidden />
+                    ) : (
+                      <Upload className="size-4" aria-hidden />
+                    )}
+                    Rasm yuklash
+                  </Button>
+                  <p className="text-[11px] leading-snug text-muted-foreground">
+                    Profil rasmi kvadratga moslab, siqilgan holda yuklanadi.
+                  </p>
+                  <div className="relative min-w-0">
+                    <ImageIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      id="admin-profile-image"
+                      value={image}
+                      onChange={(e) => setImage(e.target.value)}
+                      placeholder="https://..."
+                      className="min-w-0 pl-9"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
             <div className="space-y-2">

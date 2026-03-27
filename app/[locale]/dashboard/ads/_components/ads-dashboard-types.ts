@@ -36,6 +36,18 @@ export type AdFormState = {
   displaySeconds: number
 }
 
+export const AD_PLACEMENTS: Array<{ value: AdItem["placement"]; label: string }> = [
+  { value: "header_top_full", label: "Yuqori (full)" },
+  { value: "sidebar_widget", label: "Sidebar widget" },
+  { value: "home_bottom_full", label: "Bosh sahifa pasti (full)" },
+  { value: "article_bottom_full", label: "Maqola pasti (full)" },
+]
+
+export const AD_TYPES: Array<{ value: AdItem["type"]; label: string }> = [
+  { value: "content", label: "Content" },
+  { value: "image", label: "Image" },
+]
+
 export const emptyForm: AdFormState = {
   type: "content",
   placement: "header_top_full",

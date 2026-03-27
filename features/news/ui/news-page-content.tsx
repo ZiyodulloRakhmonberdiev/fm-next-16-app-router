@@ -45,6 +45,7 @@ import {
 import { SOCIAL_ICONS } from "@/shared/common/components/ui/social-media-buttons"
 import { useCategoryLabel } from "@/features/category/model/use-category-label"
 import type { LocaleMap } from "@/shared/common/lib/locale-types"
+import { AdSlot } from "@/features/ads/ui/ad-slot"
 
 export type { NewsItem }
 
@@ -580,6 +581,10 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
             ) : null}
           </div>
         ) : null}
+
+        <div className="mt-6">
+          <AdSlot placement="article_bottom_full" />
+        </div>
 
         <NewsEngagement slug={news.slug} newsId={newsId} />
         <section className="my-8">

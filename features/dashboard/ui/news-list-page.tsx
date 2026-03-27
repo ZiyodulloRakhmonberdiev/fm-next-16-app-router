@@ -57,6 +57,8 @@ import {
   ExternalLink, Pencil, Columns3, Languages,
   Check, CircleOff, Clock, Send, Ban, Trash2, Archive,
 } from 'lucide-react'
+import { NewsListSummaryCards } from './_components/news-list-summary-cards'
+import { NewsListFilterPanel } from './_components/news-list-filter-panel'
 
 const PER_PAGE = 50
 
@@ -369,67 +371,35 @@ export function DashboardNewsListPage({
 
       {variant === 'full' && (
         <>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-4">
-            <Link href="/dashboard/news" className="block">
-              <Card className="hover:border-primary/60 transition-colors cursor-pointer h-full p-2 md:p-4">
-                <CardHeader className="py-3 flex flex-row items-center gap-3 px-0 md:px-4">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                    <Newspaper className="size-5 text-primary" />
-                  </div>
-                  <div className="min-w-0">
-                    <CardTitle className="text-sm font-medium">Barchasi</CardTitle>
-                    <CardDescription>{news.length} ta yangilik</CardDescription>
-                  </div>
-                </CardHeader>
-              </Card>
-            </Link>
-            {STATUS_OPTIONS.filter((s) => s.value !== '').map((option) => {
-              const value = option.value as NewsStatus
-              const count = countsByStatus[value]
-              const Icon = STATUS_ICONS[value]
-              return (
-                <Link key={value} href={`/dashboard/news/status/${value}`} className="block">
-                  <Card className="hover:border-primary/60 transition-colors cursor-pointer h-full p-2 md:p-4">
-                    <div className="py-3 flex flex-row items-center gap-3 px-0 md:px-4">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                        <Icon className="size-5 text-primary" />
-                      </div>
-                      <div className="min-w-0">
-                        <CardTitle className="text-sm font-medium">{option.label}</CardTitle>
-                        <CardDescription>{count} ta yangilik</CardDescription>
-                      </div>
-                    </div>
-                  </Card>
-                </Link>
-              )
-            })}
-          </div>
+          <NewsListSummaryCards
+            total={news.length}
+            countsByStatus={countsByStatus}
+            statusOptions={STATUS_OPTIONS}
+            statusIcons={STATUS_ICONS}
+          />
 
-          <Card className="gap-3 py-0 md:gap-6 md:py-6">
-            <CardHeader className="hidden px-3 md:block md:px-6">
-              <CardTitle className="text-base">Filterlar</CardTitle>
-              <CardDescription>Status, Top, tur va sana bo'yicha filtrlash</CardDescription>
-            </CardHeader>
-            <CardContent className="px-3 pb-4 pt-2 md:px-6 md:pb-6 md:pt-0">
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-2 md:gap-6 lg:grid-cols-3 xl:grid-cols-6">
+          <NewsListFilterPanel
+            statusFilter={statusFilter}
+            isTopFilter={isTopFilter}
+            typeFilter={typeFilter}
+            dateFrom={dateFrom}
+            dateTo={dateTo}
+            onStatusChange={setStatusFilter}
+            onTopChange={setIsTopFilter}
+            onTypeChange={setTypeFilter}
+            onDateFromChange={setDateFrom}
+            onDateToChange={setDateTo}
+            onClear={clearFilters}
+            renderSelect={({ kind }) =>
+              kind === 'status' ? (
                 <FilterSelect label="Status" value={statusFilter} options={STATUS_OPTIONS} onSelect={setStatusFilter} />
+              ) : kind === 'top' ? (
                 <FilterSelect label="Top" value={isTopFilter} options={TOP_OPTIONS} onSelect={setIsTopFilter} />
+              ) : (
                 <FilterSelect label="Turi" value={typeFilter} options={TYPE_OPTIONS_FULL} onSelect={setTypeFilter} />
-                <div className="space-y-2">
-                  <Label htmlFor="date-from" className="text-sm font-medium">Sana (dan)</Label>
-                  <Input id="date-from" type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="h-9" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="date-to" className="text-sm font-medium">Sana (gacha)</Label>
-                  <Input id="date-to" type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="h-9" />
-                </div>
-                <div className="flex flex-col justify-end gap-2">
-                  <p className="hidden md:block text-xs text-muted-foreground opacity-0 pointer-events-none">.</p>
-                  <Button variant="outline" size="sm" className="mt-2 md:mt-0" onClick={clearFilters}>Filterlarni tozalash</Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              )
+            }
+          />
         </>
       )}
 

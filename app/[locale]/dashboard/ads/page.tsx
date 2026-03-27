@@ -13,6 +13,7 @@ import { AdsFormLinksSection } from "./_components/ads-form-links-section"
 import { AdsFormMediaSection } from "./_components/ads-form-media-section"
 import { AdsFormMetaFields } from "./_components/ads-form-meta-fields"
 import { AdsFormOptionalUrls } from "./_components/ads-form-optional-urls"
+import { AdsFormPlacementSection } from "./_components/ads-form-placement-section"
 import { AdsFormUrlLogo } from "./_components/ads-form-url-logo"
 import { AdsList, AdsListCardHeader } from "./_components/ads-list"
 
@@ -254,6 +255,7 @@ function DashboardAdsPage() {
             logoFileRef={logoFileRef}
             handleLogoFileChange={handleLogoFileChange}
           />
+          <AdsFormPlacementSection form={form} setForm={setForm} />
           <AdsFormMetaFields form={form} setForm={setForm} />
           <AdsFormLinksSection form={form} setForm={setForm} />
           <AdsFormOptionalUrls form={form} setForm={setForm} />

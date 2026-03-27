@@ -4,10 +4,8 @@ import { LOCALES } from "@/shared/common/lib/locale-constants"
 import { getCategoryName, getTagNames } from "@/shared/common/lib/seed-helpers"
 import type { NewsContent } from "./content"
 
-/** Yangilik holati */
 export type NewsStatus = "pending" | "published" | "cancelled" | "deleted" | "archived"
 
-/** Seed/DB dagi yangilik — title/description/content JSON (title.uz majburiy), categorySlug, tagSlugs */
 export type RawNewsItem = {
   slug: string
   title: NewsTitleLocale
@@ -40,7 +38,6 @@ export type RawNewsItem = {
   videoSource?: "youtube" | "local"
   videoUrl?: string
   createdBy?: { userId?: string; name?: string }
-  /** GET /api/news javobida qo‘shiladi */
   commentCount?: number
   reactionCount?: number
 }
@@ -129,7 +126,6 @@ export function pickNewsForLocale(
   }
 }
 
-/** Raw ro'yxatni berilgan locale uchun NewsItem[] qilib qaytaradi (title bo'lmagan yangiliklar chiqariladi) */
 export function getNewsListForLocale(
   rawList: RawNewsItem[],
   locale: AppLocale
@@ -139,12 +135,10 @@ export function getNewsListForLocale(
     .filter((item): item is NewsItem => item !== null)
 }
 
-/** Client (ommaviy) saytda ko'rsatish uchun — faqat statusi "published" bo'lgan yangiliklar */
 export function filterPublishedRawNews(rawList: RawNewsItem[]): RawNewsItem[] {
   return rawList.filter((r) => (r.status ?? "published") === "published")
 }
 
-/** Client saytda ro'yxatlar uchun — faqat published yangiliklar, berilgan locale da */
 export function getPublishedNewsListForLocale(
   rawList: RawNewsItem[],
   locale: AppLocale

@@ -4,7 +4,6 @@ import type { NewsContent } from '@/features/news/model'
 
 const LOCALES: AppLocale[] = ['uz', 'uzb', 'ru', 'en']
 
-/** Edit formasi uchun boshlang'ich ma'lumot (serverdan yig'iladi) */
 export type EditNewsInitialData = {
   id?: string
   translations: Record<AppLocale, { title: string; description: string }>

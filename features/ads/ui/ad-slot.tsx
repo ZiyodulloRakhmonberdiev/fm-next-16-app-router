@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { MoreVertical } from "lucide-react"
 import { cn } from "@/shared/common/lib/utils"
-import { usePublicAdsQuery } from "@/shared/common/lib/public-ads-query"
+import { usePublicAdsQuery } from "@/features/ads/model/public-ads-query"
 import { Button } from "@/shared/common/components/ui/button"
 import { usePublicSiteSettingsQuery } from "@/shared/common/lib/public-site-settings-query"
 import { useIsMobile } from "@/shared/hooks/use-mobile"

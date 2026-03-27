@@ -13,7 +13,6 @@ export type PublicCategory = {
   priority?: number
 }
 
-/** Yuqori `priority` birinchi (masalan bosh sahifa section tartibi). */
 export function sortCategoriesByPriority(categories: PublicCategory[]): PublicCategory[] {
   return [...categories].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))
 }

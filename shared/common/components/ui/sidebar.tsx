@@ -109,8 +109,6 @@ function SidebarProvider({
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [toggleSidebar])
 
-  // We add a state so that we can do data-state="expanded" or "collapsed".
-  // This makes it easier to style the sidebar with Tailwind classes.
   const state = open ? "expanded" : "collapsed"
 
   const contextValue = React.useMemo<SidebarContextProps>(
@@ -187,7 +185,18 @@ function Sidebar({
           data-sidebar="sidebar"
           data-slot="sidebar"
           data-mobile="true"
-          className="w-(--sidebar-width) bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
+          data-side={side}
+          className={cn(
+            "w-(--sidebar-width) bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden",
+            "transition-transform duration-300 ease-in-out data-[state=closed]:duration-200",
+            side === "left"
+              ? "data-[state=closed]:-translate-x-full data-[state=open]:translate-x-0"
+              : "data-[state=closed]:translate-x-full data-[state=open]:translate-x-0",
+            "data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:duration-200 data-[state=open]:duration-300",
+            side === "left"
+              ? "data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left"
+              : "data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right"
+          )}
           style={
             {
               "--sidebar-width": SIDEBAR_WIDTH_MOBILE,

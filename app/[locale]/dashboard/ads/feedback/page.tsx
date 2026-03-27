@@ -57,7 +57,7 @@ const PLACEMENT_ALL = "__all__"
 const AD_ALL = "__all__"
 
 const placementLabels: Record<string, string> = {
-  header_top_full: "Header yuqori",
+  header_top_full: "Yuqori",
   sidebar_widget: "Yon panel",
   home_bottom_full: "Bosh sahifa pasti",
   article_bottom_full: "Maqola pasti",

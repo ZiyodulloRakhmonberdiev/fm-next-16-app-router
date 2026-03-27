@@ -6,11 +6,8 @@
 import type { NewsItem, RawNewsItem } from "@/features/news/model"
 
 export type PushToTelegramOptions = {
-  /** Bot token (yoki process.env.TELEGRAM_BOT_TOKEN) */
   botToken?: string
-  /** Chat/kanal ID (yoki process.env.TELEGRAM_CHAT_ID) */
   chatId?: string
-  /** Sayt base URL (masalan https://example.com) — yangilik linki uchun */
   baseUrl?: string
 }
 
@@ -18,10 +15,7 @@ export type PushToTelegramResult =
   | { ok: true; messageId: number }
   | { ok: false; error: string }
 
-/**
- * Yangilikni Telegramga yuboradi.
- * HTML formatida sarlavha + qisqa matn + link.
- */
+
 export async function push_to_telegram(
   news: NewsItem | RawNewsItem,
   options: PushToTelegramOptions = {}

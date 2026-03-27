@@ -9,8 +9,8 @@ import {
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query";
 import {
   formatDateISO,
+  formatDateTimeDotSlash,
   type AppLocale,
-  type DateInput,
 } from "@/shared/common/lib/formatter";
 import { useLocale, useTranslations } from "next-intl";
 import { Play } from "lucide-react";
@@ -25,13 +25,6 @@ const VIDEO_NEWS_LIMIT = 8;
 function isVideoNewsItem(item: RawNewsItem): boolean {
   const hasVideo = Boolean(item.videoSource && item.videoUrl);
   return item.type === "video" || hasVideo;
-}
-
-/** Rasmdagidek: `17:11 / 21.03.2026` */
-function formatVideoCardMetaLine(date: DateInput): string {
-  const d = date instanceof Date ? date : new Date(date);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${pad(d.getHours())}:${pad(d.getMinutes())} / ${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`;
 }
 
 export default function VideoNewsSection2() {
@@ -79,7 +72,7 @@ export default function VideoNewsSection2() {
             item,
             locale
           );
-          const metaLine = formatVideoCardMetaLine(item.publishedAt);
+          const metaLine = formatDateTimeDotSlash(item.publishedAt);
           return (
             <li key={item.slug} className="flex h-full min-w-0">
               <button
