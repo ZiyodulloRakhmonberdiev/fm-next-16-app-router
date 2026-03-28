@@ -31,7 +31,7 @@ export async function POST(
 
   const fullName = [item.firstName, item.lastName].filter(Boolean).join(" ").trim()
   const fullPhone = [item.phoneCode, item.phoneNumber].filter(Boolean).join(" ").trim()
-  const send = await sendContactToTelegram({
+  const tg = await sendContactToTelegram({
     settings: deliverySettings,
     fullName,
     email: item.email,
