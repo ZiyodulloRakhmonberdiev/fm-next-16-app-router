@@ -132,7 +132,7 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
   }
 
   async function loadComments(offset = 0, append = false) {
-    const res = await fetch(`/api/news/${newsRef}/comments?limit=12&offset=${offset}`, { cache: "no-store" })
+    const res = await fetch(`/api/news/${newsRef}/comments?limit=12&offset=${offset}`)
     if (!res.ok) return
     const data = await res.json()
     const next = (data.comments ?? []) as CommentItem[]
@@ -147,7 +147,7 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
     const url = isAuthed
       ? `/api/news/${newsRef}/reactions`
       : `/api/news/${newsRef}/reactions?anonId=${encodeURIComponent(anonId)}`
-    const res = await fetch(url, { cache: "no-store" })
+    const res = await fetch(url)
     if (!res.ok) return
     const data = await res.json()
     setCounts(data.counts ?? counts)

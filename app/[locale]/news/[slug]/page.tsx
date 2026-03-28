@@ -1,3 +1,4 @@
+import { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { Footer } from "@/widgets/client-footer"
 import { Header } from "@/widgets/client-header"
@@ -21,9 +22,48 @@ import {
   leanDocToPayload,
 } from "@/features/dashboard/configs/site-settings.model"
 import { AdSlot } from "@/features/ads/ui/ad-slot"
+import { getCachedPublicNews } from "@/shared/common/lib/public-data-server"
 
 type Props = {
   params: Promise<{ locale: string; slug: string }>
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale, slug } = await params
+  const currentLocale = isAppLocale(locale) ? locale : "uz"
+  
+  await dbConnect()
+  const raw = await NewsModel.findOne({ slug, status: "published" }).lean()
+  if (!raw) return {}
+  
+  const news = pickNewsForLocale(raw as RawNewsItem, currentLocale)
+  if (!news) return {}
+
+  const description = news.description || news.title || ""
+  const url = `https://ferganamedia.uz/${locale}/news/${slug}`
+  
+  return {
+    title: `${news.title} | Fergana Media`,
+    description: description.slice(0, 160),
+    alternates: {
+      canonical: url,
+    },
+    openGraph: {
+      title: news.title,
+      description: description.slice(0, 160),
+      url: url,
+      siteName: "Fergana Media",
+      images: news.images?.[0] ? [{ url: news.images[0] }] : [],
+      type: "article",
+      publishedTime: news.publishedAt?.toString(),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: news.title,
+      description: description.slice(0, 160),
+      images: news.images?.[0] ? [news.images[0]] : [],
+    },
+  }
 }
 
 export default async function NewsPage({ params }: Props) {
@@ -101,7 +141,7 @@ export default async function NewsPage({ params }: Props) {
 
               <aside className="hidden md:flex flex-col gap-6 lg:col-span-2">
                 <AdSlot placement="sidebar_widget" />
-                <LatestNews excludeSlug={news.slug} />
+                <LatestNews excludeSlug={news.slug} initialNews={await getCachedPublicNews()} />
               </aside>
             </div>
           </ClientServerOffGate>

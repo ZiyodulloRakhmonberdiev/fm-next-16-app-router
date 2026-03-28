@@ -19,7 +19,7 @@ import { ContentForm } from './content-section'
 import type { NewsStatus } from '@/features/news/model'
 import type { EditNewsInitialData } from '@/features/news/lib/raw-to-edit-initial'
 import { adminQueryKeys } from '@/features/dashboard/model/admin-hooks'
-import { uploadVideoViaApiOrCloudinary } from '@/shared/common/lib/cloudinary-client-upload'
+import { uploadFileViaPresignedUrl } from '@/shared/common/lib/cloudinary-client-upload'
 
 const LOCALES: AppLocale[] = ['uz', 'uzb', 'ru', 'en']
 const LOCALE_LABELS: Record<AppLocale, string> = {
@@ -284,7 +284,7 @@ export function CreateNewsForm({
       let finalVideoUrl: string | null = null
       let finalVideoSource: 'youtube' | 'local' | null = null
       if (videoFileArg) {
-        finalVideoUrl = await uploadVideoViaApiOrCloudinary(videoFileArg, { credentials: 'include' })
+        finalVideoUrl = await uploadFileViaPresignedUrl(videoFileArg, 'video')
         finalVideoSource = 'local'
       } else if (videoUrlArg?.trim()) {
         finalVideoUrl = videoUrlArg.trim()
@@ -663,17 +663,9 @@ export function CreateNewsForm({
 
     const uploadedUrls: string[] = []
     for (const file of files) {
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('kind', 'image')
       try {
-        const res = await fetch('/api/uploads', { method: 'POST', body: formData })
-        const data = (await res.json().catch(() => null)) as { url?: string; error?: string } | null
-        if (!res.ok || !data?.url) {
-          toast.error(data?.error || "Rasmni yuklab bo'lmadi")
-          continue
-        }
-        uploadedUrls.push(data.url)
+        const uploadedUrl = await uploadFileViaPresignedUrl(file, 'image')
+        uploadedUrls.push(uploadedUrl)
       } catch (err) {
         toast.error(err instanceof Error ? err.message : "Rasmni yuklab bo'lmadi")
       }

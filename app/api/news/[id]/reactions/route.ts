@@ -4,6 +4,8 @@ import { authOptions } from "@/shared/common/lib/auth-options"
 import { dbConnect } from "@/shared/common/lib/db"
 import { NewsReactionModel } from "@/features/news/model/reaction.model"
 import { NewsModel } from "@/features/news/model/news.model"
+import { protectPublicApi } from "@/shared/common/lib/protect-api"
+import { CACHE_TIMINGS, privateCacheHeaders } from "@/shared/common/lib/http-cache"
 
 const REACTIONS = ["like", "love", "laugh", "sad", "angry"] as const
 type ReactionType = (typeof REACTIONS)[number]
@@ -27,6 +29,9 @@ export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const isProtected = await protectPublicApi(req)
+  if (isProtected) return isProtected
+
   await dbConnect()
   const session = await getServerSession(authOptions)
   const userId = session?.user?.id
@@ -50,13 +55,21 @@ export async function GET(
     if (!userId && anonId && row.anonId === anonId) myReaction = row.type as ReactionType
   }
 
-  return Response.json({ counts, myReaction })
+  return Response.json(
+    { counts, myReaction },
+    {
+      headers: privateCacheHeaders(CACHE_TIMINGS.engagement.maxAge, CACHE_TIMINGS.engagement.stale),
+    }
+  )
 }
 
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const isProtected = await protectPublicApi(req)
+  if (isProtected) return isProtected
+
   const body = (await req.json().catch(() => null)) as { type?: ReactionType } | null
   const type = body?.type
   if (!type || !REACTIONS.includes(type)) {

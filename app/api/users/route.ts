@@ -7,6 +7,7 @@ import { normalizeRole } from '@/shared/common/lib/rbac'
 import { requireAdminSession } from '@/shared/common/lib/require-admin-session'
 import { UserModel } from '@/features/users/model/user.model'
 import { createUserSchema } from '@/features/users/model/schemas'
+import { logAdminAction } from '@/features/admin-logs/lib/log-action'
 
 export async function GET() {
   const unauthorized = await requireAdminSession(['ceo', 'administrator', 'moderator'])
@@ -57,6 +58,11 @@ export async function POST(req: NextRequest) {
     const user = await UserModel.create({
       ...parsed.data,
       password: hashedPassword,
+    })
+    logAdminAction({
+      action: 'CREATE_USER',
+      targetId: user._id.toString(),
+      targetName: user.login,
     })
     return Response.json(user, { status: 201 })
   } catch (err) {

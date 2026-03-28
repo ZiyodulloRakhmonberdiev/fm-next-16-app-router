@@ -21,7 +21,7 @@ import {
 } from '@/shared/common/components/ui/dialog'
 import { Input } from '@/shared/common/components/ui/input'
 import { Label } from '@/shared/common/components/ui/label'
-import { LogOut, Search, User, ExternalLink, LayoutGrid, Upload, ImageIcon, Lock, ArrowLeft, Undo2, Loader2 } from 'lucide-react'
+import { LogOut, Search, User, ExternalLink, LayoutGrid, Upload, ImageIcon, Lock, ArrowLeft, Undo2, Loader2, RefreshCw } from 'lucide-react'
 import { LiaUserEditSolid } from 'react-icons/lia'
 import type { NewsItem } from '@/features/news/model'
 import { useTheme } from 'next-themes'
@@ -78,6 +78,7 @@ export default function AdminHeader() {
   const wrapperRef = useRef<HTMLDivElement>(null)
 
   const [profileOpen, setProfileOpen] = useState(false)
+  const [isRefreshing, setIsRefreshing] = useState(false)
   const [fullName, setFullName] = useState('')
   const [position, setPosition] = useState('')
   const [image, setImage] = useState('')
@@ -90,6 +91,12 @@ export default function AdminHeader() {
   const { resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
+
+  function handleRefresh() {
+    setIsRefreshing(true)
+    router.refresh()
+    setTimeout(() => setIsRefreshing(false), 800)
+  }
 
   const logoSrc =
     mounted && resolvedTheme === 'light'
@@ -219,18 +226,35 @@ export default function AdminHeader() {
     <>
       <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-border bg-background px-4 md:gap-4 md:px-6">
         <SidebarTrigger className="-ml-1 hidden md:flex" />
+        {/* Desktop: Back + Refresh tugmalari — pill shaklidagi guruh */}
         {showBack ? (
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="hidden shrink-0 md:flex"
-            onClick={() => router.back()}
-            aria-label="Orqaga"
-          >
-            <Undo2 className="size-5" />
-          </Button>
+          <div className="hidden shrink-0 items-center gap-0.5 rounded-lg border border-border/60 bg-muted/40 p-0.5 shadow-sm backdrop-blur md:flex">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="size-8 rounded-md text-muted-foreground transition-colors hover:bg-background hover:text-foreground hover:shadow-sm"
+              onClick={() => router.back()}
+              aria-label="Orqaga"
+            >
+              <Undo2 className="size-4" />
+            </Button>
+            <div className="h-4 w-px bg-border/70" />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="size-8 rounded-md text-muted-foreground transition-colors hover:bg-background hover:text-foreground hover:shadow-sm"
+              onClick={handleRefresh}
+              aria-label="Yangilash"
+              disabled={isRefreshing}
+            >
+              <RefreshCw className={`size-4 transition-transform duration-700 ${isRefreshing ? 'animate-spin' : ''}`} />
+            </Button>
+          </div>
         ) : null}
+
+        {/* Mobile: Back tugmasi */}
         {showBack ? (
           <Button
             type="button"

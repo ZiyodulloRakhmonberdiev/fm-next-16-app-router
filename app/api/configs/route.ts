@@ -9,6 +9,8 @@ import type { SiteSettingsPayload } from '@/shared/common/lib/site-settings-type
 import { redactSiteSettingsSecrets } from '@/shared/common/lib/redact-site-settings'
 import { requireAdminSession } from '@/shared/common/lib/require-admin-session'
 import { dbConnect } from '@/shared/common/lib/db'
+import { protectPublicApi } from '@/shared/common/lib/protect-api'
+import { CACHE_TIMINGS, noStoreHeaders, privateCacheHeaders } from '@/shared/common/lib/http-cache'
 import {
   SiteSettingsModel,
   SITE_SETTINGS_DOCUMENT_ID,
@@ -58,6 +60,7 @@ export function getDefaultSiteSettingsPayload(): SiteSettingsPayload {
       chatId: seed.databaseBackup.chatId,
       threadId: seed.databaseBackup.threadId || undefined,
       commentThreadId: seed.databaseBackup.commentThreadId || undefined,
+      contactThreadId: seed.databaseBackup.contactThreadId || undefined,
     },
   }
 }
@@ -172,18 +175,25 @@ async function ensureSiteSettingsInDb(): Promise<SiteSettingsPayload> {
   return leanDocToPayload(doc) ?? defaults
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const isProtected = await protectPublicApi(req)
+  if (isProtected) return isProtected
+
   try {
     const payload = await ensureSiteSettingsInDb()
     const session = await getServerSession(authOptions)
     const role = normalizeRole(session?.user?.role)
     if (role === 'ceo') {
-      return Response.json(payload)
+      return Response.json(payload, { headers: noStoreHeaders() })
     }
-    return Response.json(redactSiteSettingsSecrets(payload))
+    return Response.json(redactSiteSettingsSecrets(payload), {
+      headers: privateCacheHeaders(CACHE_TIMINGS.siteSettings.maxAge, CACHE_TIMINGS.siteSettings.stale),
+    })
   } catch (e) {
     console.error('[api/configs GET]', e)
-    return Response.json(redactSiteSettingsSecrets(getDefaultSiteSettingsPayload()))
+    return Response.json(redactSiteSettingsSecrets(getDefaultSiteSettingsPayload()), {
+      headers: privateCacheHeaders(CACHE_TIMINGS.siteSettings.maxAge, CACHE_TIMINGS.siteSettings.stale),
+    })
   }
 }
 

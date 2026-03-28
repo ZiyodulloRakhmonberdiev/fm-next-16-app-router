@@ -64,6 +64,12 @@ export const adminMainNavMeta: AdminMainNavMeta[] = [
     iconKey: 'MessageSquare',
   },
   {
+    href: '/dashboard/contact-messages',
+    label: 'Contact xabarlari',
+    roles: ['ceo', 'administrator', 'moderator'],
+    iconKey: 'Send',
+  },
+  {
     href: '/dashboard/reactions',
     label: 'Reaksiyalar',
     roles: ['ceo', 'administrator', 'moderator'],

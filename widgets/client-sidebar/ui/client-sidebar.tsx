@@ -32,7 +32,7 @@ export default function ClientSidebar() {
         </div>
         <CategoryListForSidebar />
         <div className='text-center flex flex-col gap-2 border-t border-border py-4'>
-          <Link href="/team">
+          <Link href="/about">
             <span className="">{t("about_us")}</span>
           </Link>
           <Link href="/contact">

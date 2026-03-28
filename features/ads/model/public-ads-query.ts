@@ -31,11 +31,12 @@ export function usePublicAdsQuery(placement?: NonNullable<PublicAd["placement"]>
     queryKey: ["public-ads", placement],
     queryFn: async () => {
       const qs = placement ? `&placement=${placement}` : ""
-      const res = await fetch(`/api/ads?public=1${qs}`, { cache: "no-store" })
+      const res = await fetch(`/api/ads?public=1${qs}`)
       if (!res.ok) throw new Error("Ads fetch failed")
       return (await res.json()) as PublicAd[]
     },
-    staleTime: 30_000,
+    staleTime: 2 * 60_000,
+    gcTime: 10 * 60_000,
     retry: 1,
     placeholderData: [],
   })

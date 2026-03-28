@@ -7,7 +7,11 @@ import { useLocale, useTranslations } from "next-intl"
 import { cn } from "@/shared/common/lib/utils"
 import type { AppLocale } from "@/shared/common/lib/formatter"
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
-import { getNewsListForLocale, isImageTypeRawNews, type NewsItem } from "@/features/news/model"
+import { getNewsListForLocale, isImageTypeRawNews, type NewsItem, type RawNewsItem } from "@/features/news/model"
+
+type HeaderNewsCarouselProps = {
+  initialNews?: RawNewsItem[]
+}
 
 const DEFAULT_IMAGE = "/images/news/image-1.png"
 
@@ -20,9 +24,10 @@ function LiveIndicator() {
   )
 }
 
-export default function HeaderNewsCarousel() {
+export default function HeaderNewsCarousel({ initialNews }: HeaderNewsCarouselProps) {
   const locale = useLocale() as AppLocale
-  const { data: publicNews = [] } = usePublicNewsQuery()
+  const { data: qNews = [] } = usePublicNewsQuery()
+  const publicNews = initialNews ?? qNews
   const t = useTranslations("common")
   const items = React.useMemo(() => {
     const raw = [...publicNews]

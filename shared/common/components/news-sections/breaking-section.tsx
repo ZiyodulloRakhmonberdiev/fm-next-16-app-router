@@ -10,6 +10,12 @@ import { useLocale, useTranslations } from "next-intl"
 import { NewsSectionHeader } from "@/shared/common/components/news-sections/news-section-header"
 import { FeaturedNewsCard } from "@/features/news/ui/featured-news-card"
 import { NewsCardContent } from "@/shared/common/components/news-sections/news-card-content"
+import type { PublicCategory } from "@/features/category/model/public-categories-query"
+
+type BreakingSectionProps = {
+  initialNews?: RawNewsItem[]
+  initialCategories?: PublicCategory[]
+}
 
 function BreakingListCard({ item, locale }: { item: NewsItem; locale: AppLocale }) {
   const categoryLabel = useCategoryLabel(item.categorySlug, locale, item.category)
@@ -34,10 +40,14 @@ function isBreakingRawNews(n: RawNewsItem) {
   return n.isBreaking === true
 }
 
-export default function BreakingSection() {
+export default function BreakingSection({
+  initialNews,
+  initialCategories,
+}: BreakingSectionProps) {
   const locale = useLocale() as AppLocale
   const t = useTranslations("common")
-  const { data: publicNews = [] } = usePublicNewsQuery()
+  const { data: qNews = [] } = usePublicNewsQuery()
+  const publicNews = initialNews ?? qNews
 
   const items = React.useMemo(() => {
     const raw = [...publicNews]

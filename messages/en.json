@@ -238,5 +238,76 @@
     "placeholder_telegram_title": "Our Telegram channel",
     "placeholder_slot_label": "Ad slot",
     "placeholder_slot_size": "1400×200"
+  },
+  "contactPage": {
+    "page_title": "Contact us",
+    "form_title": "Send us a message",
+    "form_subtitle": "Have a question, feedback, or need help? Contact Fergana Media — we will be glad to respond.",
+    "first_name": "First name",
+    "last_name": "Last name",
+    "email": "Email",
+    "contact_details": "Contact details",
+    "message": "Message",
+    "placeholder_first_name": "Enter your first name",
+    "placeholder_last_name": "Enter your last name",
+    "placeholder_email": "Enter your email",
+    "placeholder_phone": "Enter your phone number",
+    "placeholder_message": "Enter your message",
+    "dial_placeholder": "Code",
+    "submit": "Send a message",
+    "card_greeting": "Hi! We are always here to help you.",
+    "hotline_label": "Hotline",
+    "sms_whatsapp_label": "SMS / WhatsApp",
+    "email_label": "Email",
+    "connect_title": "Connect with us",
+    "mail_subject": "Fergana Media — contact form",
+    "mail_body_name": "Name",
+    "mail_body_email": "Email",
+    "mail_body_phone": "Phone",
+    "response_title": "Response time",
+    "response_value": "Usually within 24 hours",
+    "support_title": "We accept",
+    "support_value": "Feedback, questions, and partnership requests",
+    "sending": "Sending",
+    "submit_success": "Your message has been sent.",
+    "submit_warning": "Your message was saved, but Telegram delivery failed.",
+    "submit_error": "Couldn't send your message.",
+    "required_error": "First name, email, and message are required."
+  },
+  "teamPage": {
+    "intro": "{count} team members and editorial badge cards are collected on one page.",
+    "empty": "Team details will appear here soon.",
+    "members_label": "Members",
+    "hover_hint": "Hover to preview the badge cards more comfortably."
+  },
+  "aboutPage": {
+    "page_title": "About us",
+    "sections": [
+      "Fergana Media is an electronic mass media outlet that brings together regional journalism, analysis, and multimedia content in one platform.",
+      "Our goal is to give readers reliable, fast, and clear news, analysis, and special projects that show the full context of events.",
+      "The site operates as a registered e-media outlet; the editorial team follows professional journalism standards in an independent environment.",
+      "Use the link below to meet our team, projects, and official materials."
+    ],
+    "team_link": "Go to the team page"
+  },
+  "privacyPage": {
+    "title": "Privacy policy",
+    "sections": [
+      "This privacy policy explains how your personal data may be collected, stored, and protected when you use the Fergana Media website and services.",
+      "Information you provide through the site (for example, comments or profile data) may be used to deliver services, moderate content, and comply with legal requirements.",
+      "We do not sell your data; it may be shared only when required by law or security needs, or with your explicit consent.",
+      "Cookies and technical data may be used to improve the site and gather statistics; you can limit them in your browser settings.",
+      "For questions, use the contacts on the “Contact” page. This policy may be updated from time to time."
+    ]
+  },
+  "termsPage": {
+    "title": "Terms of service",
+    "sections": [
+      "Using Fergana Media means you accept these terms. Content is protected by copyright and publication rules.",
+      "Users must provide accurate information, treat others respectfully, and must not post unlawful material.",
+      "The editorial team may moderate comments, remove violating content, or restrict accounts.",
+      "We are not responsible for third-party sites linked from our pages or their privacy practices.",
+      "Terms may change; continued use means you accept the updates. Disputes are governed by the laws of Uzbekistan."
+    ]
   }
 }

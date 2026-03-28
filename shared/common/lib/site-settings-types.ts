@@ -56,6 +56,8 @@ export type DatabaseBackupSettings = {
   threadId?: string
   /** Pending izohlar alerti uchun alohida thread */
   commentThreadId?: string
+  /** Contact form xabarlari uchun alohida thread */
+  contactThreadId?: string
 }
 
 export type SiteSettingsPayload = {

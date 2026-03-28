@@ -56,3 +56,32 @@ export async function uploadVideoViaApiOrCloudinary(
   }
   return data.url
 }
+
+export async function uploadFileViaPresignedUrl(
+  file: File,
+  kind: "image" | "video"
+): Promise<string> {
+  const res1 = await fetch("/api/uploads/presigned", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ filename: file.name, kind }),
+  })
+  const data1 = await res1.json()
+  if (!res1.ok || !data1.presignedUrl) {
+    throw new Error(data1?.error || "Yuklash uchun ruxsat (presigned URL) olib bo'lmadi")
+  }
+
+  const res2 = await fetch(data1.presignedUrl, {
+    method: "PUT",
+    headers: {
+      "Content-Type": file.type || (kind === "image" ? "image/jpeg" : "video/mp4"),
+    },
+    body: file,
+  })
+
+  if (!res2.ok) {
+    throw new Error("S3 ga to'g'ridan-to'g'ri yuklash bekor qilindi / xatolik berdi")
+  }
+
+  return data1.publicUrl
+}

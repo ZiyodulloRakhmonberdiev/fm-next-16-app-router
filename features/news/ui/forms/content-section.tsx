@@ -25,7 +25,7 @@ import {
 } from "@/features/news/lib/latin-cyrill-translator"
 import type { AppLocale } from "@/shared/common/lib/locale-api"
 import { toast } from "sonner"
-import { uploadVideoViaApiOrCloudinary } from "@/shared/common/lib/cloudinary-client-upload"
+import { uploadFileViaPresignedUrl } from "@/shared/common/lib/cloudinary-client-upload"
 
 type LocalMedia = {
   id: string
@@ -65,24 +65,7 @@ export function ContentForm({
   }
 
   const uploadMedia = async (file: File, kind: "image" | "video"): Promise<string> => {
-    if (kind === "video") {
-      return uploadVideoViaApiOrCloudinary(file, { credentials: "include" })
-    }
-    const formData = new FormData()
-    formData.append("file", file)
-    formData.append("kind", kind)
-
-    const res = await fetch("/api/uploads", {
-      method: "POST",
-      credentials: "include",
-      body: formData,
-    })
-    const data = (await res.json().catch(() => null)) as { url?: string; error?: string } | null
-
-    if (!res.ok || !data?.url) {
-      throw new Error(data?.error || "Media upload xatoligi")
-    }
-    return data.url
+    return uploadFileViaPresignedUrl(file, kind)
   }
 
   const insertAtCursor = (textToInsert: string) => {

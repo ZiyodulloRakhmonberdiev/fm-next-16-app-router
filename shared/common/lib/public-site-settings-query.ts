@@ -103,7 +103,7 @@ function normalizeSiteSettings(raw: unknown): SiteSettingsPayload {
 
 async function fetchSiteSettings(): Promise<SiteSettingsPayload> {
   try {
-    const res = await fetch("/api/configs", { cache: "no-store" })
+    const res = await fetch("/api/configs")
     if (!res.ok) return getSeedSiteSettings()
     const json = await res.json().catch(() => null)
     return normalizeSiteSettings(json)
@@ -116,8 +116,9 @@ export function usePublicSiteSettingsQuery() {
   return useQuery({
     queryKey: ["public-site-settings"],
     queryFn: fetchSiteSettings,
-    staleTime: 0,
-    refetchInterval: 5000,
-    refetchOnWindowFocus: true,
+    staleTime: 5 * 60_000,
+    gcTime: 30 * 60_000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: true,
   })
 }

@@ -6,7 +6,7 @@ import { toast } from "sonner"
 import { Card, CardContent } from "@/shared/common/components/ui/card"
 import { useRouter } from "@/i18n/navigation"
 import { Loader2 } from "lucide-react"
-import { uploadVideoViaApiOrCloudinary } from "@/shared/common/lib/cloudinary-client-upload"
+import { uploadFileViaPresignedUrl } from "@/shared/common/lib/cloudinary-client-upload"
 import { applyAdItemToForm, emptyForm, type AdItem } from "./_components/ads-dashboard-types"
 import { AdsFormActions } from "./_components/ads-form-actions"
 import { AdsFormLinksSection } from "./_components/ads-form-links-section"
@@ -42,16 +42,7 @@ function DashboardAdsPage() {
   }, [])
 
   async function uploadMedia(file: File, kind: "image" | "video"): Promise<string> {
-    if (kind === "video") {
-      return uploadVideoViaApiOrCloudinary(file, { credentials: "include" })
-    }
-    const formData = new FormData()
-    formData.append("file", file)
-    formData.append("kind", kind)
-    const res = await fetch("/api/uploads", { method: "POST", credentials: "include", body: formData })
-    const data = (await res.json().catch(() => null)) as { url?: string; error?: string } | null
-    if (!res.ok || !data?.url) throw new Error(data?.error || "Yuklab bo'lmadi")
-    return data.url
+    return uploadFileViaPresignedUrl(file, kind)
   }
 
   async function handleMediaFileChange(e: React.ChangeEvent<HTMLInputElement>, atIndex?: number) {

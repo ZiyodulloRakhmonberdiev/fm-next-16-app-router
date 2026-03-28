@@ -113,6 +113,7 @@ export default function ConfigsContentDeliveryPage() {
             chatId={data.databaseBackup.chatId}
             threadId={data.databaseBackup.threadId}
             commentThreadId={data.databaseBackup.commentThreadId}
+            contactThreadId={data.databaseBackup.contactThreadId}
             onEnabledChange={(checked) => setDatabaseBackupField({ enabled: checked })}
             onPatch={(patch) => setDatabaseBackupField(patch)}
             onSaveSettings={() => void handleSaveDatabaseBackup()}

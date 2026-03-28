@@ -104,6 +104,13 @@ export default function DashboardAdsFeedbackPage() {
   }, [loadFeedback])
 
   useEffect(() => {
+    if (!data?.meta.placements) return
+    if (placement !== PLACEMENT_ALL && !data.meta.placements.includes(placement)) {
+      setPlacement(PLACEMENT_ALL)
+    }
+  }, [data?.meta.placements, placement])
+
+  useEffect(() => {
     void (async () => {
       const res = await fetch("/api/ads", { cache: "no-store", credentials: "include" })
       if (!res.ok) return

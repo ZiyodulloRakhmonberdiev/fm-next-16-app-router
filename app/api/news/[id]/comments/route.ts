@@ -12,6 +12,8 @@ import {
   leanDocToPayload,
 } from "@/features/dashboard/configs/site-settings.model"
 import { sendPendingCommentAlertToTelegram } from "@/shared/common/lib/database-backup"
+import { protectPublicApi } from "@/shared/common/lib/protect-api"
+import { CACHE_TIMINGS, privateCacheHeaders } from "@/shared/common/lib/http-cache"
 
 const newsFilter = (id: string) => ({
   $or: [{ newsId: id }, { newsSlug: id }],
@@ -21,6 +23,9 @@ export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const isProtected = await protectPublicApi(req)
+  if (isProtected) return isProtected
+
   await dbConnect()
   const session = await getServerSession(authOptions)
   const userId = session?.user?.id
@@ -52,18 +57,26 @@ export async function GET(
     status: { $in: ["confirmed", "approved"] },
   })
 
-  return Response.json({
-    comments: [...minePending, ...visiblePublic]
-      .sort((a, b) => new Date(String(a.createdAt)).getTime() - new Date(String(b.createdAt)).getTime()),
-    totalPublic,
-    hasMore: offset + limit < totalPublic,
-  })
+  return Response.json(
+    {
+      comments: [...minePending, ...visiblePublic]
+        .sort((a, b) => new Date(String(a.createdAt)).getTime() - new Date(String(b.createdAt)).getTime()),
+      totalPublic,
+      hasMore: offset + limit < totalPublic,
+    },
+    {
+      headers: privateCacheHeaders(CACHE_TIMINGS.engagement.maxAge, CACHE_TIMINGS.engagement.stale),
+    }
+  )
 }
 
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const isProtected = await protectPublicApi(req)
+  if (isProtected) return isProtected
+
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) {
     return Response.json({ error: "Unauthorized" }, { status: 401 })

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { getNewsListForLocale, isImageTypeRawNews, type NewsItem } from "@/features/news/model"
+import { getNewsListForLocale, isImageTypeRawNews, type NewsItem, type RawNewsItem } from "@/features/news/model"
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
 import { getCategoryNameFromApi, usePublicCategoriesQuery } from "@/features/category/model/public-categories-query"
 import { useLocale } from "next-intl"
@@ -10,17 +10,27 @@ import { FeaturedNewsCard } from "@/features/news/ui/featured-news-card"
 import { MiniNewsCard } from "@/features/news/ui/mini-news-card"
 import { NewsSectionHeader } from "@/shared/common/components/news-sections/news-section-header"
 
+import type { PublicCategory } from "@/features/category/model/public-categories-query"
+
 type BannerSectionProps = {
   categorySlug?: string
   featuredPosition?: "left" | "right"
+  initialNews?: RawNewsItem[]
+  initialCategories?: PublicCategory[]
 }
 
 export default function BannerSection({
   categorySlug = "business",
+  initialNews,
+  initialCategories,
 }: BannerSectionProps) {
   const locale = useLocale() as AppLocale
-  const { data: publicNews = [] } = usePublicNewsQuery()
-  const { data: categories = [] } = usePublicCategoriesQuery()
+  const { data: qNews = [] } = usePublicNewsQuery()
+  const { data: qCats = [] } = usePublicCategoriesQuery()
+  
+  const publicNews = initialNews ?? qNews
+  const categories = initialCategories ?? qCats
+  
   const categoryName = getCategoryNameFromApi(categories, categorySlug, locale)
   const rawSorted = React.useMemo(
     () =>

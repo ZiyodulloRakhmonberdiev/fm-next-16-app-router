@@ -4,6 +4,7 @@ import { dbConnect } from '@/shared/common/lib/db'
 import { AdModel } from '@/features/ads/model/ads.model'
 import { AdFeedbackModel } from '@/features/ads/model/ad-feedback.model'
 import { CategoryModel } from '@/features/category/model/category.model'
+import { ContactMessageModel } from '@/features/contact/model/contact-message.model'
 import { SiteSettingsModel } from '@/features/dashboard/configs/site-settings.model'
 import { NewsModel } from '@/features/news/model/news.model'
 import { NewsCommentModel } from '@/features/news/model/comment.model'
@@ -46,6 +47,7 @@ export async function createDatabaseBackupArchive(): Promise<DatabaseBackupArchi
     siteSettings: await SiteSettingsModel.find({}).lean(),
     ads: await AdModel.find({}).lean(),
     adFeedback: await AdFeedbackModel.find({}).lean(),
+    contactMessages: await ContactMessageModel.find({}).lean(),
     newsComments: await NewsCommentModel.find({}).lean(),
     newsReactions: await NewsReactionModel.find({}).lean(),
     savedNews: await SavedNewsModel.find({}).lean(),
@@ -248,6 +250,60 @@ export async function sendPendingCommentAlertToTelegram(input: {
     const desc = typeof data?.description === 'string' ? data.description : res.statusText
     return { ok: false, error: 'Telegram xatosi', telegramDescription: desc }
   }
+  return { ok: true, messageId: data?.result?.message_id }
+}
+
+export async function sendContactMessageToTelegram(input: {
+  settings: DatabaseBackupSettings
+  fullName: string
+  email: string
+  phone?: string
+  message: string
+  locale?: string
+}): Promise<{ ok: true; messageId?: number } | { ok: false; error: string; telegramDescription?: string }> {
+  const token = input.settings.botToken.trim()
+  const chatId = input.settings.chatId.trim()
+  if (!token || !chatId) {
+    return { ok: false, error: "Contact alert uchun bot token/chat id bo'sh" }
+  }
+
+  const threadRaw = input.settings.contactThreadId?.trim() || input.settings.threadId?.trim()
+  const threadId = threadRaw ? Number(threadRaw) : undefined
+  const payload: Record<string, unknown> = {
+    chat_id: chatId,
+    parse_mode: 'HTML',
+    text: [
+      '📩 <b>Yangi contact xabari</b>',
+      `<b>Ism:</b> ${escapeTelegramHtml(input.fullName)}`,
+      `<b>Email:</b> ${escapeTelegramHtml(input.email)}`,
+      input.phone ? `<b>Telefon:</b> ${escapeTelegramHtml(input.phone)}` : '',
+      input.locale ? `<b>Til:</b> ${escapeTelegramHtml(input.locale)}` : '',
+      '',
+      escapeTelegramHtml(input.message),
+    ]
+      .filter(Boolean)
+      .join('\n'),
+    disable_web_page_preview: true,
+  }
+  if (threadId != null && Number.isFinite(threadId)) {
+    payload.message_thread_id = Math.floor(threadId)
+  }
+
+  const url = `https://api.telegram.org/bot${token}/sendMessage`
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  const data = (await res.json().catch(() => null)) as
+    | { ok?: boolean; description?: string; result?: { message_id?: number } }
+    | null
+
+  if (!res.ok || !data?.ok) {
+    const desc = typeof data?.description === 'string' ? data.description : res.statusText
+    return { ok: false, error: 'Telegram xatosi', telegramDescription: desc }
+  }
+
   return { ok: true, messageId: data?.result?.message_id }
 }
 

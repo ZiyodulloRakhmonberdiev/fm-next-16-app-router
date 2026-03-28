@@ -238,5 +238,76 @@
     "placeholder_telegram_title": "Bizning Telegram kanalimiz",
     "placeholder_slot_label": "Reklama joyi",
     "placeholder_slot_size": "1400×200"
+  },
+  "contactPage": {
+    "page_title": "Bog'lanish",
+    "form_title": "Bizga xabar yuboring",
+    "form_subtitle": "Savolingiz, taklifingiz yoki yordam kerakmi? Fergana Media bilan bemalol bog'laning — javob berishdan mamnunmiz.",
+    "first_name": "Ism",
+    "last_name": "Familiya",
+    "email": "Email",
+    "contact_details": "Aloqa",
+    "message": "Xabar",
+    "placeholder_first_name": "Ismingizni kiriting",
+    "placeholder_last_name": "Familiyangizni kiriting",
+    "placeholder_email": "Email manzilingiz",
+    "placeholder_phone": "Telefon raqamingiz",
+    "placeholder_message": "Xabaringizni yozing",
+    "dial_placeholder": "Kod",
+    "submit": "Xabar yuborish",
+    "card_greeting": "Salom! Sizga yordam berish uchun doim tayyormiz.",
+    "hotline_label": "Issiq liniya",
+    "sms_whatsapp_label": "SMS / WhatsApp",
+    "email_label": "Email",
+    "connect_title": "Biz bilan bog'laning",
+    "mail_subject": "Fergana Media — bog'lanish formasi",
+    "mail_body_name": "Ism",
+    "mail_body_email": "Email",
+    "mail_body_phone": "Telefon",
+    "response_title": "Javob vaqti",
+    "response_value": "Odatda 24 soat ichida",
+    "support_title": "Qabul qilinadi",
+    "support_value": "Takliflar, savollar va hamkorlik so'rovlari",
+    "sending": "Yuborilmoqda",
+    "submit_success": "Xabaringiz yuborildi.",
+    "submit_warning": "Xabaringiz saqlandi, lekin Telegramga yuborishda muammo bo'ldi.",
+    "submit_error": "Xabarni yuborib bo'lmadi.",
+    "required_error": "Ism, email va xabar maydonlari majburiy."
+  },
+  "teamPage": {
+    "intro": "{count} ta jamoa a'zosi va tahririy badge kartalari bir sahifada jamlandi.",
+    "empty": "Jamoa ma'lumotlari tez orada shu yerda ko'rsatiladi.",
+    "members_label": "A'zolar",
+    "hover_hint": "Hover qiling va badge kartalarni qulayroq ko‘ring."
+  },
+  "aboutPage": {
+    "page_title": "Biz haqimizda",
+    "sections": [
+      "Fergana Media — Farg'ona va mintaqaviy jurnalistika, tahlil va multimediya kontentini yagona platformada jamlaydigan elektron ommaviy axborot vositasi.",
+      "Bizning maqsadimiz — o‘quvchilarga ishonchli, tezkor va tushunarli yangiliklar, tahlillar va maxsus loyihalar orqali voqealar fonini to‘liqroq ko‘rsatish.",
+      "Sayt AOKA ro‘yxatidan o‘tgan elektron OAV sifatida faoliyat yuritadi; tahririyat mustaqil muhitda professional jurnalistika standartlariga amal qiladi.",
+      "Jamoa a’zolari, loyihalar va rasmiy materiallar bilan tanishish uchun quyidagi havoladan foydalaning."
+    ],
+    "team_link": "Jamoa sahifasiga o‘tish"
+  },
+  "privacyPage": {
+    "title": "Maxfiylik siyosati",
+    "sections": [
+      "Ushbu maxfiylik siyosati Fergana Media veb-sayti va xizmatlaridan foydalanishda shaxsiy ma’lumotlaringiz qanday yig‘ilishi, saqlanishi va himoya qilinishini tushuntiradi.",
+      "Sayt orqali taqdim etilgan ma’lumotlar (masalan, izohlar yoki profil ma’lumotlari) xizmat ko‘rsatish, moderatsiya va qonuniy talablarga rioya qilish uchun ishlatilishi mumkin.",
+      "Biz ma’lumotlarni uchinchi shaxslarga sotmaymiz; faqat qonun yoki xavfsizlik talab qilganda yoki aniq roziligingiz bo‘lsa ulashilishi mumkin.",
+      "Cookie va texnik ma’lumotlar sayt ishlashini yaxshilash va statistikani olish uchun qo‘llanilishi mumkin; brauzer sozlamalari orqali cheklash mumkin.",
+      "Savollar uchun «Bog‘lanish» sahifasidagi aloqa ma’lumotlaridan foydalaning. Maxfiylik siyosati vaqti-vaqti bilan yangilanishi mumkin."
+    ]
+  },
+  "termsPage": {
+    "title": "Foydalanish shartlari",
+    "sections": [
+      "Fergana Media resurslaridan foydalanish ushbu shartlarga rozilik bildirishni anglatadi. Kontent mualliflik huquqi va nashr qoidalari bilan himoyalangan.",
+      "Foydalanuvchilar haqiqiy ma’lumot berishi, boshqa foydalanuvchilarga hurmat bilan munosabatda bo‘lishi va qonunga zid materiallarni joylashtirmasligi kerak.",
+      "Tahririyat izohlarni moderatsiya qilish, qoidabuzar kontentni olib tashlash yoki akkauntni cheklash huquqiga ega.",
+      "Saytdagi tashqi havolalar uchun uchinchi tomon saytlari mas’ul; ularning maxfiylik amaliyotlari bizga tegishli emas.",
+      "Shartlar o‘zgartirilishi mumkin; davom ettirib foydalanish yangi shartlarni qabul qilgan hisoblanasiz. Nizo bo‘yicha O‘zbekiston qonunchiligiga murojaat qilinadi."
+    ]
   }
 }

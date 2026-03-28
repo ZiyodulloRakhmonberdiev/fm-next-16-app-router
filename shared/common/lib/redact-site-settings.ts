@@ -16,6 +16,7 @@ export function redactSiteSettingsSecrets(payload: SiteSettingsPayload): SiteSet
       chatId: '',
       threadId: undefined,
       commentThreadId: undefined,
+      contactThreadId: undefined,
     },
   }
 }

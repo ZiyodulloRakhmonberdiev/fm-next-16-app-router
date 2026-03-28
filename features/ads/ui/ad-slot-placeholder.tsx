@@ -34,12 +34,12 @@ export function AdSlotPlaceholder({ placement = "header_top_full" }: Props) {
           <div className="absolute inset-0 rounded-xl bg-black/35" aria-hidden />
           <div className="relative z-10 flex w-full max-w-[240px] flex-col items-center gap-2 text-center">
             <Link
-              href="/contact-us"
+              href="/contact"
               className="text-sm font-medium leading-snug text-white/95 underline-offset-2 hover:text-white hover:underline"
             >
               {t("placeholder_slot_text")}
             </Link>
-            <Link href="/contact-us" className="flex flex-col items-center gap-0.5">
+            <Link href="/contact" className="flex flex-col items-center gap-0.5">
               <span className="text-[10px] font-semibold uppercase tracking-wide text-white/85">
                 {t("placeholder_slot_label")}
               </span>
@@ -98,12 +98,12 @@ export function AdSlotPlaceholder({ placement = "header_top_full" }: Props) {
 
         <div className="relative z-10 flex flex-row items-center justify-center gap-2 p-4">
           <Link
-            href="/contact-us"
+            href="/contact"
             className="hidden max-w-56 text-center text-sm font-medium text-white/95 hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary md:block md:rounded md:px-2 md:py-1 line-clamp-2"
           >
             {t("placeholder_slot_text")}
           </Link>
-          <Link href="/contact-us" className="flex flex-col items-center justify-center gap-1">
+          <Link href="/contact" className="flex flex-col items-center justify-center gap-1">
             <span className="text-[11px] font-semibold uppercase tracking-wide text-white/80">
               {t("placeholder_slot_label")}
             </span>

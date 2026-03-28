@@ -68,6 +68,7 @@ const SiteSettingsSchema = new Schema<SiteSettingsDoc>(
       chatId: { type: String, default: '' },
       threadId: { type: String },
       commentThreadId: { type: String },
+      contactThreadId: { type: String },
     },
   },
   { timestamps: true }
@@ -82,6 +83,7 @@ const defaultDatabaseBackup = (): SiteSettingsPayload['databaseBackup'] => ({
   chatId: '',
   threadId: undefined,
   commentThreadId: undefined,
+  contactThreadId: undefined,
 })
 
 export function leanDocToPayload(doc: SiteSettingsDoc | null | undefined): SiteSettingsPayload | null {
@@ -102,6 +104,9 @@ export function leanDocToPayload(doc: SiteSettingsDoc | null | undefined): SiteS
           threadId: dbBackup.threadId?.trim() ? dbBackup.threadId : undefined,
           commentThreadId: dbBackup.commentThreadId?.trim()
             ? dbBackup.commentThreadId
+            : undefined,
+          contactThreadId: dbBackup.contactThreadId?.trim()
+            ? dbBackup.contactThreadId
             : undefined,
         }
       : defaultDatabaseBackup(),

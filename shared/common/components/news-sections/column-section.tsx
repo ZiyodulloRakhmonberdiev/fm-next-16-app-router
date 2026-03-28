@@ -10,13 +10,16 @@ import { formatDateISO, formatDateTimeLocale } from "@/shared/common/lib/formatt
 import type { AppLocale } from "@/shared/common/lib/formatter"
 import { Link } from "@/i18n/navigation"
 import { useLocale, useTranslations } from "next-intl"
-import { NewsSectionHeader } from "@/shared/common/components/news-sections/news-section-header"
 import { FeaturedNewsCard } from "@/features/news/ui/featured-news-card"
 import { ChevronRight } from "lucide-react"
+import type { PublicCategory } from "@/features/category/model/public-categories-query"
+import type { RawNewsItem } from "@/features/news/model"
 
 type ColumnSectionProps = {
   categorySlug?: string
   featuredPosition?: "left" | "right"
+  initialNews?: RawNewsItem[]
+  initialCategories?: PublicCategory[]
 }
 
 function ColumnListCard({ item, locale }: { item: NewsItem; locale: AppLocale }) {
@@ -43,10 +46,16 @@ function ColumnListCard({ item, locale }: { item: NewsItem; locale: AppLocale })
 export default function ColumnSection({
   categorySlug = "business",
   featuredPosition = "right",
+  initialNews,
+  initialCategories,
 }: ColumnSectionProps) {
   const locale = useLocale() as AppLocale
-  const { data: publicNews = [] } = usePublicNewsQuery()
-  const { data: categories = [] } = usePublicCategoriesQuery()
+  const { data: qNews = [] } = usePublicNewsQuery()
+  const { data: qCats = [] } = usePublicCategoriesQuery()
+  
+  const publicNews = initialNews ?? qNews
+  const categories = initialCategories ?? qCats
+
   const categoryName = getCategoryNameFromApi(categories, categorySlug, locale)
   const t = useTranslations("common")
   const items = React.useMemo(() => {

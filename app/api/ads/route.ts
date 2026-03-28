@@ -4,8 +4,13 @@ import { isClientDeliveryEnabled } from "@/shared/common/lib/server-client-deliv
 import { AdModel } from "@/features/ads/model/ads.model"
 import { createAdSchema } from "@/features/ads/model/schemas"
 import { requireAdminSession } from "@/shared/common/lib/require-admin-session"
+import { protectPublicApi } from "@/shared/common/lib/protect-api"
+import { CACHE_TIMINGS, publicCacheHeaders } from "@/shared/common/lib/http-cache"
 
 export async function GET(req: NextRequest) {
+  const isProtected = await protectPublicApi(req)
+  if (isProtected) return isProtected
+
   const { searchParams } = new URL(req.url)
   const isPublic = searchParams.get("public") === "1"
   const placement = searchParams.get("placement")
@@ -29,7 +34,9 @@ export async function GET(req: NextRequest) {
       filter.$or = [{ placements: placement }, { placement }]
     }
     const ads = await AdModel.find(filter).sort({ priority: -1, createdAt: -1 }).lean()
-    return Response.json(ads)
+    return Response.json(ads, {
+      headers: publicCacheHeaders(CACHE_TIMINGS.ads.maxAge, CACHE_TIMINGS.ads.stale),
+    })
   }
 
   const unauthorized = await requireAdminSession(["ceo", "administrator", "ads_manager"])

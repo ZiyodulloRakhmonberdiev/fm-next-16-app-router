@@ -19,6 +19,12 @@ import { NewsSectionHeader } from "@/shared/common/components/news-sections/news
 import { usePublicCategoriesQuery } from "@/features/category/model/public-categories-query";
 import { getCategoryLabelForNewsItem } from "@/features/category/model/use-category-label";
 import { VideoCardMediaPreview } from "@/features/news/ui/news-listing/video-card-media-preview";
+import type { PublicCategory } from "@/features/category/model/public-categories-query";
+
+type VideoNewsSection2Props = {
+  initialNews?: RawNewsItem[];
+  initialCategories?: PublicCategory[];
+};
 
 const VIDEO_NEWS_LIMIT = 8;
 
@@ -27,11 +33,17 @@ function isVideoNewsItem(item: RawNewsItem): boolean {
   return item.type === "video" || hasVideo;
 }
 
-export default function VideoNewsSection2() {
+export default function VideoNewsSection2({
+  initialNews,
+  initialCategories,
+}: VideoNewsSection2Props) {
   const locale = useLocale() as AppLocale;
   const t = useTranslations("common");
-  const { data: publicNews = [] } = usePublicNewsQuery();
-  const { data: categories = [], isPending: categoriesPending } = usePublicCategoriesQuery();
+  const { data: qNews = [] } = usePublicNewsQuery();
+  const { data: qCats = [] } = usePublicCategoriesQuery();
+
+  const publicNews = initialNews ?? qNews;
+  const categories = initialCategories ?? qCats;
   const [selected, setSelected] = React.useState<NewsItem | null>(null);
   const [isOpen, setIsOpen] = React.useState(false);
 
@@ -68,7 +80,7 @@ export default function VideoNewsSection2() {
         {items.map((item) => {
           const categoryLabel = getCategoryLabelForNewsItem(
             categories,
-            categoriesPending,
+            false, // isPending not relevant with initial data or already fetched query data
             item,
             locale
           );

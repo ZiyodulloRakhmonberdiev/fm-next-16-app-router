@@ -1,21 +1,9 @@
 "use client"
 
-import { useQuery } from "@tanstack/react-query"
-import type { AppLocale } from "@/shared/common/lib/locale-api"
-import type { LocaleMap } from "@/shared/common/lib/locale-types"
 import { usePublicSiteSettingsQuery } from "@/shared/common/lib/public-site-settings-query"
+import { sortCategoriesByPriority, type PublicCategory } from "../lib/category-utils"
 
-export type PublicCategory = {
-  _id?: string
-  slug: string
-  href?: string
-  name: LocaleMap
-  priority?: number
-}
-
-export function sortCategoriesByPriority(categories: PublicCategory[]): PublicCategory[] {
-  return [...categories].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))
-}
+export type { PublicCategory }
 
 async function fetchPublicCategories(): Promise<PublicCategory[]> {
   const res = await fetch("/api/categories")
@@ -28,14 +16,9 @@ async function fetchPublicCategories(): Promise<PublicCategory[]> {
   return sortCategoriesByPriority(data)
 }
 
-export function getCategoryNameFromApi(
-  categories: PublicCategory[],
-  slug: string,
-  locale: AppLocale
-): string {
-  const category = categories.find((item) => item.slug === slug)
-  return category?.name?.[locale] ?? category?.name?.uz ?? slug
-}
+export { getCategoryNameFromApi } from "../lib/category-utils"
+
+import { useQuery } from "@tanstack/react-query"
 
 export function usePublicCategoriesQuery() {
   const { data: settings } = usePublicSiteSettingsQuery()

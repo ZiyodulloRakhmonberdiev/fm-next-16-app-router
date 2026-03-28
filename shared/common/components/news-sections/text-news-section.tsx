@@ -7,13 +7,25 @@ import { Card } from "@/shared/common/components/ui/card"
 import { formatDateISO, formatDateTimeLocale, type AppLocale } from "@/shared/common/lib/formatter"
 import { getNewsListForLocale, isTextOnlyRawNews, type NewsItem } from "@/features/news/model"
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
-import { usePublicCategoriesQuery } from "@/features/category/model/public-categories-query"
+import { usePublicCategoriesQuery, type PublicCategory } from "@/features/category/model/public-categories-query"
 import { getCategoryLabelForNewsItem } from "@/features/category/model/use-category-label"
+import type { RawNewsItem } from "@/features/news/model"
 
-export default function TextNewsSection() {
+type TextNewsSectionProps = {
+  initialNews?: RawNewsItem[]
+  initialCategories?: PublicCategory[]
+}
+
+export default function TextNewsSection({
+  initialNews,
+  initialCategories,
+}: TextNewsSectionProps) {
   const locale = useLocale() as AppLocale
-  const { data: publicNews = [] } = usePublicNewsQuery()
-  const { data: categories = [], isPending: categoriesPending } = usePublicCategoriesQuery()
+  const { data: qNews = [] } = usePublicNewsQuery()
+  const { data: qCats = [], isPending: categoriesPending } = usePublicCategoriesQuery()
+
+  const publicNews = initialNews ?? qNews
+  const categories = initialCategories ?? qCats
 
   const items = React.useMemo(() => {
     const raw = [...publicNews]

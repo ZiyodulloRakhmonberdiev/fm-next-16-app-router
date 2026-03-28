@@ -4,6 +4,8 @@ import { NewsModel } from '@/features/news/model/news.model'
 import { createNewsSchema } from '@/features/news/model/schemas'
 import { deleteNewsFromTelegram, sendNewsToTelegram } from '@/shared/common/lib/telegram'
 import { requireAdminSession } from '@/shared/common/lib/require-admin-session'
+import { logAdminAction } from '@/features/admin-logs/lib/log-action'
+import { protectPublicApi } from '@/shared/common/lib/protect-api'
 
 async function syncTelegramForNews(news: any, origin: string) {
   if (!news.pushedToTelegram) return
@@ -41,9 +43,12 @@ async function syncTelegramForNews(news: any, origin: string) {
 }
 
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const isProtected = await protectPublicApi(req)
+  if (isProtected) return isProtected
+
   await dbConnect()
   const news = await NewsModel.findById((await params).id).lean()
 
@@ -100,6 +105,12 @@ export async function PUT(
 
   await syncTelegramForNews(updated, req.nextUrl.origin)
 
+  logAdminAction({
+    action: 'UPDATE_NEWS',
+    targetId: updated._id?.toString() || updated.slug,
+    targetName: updated.title?.uzb || updated.title?.uz || updated.slug,
+  })
+
   return Response.json(updated.toObject())
 }
 
@@ -149,6 +160,12 @@ export async function PATCH(
 
   await syncTelegramForNews(updated, req.nextUrl.origin)
 
+  logAdminAction({
+    action: 'UPDATE_NEWS',
+    targetId: updated._id?.toString() || updated.slug,
+    targetName: updated.title?.uzb || updated.title?.uz || updated.slug,
+  })
+
   return Response.json(updated.toObject())
 }
 
@@ -169,6 +186,12 @@ export async function DELETE(
   if (deleted.status === 'deleted' && deleted.telegramMessageId) {
     await deleteNewsFromTelegram({ messageId: deleted.telegramMessageId })
   }
+
+  logAdminAction({
+    action: 'DELETE_NEWS',
+    targetId: deleted._id?.toString() || deleted.slug,
+    targetName: deleted.title?.uzb || deleted.title?.uz || deleted.slug,
+  })
 
   return Response.json({ ok: true })
 }

@@ -53,7 +53,9 @@ async function fetchInitial(
   for (const slug of categorySlugs ?? []) {
     if (slug) params.append("category", slug)
   }
-  const res = await fetch(`${origin}/api/news?${params.toString()}`, { cache: "no-store" })
+  const res = await fetch(`${origin}/api/news?${params.toString()}`, {
+    next: { revalidate: 60 },
+  })
   if (!res.ok) {
     return { items: [], page: 1, totalPages: 1 }
   }

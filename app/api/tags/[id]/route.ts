@@ -3,11 +3,15 @@ import { dbConnect } from '@/shared/common/lib/db'
 import { requireAdminSession } from '@/shared/common/lib/require-admin-session'
 import { TagModel } from '@/features/tags/model/tag.model'
 import { createTagSchema } from '@/features/tags/model/schemas'
+import { protectPublicApi } from '@/shared/common/lib/protect-api'
 
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const isProtected = await protectPublicApi(req)
+  if (isProtected) return isProtected
+
   await dbConnect()
   const tag = await TagModel.findById((await params).id).lean()
 

@@ -17,6 +17,7 @@ export type ConfigsDeliveryDatabaseBackupSectionProps = {
   chatId: string
   threadId?: string
   commentThreadId?: string
+  contactThreadId?: string
   onEnabledChange: (enabled: boolean) => void
   onPatch: (patch: Partial<DatabaseBackupSettings>) => void
   onSaveSettings: () => void | Promise<void>
@@ -35,6 +36,7 @@ export function ConfigsDeliveryDatabaseBackupSection({
   chatId,
   threadId,
   commentThreadId,
+  contactThreadId,
   onEnabledChange,
   onPatch,
   onSaveSettings,
@@ -97,6 +99,14 @@ export function ConfigsDeliveryDatabaseBackupSection({
               value={commentThreadId ?? ''}
               onChange={(e) => onPatch({ commentThreadId: e.target.value || undefined })}
               placeholder="Masalan: 77"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Contact thread ID (ixtiyoriy)</Label>
+            <Input
+              value={contactThreadId ?? ''}
+              onChange={(e) => onPatch({ contactThreadId: e.target.value || undefined })}
+              placeholder="Masalan: 88"
             />
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end">

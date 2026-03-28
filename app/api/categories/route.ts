@@ -4,15 +4,23 @@ import { requireAdminSession } from '@/shared/common/lib/require-admin-session'
 import { isClientDeliveryEnabled } from '@/shared/common/lib/server-client-delivery'
 import { CategoryModel } from '@/features/category/model/category.model'
 import { createCategorySchema } from '@/features/category/model/schemas'
+import { logAdminAction } from '@/features/admin-logs/lib/log-action'
+import { protectPublicApi } from '@/shared/common/lib/protect-api'
+import { CACHE_TIMINGS, publicCacheHeaders } from '@/shared/common/lib/http-cache'
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const isProtected = await protectPublicApi(req)
+  if (isProtected) return isProtected
+
   try {
     const allowed = await isClientDeliveryEnabled('categories')
     if (!allowed) return Response.json([])
 
     await dbConnect()
     const categories = await CategoryModel.find().sort({ priority: -1, createdAt: -1 }).lean()
-    return Response.json(categories)
+    return Response.json(categories, {
+      headers: publicCacheHeaders(CACHE_TIMINGS.taxonomy.maxAge, CACHE_TIMINGS.taxonomy.stale),
+    })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'DB xatosi'
     console.error('[api/categories GET]', message)
@@ -40,6 +48,11 @@ export async function POST(req: NextRequest) {
     }
 
     const category = await CategoryModel.create(parsed.data)
+    logAdminAction({
+      action: 'CREATE_CATEGORY',
+      targetId: category._id.toString(),
+      targetName: category.name?.uzb || category.name?.uz || category.slug,
+    })
     return Response.json(category, { status: 201 })
   } catch (err) {
     const anyErr = err as any

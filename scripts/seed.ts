@@ -131,21 +131,25 @@ export const seed = {
 
   links: [
     {
-      href: "/team",
+      href: "/about",
       name: { uz: "Biz haqimizda", uzb: "Биз ҳақимизда", ru: "О нас", en: "About us" } satisfies LocaleMap,
     },
-    // {
-    //   href: "/contact-us",
-    //   name: { uz: "Bog'lanish", uzb: "Боғланиш", ru: "Контакты", en: "Contact us" } satisfies LocaleMap,
-    // },
-    // {
-    //   href: "/terms-of-service",
-    //   name: { uz: "Foydalanish shartlari", uzb: "Фойдаланиш шартлари", ru: "Условия использования", en: "Terms of service" } satisfies LocaleMap,
-    // },
-    // {
-    //   href: "/privacy-policy",
-    //   name: { uz: "Maxfiylik siyosati", uzb: "Махфийлик сиёсати", ru: "Политика конфиденциальности", en: "Privacy policy" } satisfies LocaleMap,
-    // },
+    {
+      href: "/team",
+      name: { uz: "Jamoa", uzb: "Жамоа", ru: "Команда", en: "Team" } satisfies LocaleMap,
+    },
+    {
+      href: "/contact",
+      name: { uz: "Bog'lanish", uzb: "Боғланиш", ru: "Контакты", en: "Contact us" } satisfies LocaleMap,
+    },
+    {
+      href: "/terms",
+      name: { uz: "Foydalanish shartlari", uzb: "Фойдаланиш шартлари", ru: "Условия использования", en: "Terms of service" } satisfies LocaleMap,
+    },
+    {
+      href: "/privacy",
+      name: { uz: "Maxfiylik siyosati", uzb: "Махфийлик сиёсати", ru: "Политика конфиденциальности", en: "Privacy policy" } satisfies LocaleMap,
+    },
     {
       href: "https://president.uz/uz",
       name: { uz: "Prezident portali", uzb: "Президент портали", ru: "Портал Президента", en: "President's portal" } satisfies LocaleMap,
@@ -204,6 +208,7 @@ export const seed = {
     chatId: "",
     threadId: "",
     commentThreadId: "",
+    contactThreadId: "",
   } as const,
 
   users: [

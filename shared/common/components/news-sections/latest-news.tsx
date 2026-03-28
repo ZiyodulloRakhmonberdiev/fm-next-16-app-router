@@ -1,6 +1,6 @@
 "use client"
 
-import { getNewsListForLocale, isImageTypeRawNews, type NewsItem } from "@/features/news/model"
+import { getNewsListForLocale, isImageTypeRawNews, type NewsItem, type RawNewsItem } from "@/features/news/model"
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
 import { useLocale, useTranslations } from "next-intl"
 import type { AppLocale } from "@/shared/common/lib/formatter"
@@ -9,12 +9,14 @@ import { MiniNewsCard } from "@/features/news/ui/mini-news-card"
 type LatestNewsProps = {
   /** Hozir ko‘rilayotgan yangilik slug — ro‘yxatda ko‘rsatilmaydi */
   excludeSlug?: string
+  initialNews?: RawNewsItem[]
 }
 
-export default function LatestNews({ excludeSlug }: LatestNewsProps = {}) {
+export default function LatestNews({ excludeSlug, initialNews }: LatestNewsProps = {}) {
   const locale = useLocale() as AppLocale
   const t = useTranslations("Home")
-  const { data: publicNews = [] } = usePublicNewsQuery()
+  const { data: qNews = [] } = usePublicNewsQuery()
+  const publicNews = initialNews ?? qNews
 
   const rawSorted = [...publicNews]
     .filter(isImageTypeRawNews)

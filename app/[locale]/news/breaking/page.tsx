@@ -41,7 +41,7 @@ async function fetchInitial(locale: AppLocale) {
   const origin = `${proto}://${host}`
   const res = await fetch(
     `${origin}/api/news?status=published&breaking=1&sortBy=publishedAt&page=1&limit=4`,
-    { cache: "no-store" }
+    { next: { revalidate: 60 } }
   )
   if (!res.ok) return { items: [], page: 1, totalPages: 1 }
   const json = (await res.json()) as NewsListResponse

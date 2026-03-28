@@ -141,7 +141,7 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
 
   React.useEffect(() => {
     let cancelled = false
-    void fetch("/api/tags", { cache: "no-store" })
+    void fetch("/api/tags")
       .then((r) => (r.ok ? r.json() : []))
       .then((rows) => {
         if (cancelled) return

@@ -5,8 +5,13 @@ import { mapTeamDocToClient } from "@/features/team/lib/team-api-map"
 import { TeamMemberModel } from "@/features/team/model/team.model"
 import { createTeamMemberSchema } from "@/features/team/model/schemas"
 import { requireAdminSession } from "@/shared/common/lib/require-admin-session"
+import { protectPublicApi } from "@/shared/common/lib/protect-api"
+import { CACHE_TIMINGS, publicCacheHeaders } from "@/shared/common/lib/http-cache"
 
 export async function GET(req: NextRequest) {
+  const isProtected = await protectPublicApi(req)
+  if (isProtected) return isProtected
+
   const isPublic = new URL(req.url).searchParams.get("public") === "1"
   if (isPublic) {
     const allowed = await isClientDeliveryEnabled("team")
@@ -19,7 +24,9 @@ export async function GET(req: NextRequest) {
     .lean()
   const mapped = rows.map((r) => mapTeamDocToClient(r))
   if (isPublic) {
-    return Response.json(mapped)
+    return Response.json(mapped, {
+      headers: publicCacheHeaders(CACHE_TIMINGS.team.maxAge, CACHE_TIMINGS.team.stale),
+    })
   }
   const unauthorized = await requireAdminSession(["ceo", "administrator"])
   if (unauthorized) return unauthorized

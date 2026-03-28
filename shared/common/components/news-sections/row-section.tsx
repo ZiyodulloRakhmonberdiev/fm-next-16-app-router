@@ -6,17 +6,27 @@ import type { AppLocale } from "@/shared/common/lib/formatter"
 import { NewsSectionHeader } from "@/shared/common/components/news-sections/news-section-header"
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
 import { getNewsListForLocale, isImageTypeRawNews, type NewsItem } from "@/features/news/model"
-import { getCategoryNameFromApi, usePublicCategoriesQuery } from "@/features/category/model/public-categories-query"
+import { getCategoryNameFromApi, usePublicCategoriesQuery, type PublicCategory } from "@/features/category/model/public-categories-query"
 import { MiniNewsCard } from "@/features/news/ui/mini-news-card"
+import type { RawNewsItem } from "@/features/news/model"
 
 type RowSectionProps = {
   categorySlug: string
+  initialNews?: RawNewsItem[]
+  initialCategories?: PublicCategory[]
 }
 
-export default function RowSection({ categorySlug }: RowSectionProps) {
+export default function RowSection({
+  categorySlug,
+  initialNews,
+  initialCategories,
+}: RowSectionProps) {
   const locale = useLocale() as AppLocale
-  const { data: publicNews = [] } = usePublicNewsQuery()
-  const { data: categories = [] } = usePublicCategoriesQuery()
+  const { data: qNews = [] } = usePublicNewsQuery()
+  const { data: qCats = [] } = usePublicCategoriesQuery()
+  
+  const publicNews = initialNews ?? qNews
+  const categories = initialCategories ?? qCats
 
   const categoryName = getCategoryNameFromApi(categories, categorySlug, locale)
 

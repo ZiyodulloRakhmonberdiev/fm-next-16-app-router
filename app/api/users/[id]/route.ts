@@ -7,6 +7,7 @@ import { normalizeRole } from '@/shared/common/lib/rbac'
 import { requireAdminSession } from '@/shared/common/lib/require-admin-session'
 import { UserModel } from '@/features/users/model/user.model'
 import { createUserSchema } from '@/features/users/model/schemas'
+import { logAdminAction } from '@/features/admin-logs/lib/log-action'
 
 export async function GET(
   _req: NextRequest,
@@ -64,6 +65,12 @@ export async function PUT(
     return Response.json({ error: 'Foydalanuvchi topilmadi' }, { status: 404 })
   }
 
+  logAdminAction({
+    action: 'UPDATE_USER',
+    targetId: updated._id.toString(),
+    targetName: updated.login,
+  })
+
   return Response.json(updated)
 }
 
@@ -112,6 +119,12 @@ export async function PATCH(
     return Response.json({ error: 'Foydalanuvchi topilmadi' }, { status: 404 })
   }
 
+  logAdminAction({
+    action: 'UPDATE_USER',
+    targetId: updated._id.toString(),
+    targetName: updated.login,
+  })
+
   return Response.json(updated)
 }
 
@@ -128,6 +141,12 @@ export async function DELETE(
   if (!deleted) {
     return Response.json({ error: 'Foydalanuvchi topilmadi' }, { status: 404 })
   }
+
+  logAdminAction({
+    action: 'DELETE_USER',
+    targetId: deleted._id.toString(),
+    targetName: deleted.login,
+  })
 
   return Response.json({ ok: true })
 }

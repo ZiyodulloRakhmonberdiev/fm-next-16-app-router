@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
+// import { withSentryConfig } from "@sentry/nextjs"; // Sentry vaqtincha o'chirilgan
 
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 
@@ -7,21 +8,70 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ["mongoose"],
   experimental: {
     serverActions: {
-      bodySizeLimit: "500mb",
+      bodySizeLimit: "50mb",
     },
-    proxyClientMaxBodySize: "500mb",
+    proxyClientMaxBodySize: "50mb",
   },
   images: {
     loader: "custom",
     loaderFile: "./lib/image-loader.ts",
     remotePatterns: [
+      // Ruxsat berilgan Contabo mintaqalari
+      { protocol: "https", hostname: "*.contabostorage.com", pathname: "/**" },
+      // Cloudinary
       { protocol: "https", hostname: "res.cloudinary.com", pathname: "/**" },
-      // Contabo (comment): eu2/sin1/usc1.contabostorage.com
-      { protocol: "https", hostname: "**" },
+      // YouTube thumnails uchun
+      { protocol: "https", hostname: "i.ytimg.com", pathname: "/**" },
+      { protocol: "https", hostname: "img.youtube.com", pathname: "/**" },
+
       { protocol: "http", hostname: "localhost", pathname: "/**" },
-      { protocol: "http", hostname: "127.0.0.1", pathname: "/**" },
     ],
+  },
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          {
+            key: "X-Frame-Options",
+            value: "DENY",
+          },
+          {
+            key: "X-Content-Type-Options",
+            value: "nosniff",
+          },
+          {
+            key: "Referrer-Policy",
+            value: "origin-when-cross-origin",
+          },
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=31536000; includeSubDomains; preload",
+          },
+          {
+            key: "Content-Security-Policy",
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://telegram.org https://www.google-analytics.com https://ssl.google-analytics.com https://browser.sentry-cdn.com https://js.sentry-cdn.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' blob: data: https://*.contabostorage.com https://res.cloudinary.com https://i.ytimg.com https://img.youtube.com https://*.google-analytics.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://*.sentry.io https://*.google-analytics.com; frame-src 'self' https://www.youtube.com https://youtube.com https://t.me https://telegram.org; media-src 'self' https://*.contabostorage.com https://res.cloudinary.com; object-src 'none'; upgrade-insecure-requests;",
+          },
+        ],
+      },
+    ];
   },
 };
 
+
+// Sentry vaqtincha o'chirilgan. Qayta yoqish uchun withSentryConfig ni qaytaring.
 export default withNextIntl(nextConfig);
+
+// export default withSentryConfig(
+//   withNextIntl(nextConfig),
+//   {
+//     org: "fergana-media",
+//     project: "fm-next-router",
+//     silent: !process.env.CI,
+//     widenClientFileUpload: true,
+//     reactComponentAnnotation: { enabled: true },
+//     tunnelRoute: "/monitoring",
+//     disableLogger: true,
+//     automaticVercelMonitors: true,
+//   }
+// );

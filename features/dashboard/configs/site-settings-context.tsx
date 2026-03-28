@@ -83,6 +83,7 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
             chatId: '',
             threadId: undefined,
             commentThreadId: undefined,
+            contactThreadId: undefined,
           },
         })
       })

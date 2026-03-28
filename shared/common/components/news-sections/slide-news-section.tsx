@@ -3,8 +3,9 @@
 import * as React from "react"
 import { getNewsListForLocale, isImageTypeRawNews, type NewsItem } from "@/features/news/model"
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
-import { getCategoryNameFromApi, usePublicCategoriesQuery } from "@/features/category/model/public-categories-query"
+import { getCategoryNameFromApi, usePublicCategoriesQuery, type PublicCategory } from "@/features/category/model/public-categories-query"
 import { getCategoryLabelForNewsItem, useCategoryLabel } from "@/features/category/model/use-category-label"
+import type { RawNewsItem } from "@/features/news/model"
 import { Card } from "@/shared/common/components/ui/card"
 import {
   Carousel,
@@ -26,6 +27,8 @@ import { NewsCardContent } from "./news-card-content"
 
 type SlideNewsSectionProps = {
   categorySlug?: string
+  initialNews?: RawNewsItem[]
+  initialCategories?: PublicCategory[]
 }
 
 type SlideVisual = { opacity: number; blurPx: number }
@@ -41,6 +44,8 @@ function ratioToVisual(ratio: number): SlideVisual {
 
 export default function SlideNewsSection({
   categorySlug = "sports",
+  initialNews,
+  initialCategories,
 }: SlideNewsSectionProps) {
   const autoplay = React.useRef(
     Autoplay({
@@ -50,8 +55,12 @@ export default function SlideNewsSection({
   )
   const locale = useLocale() as AppLocale
   const t = useTranslations("common")
-  const { data: publicNews = [] } = usePublicNewsQuery()
-  const { data: categories = [], isPending: categoriesPending } = usePublicCategoriesQuery()
+  const { data: qNews = [] } = usePublicNewsQuery()
+  const { data: qCats = [] } = usePublicCategoriesQuery()
+  
+  const publicNews = initialNews ?? qNews
+  const categories = initialCategories ?? qCats
+
   const categoryName = getCategoryNameFromApi(categories, categorySlug, locale)
   const [api, setApi] = React.useState<CarouselApi | null>(null)
   const [slideVisual, setSlideVisual] = React.useState<SlideVisual[]>([])

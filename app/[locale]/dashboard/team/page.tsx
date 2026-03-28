@@ -6,6 +6,7 @@ import { Button } from "@/shared/common/components/ui/button"
 import { Input } from "@/shared/common/components/ui/input"
 import { Label } from "@/shared/common/components/ui/label"
 import { toast } from "sonner"
+import { uploadFileViaPresignedUrl } from "@/shared/common/lib/cloudinary-client-upload"
 import { TeamTable } from "./_components/team-table"
 import { TeamDeleteDialog } from "./_components/team-delete-dialog"
 import { emptyForm, type TeamForm, type TeamRow } from "./_components/team-types"
@@ -97,16 +98,7 @@ export default function DashboardTeamPage() {
     if (!file) return
     setUploadingImage(kind)
     try {
-      const formData = new FormData()
-      formData.append("file", file)
-      formData.append("kind", "image")
-      const res = await fetch("/api/uploads", { method: "POST", body: formData })
-      const data = (await res.json().catch(() => null)) as { url?: string; error?: string } | null
-      const uploadedUrl = data?.url
-      if (!res.ok || !uploadedUrl) {
-        toast.error(data?.error || "Rasmni yuklab bo'lmadi")
-        return
-      }
+      const uploadedUrl = await uploadFileViaPresignedUrl(file, "image")
       if (kind === "image") {
         setForm((p) => ({ ...p, image: uploadedUrl }))
       } else if (kind === "qr") {

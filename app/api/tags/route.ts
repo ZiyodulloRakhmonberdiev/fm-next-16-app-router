@@ -3,12 +3,19 @@ import { dbConnect } from '@/shared/common/lib/db'
 import { requireAdminSession } from '@/shared/common/lib/require-admin-session'
 import { TagModel } from '@/features/tags/model/tag.model'
 import { createTagSchema } from '@/features/tags/model/schemas'
+import { protectPublicApi } from '@/shared/common/lib/protect-api'
+import { CACHE_TIMINGS, publicCacheHeaders } from '@/shared/common/lib/http-cache'
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const isProtected = await protectPublicApi(req)
+  if (isProtected) return isProtected
+
   try {
     await dbConnect()
     const tags = await TagModel.find().lean()
-    return Response.json(tags)
+    return Response.json(tags, {
+      headers: publicCacheHeaders(CACHE_TIMINGS.taxonomy.maxAge, CACHE_TIMINGS.taxonomy.stale),
+    })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'DB xatosi'
     console.error('[api/tags GET]', message)

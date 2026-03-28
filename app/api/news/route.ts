@@ -7,10 +7,16 @@ import { NewsCommentModel } from '@/features/news/model/comment.model'
 import { NewsReactionModel } from '@/features/news/model/reaction.model'
 import { createNewsSchema } from '@/features/news/model/schemas'
 import { sendNewsToTelegram } from '@/shared/common/lib/telegram'
+import { logAdminAction } from '@/features/admin-logs/lib/log-action'
 import { requireAdminSession } from '@/shared/common/lib/require-admin-session'
+import { protectPublicApi } from '@/shared/common/lib/protect-api'
+import { CACHE_TIMINGS, noStoreHeaders, publicCacheHeaders } from '@/shared/common/lib/http-cache'
 import type { SortOrder } from 'mongoose'
 
 export async function GET(req: NextRequest) {
+  const isProtected = await protectPublicApi(req)
+  if (isProtected) return isProtected
+
   try {
     await dbConnect()
 
@@ -108,10 +114,18 @@ export async function GET(req: NextRequest) {
       reactionCount: reactionBySlug.get(n.slug) ?? 0,
     }))
 
-    return Response.json({
-      data,
-      meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
-    })
+    const isPublicPublished = !status || status === 'published'
+    return Response.json(
+      {
+        data,
+        meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
+      },
+      {
+        headers: isPublicPublished
+          ? publicCacheHeaders(CACHE_TIMINGS.newsList.maxAge, CACHE_TIMINGS.newsList.stale)
+          : noStoreHeaders(),
+      }
+    )
   } catch (err) {
     const message = err instanceof Error ? err.message : 'DB xatosi'
     console.error('[api/news GET]', message)
@@ -201,6 +215,14 @@ export async function POST(req: NextRequest) {
       news.telegramPushReason = "News published bo'lganda Telegramga yuboriladi."
       await news.save()
     }
+    
+    // Log the creation action asynchronously
+    logAdminAction({
+      action: 'CREATE_NEWS',
+      targetId: news._id?.toString() || news.slug,
+      targetName: news.title?.uzb || news.title?.uz || news.slug,
+    })
+
     return Response.json(news, { status: 201 })
   } catch (err) {
     const anyErr = err as any

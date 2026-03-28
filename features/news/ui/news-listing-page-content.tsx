@@ -96,7 +96,7 @@ export function NewsListingPageContent({
     async (filter: FilterType, slugs: string[]) => {
       setLoading(true)
       try {
-        const res = await fetch(buildQuery(1, filter, slugs), { cache: "no-store" })
+        const res = await fetch(buildQuery(1, filter, slugs))
         if (!res.ok) return
         const json = (await res.json()) as NewsListResponse
         const raw = Array.isArray(json.data) ? json.data.map(normalizeRaw) : []
@@ -114,10 +114,7 @@ export function NewsListingPageContent({
   const fetchAuthorsChoice = React.useCallback(async () => {
     setAuthorsChoiceLoading(true)
     try {
-      const res = await fetch(
-        `/api/news?status=published&authorsChoice=1&sortBy=publishedAt&page=1&limit=6`,
-        { cache: "no-store" }
-      )
+      const res = await fetch(`/api/news?status=published&authorsChoice=1&sortBy=publishedAt&page=1&limit=6`)
       if (!res.ok) return
       const json = (await res.json()) as NewsListResponse
       const raw = Array.isArray(json.data) ? json.data.map(normalizeRaw) : []
@@ -187,9 +184,7 @@ export function NewsListingPageContent({
     setLoading(true)
     try {
       const nextPage = page + 1
-      const res = await fetch(buildQuery(nextPage, activeFilter, selectedCategorySlugs), {
-        cache: "no-store",
-      })
+      const res = await fetch(buildQuery(nextPage, activeFilter, selectedCategorySlugs))
       if (!res.ok) return
       const json = (await res.json()) as NewsListResponse
       const raw = Array.isArray(json.data) ? json.data.map(normalizeRaw) : []

@@ -3,11 +3,16 @@ import { dbConnect } from '@/shared/common/lib/db'
 import { requireAdminSession } from '@/shared/common/lib/require-admin-session'
 import { CategoryModel } from '@/features/category/model/category.model'
 import { createCategorySchema } from '@/features/category/model/schemas'
+import { logAdminAction } from '@/features/admin-logs/lib/log-action'
+import { protectPublicApi } from '@/shared/common/lib/protect-api'
 
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const isProtected = await protectPublicApi(req)
+  if (isProtected) return isProtected
+
   await dbConnect()
   const category = await CategoryModel.findById((await params).id).lean()
 
@@ -46,6 +51,12 @@ export async function PUT(
     return Response.json({ error: 'Kategoriya topilmadi' }, { status: 404 })
   }
 
+  logAdminAction({
+    action: 'UPDATE_CATEGORY',
+    targetId: updated._id.toString(),
+    targetName: updated.name?.uzb || updated.name?.uz || updated.slug,
+  })
+
   return Response.json(updated)
 }
 
@@ -77,6 +88,12 @@ export async function PATCH(
     return Response.json({ error: 'Kategoriya topilmadi' }, { status: 404 })
   }
 
+  logAdminAction({
+    action: 'UPDATE_CATEGORY',
+    targetId: updated._id.toString(),
+    targetName: updated.name?.uzb || updated.name?.uz || updated.slug,
+  })
+
   return Response.json(updated)
 }
 
@@ -93,6 +110,12 @@ export async function DELETE(
   if (!deleted) {
     return Response.json({ error: 'Kategoriya topilmadi' }, { status: 404 })
   }
+
+  logAdminAction({
+    action: 'DELETE_CATEGORY',
+    targetId: deleted._id.toString(),
+    targetName: deleted.name?.uzb || deleted.name?.uz || deleted.slug,
+  })
 
   return Response.json({ ok: true })
 }
