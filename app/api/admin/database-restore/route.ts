@@ -1,32 +1,38 @@
 import { NextRequest } from 'next/server'
-import { requireAdminSession } from '@/shared/common/lib/require-admin-session'
-import { restoreDatabaseFromArchiveBuffer } from '@/shared/common/lib/database-restore'
+import { requireAdminSession } from '@/shared/server/require-admin-session'
+import { restoreDatabase } from '@/shared/infra/database-restore'
 
 export const runtime = 'nodejs'
 export const maxDuration = 300
 
-export async function POST(request: NextRequest) {
-  const denied = await requireAdminSession(['ceo'])
-  if (denied) return denied
+export async function POST(req: NextRequest) {
+  const unauthorized = await requireAdminSession(['ceo', 'administrator'])
+  if (unauthorized) return unauthorized
 
-  const form = await request.formData()
-  const file = form.get('file')
-  if (!file || !(file instanceof File)) {
-    return Response.json({ ok: false, error: 'Fayl topilmadi. `file` maydoniga backup yuklang.' }, { status: 400 })
+  try {
+    const formData = await req.formData()
+    const file = formData.get('file') as File | null
+
+    if (!file) {
+      return Response.json({ error: 'Fayl tanlanmagan' }, { status: 400 })
+    }
+
+    const buffer = Buffer.from(await file.arrayBuffer())
+    const res = await restoreDatabase({
+      buffer,
+      filename: file.name,
+    })
+
+    if (!res.ok) {
+      return Response.json({ error: res.error }, { status: 500 })
+    }
+
+    return Response.json({
+      message: 'Ma’lumotlar muvaffaqiyatli tiklandi',
+      inserted: res.inserted,
+    })
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e)
+    return Response.json({ error: `Xatolik: ${msg}` }, { status: 500 })
   }
-
-  const arrayBuffer = await file.arrayBuffer()
-  const buffer = Buffer.from(arrayBuffer)
-
-  const result = await restoreDatabaseFromArchiveBuffer({
-    buffer,
-    filename: file.name || 'backup',
-  })
-
-  if (result.ok) {
-    return Response.json({ ok: true, inserted: result.inserted })
-  }
-
-  return Response.json({ ok: false, error: result.error }, { status: 500 })
 }
-

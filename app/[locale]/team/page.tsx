@@ -33,76 +33,74 @@ export default async function TeamPage() {
       <div className="block md:hidden">
         <ClientSidebar />
       </div>
-      <div className="flex w-full flex-1 flex-col">
+      <div className="flex w-full flex-1 flex-col bg-background">
         <Header />
-        <main className="flex-1 py-4 px-4 md:px-6">
+        <main className="flex-1 py-16 px-4 md:px-6">
           <ClientServerOffGate model="categories">
-            <div className="max-w-7xl mx-auto">
-              <div className="container mx-auto px-4 py-8 space-y-8">
-                <section className="overflow-hidden rounded-[28px] border border-brand/15 bg-linear-to-br from-brand/10 via-background to-background px-6 py-8 md:px-10 md:py-12">
-                  <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-center">
-                    <div className="space-y-4">
-                      <span className="inline-flex items-center gap-2 rounded-full bg-brand px-4 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-white">
-                        <Users className="size-3.5" />
-                        {t("team_title")}
-                      </span>
-                      <h1 className="text-3xl font-bold tracking-tight text-foreground md:text-5xl">
-                        {t("team_title")}
-                      </h1>
-                      <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground md:text-base">
-                        {items.length > 0
-                          ? teamT("intro", { count: items.length })
-                          : teamT("empty")}
+            <div className="max-w-7xl mx-auto space-y-20">
+              
+              {/* Minimalist Header */}
+              <section className="space-y-6">
+                <h1 className="text-4xl font-light tracking-tight text-foreground md:text-6xl">
+                  {t("team_title")}
+                </h1>
+                {/* <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-border">
+                  <p className="max-w-2xl text-lg font-light leading-relaxed text-muted-foreground md:text-xl">
+                    {items.length > 0
+                      ? teamT("intro", { count: items.length })
+                      : teamT("empty")}
+                  </p>
+                </div> */}
+              </section>
+
+              {/* Minimalist Member Grid */}
+              <div className="grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
+                {items.map((m) => (
+                  <div
+                    key={m._id}
+                    className="group space-y-4"
+                  >
+                    <div className="relative overflow-hidden rounded-xl border border-border bg-muted/10 transition-colors duration-500 group-hover:border-foreground/20">
+                      {(m.image || m.badgeImage) ? (
+                        <img
+                          src={m.image || m.badgeImage}
+                          alt={m.fullName}
+                          className="w-full h-auto transition-transform duration-700 group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className="flex aspect-[4/5] w-full items-center justify-center text-4xl font-light text-muted-foreground">
+                          {m.fullName.slice(0, 1)}
+                        </div>
+                      )}
+                      
+                      <div className="absolute top-4 right-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                         <div className="bg-background/80 backdrop-blur-sm p-1.5 rounded-full border border-border">
+                            <BadgeCheck className="size-4 text-foreground" />
+                         </div>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-1 px-1">
+                      <h3 className="text-lg font-medium tracking-tight text-foreground">
+                        {m.fullName}
+                      </h3>
+                      <p className="text-sm font-light text-muted-foreground">
+                        {m.position}
                       </p>
                     </div>
-                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-                      <div className="rounded-2xl border border-brand/15 bg-white/80 p-4 shadow-sm dark:bg-card/80">
-                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand">
-                          {teamT("members_label")}
-                        </p>
-                        <p className="mt-2 text-3xl font-bold text-foreground">{items.length}</p>
-                      </div>
-                      <div className="rounded-2xl border border-brand/15 bg-white/80 p-4 shadow-sm dark:bg-card/80">
-                        <div className="flex items-center gap-3">
-                          <span className="rounded-xl bg-brand/10 p-2 text-brand">
-                            <BadgeCheck className="size-5" />
-                          </span>
-                          <p className="text-sm leading-relaxed text-muted-foreground">{teamT("hover_hint")}</p>
-                        </div>
-                      </div>
-                    </div>
                   </div>
-                </section>
-
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                  {items.map((m) => (
-                    <Card
-                      key={m._id}
-                      className="group overflow-hidden border-brand/10 bg-card p-0 transition-all duration-300 hover:-translate-y-1 hover:border-brand/30 hover:shadow-[0_20px_50px_-30px_rgba(209,0,28,0.55)]"
-                    >
-                      <CardContent className="p-0">
-                        <div className="relative overflow-hidden">
-                          {m.badgeImage ? (
-                            <img
-                              src={m.badgeImage}
-                              alt={m.fullName}
-                              className="block h-auto w-full transition-transform duration-300 group-hover:scale-[1.02]"
-                            />
-                          ) : (
-                            <div className="flex aspect-4/5 items-center justify-center bg-brand/10 text-2xl font-semibold text-brand">
-                              {m.fullName.slice(0, 1)}
-                            </div>
-                          )}
-                        </div>
-                        <div className="space-y-1 border-t border-brand/10 p-4">
-                          <p className="line-clamp-1 font-semibold text-foreground">{m.fullName}</p>
-                          <p className="line-clamp-2 text-sm text-muted-foreground">{m.position}</p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                ))}
               </div>
+
+              {/* Subtle Hint */}
+              {/* {items.length > 0 && (
+                <div className="flex justify-center pt-8 border-t border-border/50">
+                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground/60 italic">
+                    {teamT("hover_hint")}
+                  </p>
+                </div>
+              )} */}
+
             </div>
           </ClientServerOffGate>
         </main>

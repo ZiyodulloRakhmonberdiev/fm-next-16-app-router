@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { getYoutubeEmbedUrl } from "@/shared/common/lib/youtube"
+import { getYoutubeEmbedUrl } from "@/features/news/lib/youtube"
 import { getCardImageSrc, getPublicVideoSrc } from "./news-listing-utils"
 
 type VideoCardMediaPreviewProps = {

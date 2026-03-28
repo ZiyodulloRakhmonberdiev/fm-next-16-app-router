@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { dbConnect } from '@/shared/common/lib/db'
-import { requireAdminSession } from '@/shared/common/lib/require-admin-session'
+import { requireAdminSession } from '@/shared/server/require-admin-session'
 import { NewsModel } from '@/features/news/model/news.model'
 import { NewsCommentModel } from '@/features/news/model/comment.model'
 import { NewsReactionModel } from '@/features/news/model/reaction.model'

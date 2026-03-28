@@ -2,10 +2,10 @@ import { NextRequest } from 'next/server'
 import { dbConnect } from '@/shared/common/lib/db'
 import { NewsModel } from '@/features/news/model/news.model'
 import { createNewsSchema } from '@/features/news/model/schemas'
-import { deleteNewsFromTelegram, sendNewsToTelegram } from '@/shared/common/lib/telegram'
-import { requireAdminSession } from '@/shared/common/lib/require-admin-session'
+import { deleteNewsFromTelegram, sendNewsToTelegram } from '@/shared/infra/telegram'
+import { requireAdminSession } from '@/shared/server/require-admin-session'
 import { logAdminAction } from '@/features/admin-logs/lib/log-action'
-import { protectPublicApi } from '@/shared/common/lib/protect-api'
+import { protectPublicApi } from '@/shared/server/protect-api'
 
 async function syncTelegramForNews(news: any, origin: string) {
   if (!news.pushedToTelegram) return

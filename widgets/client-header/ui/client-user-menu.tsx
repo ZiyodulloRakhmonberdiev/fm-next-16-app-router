@@ -30,7 +30,7 @@ import {
 } from "@/features/auth/ui/auth-modal"
 import { cn } from "@/shared/common/lib/utils"
 import { useTranslations } from "next-intl"
-import { resizeImageToSquareJpeg } from "@/shared/common/lib/resize-profile-avatar"
+import { resizeImageToSquareJpeg } from "@/features/user/lib/resize-profile-avatar"
 import { getDefaultDashboardPath, normalizeRole } from "@/shared/common/lib/rbac"
 import { LayoutGrid } from "lucide-react"
 

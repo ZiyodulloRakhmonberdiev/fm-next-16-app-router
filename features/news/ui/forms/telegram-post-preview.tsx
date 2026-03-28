@@ -1,7 +1,7 @@
 'use client'
 
 import { Play } from 'lucide-react'
-import { getYoutubeThumbnailUrl } from '@/shared/common/lib/youtube'
+import { getYoutubeThumbnailUrl } from '@/features/news/lib/youtube'
 
 function truncateWords(text: string, maxWords: number): string {
   const words = text.trim().split(/\s+/).filter(Boolean)

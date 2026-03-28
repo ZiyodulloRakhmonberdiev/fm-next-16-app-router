@@ -56,9 +56,10 @@ async function fetchInitial(locale: AppLocale) {
 export default async function BreakingNewsPage({
   params,
 }: {
-  params: { locale: AppLocale }
+  params: Promise<{ locale: AppLocale }>
 }) {
-  const initial = await fetchInitial(params.locale)
+  const { locale } = await params
+  const initial = await fetchInitial(locale)
   return (
     <ClientSiteNothingGate>
       <div className="block md:hidden">

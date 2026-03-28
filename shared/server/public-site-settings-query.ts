@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query"
 import { seed } from "@/scripts/seed"
-import type { SiteSettingsPayload } from "./site-settings-types"
+import type { SiteSettingsPayload } from "@/shared/common/lib/site-settings-types"
 
 export function getSeedSiteSettings(): SiteSettingsPayload {
   return {

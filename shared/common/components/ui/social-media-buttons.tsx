@@ -3,7 +3,7 @@
 import { Link } from "@/i18n/navigation";
 import { seed } from "@/scripts/seed";
 import { cn } from "@/shared/common/lib/utils";
-import { usePublicSiteSettingsQuery } from "@/shared/common/lib/public-site-settings-query";
+import { usePublicSiteSettingsQuery } from "@/shared/server/public-site-settings-query";
 import { getSocialStyle, SOCIAL_ICONS } from "@/shared/common/components/ui/social-platform-styles";
 
 export type SocialPlatformName = "facebook" | "instagram" | "telegram" | "youtube";

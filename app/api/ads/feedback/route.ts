@@ -2,8 +2,8 @@ import { NextRequest } from "next/server"
 import { dbConnect } from "@/shared/common/lib/db"
 import { AdFeedbackModel } from "@/features/ads/model/ad-feedback.model"
 import { AdModel } from "@/features/ads/model/ads.model"
-import { requireAdminSession } from "@/shared/common/lib/require-admin-session"
-import { protectPublicApi } from "@/shared/common/lib/protect-api"
+import { requireAdminSession } from "@/shared/server/require-admin-session"
+import { protectPublicApi } from "@/shared/server/protect-api"
 
 function mergeUniquePlacements(
   feedbackPlacements: unknown[],

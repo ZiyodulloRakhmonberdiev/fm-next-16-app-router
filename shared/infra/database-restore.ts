@@ -41,7 +41,6 @@ type BackupArchive = {
 }
 
 function isGzip(buffer: Buffer): boolean {
-  // gzip magic: 1f 8b
   return buffer.length >= 2 && buffer[0] === 0x1f && buffer[1] === 0x8b
 }
 
@@ -51,7 +50,7 @@ function parseJsonFromArchiveBuffer(buffer: Buffer): BackupArchive {
   return parsed
 }
 
-export async function restoreDatabaseFromArchiveBuffer(
+export async function restoreDatabase(
   input: { buffer: Buffer; filename: string }
 ): Promise<DatabaseRestoreResult> {
   try {
@@ -141,4 +140,3 @@ export async function restoreDatabaseFromArchiveBuffer(
     return { ok: false, error: `Restore xatosi: ${msg}` }
   }
 }
-

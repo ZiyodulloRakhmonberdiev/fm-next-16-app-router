@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server'
 import { seedNews } from '@/scripts/seed-news'
 import { getNewsListForLocale } from '@/features/news/model'
 import type { AppLocale } from '@/shared/common/lib/locale-api'
-import { requireAdminSession } from '@/shared/common/lib/require-admin-session'
+import { requireAdminSession } from '@/shared/server/require-admin-session'
 
 function matchesQuery(title: string, description: string | undefined, q: string): boolean {
   const lower = q.trim().toLowerCase()

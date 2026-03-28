@@ -23,6 +23,8 @@ const nextConfig: NextConfig = {
       // YouTube thumnails uchun
       { protocol: "https", hostname: "i.ytimg.com", pathname: "/**" },
       { protocol: "https", hostname: "img.youtube.com", pathname: "/**" },
+      // Pinterest (test uchun ishlatilishi mumkin)
+      { protocol: "https", hostname: "i.pinimg.com", pathname: "/**" },
 
       { protocol: "http", hostname: "localhost", pathname: "/**" },
     ],
@@ -50,7 +52,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: "Content-Security-Policy",
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://telegram.org https://www.google-analytics.com https://ssl.google-analytics.com https://browser.sentry-cdn.com https://js.sentry-cdn.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' blob: data: https://*.contabostorage.com https://res.cloudinary.com https://i.ytimg.com https://img.youtube.com https://*.google-analytics.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://*.sentry.io https://*.google-analytics.com; frame-src 'self' https://www.youtube.com https://youtube.com https://t.me https://telegram.org; media-src 'self' https://*.contabostorage.com https://res.cloudinary.com; object-src 'none'; upgrade-insecure-requests;",
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://telegram.org https://www.google-analytics.com https://ssl.google-analytics.com https://browser.sentry-cdn.com https://js.sentry-cdn.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' blob: data: https://*.contabostorage.com https://res.cloudinary.com https://i.ytimg.com https://img.youtube.com https://i.pinimg.com https://*.google-analytics.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://*.contabostorage.com https://api.cloudinary.com https://*.sentry.io https://*.google-analytics.com; frame-src 'self' https://www.youtube.com https://youtube.com https://t.me https://telegram.org; media-src 'self' https://*.contabostorage.com https://res.cloudinary.com; object-src 'none'; upgrade-insecure-requests;",
           },
         ],
       },

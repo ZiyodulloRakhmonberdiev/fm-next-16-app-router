@@ -19,16 +19,15 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/shared/common/components/ui/carousel"
-import { getYoutubeEmbedUrl } from "@/shared/common/lib/youtube"
-import { getCloudinaryVideoPosterUrl } from "@/shared/common/lib/cloudinary"
-import { getYoutubeThumbnailUrl } from "@/shared/common/lib/youtube"
+import { getYoutubeEmbedUrl, getYoutubeThumbnailUrl } from "@/features/news/lib/youtube"
+import { getCloudinaryVideoPosterUrl } from "@/shared/infra/cloudinary"
 import type { NewsItem } from "@/features/news/model"
 import { isRichContent, parseRichContentString } from "@/features/news/model"
 import { RichContentBlocks } from "@/features/news/ui/rich-content-blocks"
 import { TextContentRenderer } from "@/features/news/ui/text-content-renderer"
 import { NewsEngagement } from "@/features/news/ui/news-engagement"
 import { SavedNewsActions } from "@/features/news/ui/saved-news-actions"
-import { usePublicSiteSettingsQuery } from "@/shared/common/lib/public-site-settings-query"
+import { usePublicSiteSettingsQuery } from "@/shared/server/public-site-settings-query"
 import {
   DropdownMenu,
   DropdownMenuContent,

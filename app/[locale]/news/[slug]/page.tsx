@@ -22,7 +22,7 @@ import {
   leanDocToPayload,
 } from "@/features/dashboard/configs/site-settings.model"
 import { AdSlot } from "@/features/ads/ui/ad-slot"
-import { getCachedPublicNews } from "@/shared/common/lib/public-data-server"
+import { getCachedPublicNews } from "@/shared/server/public-data-server"
 
 type Props = {
   params: Promise<{ locale: string; slug: string }>

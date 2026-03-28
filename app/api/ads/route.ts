@@ -1,10 +1,10 @@
 import { NextRequest } from "next/server"
 import { dbConnect } from "@/shared/common/lib/db"
-import { isClientDeliveryEnabled } from "@/shared/common/lib/server-client-delivery"
+import { isClientDeliveryEnabled } from "@/shared/server/server-client-delivery"
 import { AdModel } from "@/features/ads/model/ads.model"
 import { createAdSchema } from "@/features/ads/model/schemas"
-import { requireAdminSession } from "@/shared/common/lib/require-admin-session"
-import { protectPublicApi } from "@/shared/common/lib/protect-api"
+import { requireAdminSession } from "@/shared/server/require-admin-session"
+import { protectPublicApi } from "@/shared/server/protect-api"
 import { CACHE_TIMINGS, publicCacheHeaders } from "@/shared/common/lib/http-cache"
 
 export async function GET(req: NextRequest) {

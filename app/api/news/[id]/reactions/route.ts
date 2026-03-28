@@ -4,7 +4,7 @@ import { authOptions } from "@/shared/common/lib/auth-options"
 import { dbConnect } from "@/shared/common/lib/db"
 import { NewsReactionModel } from "@/features/news/model/reaction.model"
 import { NewsModel } from "@/features/news/model/news.model"
-import { protectPublicApi } from "@/shared/common/lib/protect-api"
+import { protectPublicApi } from "@/shared/server/protect-api"
 import { CACHE_TIMINGS, privateCacheHeaders } from "@/shared/common/lib/http-cache"
 
 const REACTIONS = ["like", "love", "laugh", "sad", "angry"] as const

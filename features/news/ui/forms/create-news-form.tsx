@@ -8,7 +8,7 @@ import type { AppLocale } from '@/shared/common/lib/locale-api'
 import { ArrowRight, Loader2 } from 'lucide-react'
 import { Button } from '@/shared/common/components/ui/button'
 import { cn } from '@/shared/common/lib/utils'
-import { getYoutubeEmbedUrl } from '@/shared/common/lib/youtube'
+import { getYoutubeEmbedUrl } from '@/features/news/lib/youtube'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/shared/common/components/ui/tooltip'
 import { TextForm } from './text-section'
 import { GeneralsForm } from './generals-section'
@@ -19,7 +19,7 @@ import { ContentForm } from './content-section'
 import type { NewsStatus } from '@/features/news/model'
 import type { EditNewsInitialData } from '@/features/news/lib/raw-to-edit-initial'
 import { adminQueryKeys } from '@/features/dashboard/model/admin-hooks'
-import { uploadFileViaPresignedUrl } from '@/shared/common/lib/cloudinary-client-upload'
+import { uploadFileViaPresignedUrl } from '@/shared/infra/cloudinary-client-upload'
 
 const LOCALES: AppLocale[] = ['uz', 'uzb', 'ru', 'en']
 const LOCALE_LABELS: Record<AppLocale, string> = {

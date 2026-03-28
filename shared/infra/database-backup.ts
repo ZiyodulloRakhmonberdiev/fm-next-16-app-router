@@ -34,7 +34,6 @@ export type DatabaseBackupArchive = {
 
 /**
  * Barcha asosiy MongoDB kolleksiyalarini JSON + gzip qilib qaytaradi.
- * Tiklash: gzip ochib JSON ni import skripti bilan yuklash (qo‘lda).
  */
 export async function createDatabaseBackupArchive(): Promise<DatabaseBackupArchive> {
   await dbConnect()
@@ -126,9 +125,8 @@ export type DatabaseBackupJobResult =
 
 /**
  * @param requireScheduledEnabled — `true`: faqat cron; sozlamada `enabled` bo‘lmasa yoki token bo‘sh bo‘lsa skip.
- * Manual yuborishda `false` — token/chatId bo‘lmasa `failed`.
  */
-export async function runDatabaseBackupToTelegram(
+export async function runDatabaseBackupTask(
   settings: DatabaseBackupSettings,
   opts: { requireScheduledEnabled: boolean }
 ): Promise<DatabaseBackupJobResult> {
@@ -185,154 +183,4 @@ export async function runDatabaseBackupToTelegram(
     jsonBytes: archive.jsonBytes,
     gzipBytes: archive.gzipBytes,
   }
-}
-
-function escapeTelegramHtml(text: string): string {
-  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-}
-
-function resolvePublicBaseUrl(requestOrigin: string): string {
-  const fromEnv =
-    process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
-    process.env.SITE_URL?.trim() ||
-    process.env.PUBLIC_SITE_URL?.trim()
-  if (fromEnv) return fromEnv.replace(/\/$/, '')
-  return requestOrigin.replace(/\/$/, '')
-}
-
-export async function sendPendingCommentAlertToTelegram(input: {
-  settings: DatabaseBackupSettings
-  requestOrigin: string
-  newsTitle: string
-  commentText: string
-}): Promise<{ ok: true; messageId?: number } | { ok: false; error: string; telegramDescription?: string }> {
-  const token = input.settings.botToken.trim()
-  const chatId = input.settings.chatId.trim()
-  if (!token || !chatId) {
-    return { ok: false, error: "Comment alert uchun bot token/chat id bo'sh" }
-  }
-
-  const threadRaw = input.settings.commentThreadId?.trim() || input.settings.threadId?.trim()
-  const threadId = threadRaw ? Number(threadRaw) : undefined
-  const base = resolvePublicBaseUrl(input.requestOrigin)
-  const reviewUrl = `${base}/dashboard/comments`
-
-  const text = [
-    `<b>${escapeTelegramHtml(input.newsTitle)}</b>`,
-    escapeTelegramHtml(input.commentText),
-  ].join('\n\n')
-
-  const payload: Record<string, unknown> = {
-    chat_id: chatId,
-    parse_mode: 'HTML',
-    text,
-    disable_web_page_preview: true,
-    reply_markup: {
-      inline_keyboard: [
-        [{ text: 'Preview', url: reviewUrl }],
-      ],
-    },
-  }
-  if (threadId != null && Number.isFinite(threadId)) {
-    payload.message_thread_id = Math.floor(threadId)
-  }
-
-  const url = `https://api.telegram.org/bot${token}/sendMessage`
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  })
-  const data = (await res.json().catch(() => null)) as
-    | { ok?: boolean; description?: string; result?: { message_id?: number } }
-    | null
-  if (!res.ok || !data?.ok) {
-    const desc = typeof data?.description === 'string' ? data.description : res.statusText
-    return { ok: false, error: 'Telegram xatosi', telegramDescription: desc }
-  }
-  return { ok: true, messageId: data?.result?.message_id }
-}
-
-export async function sendContactMessageToTelegram(input: {
-  settings: DatabaseBackupSettings
-  fullName: string
-  email: string
-  phone?: string
-  message: string
-  locale?: string
-}): Promise<{ ok: true; messageId?: number } | { ok: false; error: string; telegramDescription?: string }> {
-  const token = input.settings.botToken.trim()
-  const chatId = input.settings.chatId.trim()
-  if (!token || !chatId) {
-    return { ok: false, error: "Contact alert uchun bot token/chat id bo'sh" }
-  }
-
-  const threadRaw = input.settings.contactThreadId?.trim() || input.settings.threadId?.trim()
-  const threadId = threadRaw ? Number(threadRaw) : undefined
-  const payload: Record<string, unknown> = {
-    chat_id: chatId,
-    parse_mode: 'HTML',
-    text: [
-      '📩 <b>Yangi contact xabari</b>',
-      `<b>Ism:</b> ${escapeTelegramHtml(input.fullName)}`,
-      `<b>Email:</b> ${escapeTelegramHtml(input.email)}`,
-      input.phone ? `<b>Telefon:</b> ${escapeTelegramHtml(input.phone)}` : '',
-      input.locale ? `<b>Til:</b> ${escapeTelegramHtml(input.locale)}` : '',
-      '',
-      escapeTelegramHtml(input.message),
-    ]
-      .filter(Boolean)
-      .join('\n'),
-    disable_web_page_preview: true,
-  }
-  if (threadId != null && Number.isFinite(threadId)) {
-    payload.message_thread_id = Math.floor(threadId)
-  }
-
-  const url = `https://api.telegram.org/bot${token}/sendMessage`
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  })
-  const data = (await res.json().catch(() => null)) as
-    | { ok?: boolean; description?: string; result?: { message_id?: number } }
-    | null
-
-  if (!res.ok || !data?.ok) {
-    const desc = typeof data?.description === 'string' ? data.description : res.statusText
-    return { ok: false, error: 'Telegram xatosi', telegramDescription: desc }
-  }
-
-  return { ok: true, messageId: data?.result?.message_id }
-}
-
-export async function deletePendingCommentAlertFromTelegram(input: {
-  settings: DatabaseBackupSettings
-  messageId?: number
-}): Promise<{ ok: true } | { ok: false; error: string; telegramDescription?: string }> {
-  if (!input.messageId) return { ok: true }
-  const token = input.settings.botToken.trim()
-  const chatId = input.settings.chatId.trim()
-  if (!token || !chatId) {
-    return { ok: false, error: "Comment alert delete uchun bot token/chat id bo'sh" }
-  }
-
-  const url = `https://api.telegram.org/bot${token}/deleteMessage`
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      chat_id: chatId,
-      message_id: input.messageId,
-    }),
-  })
-  const data = (await res.json().catch(() => null)) as
-    | { ok?: boolean; description?: string }
-    | null
-  if (!res.ok || !data?.ok) {
-    const desc = typeof data?.description === 'string' ? data.description : res.statusText
-    return { ok: false, error: 'Telegram xatosi', telegramDescription: desc }
-  }
-  return { ok: true }
 }

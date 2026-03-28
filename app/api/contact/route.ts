@@ -5,8 +5,8 @@ import {
   leanDocToPayload,
 } from "@/features/dashboard/configs/site-settings.model"
 import { ContactMessageModel } from "@/features/contact/model/contact-message.model"
-import { sendContactMessageToTelegram } from "@/shared/common/lib/database-backup"
-import { requireAdminSession } from "@/shared/common/lib/require-admin-session"
+import { requireAdminSession } from "@/shared/server/require-admin-session"
+import { sendContactToTelegram } from "@/shared/infra/telegram"
 
 export const runtime = "nodejs"
 
@@ -131,7 +131,7 @@ export async function POST(req: Request) {
     })
   }
 
-  const tg = await sendContactMessageToTelegram({
+  const tg = await sendContactToTelegram({
     settings: deliverySettings,
     fullName: [firstName, lastName].filter(Boolean).join(" ").trim(),
     email,

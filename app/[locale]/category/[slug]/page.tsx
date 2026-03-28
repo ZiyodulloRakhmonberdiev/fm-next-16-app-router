@@ -2,7 +2,7 @@ import { Metadata } from "next"
 import type { AppLocale } from "@/shared/common/lib/formatter"
 import { isAppLocale } from "@/shared/common/lib/locale-api"
 import { NewsListingPage } from "../../news/_components/news-listing-page"
-import { getCachedCategoryBySlug } from "@/shared/common/lib/public-data-server"
+import { getCachedCategoryBySlug } from "@/shared/server/public-data-server"
 
 type Props = {
   params: Promise<{ locale: string; slug: string }>

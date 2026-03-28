@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query"
 import type { RawNewsItem } from "./types"
-import { usePublicSiteSettingsQuery } from "@/shared/common/lib/public-site-settings-query"
+import { usePublicSiteSettingsQuery } from "@/shared/server/public-site-settings-query"
 
 type NewsListResponse = {
   data: RawNewsItem[]

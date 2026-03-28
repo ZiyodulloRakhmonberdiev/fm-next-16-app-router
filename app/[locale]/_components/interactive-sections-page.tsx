@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Link } from "@/i18n/navigation"
-import { ArrowRight, Sparkles } from "lucide-react"
+import { ArrowRight } from "lucide-react"
 import { cn } from "@/shared/common/lib/utils"
 
 type InteractiveSectionsPageProps = {
@@ -22,92 +22,72 @@ export function InteractiveSectionsPage({
   const activeText = sections[activeIndex] ?? sections[0] ?? ""
 
   return (
-    <div className="mx-auto max-w-7xl space-y-4 md:space-y-8">
-      <section className="overflow-hidden rounded-[28px] border border-brand/15 bg-linear-to-br from-brand/10 via-background to-background">
-        <div className="grid gap-6 px-6 py-8 md:px-10 md:py-12 lg:grid-cols-[minmax(0,1.35fr)_260px] lg:items-center">
-          <div className="space-y-4">
-            {/* <span className="inline-flex items-center gap-2 rounded-full bg-brand px-4 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-white">
-              <Sparkles className="size-3.5" />
-              {title}
-            </span> */}
-            <h1 className="max-w-3xl text-3xl font-bold tracking-tight text-foreground md:text-5xl">
-              {title}
-            </h1>
-            <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground md:text-base">
-              {activeText}
-            </p>
-          </div>
-
-          {/* <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-            {sections.slice(0, 3).map((section, index) => (
-              <button
-                key={`${title}-metric-${index}`}
-                type="button"
-                onClick={() => setActiveIndex(index)}
-                className={cn(
-                  "rounded-2xl border p-4 text-left transition-all",
-                  activeIndex === index
-                    ? "border-brand bg-brand text-white shadow-lg"
-                    : "border-brand/15 bg-white/85 hover:-translate-y-0.5 hover:border-brand/35 dark:bg-card/80"
-                )}
-              >
-                <p className={cn("text-xs font-semibold uppercase tracking-[0.18em]", activeIndex === index ? "text-white/80" : "text-brand")}>
-                  0{index + 1}
-                </p>
-                <p className={cn("mt-2 line-clamp-3 text-sm leading-relaxed", activeIndex === index ? "text-white" : "text-muted-foreground")}>
-                  {section}
-                </p>
-              </button>
-            ))}
-          </div> */}
+    <div className="mx-auto max-w-7xl space-y-12 md:space-y-16">
+      <section className="border-b border-border pb-12 md:pb-16">
+        <div className="space-y-6">
+          <h1 className="text-4xl font-light tracking-tight text-foreground md:text-6xl">
+            {title}
+          </h1>
+          <p className="max-w-3xl text-lg font-light leading-relaxed text-muted-foreground md:text-xl">
+            {activeText}
+          </p>
         </div>
       </section>
 
-      <div className="grid gap-3 md:gap-6 md:grid-cols-2">
-        {sections.map((section, index) => (
-          <button
-            key={`${title}-section-${index}`}
-            type="button"
-            onClick={() => setActiveIndex(index)}
-            className={cn(
-              "flex w-full items-start gap-4 rounded-2xl border p-4 text-left transition-all",
-              activeIndex === index
-                ? "border-brand bg-brand text-white shadow-lg"
-                : "border-border bg-background hover:border-brand/35 hover:shadow-sm"
-            )}
-          >
-            <span
+      <div className="grid gap-12 lg:grid-cols-[1fr_360px] lg:items-start">
+        <div className="grid gap-4 md:gap-6 sm:grid-cols-2">
+          {sections.map((section, index) => (
+            <button
+              key={`${title}-section-${index}`}
+              type="button"
+              onClick={() => setActiveIndex(index)}
               className={cn(
-                "mt-0.5 inline-flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold",
-                activeIndex === index ? "bg-white/15 text-white" : "bg-brand/10 text-brand"
+                "group flex w-full flex-col gap-4 rounded-xl border p-6 text-left transition-all",
+                activeIndex === index
+                  ? "border-foreground bg-foreground text-background"
+                  : "border-border bg-background hover:border-foreground/30 hover:shadow-sm"
               )}
             >
-              {index + 1}
-            </span>
-            <span className={cn("text-sm leading-relaxed", activeIndex === index ? "text-white" : "text-muted-foreground")}>
-              {section}
-            </span>
-          </button>
-        ))}
-      </div>
-
-      {/* <div className="rounded-[28px] border border-brand/15 bg-white p-6 shadow-[0_20px_60px_-32px_rgba(209,0,28,0.35)] dark:bg-card md:p-8 lg:sticky lg:top-24">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand">
-            Section 0{activeIndex + 1}
-          </p>
-          <p className="mt-4 text-base leading-8 text-foreground md:text-lg">{activeText}</p>
-          {ctaHref && ctaLabel ? (
-            <div className="mt-6">
-              <Link
-                href={ctaHref}
-                className="inline-flex items-center gap-2 rounded-xl bg-brand px-4 py-2 text-sm font-medium text-white transition hover:bg-brand/90"
+              <span
+                className={cn(
+                  "text-xs font-semibold uppercase tracking-widest",
+                  activeIndex === index ? "text-background/60" : "text-muted-foreground"
+                )}
               >
-                {ctaLabel}
-                <ArrowRight className="size-4" />
-              </Link>
-            </div>
-          ) : null}
-        </div> */}
+                {String(index + 1).padStart(2, "0")}
+              </span>
+              <span className={cn("text-base leading-relaxed tracking-tight font-medium", activeIndex === index ? "text-background" : "text-foreground")}>
+                {section.length > 80 ? section.slice(0, 80) + "..." : section}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        {ctaHref && ctaLabel ? (
+           <aside className="lg:sticky lg:top-32 space-y-8">
+              <div className="rounded-xl border border-border p-8 space-y-6 bg-muted/20">
+                <p className="text-sm text-foreground/80 leading-relaxed font-light italic">
+                  &quot;{activeText.slice(0, 120)}...&quot;
+                </p>
+                <Link
+                  href={ctaHref}
+                  className="inline-flex w-full items-center justify-between rounded-full bg-foreground px-6 py-3 text-sm font-medium text-background transition hover:bg-foreground/90"
+                >
+                  {ctaLabel}
+                  <ArrowRight className="size-4" />
+                </Link>
+              </div>
+           </aside>
+        ) : (
+          <aside className="lg:sticky lg:top-32 space-y-8">
+              <div className="rounded-xl border border-border p-8 space-y-6 bg-muted/20">
+                <p className="text-sm text-muted-foreground leading-relaxed font-light">
+                  {sections[activeIndex]}
+                </p>
+              </div>
+          </aside>
+        )}
+      </div>
     </div>
   )
 }

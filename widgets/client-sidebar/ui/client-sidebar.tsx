@@ -5,8 +5,7 @@ import { CategoryListForSidebar } from '@/entities/category'
 import { Sidebar, SidebarHeader, SidebarContent, SidebarFooter } from '@/shared/common/components/ui/sidebar'
 import { StayConnectedSidebar } from '@/shared/common/components/organisms'
 import { LanguageSwitcherForSidebar } from '@/widgets/language-switcher'
-import { ThemeSwitcher, ThemeSwitcherForHeader, ThemeSwitcherForSidebar } from '@/widgets/theme-switcher'
-import { seed } from '@/scripts/seed'
+import { ThemeSwitcherForHeader } from '@/widgets/theme-switcher'
 import { useLocale } from 'next-intl'
 import type { AppLocale } from '@/shared/common/lib/locale-api'
 import { Label } from '@/shared/common/components/ui/label'
@@ -37,6 +36,12 @@ export default function ClientSidebar() {
           </Link>
           <Link href="/contact">
             <span className="">{t("contact_us")}</span>
+          </Link>
+          <Link href="/privacy">
+            <span className="">{t("privacy_policy")}</span>
+          </Link>
+          <Link href="/terms">
+            <span className="">{t("terms_of_service")}</span>
           </Link>
         </div>
 

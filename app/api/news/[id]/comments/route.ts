@@ -11,8 +11,8 @@ import {
   SITE_SETTINGS_DOCUMENT_ID,
   leanDocToPayload,
 } from "@/features/dashboard/configs/site-settings.model"
-import { sendPendingCommentAlertToTelegram } from "@/shared/common/lib/database-backup"
-import { protectPublicApi } from "@/shared/common/lib/protect-api"
+import { sendPendingCommentAlertToTelegram } from "@/shared/infra/telegram"
+import { protectPublicApi } from "@/shared/server/protect-api"
 import { CACHE_TIMINGS, privateCacheHeaders } from "@/shared/common/lib/http-cache"
 
 const newsFilter = (id: string) => ({

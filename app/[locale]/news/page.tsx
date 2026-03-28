@@ -4,8 +4,9 @@ import { NewsListingPage } from "./_components/news-listing-page"
 export default async function NewsPage({
   params,
 }: {
-  params: { locale: AppLocale }
+  params: Promise<{ locale: AppLocale }>
 }) {
-  return <NewsListingPage locale={params.locale} variant="latest" />
+  const { locale } = await params
+  return <NewsListingPage locale={locale} variant="latest" />
 }
 

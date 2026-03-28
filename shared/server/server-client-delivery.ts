@@ -1,7 +1,7 @@
 import { readFile } from 'fs/promises'
 import { join } from 'path'
 import { seed } from '@/scripts/seed'
-import type { ClientModelSwitches } from './site-settings-types'
+import type { ClientModelSwitches } from '@/shared/common/lib/site-settings-types'
 
 const SETTINGS_PATH = join(process.cwd(), 'data', 'site-settings.json')
 

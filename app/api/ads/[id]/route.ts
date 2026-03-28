@@ -2,7 +2,7 @@ import { NextRequest } from "next/server"
 import { dbConnect } from "@/shared/common/lib/db"
 import { AdModel } from "@/features/ads/model/ads.model"
 import { createAdSchema, createAdSchemaInput } from "@/features/ads/model/schemas"
-import { requireAdminSession } from "@/shared/common/lib/require-admin-session"
+import { requireAdminSession } from "@/shared/server/require-admin-session"
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const unauthorized = await requireAdminSession(["ceo", "administrator", "ads_manager"])

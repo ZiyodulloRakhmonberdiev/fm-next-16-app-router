@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto"
 import path from "node:path"
 import { NextRequest } from "next/server"
-import { requireAdminSession } from "@/shared/common/lib/require-admin-session"
+import { requireAdminSession } from "@/shared/server/require-admin-session"
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3"
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 

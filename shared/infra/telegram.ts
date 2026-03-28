@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises"
 import { join } from "node:path"
-import type { SiteSettingsPayload } from "./site-settings-types"
-import { getYoutubeVideoId } from "./youtube"
+import type { SiteSettingsPayload } from "@/shared/common/lib/site-settings-types"
+import { getYoutubeVideoId } from "@/features/news/lib/youtube"
 
 const SETTINGS_PATH = join(process.cwd(), "data", "site-settings.json")
 
@@ -95,11 +95,6 @@ function isLocalOrigin(origin: string): boolean {
   )
 }
 
-/**
- * Ommaviy sayt bazasi: avvalo `.env` (`NEXT_PUBLIC_SITE_URL` / `SITE_URL` / `PUBLIC_SITE_URL`),
- * keyin so‘rov `origin`. Telegramdagi «Мақолани ўқиш» havolasi shu bazaga bog‘lanadi.
- * Localhost + env bo‘lmasa — localhost qoladi (Telegram tugma/URL cheklovi bilan sinovda muammo bo‘lishi mumkin).
- */
 function resolvePublicBaseUrl(requestOrigin: string): string {
   const fromEnv =
     process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
@@ -186,20 +181,15 @@ export async function sendNewsToTelegram(input: {
   const absoluteVideo = toAbsoluteUrl(input.videoUrl, linkBase)
   const absoluteImage = toAbsoluteUrl(input.imageUrl, linkBase)
   const isYoutubeVideo = input.type === "video" && Boolean(getYoutubeVideoId(input.videoUrl ?? ""))
-  // YouTube video Telegram uchun video emas (yuklab bera olmaydi),
-  // shuning uchun poster rasmni albatta yuborish kerak.
+  
   if (isYoutubeVideo && !absoluteImage) {
     return { status: "failed", reason: "YouTube video uchun 1 ta poster rasm kiriting" }
   }
 
   let method = "sendMessage"
   const payload: Record<string, unknown> = { ...basePayload }
-  // Telegram media URL ochiq internetdan yuklanishi kerak.
-  // `origin` localhost bo‘lsa ham, media URL’larini `.env` public bazaga bog‘lab berdik (`linkBase`).
   const canSendMediaByUrl = !isLocalOrigin(linkBase)
   if (isYoutubeVideo && absoluteImage && canSendMediaByUrl) {
-    // YouTube video URL'dan Telegram video yuklab bera olmaydi,
-    // shuning uchun poster rasmni `sendPhoto` bilan yuboramiz.
     method = "sendPhoto"
     payload.photo = absoluteImage
     payload.caption = htmlCaption
@@ -291,4 +281,160 @@ export async function deleteNewsFromTelegram(input: {
   if (res.ok && json?.ok) return { status: "deleted" }
   const reason = json?.description ?? "Telegramdan o'chirishda xatolik."
   return { status: "failed", reason }
+}
+
+export function escapeTelegramHtmlSimple(text: string): string {
+  return escapeTelegramHtml(text)
+}
+
+/**
+ * Sends a message to Telegram about NEW Contact Message
+ */
+export async function sendContactToTelegram(input: {
+  settings: any // DatabaseBackupSettings
+  fullName: string
+  email: string
+  phone?: string
+  message: string
+  locale?: string
+}): Promise<{ ok: true; messageId?: number } | { ok: false; error: string; telegramDescription?: string }> {
+  const token = input.settings.botToken.trim()
+  const chatId = input.settings.chatId.trim()
+  if (!token || !chatId) {
+    return { ok: false, error: "Contact alert uchun bot token/chat id bo'sh" }
+  }
+
+  const threadRaw = input.settings.contactThreadId?.trim() || input.settings.threadId?.trim()
+  const threadId = threadRaw ? Number(threadRaw) : undefined
+  const payload: Record<string, unknown> = {
+    chat_id: chatId,
+    parse_mode: 'HTML',
+    text: [
+      '📩 <b>Yangi contact xabari</b>',
+      `<b>Ism:</b> ${escapeTelegramHtml(input.fullName)}`,
+      `<b>Email:</b> ${escapeTelegramHtml(input.email)}`,
+      input.phone ? `<b>Telefon:</b> ${escapeTelegramHtml(input.phone)}` : '',
+      input.locale ? `<b>Til:</b> ${escapeTelegramHtml(input.locale)}` : '',
+      '',
+      escapeTelegramHtml(input.message),
+    ]
+      .filter(Boolean)
+      .join('\n'),
+    disable_web_page_preview: true,
+  }
+  if (threadId != null && Number.isFinite(threadId)) {
+    payload.message_thread_id = Math.floor(threadId)
+  }
+
+  const url = `https://api.telegram.org/bot${token}/sendMessage`
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  const data = (await res.json().catch(() => null)) as
+    | { ok?: boolean; description?: string; result?: { message_id?: number } }
+    | null
+
+  if (!res.ok || !data?.ok) {
+    const desc = typeof data?.description === 'string' ? data.description : res.statusText
+    return { ok: false, error: 'Telegram xatosi', telegramDescription: desc }
+  }
+
+  return { ok: true, messageId: data?.result?.message_id }
+}
+
+/**
+ * Sends a message to Telegram about NEW Comment
+ */
+export async function sendPendingCommentAlertToTelegram(input: {
+  settings: any // DatabaseBackupSettings
+  requestOrigin: string
+  newsTitle: string
+  commentText: string
+}): Promise<{ ok: true; messageId?: number } | { ok: false; error: string; telegramDescription?: string }> {
+  const token = input.settings.botToken.trim()
+  const chatId = input.settings.chatId.trim()
+  if (!token || !chatId) {
+    return { ok: false, error: "Comment alert uchun bot token/chat id bo'sh" }
+  }
+
+  const threadRaw = input.settings.commentThreadId?.trim() || input.settings.threadId?.trim()
+  const threadId = threadRaw ? Number(threadRaw) : undefined
+  
+  const fromEnv =
+    process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
+    process.env.SITE_URL?.trim() ||
+    process.env.PUBLIC_SITE_URL?.trim()
+  const base = fromEnv ? fromEnv.replace(/\/$/, '') : input.requestOrigin.replace(/\/$/, '')
+  
+  const reviewUrl = `${base}/dashboard/comments`
+
+  const text = [
+    `<b>${escapeTelegramHtml(input.newsTitle)}</b>`,
+    escapeTelegramHtml(input.commentText),
+  ].join('\n\n')
+
+  const payload: Record<string, unknown> = {
+    chat_id: chatId,
+    parse_mode: 'HTML',
+    text,
+    disable_web_page_preview: true,
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: 'Preview', url: reviewUrl }],
+      ],
+    },
+  }
+  if (threadId != null && Number.isFinite(threadId)) {
+    payload.message_thread_id = Math.floor(threadId)
+  }
+
+  const url = `https://api.telegram.org/bot${token}/sendMessage`
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  const data = (await res.json().catch(() => null)) as
+    | { ok?: boolean; description?: string; result?: { message_id?: number } }
+    | null
+  if (!res.ok || !data?.ok) {
+    const desc = typeof data?.description === 'string' ? data.description : res.statusText
+    return { ok: false, error: 'Telegram xatosi', telegramDescription: desc }
+  }
+  return { ok: true, messageId: data?.result?.message_id }
+}
+
+/**
+ * Deletes a message from Telegram
+ */
+export async function deletePendingCommentAlertFromTelegram(input: {
+  settings: any // DatabaseBackupSettings
+  messageId?: number
+}): Promise<{ ok: true } | { ok: false; error: string; telegramDescription?: string }> {
+  if (!input.messageId) return { ok: true }
+  const token = input.settings.botToken.trim()
+  const chatId = input.settings.chatId.trim()
+  if (!token || !chatId) {
+    return { ok: false, error: "Comment alert delete uchun bot token/chat id bo'sh" }
+  }
+
+  const url = `https://api.telegram.org/bot${token}/deleteMessage`
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      chat_id: chatId,
+      message_id: input.messageId,
+    }),
+  })
+  const data = (await res.json().catch(() => null)) as
+    | { ok?: boolean; description?: string }
+    | null
+  if (!res.ok || !data?.ok) {
+    const desc = typeof data?.description === 'string' ? data.description : res.statusText
+    return { ok: false, error: 'Telegram xatosi', telegramDescription: desc }
+  }
+  return { ok: true }
 }

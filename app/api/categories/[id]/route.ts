@@ -1,10 +1,10 @@
 import { NextRequest } from 'next/server'
 import { dbConnect } from '@/shared/common/lib/db'
-import { requireAdminSession } from '@/shared/common/lib/require-admin-session'
+import { requireAdminSession } from '@/shared/server/require-admin-session'
 import { CategoryModel } from '@/features/category/model/category.model'
 import { createCategorySchema } from '@/features/category/model/schemas'
 import { logAdminAction } from '@/features/admin-logs/lib/log-action'
-import { protectPublicApi } from '@/shared/common/lib/protect-api'
+import { protectPublicApi } from '@/shared/server/protect-api'
 
 export async function GET(
   req: NextRequest,

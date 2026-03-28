@@ -1,8 +1,8 @@
 import { NextRequest } from 'next/server'
 import { dbConnect } from '@/shared/common/lib/db'
 import { NewsModel } from '@/features/news/model/news.model'
-import { deleteNewsFromTelegram, sendNewsToTelegram } from '@/shared/common/lib/telegram'
-import { requireAdminSession } from '@/shared/common/lib/require-admin-session'
+import { deleteNewsFromTelegram, sendNewsToTelegram } from '@/shared/infra/telegram'
+import { requireAdminSession } from '@/shared/server/require-admin-session'
 
 export async function POST(
   req: NextRequest,

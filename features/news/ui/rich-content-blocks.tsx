@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import type { RichContentBlock } from "@/features/news/model"
-import { getYoutubeEmbedUrl } from "@/shared/common/lib/youtube"
+import { getYoutubeEmbedUrl } from "@/features/news/lib/youtube"
 
 export type RichContentBlocksProps = {
   blocks: RichContentBlock[]

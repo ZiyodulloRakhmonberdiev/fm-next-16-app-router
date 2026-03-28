@@ -3,13 +3,13 @@ import { getServerSession } from "next-auth"
 import { dbConnect } from "@/shared/common/lib/db"
 import { authOptions } from "@/shared/common/lib/auth-options"
 import { NewsCommentModel } from "@/features/news/model/comment.model"
-import { requireAdminSession } from "@/shared/common/lib/require-admin-session"
+import { requireAdminSession } from "@/shared/server/require-admin-session"
 import {
   SiteSettingsModel,
   SITE_SETTINGS_DOCUMENT_ID,
   leanDocToPayload,
 } from "@/features/dashboard/configs/site-settings.model"
-import { deletePendingCommentAlertFromTelegram } from "@/shared/common/lib/database-backup"
+import { deletePendingCommentAlertFromTelegram } from "@/shared/infra/telegram"
 
 function moderatorDisplayName(user: {
   name?: string | null

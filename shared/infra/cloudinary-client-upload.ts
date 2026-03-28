@@ -5,7 +5,7 @@
  * Cloudinary faqat optional fallback sifatida qoldirilgan.
  */
 
-// Direct Cloudinary upload yo‘li hozircha ishlatilmaydi.
+// Direct Cloudinary upload yo'li hozircha ishlatilmaydi.
 export function isCloudinaryDirectVideoUploadConfigured(): boolean {
   return false
 }
@@ -34,7 +34,7 @@ export async function uploadVideoToCloudinaryDirect(file: File): Promise<string>
         : "Cloudinary video yuklash xatoligi"
     throw new Error(msg)
   }
-  if (!data?.secure_url) throw new Error("Cloudinary javobida URL yo‘q")
+  if (!data?.secure_url) throw new Error("Cloudinary javobida URL yo'q")
   return data.secure_url
 }
 

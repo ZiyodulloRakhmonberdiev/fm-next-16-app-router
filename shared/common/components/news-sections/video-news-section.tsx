@@ -18,8 +18,8 @@ import { VideoNewsModal } from "@/shared/common/components/molecules"
 import { NewsSectionHeader } from "@/shared/common/components/news-sections/news-section-header"
 import { usePublicCategoriesQuery } from "@/features/category/model/public-categories-query"
 import { getCategoryLabelForNewsItem } from "@/features/category/model/use-category-label"
-import { getCloudinaryVideoPosterUrl } from "@/shared/common/lib/cloudinary"
-import { getYoutubeThumbnailUrl, getYoutubeEmbedUrl } from "@/shared/common/lib/youtube"
+import { getCloudinaryVideoPosterUrl } from "@/shared/infra/cloudinary"
+import { getYoutubeThumbnailUrl, getYoutubeEmbedUrl } from "@/features/news/lib/youtube"
 
 function isVideoNewsItem(item: RawNewsItem): boolean {
   const hasVideo = Boolean(item.videoSource && item.videoUrl)

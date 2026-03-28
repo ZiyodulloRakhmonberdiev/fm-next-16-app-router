@@ -29,7 +29,7 @@ import { signOut, useSession } from 'next-auth/react'
 import { toast } from 'sonner'
 import { normalizeRole } from '@/shared/common/lib/rbac'
 import { ThemeSwitcherForHeader } from '@/widgets/theme-switcher'
-import { resizeImageToSquareJpeg } from '@/shared/common/lib/resize-profile-avatar'
+import { resizeImageToSquareJpeg } from '@/features/user/lib/resize-profile-avatar'
 
 function canOpenDashboardMenuHub(role: ReturnType<typeof normalizeRole>): boolean {
   return role === 'ceo' || role === 'administrator'

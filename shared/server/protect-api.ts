@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { authOptions } from './auth-options'
+import { authOptions } from '@/shared/common/lib/auth-options'
 
 export async function protectPublicApi(req: NextRequest) {
   // 1. Sessiya (Avtorizatsiya) mavjudligini tekshiramiz

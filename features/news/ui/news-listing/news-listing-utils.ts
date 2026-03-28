@@ -1,7 +1,7 @@
 import type { RawNewsItem } from "@/features/news/model"
-import { getCloudinaryVideoPosterUrl } from "@/shared/common/lib/cloudinary"
+import { getCloudinaryVideoPosterUrl } from "@/shared/infra/cloudinary"
 import type { DateInput } from "@/shared/common/lib/formatter"
-import { getYoutubeEmbedUrl, getYoutubeThumbnailUrl } from "@/shared/common/lib/youtube"
+import { getYoutubeEmbedUrl, getYoutubeThumbnailUrl } from "@/features/news/lib/youtube"
 import type { NewsListResponse } from "./news-listing-types"
 
 export function toDate(value?: string | Date): Date | undefined {

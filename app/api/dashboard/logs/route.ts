@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { dbConnect } from '@/shared/common/lib/db'
 import { AdminLogModel } from '@/features/admin-logs/model/admin-log.model'
-import { requireAdminSession } from '@/shared/common/lib/require-admin-session'
+import { requireAdminSession } from '@/shared/server/require-admin-session'
 
 export async function GET(req: NextRequest) {
   const unauthorized = await requireAdminSession(['ceo', 'administrator', 'moderator'])

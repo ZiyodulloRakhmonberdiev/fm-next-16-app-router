@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { dbConnect } from '@/shared/common/lib/db'
-import { runDatabaseBackupToTelegram } from '@/shared/common/lib/database-backup'
+import { runDatabaseBackupTask } from '@/shared/infra/database-backup'
 import {
   SiteSettingsModel,
   SITE_SETTINGS_DOCUMENT_ID,
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
     return Response.json({ ok: false, error: 'Sozlamalar topilmadi' }, { status: 500 })
   }
 
-  const result = await runDatabaseBackupToTelegram(payload.databaseBackup, {
+  const result = await runDatabaseBackupTask(payload.databaseBackup, {
     requireScheduledEnabled: true,
   })
 

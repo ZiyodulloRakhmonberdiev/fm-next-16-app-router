@@ -1,7 +1,7 @@
 "use client"
 
 import type { ReactNode } from "react"
-import { usePublicSiteSettingsQuery } from "@/shared/common/lib/public-site-settings-query"
+import { usePublicSiteSettingsQuery } from "@/shared/server/public-site-settings-query"
 
 type Props = {
   children: ReactNode

@@ -3,7 +3,7 @@
 import { Link } from "@/i18n/navigation"
 import { useTranslations } from "next-intl"
 import { cn } from "@/shared/common/lib/utils"
-import { usePublicSiteSettingsQuery } from "@/shared/common/lib/public-site-settings-query"
+import { usePublicSiteSettingsQuery } from "@/shared/server/public-site-settings-query"
 import { seed } from "@/scripts/seed"
 
 export type AdSlotPlaceholderPlacement =

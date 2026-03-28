@@ -1,5 +1,5 @@
 import { MetadataRoute } from "next"
-import { getSitemapData } from "@/shared/common/lib/public-data-server"
+import { getSitemapData } from "@/shared/server/public-data-server"
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const { news, categories } = await getSitemapData()

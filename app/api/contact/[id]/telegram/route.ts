@@ -1,13 +1,13 @@
 import { NextRequest } from "next/server"
 import { dbConnect } from "@/shared/common/lib/db"
-import { requireAdminSession } from "@/shared/common/lib/require-admin-session"
+import { requireAdminSession } from "@/shared/server/require-admin-session"
 import { ContactMessageModel } from "@/features/contact/model/contact-message.model"
 import {
   SiteSettingsModel,
   SITE_SETTINGS_DOCUMENT_ID,
   leanDocToPayload,
 } from "@/features/dashboard/configs/site-settings.model"
-import { sendContactMessageToTelegram } from "@/shared/common/lib/database-backup"
+import { sendContactToTelegram } from "@/shared/infra/telegram"
 
 export async function POST(
   _req: NextRequest,
@@ -31,7 +31,7 @@ export async function POST(
 
   const fullName = [item.firstName, item.lastName].filter(Boolean).join(" ").trim()
   const fullPhone = [item.phoneCode, item.phoneNumber].filter(Boolean).join(" ").trim()
-  const tg = await sendContactMessageToTelegram({
+  const send = await sendContactToTelegram({
     settings: deliverySettings,
     fullName,
     email: item.email,

@@ -18,7 +18,7 @@ export const getCachedPublicNews = unstable_cache(
       .sort({ publishedAt: -1 })
       .limit(120)
       .lean()
-    
+
     // Mongoose hujjatlarini plain JSON qilib qaytaramiz (Date ob'ektlarini string qilib)
     return JSON.parse(JSON.stringify(news))
   },
@@ -87,14 +87,13 @@ export async function getSitemapData() {
     .select("slug updatedAt")
     .sort({ publishedAt: -1 })
     .lean()
-  
+
   const categories = await CategoryModel.find()
     .select("slug updatedAt")
     .lean()
-    
+
   return {
     news: JSON.parse(JSON.stringify(news)),
     categories: JSON.parse(JSON.stringify(categories)),
   }
 }
-

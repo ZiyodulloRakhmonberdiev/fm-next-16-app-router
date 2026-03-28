@@ -19,7 +19,7 @@ import {
 import RowSection from "@/shared/common/components/news-sections/row-section"
 import VideoNewsSection2 from "@/shared/common/components/news-sections/video-news-section-2"
 import { AdSlot } from "@/features/ads/ui/ad-slot"
-import { getCachedPublicNews, getCachedPublicCategories } from "@/shared/common/lib/public-data-server"
+import { getCachedPublicNews, getCachedPublicCategories } from "@/shared/server/public-data-server"
 
 export default async function HomeMainContent() {
   const publicNews = await getCachedPublicNews()

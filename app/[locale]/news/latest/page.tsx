@@ -4,8 +4,9 @@ import type { AppLocale } from "@/shared/common/lib/formatter"
 export default async function LatestNewsPage({
   params,
 }: {
-  params: { locale: AppLocale }
+  params: Promise<{ locale: AppLocale }>
 }) {
-  return <NewsListingPage locale={params.locale} variant="latest" />
+  const { locale } = await params
+  return <NewsListingPage locale={locale} variant="latest" />
 }
 

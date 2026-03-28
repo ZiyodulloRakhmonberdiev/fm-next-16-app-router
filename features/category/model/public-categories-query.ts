@@ -1,6 +1,6 @@
 "use client"
 
-import { usePublicSiteSettingsQuery } from "@/shared/common/lib/public-site-settings-query"
+import { usePublicSiteSettingsQuery } from "@/shared/server/public-site-settings-query"
 import { sortCategoriesByPriority, type PublicCategory } from "../lib/category-utils"
 
 export type { PublicCategory }

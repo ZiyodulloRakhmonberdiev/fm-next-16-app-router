@@ -1,11 +1,11 @@
 import type { AppLocale } from "@/shared/common/lib/formatter"
 import { NewsListingPage } from "../_components/news-listing-page"
 
-export default async function TrendingNewsPage({
+export default async function TrendingTrendingPage({
   params,
 }: {
-  params: { locale: AppLocale }
+  params: Promise<{ locale: AppLocale }>
 }) {
-  return <NewsListingPage locale={params.locale} variant="trending" />
+  const { locale } = await params
+  return <NewsListingPage locale={locale} variant="trending" />
 }
-

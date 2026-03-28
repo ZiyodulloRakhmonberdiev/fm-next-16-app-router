@@ -1,11 +1,11 @@
 import { NextRequest } from 'next/server'
 import { dbConnect } from '@/shared/common/lib/db'
-import { requireAdminSession } from '@/shared/common/lib/require-admin-session'
-import { isClientDeliveryEnabled } from '@/shared/common/lib/server-client-delivery'
+import { requireAdminSession } from '@/shared/server/require-admin-session'
+import { isClientDeliveryEnabled } from '@/shared/server/server-client-delivery'
 import { CategoryModel } from '@/features/category/model/category.model'
 import { createCategorySchema } from '@/features/category/model/schemas'
 import { logAdminAction } from '@/features/admin-logs/lib/log-action'
-import { protectPublicApi } from '@/shared/common/lib/protect-api'
+import { protectPublicApi } from '@/shared/server/protect-api'
 import { CACHE_TIMINGS, publicCacheHeaders } from '@/shared/common/lib/http-cache'
 
 export async function GET(req: NextRequest) {

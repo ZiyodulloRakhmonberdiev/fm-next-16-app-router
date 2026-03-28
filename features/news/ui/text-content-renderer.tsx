@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { getYoutubeEmbedUrl } from "@/shared/common/lib/youtube"
+import { getYoutubeEmbedUrl } from "@/features/news/lib/youtube"
 
 type TextContentRendererProps = {
   content: string

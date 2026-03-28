@@ -9,7 +9,7 @@ import {
   SITE_SETTINGS_DOCUMENT_ID,
   leanDocToPayload,
 } from "@/features/dashboard/configs/site-settings.model"
-import { deletePendingCommentAlertFromTelegram } from "@/shared/common/lib/database-backup"
+import { deletePendingCommentAlertFromTelegram } from "@/shared/infra/telegram"
 
 export async function DELETE(
   _req: NextRequest,

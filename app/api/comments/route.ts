@@ -1,8 +1,9 @@
 import { NextRequest } from "next/server"
-import { mapSlugsToNewsTitles } from "@/shared/common/lib/admin-news-titles"
+import { mapSlugsToNewsTitles } from "@/features/news/lib/admin-news-titles"
 import { dbConnect } from "@/shared/common/lib/db"
 import { NewsCommentModel } from "@/features/news/model/comment.model"
-import { requireAdminSession } from "@/shared/common/lib/require-admin-session"
+import { requireAdminSession } from "@/shared/server/require-admin-session"
+import { protectPublicApi } from "@/shared/server/protect-api"
 
 export async function GET(req: NextRequest) {
   const unauthorized = await requireAdminSession(["ceo", "administrator", "moderator"])

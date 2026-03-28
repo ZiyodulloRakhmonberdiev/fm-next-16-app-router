@@ -3,9 +3,9 @@ import { dbConnect } from "@/shared/common/lib/db"
 import {
   findSlugsMatchingTitleQuery,
   mapSlugsToNewsTitles,
-} from "@/shared/common/lib/admin-news-titles"
+} from "@/features/news/lib/admin-news-titles"
 import { NewsReactionModel } from "@/features/news/model/reaction.model"
-import { requireAdminSession } from "@/shared/common/lib/require-admin-session"
+import { requireAdminSession } from "@/shared/server/require-admin-session"
 
 export async function GET(req: NextRequest) {
   const unauthorized = await requireAdminSession(["ceo", "administrator", "moderator"])

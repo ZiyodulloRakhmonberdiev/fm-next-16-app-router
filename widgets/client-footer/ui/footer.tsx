@@ -8,7 +8,7 @@ import { Mail, MapPin, Phone } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTheme } from 'next-themes'
 import type { AppLocale } from '@/shared/common/lib/locale-api'
-import { usePublicSiteSettingsQuery } from '@/shared/common/lib/public-site-settings-query'
+import { usePublicSiteSettingsQuery } from '@/shared/server/public-site-settings-query'
 
 export default function Footer() {
   const { resolvedTheme } = useTheme()

@@ -25,7 +25,7 @@ import {
 } from "@/features/news/lib/latin-cyrill-translator"
 import type { AppLocale } from "@/shared/common/lib/locale-api"
 import { toast } from "sonner"
-import { uploadFileViaPresignedUrl } from "@/shared/common/lib/cloudinary-client-upload"
+import { uploadFileViaPresignedUrl } from "@/shared/infra/cloudinary-client-upload"
 
 type LocalMedia = {
   id: string
