@@ -390,7 +390,9 @@ export default function DashboardContactMessagesPage() {
               </div>
               <div className="rounded-lg border p-4">
                 <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Xabar</p>
-                <p className="mt-2 whitespace-pre-wrap leading-7">{preview.message}</p>
+                <div className="mt-2 max-h-[40vh] overflow-y-auto">
+                  <p className="whitespace-pre-wrap leading-7 text-foreground/90">{preview.message}</p>
+                </div>
               </div>
               <div className="flex flex-wrap gap-2">
                 <Button
