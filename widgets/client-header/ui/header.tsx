@@ -88,8 +88,11 @@ export default function Header() {
                 priority
               />
             </Link>
-            <div className="ml-12 md:ml-16">
+            <div className="ml-12 md:ml-16 flex items-center gap-6">
               <CategoryList />
+              <Link href="/news/audio" className="text-sm font-medium hover:text-brand transition-colors">
+                Audio
+              </Link>
             </div>
           </div>
           {/* <div className="z-[2] flex shrink-0 items-center md:hidden">

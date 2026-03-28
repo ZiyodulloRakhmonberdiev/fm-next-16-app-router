@@ -14,7 +14,7 @@ import { Link } from "@/i18n/navigation"
 import { CategoryListForNewsPage } from "@/entities/category/ui/category-list"
 import ClientSiteNothingGate from "../../_components/client-site-nothing-gate"
 import ClientServerOffGate from "../../_components/client-server-off-gate"
-import { Flame, History, HomeIcon, Lightbulb, TrendingUpIcon, VideoIcon } from "lucide-react"
+import { Flame, History, HomeIcon, Lightbulb, TrendingUpIcon, VideoIcon, Volume2 } from "lucide-react"
 import { getTranslations } from "next-intl/server"
 import {
   SiteSettingsModel,
@@ -118,6 +118,9 @@ export default async function NewsPage({ params }: Props) {
                     </Link>
                     <Link href="/news/video" className="flex items-center gap-3">
                       <VideoIcon className="w-5 h-5" /> <span className="text-lg">{t("nav_video")}</span>
+                    </Link>
+                    <Link href="/news/audio" className="flex items-center gap-3">
+                      <Volume2 className="w-5 h-5" /> <span className="text-lg">Audio</span>
                     </Link>
                   </nav>
                 </div>

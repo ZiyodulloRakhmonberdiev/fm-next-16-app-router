@@ -7,6 +7,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 
 const IMAGE_EXTENSIONS = new Set([".jpg", ".jpeg", ".png", ".webp", ".gif", ".svg"])
 const VIDEO_EXTENSIONS = new Set([".mp4", ".webm", ".ogg", ".mov", ".m4v"])
+const AUDIO_EXTENSIONS = new Set([".mp3", ".wav", ".m4a", ".aac", ".ogg"])
 
 const EXT_TO_MIME: Record<string, string> = {
   ".jpg": "image/jpeg",
@@ -17,9 +18,13 @@ const EXT_TO_MIME: Record<string, string> = {
   ".svg": "image/svg+xml",
   ".mp4": "video/mp4",
   ".webm": "video/webm",
-  ".ogg": "video/ogg",
   ".mov": "video/quicktime",
   ".m4v": "video/x-m4v",
+  ".mp3": "audio/mpeg",
+  ".wav": "audio/wav",
+  ".m4a": "audio/x-m4a",
+  ".aac": "audio/aac",
+  ".ogg": "audio/ogg",
 }
 
 function sanitizeBaseName(name: string): string {
@@ -47,12 +52,12 @@ export async function POST(req: NextRequest) {
     if (!filename || typeof filename !== "string") {
       return Response.json({ error: "Fayl nomi topilmadi" }, { status: 400 })
     }
-    if (kind !== "image" && kind !== "video") {
+    if (kind !== "image" && kind !== "video" && kind !== "audio") {
       return Response.json({ error: "Noto'g'ri media turi" }, { status: 400 })
     }
 
     const ext = path.extname(filename).toLowerCase()
-    const allowed = kind === "image" ? IMAGE_EXTENSIONS : VIDEO_EXTENSIONS
+    const allowed = kind === "image" ? IMAGE_EXTENSIONS : kind === "video" ? VIDEO_EXTENSIONS : AUDIO_EXTENSIONS
     if (!allowed.has(ext)) {
       return Response.json({ error: "Fayl turi qo'llab-quvvatlanmaydi" }, { status: 400 })
     }
@@ -70,9 +75,9 @@ export async function POST(req: NextRequest) {
     const secretKey = process.env.CONTABO_SECRET_KEY!
     const publicBase = process.env.NEXT_PUBLIC_STORAGE_PUBLIC_URL!.replace(/\/$/, "")
 
-    const subfolder = kind === "image" ? "images" : "videos"
+    const subfolder = kind === "image" ? "images" : kind === "video" ? "videos" : "audios"
     const key = `uploads/${subfolder}/${newFilename}`
-    const contentType = EXT_TO_MIME[ext] || (kind === "image" ? "image/jpeg" : "video/mp4")
+    const contentType = EXT_TO_MIME[ext] || (kind === "image" ? "image/jpeg" : kind === "video" ? "video/mp4" : "audio/mpeg")
 
     const region = process.env.CONTABO_REGION || "eu2"
     const client = new S3Client({

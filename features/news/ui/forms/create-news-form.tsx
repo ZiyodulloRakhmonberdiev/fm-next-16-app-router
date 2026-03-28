@@ -14,7 +14,7 @@ import { TextForm } from './text-section'
 import { GeneralsForm } from './generals-section'
 import { ImageForm } from './image-section'
 import { VideoForm } from './video-section'
-import { SettingsForm } from './settings-section'
+import { AudioForm } from './audio-section'
 import { ContentForm } from './content-section'
 import type { NewsStatus } from '@/features/news/model'
 import type { EditNewsInitialData } from '@/features/news/lib/raw-to-edit-initial'
@@ -245,6 +245,8 @@ export function CreateNewsForm({
   const [videoUrl, setVideoUrl] = useState(initialData?.videoUrl ?? '')
   const [videoFile, setVideoFile] = useState<File | null>(null)
   const [activeTab, setActiveTab] = useState<AppLocale>('uz')
+  const [audioUrl, setAudioUrl] = useState(initialData?.audioUrl ?? '')
+  const [audioFile, setAudioFile] = useState<File | null>(null)
   const [authorsChoice, setAuthorsChoice] = useState(initialData?.authorsChoice ?? false)
   const [isTrending, setIsTrending] = useState(initialData?.isTrending ?? false)
   const [isLatest] = useState(initialData?.isLatest ?? false)
@@ -265,6 +267,11 @@ export function CreateNewsForm({
   const [isTelegramProcessing, setIsTelegramProcessing] = useState(false)
   const [editStatus, setEditStatus] = useState<NewsStatus>(initialData?.status ?? 'pending')
   const saveStatus: NewsStatus = isEditMode ? editStatus : 'pending'
+
+  const audioDisplayUrl = useMemo(() => {
+    if (audioFile) return URL.createObjectURL(audioFile)
+    return audioUrl
+  }, [audioFile, audioUrl])
 
   const saveNews = useMutation({
     mutationFn: async ({
@@ -309,6 +316,16 @@ export function CreateNewsForm({
         ru: contents.ru.length ? contents.ru : undefined,
         en: contents.en.length ? contents.en : undefined,
       }
+      let finalAudioUrl: string | null = null
+      let finalAudioSource: 'local' | 'external' | null = null
+      if (audioFile) {
+        finalAudioUrl = await uploadFileViaPresignedUrl(audioFile, 'audio')
+        finalAudioSource = 'local'
+      } else if (audioUrl.trim()) {
+        finalAudioUrl = audioUrl.trim()
+        finalAudioSource = 'external'
+      }
+
       const payload = {
         slug,
         title,
@@ -335,6 +352,8 @@ export function CreateNewsForm({
         pushedToTelegram: pushedToTelegramOverride ?? pushedToTelegram,
         videoSource: finalVideoSource,
         videoUrl: finalVideoUrl,
+        audioSource: finalAudioSource,
+        audioUrl: finalAudioUrl,
       }
 
       const targetId = savedNewsId
@@ -434,9 +453,10 @@ export function CreateNewsForm({
     !!videoFile
   const resolvedMinutes = minutes === '' || minutes === undefined || isNaN(Number(minutes)) ? 3 : Number(minutes)
   const hasVideo = !!(videoUrl.trim() || videoFile)
+  const hasAudio = !!(audioUrl.trim() || audioFile)
   const hasImage = imageUrls.length > 0 || imageFiles.length > 0
-  const resolvedType: 'text' | 'image' | 'video' =
-    hasVideo ? 'video' : hasImage ? 'image' : 'text'
+  const resolvedType: 'text' | 'image' | 'video' | 'audio' =
+    hasVideo ? 'video' : hasAudio ? 'audio' : hasImage ? 'image' : 'text'
 
   const buildSavePayload = (status: 'pending' | 'published') => {
     const imageList = [
@@ -462,6 +482,8 @@ export function CreateNewsForm({
       isLatest,
       isPopular,
       isBreaking,
+      audioUrl: audioUrl.trim() || undefined,
+      audioFile: audioFile?.name,
       pushedToTelegram,
       status,
     }
@@ -731,6 +753,14 @@ export function CreateNewsForm({
             hasVideoFile={Boolean(videoFile)}
             onVideoUrlChange={setVideoUrl}
             onVideoFileChange={setVideoFile}
+          />
+
+          <AudioForm
+            audioUrl={audioUrl}
+            audioDisplayUrl={audioDisplayUrl}
+            hasAudioFile={Boolean(audioFile)}
+            onAudioUrlChange={setAudioUrl}
+            onAudioFileChange={setAudioFile}
           />
 
           <div className="flex flex-col items-end gap-2">

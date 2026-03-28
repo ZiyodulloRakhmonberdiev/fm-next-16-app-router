@@ -98,6 +98,12 @@ export const createNewsSchema = z.object({
     )
     .optional()
     .nullable(),
+  audioSource: z.enum(['local', 'external']).optional().nullable(),
+  audioUrl: z
+    .string()
+    .min(1, "Audio URL bo'sh bo'lmasligi kerak")
+    .optional()
+    .nullable(),
 })
 
 export type CreateNewsInput = z.infer<typeof createNewsSchema>

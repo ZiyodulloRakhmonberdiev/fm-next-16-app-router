@@ -1,12 +1,12 @@
 import { Link } from '@/i18n/navigation'
 import Image from 'next/image'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
+import { Volume2 } from 'lucide-react'
 import { CategoryListForSidebar } from '@/entities/category'
 import { Sidebar, SidebarHeader, SidebarContent, SidebarFooter } from '@/shared/common/components/ui/sidebar'
 import { StayConnectedSidebar } from '@/shared/common/components/organisms'
 import { LanguageSwitcherForSidebar } from '@/widgets/language-switcher'
 import { ThemeSwitcherForHeader } from '@/widgets/theme-switcher'
-import { useLocale } from 'next-intl'
 import type { AppLocale } from '@/shared/common/lib/locale-api'
 import { Label } from '@/shared/common/components/ui/label'
 
@@ -28,6 +28,12 @@ export default function ClientSidebar() {
         </div>
         <div className='font-medium px-4 border-b border-border pb-2'>
           <LanguageSwitcherForSidebar />
+        </div>
+        <div className="px-4 py-2 border-b border-border">
+          <Link href="/news/audio" className="flex items-center gap-3 text-sm font-medium hover:text-brand transition-colors">
+            <Volume2 className="size-4" />
+            Audio
+          </Link>
         </div>
         <CategoryListForSidebar />
         <div className='text-center flex flex-col gap-2 border-t border-border py-4'>

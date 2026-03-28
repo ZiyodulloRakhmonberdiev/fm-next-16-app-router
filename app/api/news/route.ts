@@ -32,6 +32,7 @@ export async function GET(req: NextRequest) {
     const authorsChoice = searchParams.get("authorsChoice") ?? searchParams.get("authors_choice")
     const breaking = searchParams.get("breaking") ?? searchParams.get("isBreaking")
     const video = searchParams.get("video") ?? searchParams.get("hasVideo") ?? searchParams.get("has_video")
+    const audio = searchParams.get("audio") ?? searchParams.get("hasAudio") ?? searchParams.get("has_audio")
     const skip = (page - 1) * limit
 
     const filter: Record<string, unknown> = {}
@@ -58,6 +59,10 @@ export async function GET(req: NextRequest) {
           videoSource: { $in: ["youtube", "local"] },
         },
       ]
+    }
+    /** Audio filter: audioUrl mavjud bo'lsa */
+    if (audio === "1" || audio === "true") {
+      filter.audioUrl = { $exists: true, $ne: "" }
     }
     if (Number.isFinite(recentMonths) && recentMonths > 0) {
       const now = new Date()

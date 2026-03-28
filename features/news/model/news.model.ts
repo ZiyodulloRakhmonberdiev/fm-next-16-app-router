@@ -32,8 +32,9 @@ export interface INews {
   telegramPushStatus?: 'sent' | 'failed'
   telegramPushReason?: string
   telegramLastAttemptAt?: Date
-  videoSource?: 'youtube' | 'local'
   videoUrl?: string
+  audioSource?: 'local' | 'external'
+  audioUrl?: string
   /** Yangilikni yaratgan admin foydalanuvchi */
   createdBy?: { userId: string; name: string }
   createdAt: Date
@@ -90,8 +91,9 @@ const NewsSchema = new Schema<INews>(
     telegramPushStatus: { type: String, enum: ['sent', 'failed'] },
     telegramPushReason: String,
     telegramLastAttemptAt: Date,
-    videoSource: { type: String, enum: ['youtube', 'local'] },
     videoUrl: String,
+    audioSource: { type: String, enum: ['local', 'external'] },
+    audioUrl: String,
     createdBy: {
       userId: { type: String },
       name: { type: String },

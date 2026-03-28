@@ -4,7 +4,7 @@ import * as React from "react"
 import { Link } from "@/i18n/navigation"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { Calendar, Clock, Eye, EyeOff, Facebook, Heart, Link2, MessageSquare, Send, Share2 } from "lucide-react"
+import { Calendar, Clock, Eye, EyeOff, Facebook, Heart, Link2, MessageSquare, Send, Share2, Volume2 } from "lucide-react"
 import { Button } from "@/shared/common/components/ui/button"
 import { formatDateISO, formatDateTimeLocale } from "@/shared/common/lib/formatter"
 import type { AppLocale } from "@/shared/common/lib/formatter"
@@ -400,6 +400,22 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
             </div>
           </div>
         </div>
+        {news.audioUrl && (
+          <div className="mb-6 rounded-xl border bg-muted/30 p-4 shadow-sm">
+            <div className="mb-2 flex items-center gap-2 text-sm font-medium text-brand">
+              <Volume2 className="size-4" />
+              <span>Audio xabarni tinglang</span>
+            </div>
+            <audio
+              src={news.audioUrl}
+              controls
+              className="w-full"
+            >
+              Brauzeringiz audio qo'llab-quvvatlamaydi.
+            </audio>
+          </div>
+        )}
+
         {hasVideo && (() => {
           const youtubeEmbed = getYoutubeEmbedUrl(news.videoUrl ?? "")
           return (
