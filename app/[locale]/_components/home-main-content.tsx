@@ -29,7 +29,6 @@ export default async function HomeMainContent() {
     return <ServerUnavailable />
   }
 
-  /** Admin panelda `priority` bo‘yicha (katta = yuqoriroq); index 0 = eng ustun. */
   const categoriesByPriority = sortCategoriesByPriority(categories)
 
   const firstCategorySlug = categoriesByPriority[0]?.slug ?? "politics"
@@ -104,7 +103,9 @@ export default async function HomeMainContent() {
         initialNews={publicNews} 
         initialCategories={categories}
       />
-      <AdSlot placement="home_bottom_full" />
+      <div className="px-4 md:px-6 py-4">
+        <AdSlot placement="home_bottom_full" />
+      </div>
       <RowSection 
         categorySlug={thirdCategorySlug} 
         initialNews={publicNews} 

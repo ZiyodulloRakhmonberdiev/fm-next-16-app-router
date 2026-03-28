@@ -93,6 +93,9 @@ export function GeneralsForm({
             <DropdownMenuContent className="w-(--radix-dropdown-menu-trigger-width)">
               <DropdownMenuLabel>Muallif</DropdownMenuLabel>
               <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => onAuthorChange("")}>
+                <span className="text-muted-foreground italic font-light italic">Tanlanmagan</span>
+              </DropdownMenuItem>
               {authors.map((a) => (
                 <DropdownMenuItem key={a} onClick={() => onAuthorChange(a)}>
                   {a}

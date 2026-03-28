@@ -119,7 +119,7 @@ export default async function DashboardPage(props: { searchParams?: Promise<{ ra
       href: '/dashboard/comments',
     },
     {
-      label: 'Contact xabarlari',
+      label: 'Xabarlar',
       value: sData.contactTotal ?? 0,
       secondary: `${sData.contactNew ?? 0} yangi`,
       icon: Send,
@@ -215,9 +215,9 @@ export default async function DashboardPage(props: { searchParams?: Promise<{ ra
                   <p className="text-xl sm:text-2xl font-semibold tracking-tight tabular-nums truncate">
                     {typeof s.value === 'number' ? s.value.toLocaleString() : s.value}
                   </p>
-                  {s.secondary != null ? (
+                  {/* {s.secondary != null ? (
                     <p className="text-xs text-muted-foreground tabular-nums truncate">{s.secondary}</p>
-                  ) : null}
+                  ) : null} */}
                 </CardContent>
               </Card>
             </Link>

@@ -46,6 +46,10 @@ export function ContactPageClient() {
       toast.error(t("required_error"))
       return
     }
+    if (message.length > 1024) {
+      toast.error("Xabar 1024 belgidan oshmasligi kerak")
+      return
+    }
 
     setSubmitting(true)
     try {
@@ -178,14 +182,20 @@ export function ContactPageClient() {
                 <Label htmlFor="message" className="text-xs uppercase tracking-widest text-muted-foreground">
                   {t("message")}
                 </Label>
-                <Textarea
-                  id="message"
-                  required
-                  placeholder={t("placeholder_message")}
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  className="min-h-[120px] border-0 border-b border-border bg-transparent px-0 rounded-none focus-visible:ring-0 focus-visible:border-foreground transition-colors resize-none placeholder:text-muted-foreground/40"
-                />
+                <div className="relative">
+                  <Textarea
+                    id="message"
+                    required
+                    maxLength={1024}
+                    placeholder={t("placeholder_message")}
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    className="min-h-[120px] border-0 border-b border-border bg-transparent px-0 rounded-none focus-visible:ring-0 focus-visible:border-foreground transition-colors resize-none placeholder:text-muted-foreground/40"
+                  />
+                  <div className="absolute bottom-0 right-0 text-[10px] uppercase tracking-widest text-muted-foreground/50 py-1">
+                    {message.length} / 1024
+                  </div>
+                </div>
               </div>
 
               <div className="pt-6">

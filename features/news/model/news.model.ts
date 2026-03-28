@@ -13,7 +13,7 @@ export interface INews {
   categorySlug: string
   tagSlugs: string[]
   images: string[]
-  author: string
+  author?: string | null
   minutes: number
   views: number
   publishedAt: Date
@@ -67,7 +67,7 @@ const NewsSchema = new Schema<INews>(
     categorySlug: { type: String, required: true },
     tagSlugs: { type: [String], default: [] },
     images: { type: [String], default: [] },
-    author: { type: String, required: true },
+    author: { type: String, required: false },
     minutes: { type: Number, default: 1 },
     views: { type: Number, default: 0 },
     publishedAt: { type: Date, default: Date.now },

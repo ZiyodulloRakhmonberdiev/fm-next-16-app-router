@@ -22,7 +22,7 @@ export function InteractiveSectionsPage({
   const activeText = sections[activeIndex] ?? sections[0] ?? ""
 
   return (
-    <div className="mx-auto max-w-7xl space-y-12 md:space-y-16">
+    <div className="mx-auto max-w-7xl px-4 md:px-6 space-y-12 md:space-y-16">
       <section className="border-b border-border pb-12 md:pb-16">
         <div className="space-y-6">
           <h1 className="text-4xl font-light tracking-tight text-foreground md:text-6xl">
@@ -57,7 +57,7 @@ export function InteractiveSectionsPage({
                 {String(index + 1).padStart(2, "0")}
               </span>
               <span className={cn("text-base leading-relaxed tracking-tight font-medium", activeIndex === index ? "text-background" : "text-foreground")}>
-                {section.length > 80 ? section.slice(0, 80) + "..." : section}
+                {section}
               </span>
             </button>
           ))}

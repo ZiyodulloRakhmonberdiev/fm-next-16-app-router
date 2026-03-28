@@ -68,7 +68,7 @@ export const createNewsSchema = z.object({
   categorySlug: z.string().min(1, 'Kategoriya majburiy'),
   tagSlugs: z.array(z.string()).default([]),
   images: z.array(imageUrlSchema).default([]),
-  author: z.string().min(1, 'Muallif majburiy'),
+  author: z.string().optional().nullable(),
   minutes: z.number().int().min(0).default(3),
   views: z.number().int().min(0).default(0),
   publishedAt: z.coerce.date().optional(),

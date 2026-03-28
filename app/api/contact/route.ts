@@ -90,7 +90,7 @@ export async function POST(req: Request) {
   const email = cleanText(body?.email, 160).toLowerCase()
   const phoneCode = cleanText(body?.phoneCode, 12)
   const phoneNumber = cleanText(body?.phoneNumber, 32)
-  const message = cleanText(body?.message, 3000)
+  const message = cleanText(body?.message, 1024)
   const locale = cleanText(body?.locale, 12)
 
   if (!firstName || !email || !message) {

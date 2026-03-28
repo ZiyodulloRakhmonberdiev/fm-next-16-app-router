@@ -65,7 +65,7 @@ export const adminMainNavMeta: AdminMainNavMeta[] = [
   },
   {
     href: '/dashboard/contact-messages',
-    label: 'Contact xabarlari',
+    label: 'Xabarlar',
     roles: ['ceo', 'administrator', 'moderator'],
     iconKey: 'Send',
   },
@@ -95,7 +95,7 @@ export const adminMainNavMeta: AdminMainNavMeta[] = [
   },
   {
     href: '/dashboard/ads/feedback',
-    label: 'Reklama fikrlari',
+    label: 'Reklama statistikasi',
     roles: ['ceo', 'administrator', 'ads_manager'],
     iconKey: 'ClipboardList',
   },

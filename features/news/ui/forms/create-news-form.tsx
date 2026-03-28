@@ -317,7 +317,7 @@ export function CreateNewsForm({
         categorySlug,
         tagSlugs,
         images: imageUrls,
-        author: author.trim(),
+        author: author.trim() || null,
         minutes: resolvedMinutes,
         ...(isEditMode ? {} : { views: 0 }),
         publishedAt:

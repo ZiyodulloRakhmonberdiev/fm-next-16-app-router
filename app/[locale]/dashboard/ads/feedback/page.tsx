@@ -149,7 +149,7 @@ export default function DashboardAdsFeedbackPage() {
       <CardHeader className="space-y-2 px-4 md:px-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <CardTitle>Reklama fikrlari</CardTitle>
+            <CardTitle>Reklama statistikasi</CardTitle>
             <CardDescription className="mt-1">
               Foydalanuvchilar yashirish yoki arz sabablari bo&apos;yicha yuborgan fikrlar. Filtrlar jadvaldagi
               yozuvlar va pastdagi qisqacha statistikaga ta&apos;sir qiladi.
