@@ -40,8 +40,7 @@ type SettingsFormProps = {
   onChangeIsPopular: (value: boolean) => void
   onChangeIsTop: (value: boolean) => void
   onChangeIsBreaking: (value: boolean) => void
-  onSendToTelegram: () => void
-  onRemoveFromTelegram: () => void
+  onChangePushedToTelegram: (value: boolean) => void
   onSavePending: () => void
   onPublish: () => void
   isSaving?: boolean
@@ -74,8 +73,7 @@ export function SettingsForm({
   onChangeIsPopular,
   onChangeIsTop,
   onChangeIsBreaking,
-  onSendToTelegram,
-  onRemoveFromTelegram,
+  onChangePushedToTelegram,
   onSavePending,
   onPublish,
   isSaving = false,
@@ -135,32 +133,15 @@ export function SettingsForm({
           <Switch id="isBreaking" checked={isBreaking} onCheckedChange={onChangeIsBreaking} />
         </div>
         <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border p-4">
-          <Label className="cursor-pointer">Telegram</Label>
-          {telegramMessageId ? (
-            <Button
-              type="button"
-              variant="destructive"
-              size="sm"
-              onClick={onRemoveFromTelegram}
-              disabled={isTelegramProcessing}
-              className="gap-2"
-            >
-              {isTelegramProcessing ? <Loader2 className="size-4 animate-spin" /> : null}
-              Telegramdan O&apos;chirish
-            </Button>
-          ) : (
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              onClick={onSendToTelegram}
-              disabled={isTelegramProcessing}
-              className="gap-2"
-            >
-              {isTelegramProcessing ? <Loader2 className="size-4 animate-spin" /> : null}
-              Telegramga yuborish
-            </Button>
-          )}
+          <Label htmlFor="pushedToTelegram" className="cursor-pointer">
+            Telegramga yuborish
+          </Label>
+          <Switch
+            id="pushedToTelegram"
+            checked={pushedToTelegram}
+            onCheckedChange={onChangePushedToTelegram}
+            disabled={isTelegramProcessing}
+          />
         </div>
         <div className="rounded-lg border p-4 space-y-2">
           <p className="text-sm font-medium">Telegram holati</p>

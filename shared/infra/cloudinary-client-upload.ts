@@ -4,6 +4,7 @@
  * Server tomonda media saqlash Contabo object storage (S3 compatible) orqali amalga oshiriladi.
  * Cloudinary faqat optional fallback sifatida qoldirilgan.
  */
+import { optimizeImage } from "@/shared/common/lib/image-optimizer"
 
 // Direct Cloudinary upload yo'li hozircha ishlatilmaydi.
 export function isCloudinaryDirectVideoUploadConfigured(): boolean {
@@ -61,10 +62,19 @@ export async function uploadFileViaPresignedUrl(
   file: File,
   kind: "image" | "video"
 ): Promise<string> {
+  let fileToUpload = file
+  if (kind === "image") {
+    try {
+      fileToUpload = await optimizeImage(file)
+    } catch (err) {
+      console.warn("Rasm optimallashtirishda xato, original yuklanmoqda:", err)
+    }
+  }
+
   const res1 = await fetch("/api/uploads/presigned", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ filename: file.name, kind }),
+    body: JSON.stringify({ filename: fileToUpload.name, kind }),
   })
   const data1 = await res1.json()
   if (!res1.ok || !data1.presignedUrl) {
@@ -74,9 +84,9 @@ export async function uploadFileViaPresignedUrl(
   const res2 = await fetch(data1.presignedUrl, {
     method: "PUT",
     headers: {
-      "Content-Type": file.type || (kind === "image" ? "image/jpeg" : "video/mp4"),
+      "Content-Type": fileToUpload.type || (kind === "image" ? "image/jpeg" : "video/mp4"),
     },
-    body: file,
+    body: fileToUpload,
   })
 
   if (!res2.ok) {

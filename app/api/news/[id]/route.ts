@@ -8,7 +8,22 @@ import { logAdminAction } from '@/features/admin-logs/lib/log-action'
 import { protectPublicApi } from '@/shared/server/protect-api'
 
 async function syncTelegramForNews(news: any, origin: string) {
-  if (!news.pushedToTelegram) return
+  // Agar pushedToTelegram false bo'lsa, lekin xabar yuborilgan bo'lsa - uni o'chirish kerak
+  if (!news.pushedToTelegram) {
+    if (news.telegramMessageId) {
+      try {
+        await deleteNewsFromTelegram({ messageId: news.telegramMessageId })
+      } catch (err) {
+        console.error("Telegramdan o'chirishda xato:", err)
+      }
+      news.telegramMessageId = undefined
+      news.telegramMessageLink = undefined
+      news.telegramPushStatus = undefined
+      news.telegramPushReason = "Telegramdan o'chirildi."
+      await news.save()
+    }
+    return
+  }
 
   if (news.status !== 'published') {
     news.telegramLastAttemptAt = new Date()
@@ -18,8 +33,13 @@ async function syncTelegramForNews(news: any, origin: string) {
     return
   }
 
+  // Agar allaqachon yuborilgan bo'lsa va mantiq bo'yicha yangilash kerak bo'lsa - avval eskisini o'chiramiz
   if (news.telegramMessageId) {
-    await deleteNewsFromTelegram({ messageId: news.telegramMessageId })
+    try {
+      await deleteNewsFromTelegram({ messageId: news.telegramMessageId })
+    } catch (err) {
+      console.warn("Telegramdan o'chirishda xato:", err)
+    }
   }
 
   const tgResult = await sendNewsToTelegram({

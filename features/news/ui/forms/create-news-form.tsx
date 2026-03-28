@@ -511,72 +511,6 @@ export function CreateNewsForm({
     }
   }
 
-  const syncTelegram = async (method: 'POST' | 'DELETE') => {
-    if (!savedNewsId) return false
-    const res = await fetch(`/api/news/${savedNewsId}/telegram`, { method })
-    const data = await res.json().catch(() => null)
-    if (!res.ok || !data) {
-      throw new Error((data && data.error) || 'Telegram sync xatosi')
-    }
-    setPushedToTelegram(Boolean(data.pushedToTelegram))
-    setTelegramMessageId(data.telegramMessageId)
-    setTelegramMessageLink(data.telegramMessageLink)
-    setTelegramPushStatus(data.telegramPushStatus)
-    setTelegramPushReason(data.telegramPushReason)
-    setTelegramLastAttemptAt(
-      data.telegramLastAttemptAt ? new Date(data.telegramLastAttemptAt).toISOString() : undefined
-    )
-    setPushedToTelegramAt(
-      data.pushedToTelegramAt ? new Date(data.pushedToTelegramAt).toISOString() : undefined
-    )
-    return true
-  }
-
-  const handleSendToTelegram = async () => {
-    try {
-      // YouTube video yuborishda albatta 1 ta poster rasm kerak.
-      // Local videoda (videoFile mavjud bo‘lsa) poster shart emas.
-      if (resolvedType === 'video' && videoUrl.trim() && !videoFile) {
-        const youtubeEmbed = getYoutubeEmbedUrl(videoUrl.trim())
-        if (youtubeEmbed) {
-          const hasPoster = imageUrls.length > 0
-          if (!hasPoster) {
-            toast.error('YouTube video uchun 1 ta poster rasm kiriting')
-            return
-          }
-        }
-      }
-
-      setIsTelegramProcessing(true)
-      if (!savedNewsId) {
-        const ok = await savePendingWithoutRedirect(saveStatus, true)
-        if (!ok) return
-      } else {
-        setPushedToTelegram(true)
-        const ok = await savePendingWithoutRedirect(saveStatus, true)
-        if (!ok) return
-      }
-      await syncTelegram('POST')
-      toast.success("Telegramga yuborish so'rovi bajarildi")
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Telegramga yuborib bo‘lmadi')
-    } finally {
-      setIsTelegramProcessing(false)
-    }
-  }
-
-  const handleRemoveFromTelegram = async () => {
-    try {
-      setIsTelegramProcessing(true)
-      await syncTelegram('DELETE')
-      toast.success("Telegramdan o'chirildi")
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Telegramdan o'chirib bo'lmadi")
-    } finally {
-      setIsTelegramProcessing(false)
-    }
-  }
-
   const handleSave = async (status: 'pending' | 'published', redirectOnSuccess: boolean) => {
     try {
       const saved = await saveNews.mutateAsync({ status, videoFile, videoUrl })
@@ -912,28 +846,27 @@ export function CreateNewsForm({
       )}
 
       {step === 3 && (
-        <SettingsForm
-          isTop={isTop}
-          authorsChoice={authorsChoice}
-          isTrending={isTrending}
-          isPopular={isPopular}
-          isBreaking={isBreaking}
-          pushedToTelegram={pushedToTelegram}
-          canPublish={canPublish}
-          publishDisabledReason={publishDisabledReason}
-          onBack={() => setStep(2)}
-          onChangeAuthorsChoice={setAuthorsChoice}
-          onChangeIsTrending={setIsTrending}
-          onChangeIsPopular={setIsPopular}
-          onChangeIsTop={setIsTop}
-          onChangeIsBreaking={setIsBreaking}
-          onSendToTelegram={() => void handleSendToTelegram()}
-          onRemoveFromTelegram={() => void handleRemoveFromTelegram()}
-          onSavePending={() => void savePendingWithoutRedirect(saveStatus === 'published' ? 'published' : 'pending')}
-          // Create rejimida chop etgandan keyin redirect bo‘lmasin.
-          onPublish={() => void handleSave('published', isEditMode)}
-          isSaving={isSaving}
-          isTelegramProcessing={isTelegramProcessing}
+          <SettingsForm
+            isTop={isTop}
+            authorsChoice={authorsChoice}
+            isTrending={isTrending}
+            isPopular={isPopular}
+            isBreaking={isBreaking}
+            pushedToTelegram={pushedToTelegram}
+            canPublish={canPublish}
+            publishDisabledReason={publishDisabledReason}
+            onBack={() => setStep(2)}
+            onChangeAuthorsChoice={setAuthorsChoice}
+            onChangeIsTrending={setIsTrending}
+            onChangeIsPopular={setIsPopular}
+            onChangeIsTop={setIsTop}
+            onChangeIsBreaking={setIsBreaking}
+            onChangePushedToTelegram={setPushedToTelegram}
+            onSavePending={() => void savePendingWithoutRedirect(saveStatus === 'published' ? 'published' : 'pending')}
+            // Create rejimida chop etgandan keyin redirect bo‘lmasin.
+            onPublish={() => void handleSave('published', isEditMode)}
+            isSaving={isSaving}
+            isTelegramProcessing={isTelegramProcessing}
           mode={isEditMode ? 'edit' : 'create'}
           currentStatus={editStatus}
           telegramMessageId={telegramMessageId}
