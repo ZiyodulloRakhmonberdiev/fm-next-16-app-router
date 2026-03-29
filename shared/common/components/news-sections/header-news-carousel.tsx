@@ -41,7 +41,7 @@ export default function HeaderNewsCarousel({ initialNews }: HeaderNewsCarouselPr
   if (items.length === 0) return null
 
   return (
-    <div className="max-w-7xl mx-auto px-4 md:px-6 my-0 mb-4 md:my-3">
+    <div className="max-w-7xl mx-auto px-4 md:px-6 my-0 mb-4">
       <section className="w-full bg-muted/30 px-4 py-1 md:py-3">
         <div className="flex items-stretch gap-4 md:gap-6">
           <div className="flex shrink-0 items-center gap-2 border-r border-border pr-4 md:pr-6">

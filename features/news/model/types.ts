@@ -11,9 +11,13 @@ export type RawNewsItem = {
   title: NewsTitleLocale
   description?: NewsOptionalLocale<string>
   content?: NewsOptionalLocale<NewsContent>
+  categoryId?: string
   categorySlug: string
+  themeId?: string
+  tagIds?: string[]
   tagSlugs: string[]
   images: string[]
+  authorId?: string
   author: string
   minutes: number
   views: number
@@ -50,12 +54,16 @@ export type NewsItem = {
   description?: string
   content?: NewsContent
   images: string[]
+  categoryId?: string
   category: string
   categorySlug: string
+  themeId?: string
+  tagIds?: string[]
   tags: string[]
   publishedAt: Date
   minutes: number
   views: number
+  authorId?: string
   author: string
   status?: NewsStatus
   isTop?: boolean
@@ -105,12 +113,16 @@ export function pickNewsForLocale(
       : {}),
     ...(content !== undefined && content !== null ? { content } : {}),
     images: raw.images,
+    categoryId: raw.categoryId,
     category: getCategoryName(raw.categorySlug, locale),
     categorySlug: raw.categorySlug,
+    themeId: raw.themeId,
+    tagIds: raw.tagIds,
     tags: getTagNames(raw.tagSlugs, locale),
     publishedAt: raw.publishedAt,
     minutes: raw.minutes,
     views: raw.views,
+    authorId: raw.authorId,
     author: raw.author,
     status: raw.status ?? "published",
     isTop: raw.isTop ?? false,

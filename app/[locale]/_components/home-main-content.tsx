@@ -1,4 +1,6 @@
 import * as React from "react"
+import { getLocale } from "next-intl/server"
+import { Link } from "@/i18n/navigation"
 import {
   StayConnected,
   TopBanner,
@@ -19,11 +21,14 @@ import {
 import RowSection from "@/shared/common/components/news-sections/row-section"
 import VideoNewsSection2 from "@/shared/common/components/news-sections/video-news-section-2"
 import { AdSlot } from "@/features/ads/ui/ad-slot"
-import { getCachedPublicNews, getCachedPublicCategories } from "@/shared/server/public-data-server"
+import { getCachedPublicNews, getCachedPublicCategories, getCachedPublicThemes } from "@/shared/server/public-data-server"
+import type { AppLocale } from "@/shared/common/lib/locale-api"
 
 export default async function HomeMainContent() {
   const publicNews = await getCachedPublicNews()
   const categories = await getCachedPublicCategories()
+  const themes = await getCachedPublicThemes()
+  const locale = (await getLocale()) as AppLocale
 
   if (!publicNews || !categories) {
     return <ServerUnavailable />
@@ -65,81 +70,100 @@ export default async function HomeMainContent() {
   const tenthCategorySlug =
     categoriesByPriority[9]?.slug ??
     "sports"
-    
+
   if (publicNews.length === 0) {
     return null
   }
 
   return (
     <>
+      {themes.length > 0 ? (
+        <section className="px-4 md:px-6 pt-2 pb-1">
+          <div className="flex items-center justify-between gap-4 border-b pb-2 overflow-x-auto whitespace-nowrap scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            {themes.map((theme: { _id: string; slug: string; name?: Record<string, string> }) => (
+              <Link
+                key={theme._id}
+                href={`/theme/${theme.slug}`}
+                className="shrink-0 rounded-full bg-background px-3 py-1.5 text-md font-medium flex items-center gap-3"
+              >
+                <span className="block size-2 shrink-0 bg-foreground/50 rounded-full"></span>
+                <span>
+                  {theme.name?.[locale] ?? theme.name?.uz ?? theme.slug}
+
+                </span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      ) : null}
       <HeaderNewsCarousel initialNews={publicNews} />
       <TopBanner />
-      <BannerSection 
-        categorySlug={firstCategorySlug} 
-        featuredPosition="right" 
-        initialNews={publicNews} 
+      <BannerSection
+        categorySlug={firstCategorySlug}
+        featuredPosition="right"
+        initialNews={publicNews}
         initialCategories={categories}
       />
-      <SlideNewsSection 
-        categorySlug={fourthCategorySlug} 
-        initialNews={publicNews} 
+      <SlideNewsSection
+        categorySlug={fourthCategorySlug}
+        initialNews={publicNews}
         initialCategories={categories}
       />
-      <BreakingSection 
-        initialNews={publicNews} 
+      <BreakingSection
+        initialNews={publicNews}
         initialCategories={categories}
       />
-      <BannerSection 
-        categorySlug={secondCategorySlug} 
-        featuredPosition="left" 
-        initialNews={publicNews} 
+      <BannerSection
+        categorySlug={secondCategorySlug}
+        featuredPosition="left"
+        initialNews={publicNews}
         initialCategories={categories}
       />
-      <TextNewsSection 
-        initialNews={publicNews} 
+      <TextNewsSection
+        initialNews={publicNews}
         initialCategories={categories}
       />
-      <VideoNewsSection2 
-        initialNews={publicNews} 
+      <VideoNewsSection2
+        initialNews={publicNews}
         initialCategories={categories}
       />
       <div className="px-4 md:px-6 py-4">
         <AdSlot placement="home_bottom_full" />
       </div>
-      <RowSection 
-        categorySlug={thirdCategorySlug} 
-        initialNews={publicNews} 
+      <RowSection
+        categorySlug={thirdCategorySlug}
+        initialNews={publicNews}
         initialCategories={categories}
       />
-      <SlideNewsSection 
-        categorySlug={fifthCategorySlug} 
-        initialNews={publicNews} 
+      <SlideNewsSection
+        categorySlug={fifthCategorySlug}
+        initialNews={publicNews}
         initialCategories={categories}
       />
-      <ColumnSection 
-        categorySlug={sixthCategorySlug} 
-        initialNews={publicNews} 
+      <ColumnSection
+        categorySlug={sixthCategorySlug}
+        initialNews={publicNews}
         initialCategories={categories}
       />
-      <RowSection 
-        categorySlug={seventhCategorySlug} 
-        initialNews={publicNews} 
+      <RowSection
+        categorySlug={seventhCategorySlug}
+        initialNews={publicNews}
         initialCategories={categories}
       />
-      <BannerSection 
-        categorySlug={eighthCategorySlug} 
-        featuredPosition="right" 
-        initialNews={publicNews} 
+      <BannerSection
+        categorySlug={eighthCategorySlug}
+        featuredPosition="right"
+        initialNews={publicNews}
         initialCategories={categories}
       />
-      <SlideNewsSection 
-        categorySlug={ninthCategorySlug} 
-        initialNews={publicNews} 
+      <SlideNewsSection
+        categorySlug={ninthCategorySlug}
+        initialNews={publicNews}
         initialCategories={categories}
       />
-      <ColumnSection 
-        categorySlug={tenthCategorySlug} 
-        initialNews={publicNews} 
+      <ColumnSection
+        categorySlug={tenthCategorySlug}
+        initialNews={publicNews}
         initialCategories={categories}
       />
     </>

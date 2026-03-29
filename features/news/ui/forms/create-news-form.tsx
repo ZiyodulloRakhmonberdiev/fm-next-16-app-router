@@ -30,14 +30,17 @@ const LOCALE_LABELS: Record<AppLocale, string> = {
   en: 'English',
 }
 
-type CategoryOption = { slug: string; name: string }
-type TagOption = { slug: string; name: string }
+type CategoryOption = { id: string; slug: string; name: string }
+type ThemeOption = { id: string; slug: string; name: string }
+type TagOption = { id: string; slug: string; name: string }
+type AuthorOption = { id: string; name: string }
 
 /** Edit rejimida forma uchun boshlang‘ich ma’lumot (serverdan keladi) */
 export type CreateNewsFormProps = {
   categories: CategoryOption[]
+  themes: ThemeOption[]
   tags: TagOption[]
-  authors: string[]
+  authors: AuthorOption[]
   existingSlugs?: string[]
   /** Berilsa — tahrirlash rejimi (barcha maydonlar shu qiymatlar bilan to‘ldiriladi) */
   initialData?: EditNewsInitialData
@@ -206,6 +209,7 @@ function getValidationDescription(data: unknown): string | undefined {
 
 export function CreateNewsForm({
   categories,
+  themes,
   tags,
   authors,
   existingSlugs = [],
@@ -236,9 +240,10 @@ export function CreateNewsForm({
   const [slugs, setSlugs] = useState<Record<AppLocale, string>>(
     () => initialData?.slugs ?? defaultSlugs()
   )
-  const [categorySlug, setCategorySlug] = useState(initialData?.categorySlug ?? '')
-  const [tagSlugs, setTagSlugs] = useState<string[]>(() => initialData?.tagSlugs ?? [])
-  const [author, setAuthor] = useState(initialData?.author ?? '')
+  const [categoryId, setCategoryId] = useState(initialData?.categoryId ?? '')
+  const [themeId, setThemeId] = useState(initialData?.themeId ?? '')
+  const [tagIds, setTagIds] = useState<string[]>(() => initialData?.tagIds ?? [])
+  const [authorId, setAuthorId] = useState(initialData?.authorId ?? '')
   const [imageUrls, setImageUrls] = useState<string[]>(() => initialData?.imageUrls ?? [])
   const [imageUrlInput, setImageUrlInput] = useState('')
   const [imageFiles, setImageFiles] = useState<File[]>([])
@@ -332,10 +337,11 @@ export function CreateNewsForm({
         title,
         description,
         content,
-        categorySlug,
-        tagSlugs,
+        categoryId,
+        themeId: themeId.trim() || null,
+        tagIds,
         images: imageUrls,
-        author: author.trim() || null,
+        authorId: authorId.trim() || null,
         minutes: resolvedMinutes,
         ...(isEditMode ? {} : { views: 0 }),
         publishedAt:
@@ -397,6 +403,22 @@ export function CreateNewsForm({
     () => initialData?.contents ?? defaultContents()
   )
 
+  useEffect(() => {
+    if (!categoryId && initialData?.categorySlug) {
+      const fallbackCategoryId = categories.find((c) => c.slug === initialData.categorySlug)?.id
+      if (fallbackCategoryId) setCategoryId(fallbackCategoryId)
+    }
+  }, [categoryId, categories, initialData?.categorySlug])
+
+  useEffect(() => {
+    if (tagIds.length === 0 && initialData?.tagSlugs?.length) {
+      const fallbackTagIds = tags
+        .filter((t) => initialData.tagSlugs.includes(t.slug))
+        .map((t) => t.id)
+      if (fallbackTagIds.length) setTagIds(fallbackTagIds)
+    }
+  }, [tagIds.length, tags, initialData?.tagSlugs])
+
   const setTranslation = useCallback(
     (loc: AppLocale, field: 'title' | 'description', value: string) => {
       setTranslations((prev) => ({
@@ -445,9 +467,9 @@ export function CreateNewsForm({
     Object.values(translations).some(
       (t) => t.title.trim() || t.description.trim()
     ) ||
-    !!categorySlug ||
-    tagSlugs.length > 0 ||
-    !!author.trim() ||
+    !!categoryId ||
+    tagIds.length > 0 ||
+    !!authorId.trim() ||
     imageUrls.length > 0 ||
     imageFiles.length > 0 ||
     !!videoUrl.trim() ||
@@ -468,9 +490,10 @@ export function CreateNewsForm({
       translations,
       slugs,
       content: contents,
-      categorySlug,
-      tagSlugs,
-      author,
+      categoryId,
+      themeId,
+      tagIds,
+      authorId,
       images: imageList,
       imageFiles: imageFiles.length,
       minutes: resolvedMinutes,
@@ -592,11 +615,13 @@ export function CreateNewsForm({
     })
   }
 
-  const categoryName = categories.find((c) => c.slug === categorySlug)?.name ?? (categorySlug || '—')
-  const selectedTagSlugsSet = new Set(tagSlugs)
-  const toggleTag = (tagSlug: string) => {
-    setTagSlugs((prev) =>
-      prev.includes(tagSlug) ? prev.filter((s) => s !== tagSlug) : [...prev, tagSlug]
+  const categoryName = categories.find((c) => c.id === categoryId)?.name ?? (categoryId || '—')
+  const themeName = themes.find((th) => th.id === themeId)?.name ?? (themeId || '')
+  const authorName = authors.find((a) => a.id === authorId)?.name ?? ''
+  const selectedTagIdsSet = new Set(tagIds)
+  const toggleTag = (tagId: string) => {
+    setTagIds((prev) =>
+      prev.includes(tagId) ? prev.filter((s) => s !== tagId) : [...prev, tagId]
     )
   }
 
@@ -640,7 +665,7 @@ export function CreateNewsForm({
     setImageFiles((prev) => prev.filter((_, i) => i !== index))
   }
 
-  const selectedTags = tagSlugs.map((slug) => tags.find((t) => t.slug === slug)).filter(Boolean) as TagOption[]
+  const selectedTags = tagIds.map((id) => tags.find((t) => t.id === id)).filter(Boolean) as TagOption[]
 
   const imageFilePreviewUrls = useMemo(
     () => imageFiles.map((f) => URL.createObjectURL(f)),
@@ -721,17 +746,22 @@ export function CreateNewsForm({
 
           <GeneralsForm
             categories={categories}
+            themes={themes}
             tags={tags}
             authors={authors}
-            categorySlug={categorySlug}
+            categoryId={categoryId}
             categoryName={categoryName}
+            themeId={themeId}
+            themeName={themeName}
             selectedTags={selectedTags}
-            selectedTagSlugsSet={selectedTagSlugsSet}
-            author={author}
+            selectedTagIdsSet={selectedTagIdsSet}
+            authorId={authorId}
+            authorName={authorName}
             minutes={minutes}
-            onCategoryChange={setCategorySlug}
+            onCategoryChange={setCategoryId}
+            onThemeChange={setThemeId}
             onToggleTag={toggleTag}
-            onAuthorChange={setAuthor}
+            onAuthorChange={setAuthorId}
             onMinutesChange={setMinutes}
           />
 

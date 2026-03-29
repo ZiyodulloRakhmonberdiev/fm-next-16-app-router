@@ -3,6 +3,9 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/shared/common/lib/auth-options'
 import { dbConnect } from '@/shared/common/lib/db'
 import { NewsModel } from '@/features/news/model/news.model'
+import { CategoryModel } from '@/features/category/model/category.model'
+import { TagModel } from '@/features/tags/model/tag.model'
+import { UserModel } from '@/features/users/model/user.model'
 import { NewsCommentModel } from '@/features/news/model/comment.model'
 import { NewsReactionModel } from '@/features/news/model/reaction.model'
 import { createNewsSchema } from '@/features/news/model/schemas'
@@ -22,8 +25,17 @@ export async function GET(req: NextRequest) {
 
     const { searchParams } = new URL(req.url)
     const status = searchParams.get('status')
+    const wantsAdmin = searchParams.get('admin') === '1'
+    if (wantsAdmin) {
+      const unauthorized = await requireAdminSession(['ceo', 'administrator', 'moderator'])
+      if (unauthorized) return unauthorized
+    }
     const category = searchParams.get('category')
     const categoryList = searchParams.getAll("category")
+    const categoryId = searchParams.get('categoryId')
+    const categoryIdList = searchParams.getAll("categoryId")
+    const theme = searchParams.get('theme')
+    const themeList = searchParams.getAll("theme")
     const page = Math.max(1, Number(searchParams.get('page') ?? 1))
     const limit = Math.min(100, Math.max(1, Number(searchParams.get('limit') ?? 20)))
     const sortBy = (searchParams.get("sortBy") ?? "publishedAt").toLowerCase()
@@ -41,11 +53,32 @@ export async function GET(req: NextRequest) {
       ...categoryList.flatMap((v) => String(v).split(",").map((s) => s.trim()).filter(Boolean)),
       ...(category ? String(category).split(",").map((s) => s.trim()).filter(Boolean) : []),
     ]
-    const uniqueCategorySlugs = Array.from(new Set(categorySlugs))
-    if (uniqueCategorySlugs.length === 1) {
-      filter.categorySlug = uniqueCategorySlugs[0]
-    } else if (uniqueCategorySlugs.length > 1) {
-      filter.categorySlug = { $in: uniqueCategorySlugs }
+    const categoryIds = [
+      ...categoryIdList.flatMap((v) => String(v).split(",").map((s) => s.trim()).filter(Boolean)),
+      ...(categoryId ? String(categoryId).split(",").map((s) => s.trim()).filter(Boolean) : []),
+    ]
+    const uniqueCategoryIds = Array.from(new Set(categoryIds))
+    if (uniqueCategoryIds.length === 1) {
+      filter.categoryId = uniqueCategoryIds[0]
+    } else if (uniqueCategoryIds.length > 1) {
+      filter.categoryId = { $in: uniqueCategoryIds }
+    } else {
+      const uniqueCategorySlugs = Array.from(new Set(categorySlugs))
+      if (uniqueCategorySlugs.length === 1) {
+        filter.categorySlug = uniqueCategorySlugs[0]
+      } else if (uniqueCategorySlugs.length > 1) {
+        filter.categorySlug = { $in: uniqueCategorySlugs }
+      }
+    }
+    const themeIds = [
+      ...themeList.flatMap((v) => String(v).split(",").map((s) => s.trim()).filter(Boolean)),
+      ...(theme ? String(theme).split(",").map((s) => s.trim()).filter(Boolean) : []),
+    ]
+    const uniqueThemeIds = Array.from(new Set(themeIds))
+    if (uniqueThemeIds.length === 1) {
+      filter.themeId = uniqueThemeIds[0]
+    } else if (uniqueThemeIds.length > 1) {
+      filter.themeId = { $in: uniqueThemeIds }
     }
     if (top === "1" || top === "true") filter.isTop = true
     if (authorsChoice === "1" || authorsChoice === "true") filter.authorsChoice = true
@@ -86,6 +119,19 @@ export async function GET(req: NextRequest) {
       NewsModel.countDocuments(filter),
     ])
 
+    const authorIds = Array.from(
+      new Set(news.map((n) => n.authorId).filter((id): id is string => typeof id === 'string' && id.trim() !== ''))
+    )
+    const authorNameById = new Map<string, string>()
+    if (authorIds.length > 0) {
+      const users = await UserModel.find({ _id: { $in: authorIds } })
+        .select({ _id: 1, full_name: 1 })
+        .lean()
+      for (const user of users) {
+        authorNameById.set(user._id, user.full_name)
+      }
+    }
+
     const slugs = news.map((n) => n.slug).filter(Boolean)
     const commentBySlug = new Map<string, number>()
     const reactionBySlug = new Map<string, number>()
@@ -115,11 +161,12 @@ export async function GET(req: NextRequest) {
 
     const data = news.map((n) => ({
       ...n,
+      author: n.authorId ? (authorNameById.get(n.authorId) ?? n.author) : n.author,
       commentCount: commentBySlug.get(n.slug) ?? 0,
       reactionCount: reactionBySlug.get(n.slug) ?? 0,
     }))
 
-    const isPublicPublished = !status || status === 'published'
+    const isPublicPublished = !wantsAdmin && (!status || status === 'published')
     return Response.json(
       {
         data,
@@ -177,7 +224,45 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const createData = { ...parsed.data }
+    const createData: Record<string, unknown> & {
+      categoryId: string
+      tagIds: string[]
+      themeId?: string | null
+      authorId?: string | null
+      videoSource?: string | null
+      videoUrl?: string | null
+      images?: unknown[]
+    } = { ...parsed.data }
+    const category = await CategoryModel.findById(createData.categoryId).select({ _id: 1, slug: 1 }).lean()
+    if (!category) {
+      return Response.json(
+        { error: 'Validation error', message: 'Tanlangan kategoriya topilmadi.' },
+        { status: 400 }
+      )
+    }
+    createData.categorySlug = category.slug
+    if (createData.tagIds.length > 0) {
+      const tags = await TagModel.find({ _id: { $in: createData.tagIds } }).select({ _id: 1, slug: 1 }).lean()
+      const slugById = new Map(tags.map((t) => [t._id, t.slug]))
+      createData.tagIds = tags.map((t) => t._id)
+      createData.tagSlugs = createData.tagIds.map((id) => slugById.get(id)).filter(Boolean) as string[]
+    } else {
+      createData.tagSlugs = []
+    }
+    if (createData.themeId === null) delete createData.themeId
+    if (typeof createData.authorId === 'string' && createData.authorId.trim()) {
+      const author = await UserModel.findById(createData.authorId).select({ _id: 1, full_name: 1 }).lean()
+      if (!author) {
+        return Response.json(
+          { error: 'Validation error', message: 'Tanlangan muallif topilmadi.' },
+          { status: 400 }
+        )
+      }
+      createData.author = author.full_name
+    } else {
+      delete createData.authorId
+      delete createData.author
+    }
     if (createData.videoSource === null) delete createData.videoSource
     if (createData.videoUrl === null) delete createData.videoUrl
     if (Array.isArray(createData.images)) {

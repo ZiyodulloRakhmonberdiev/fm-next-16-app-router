@@ -43,7 +43,7 @@ export function NewsListingAuthorsChoiceSidebar({
   if (embedded) return inner
 
   return (
-    <aside className="mt-4 hidden h-fit lg:sticky lg:top-20 lg:col-span-1 lg:block lg:self-start">
+    <aside className="mt-4 hidden h-fit lg:col-span-1 lg:block lg:self-start">
       {inner}
     </aside>
   )

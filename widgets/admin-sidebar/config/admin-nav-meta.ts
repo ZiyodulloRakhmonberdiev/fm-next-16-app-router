@@ -52,6 +52,12 @@ export const adminMainNavMeta: AdminMainNavMeta[] = [
     iconKey: 'FolderTree',
   },
   {
+    href: '/dashboard/themes',
+    label: 'Temalar',
+    roles: ['ceo', 'administrator', 'moderator'],
+    iconKey: 'Sparkles',
+  },
+  {
     href: '/dashboard/tags',
     label: 'Teglar',
     roles: ['ceo', 'administrator', 'moderator'],

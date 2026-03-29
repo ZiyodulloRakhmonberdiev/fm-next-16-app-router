@@ -55,7 +55,7 @@ export async function RecentActivityAsync({ opts }: { opts: RequestInit }) {
                 const cfg = getLogConfig(log.action)
                 return (
                   <div key={log._id} className="relative flex items-start gap-4 z-10">
-                    <div className={`p-1.5 sm:p-2 rounded-full flex-shrink-0 border bg-background mt-0.5 ${cfg.colorClass}`}>
+                    <div className={`p-1.5 sm:p-2 rounded-full shrink-0 border bg-background mt-0.5 ${cfg.colorClass}`}>
                       <cfg.icon className="size-3.5 sm:size-4" />
                     </div>
                     <div className="flex flex-col flex-1 min-w-0">
@@ -96,6 +96,12 @@ function getLogConfig(action: string) {
       return { icon: Edit2, label: "kategoriyani yangiladi", colorClass: 'text-purple-500 border-purple-500/20' }
     case 'DELETE_CATEGORY':
       return { icon: Trash2, label: "kategoriyani o'chirdi", colorClass: 'text-rose-500 border-rose-500/20' }
+    case 'CREATE_THEME':
+      return { icon: FolderTree, label: "tema yaratdi", colorClass: 'text-fuchsia-500 border-fuchsia-500/20' }
+    case 'UPDATE_THEME':
+      return { icon: Edit2, label: "temani yangiladi", colorClass: 'text-fuchsia-500 border-fuchsia-500/20' }
+    case 'DELETE_THEME':
+      return { icon: Trash2, label: "temani o'chirdi", colorClass: 'text-rose-500 border-rose-500/20' }
 
     case 'CREATE_USER':
       return { icon: User, label: "yangi foydalanuvchi qo'shdi", colorClass: 'text-teal-500 border-teal-500/20' }

@@ -5,7 +5,7 @@ import Image from "next/image"
 import { Link } from "@/i18n/navigation"
 import { Clock, Eye, Heart, MessageSquare, Play } from "lucide-react"
 import type { AppLocale } from "@/shared/common/lib/formatter"
-import { formatDateISO, formatDateTimeLocale } from "@/shared/common/lib/formatter"
+import { formatDate, formatDateISO, formatDateTimeDotSlash, formatDateTimeLocale } from "@/shared/common/lib/formatter"
 import { Card } from "@/shared/common/components/ui/card"
 import type { NewsItem } from "@/features/news/model"
 import { useCategoryLabel } from "@/features/category/model/use-category-label"
@@ -62,7 +62,7 @@ export function NewsListingListCard({ item, locale, stats, imagesLabel, imageOve
             </Link>
             <div className="inline-flex items-center gap-1">
               <time dateTime={formatDateISO(item.publishedAt)} className="inline-flex items-center gap-1">
-                {formatDateTimeLocale(item.publishedAt, locale)}
+                {formatDateTimeDotSlash(item.publishedAt)}
               </time>
             </div>
           </div>

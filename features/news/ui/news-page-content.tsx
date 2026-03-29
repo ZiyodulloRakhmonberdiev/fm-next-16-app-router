@@ -31,6 +31,8 @@ import { usePublicSiteSettingsQuery } from "@/shared/server/public-site-settings
 import { useCategoryLabel } from "@/features/category/model/use-category-label"
 import type { LocaleMap } from "@/shared/common/lib/locale-types"
 import { AdSlot } from "@/features/ads/ui/ad-slot"
+import { useThemeLabel } from "@/features/theme/model/use-theme-label"
+import { usePublicThemesQuery } from "@/features/theme/model/public-themes-query"
 
 export type { NewsItem }
 
@@ -44,6 +46,7 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
   const locale = useLocale() as AppLocale
   const t = useTranslations("common")
   const categorySlug = news.categorySlug
+  const themeId = news.themeId ?? ""
   const parsedRichFromString =
     typeof news.content === "string" ? parseRichContentString(news.content) : null
   const { data: settings } = usePublicSiteSettingsQuery()
@@ -95,8 +98,6 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
       const u = new URL(news.telegramMessageLink)
       const parts = u.pathname.split("/").filter(Boolean)
       if (parts.length < 2) return null
-      // Telegram widget "data-telegram-post" expects something like: channel/POST_ID
-      // For private channels it often looks like: c/CHANNEL_ID/POST_ID.
       return parts.join("/")
     } catch {
       return null
@@ -166,6 +167,12 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
     const name = categoryLabelRaw
     return name ? name.charAt(0).toUpperCase() + name.slice(1) : name
   }, [categoryLabelRaw])
+  const { data: themes = [] } = usePublicThemesQuery()
+  const themeLabel = useThemeLabel(themeId, locale, themeId)
+  const themeSlug = React.useMemo(
+    () => themes.find((th) => th._id === themeId)?.slug ?? "",
+    [themeId, themes]
+  )
 
   const localizedTags = React.useMemo(() => {
     if (!Array.isArray(news.tags) || news.tags.length === 0) return []
@@ -228,9 +235,18 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
   }, [news.slug])
 
   return (
-    <div className="">
-      <article className="overflow-hidden">
-        {/* <div className="mb-6 flex flex-col gap-3">
+    <div className="px-4 md:px-6 bg-background">
+      <div className="relative isolate">
+        {/* Reklama viewport markazida qotib turadi; kontent ustidan scroll bo‘ladi, oraliqda “deraza” orqali ko‘rinadi. */}
+        {/* <div className="pointer-events-none flex fixed md:inset-0 md:z-0 md:items-center md:justify-center md:px-4">
+          <div className="pointer-events-auto w-full max-w-xl">
+            <AdSlot placement="sidebar_widget" />
+          </div>
+        </div> */}
+
+        <article className="overflow-x-hidden">
+          <div className="relative z-10 bg-background">
+            {/* <div className="mb-6 flex flex-col gap-3">
           <Button
             variant="ghost"
             size="sm"
@@ -242,71 +258,90 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
           </Button>
         </div> */}
 
-        <div className="mb-2 flex flex-wrap items-center justify-between gap-x-2 gap-y-2 text-sm text-muted-foreground rounded-sm">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="h-8 gap-1.5 px-2 bg-foreground/10 text-muted-foreground hover:text-foreground"
-            onClick={() => router.back()}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
+            <div className="my-2 flex flex-wrap items-center justify-between gap-x-2 gap-y-2 text-sm text-muted-foreground rounded-sm shadow-sm md:shadow-none border-b pb-2">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-8 gap-1.5 px-2 bg-foreground/10 text-muted-foreground hover:text-foreground"
+                onClick={() => router.back()}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
 
 
-          <div className="flex items-center gap-1">
-            <SavedNewsActions
-              slug={news.slug}
-              newsId={newsId}
-              overlay
-              unauthAction="toast"
-              size="sm"
-              variant="ghost"
-              className="h-8 w-8 p-0"
-            />
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="h-8 gap-1.5 text-muted-foreground hover:text-foreground"
-              onClick={() => void handleShare()}
-            >
-              <Share2 className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-
-        <h1 className="text-2xl font-bold leading-tight md:text-3xl">
-          {news.title}
-        </h1>
-        <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
-          <Link
-            href={`/category/${categorySlug}`}
-            className="font-medium block my-2 text-brand hover:underline"
-          >
-            {categoryLabel}
-          </Link>
-          <time dateTime={formatDateTime(news.publishedAt)} className="text-sm text-muted-foreground flex items-center gap-2">
-            <Calendar className="h-4 w-4 hidden md:block shrink-0" /> <span>{formatDateTimeDotSlash(news.publishedAt)}</span>
-          </time>
-        </div>
-        {news.description != null && news.description !== "" && (
-          <p className="leading-relaxed">
-            {news.description}
-          </p>
-        )}
-        <div className="my-4 flex items-center gap-2 text-muted-foreground text-sm">
-          <div className="inline-flex items-center gap-2 md:px-1">
-            <Clock className="h-4 w-4" />
-            <span>{news.minutes}</span> <span className="hidden md:inline-block">{t("min_read")}</span>
-          </div>
-          <span aria-hidden className="select-none px-1 md:px-2">·</span>
-          <div className="inline-flex items-center gap-2 md:px-1">
-            <Eye className="h-4 w-4" />
-            {news.views} <span className="hidden md:inline-block">{t("views")}</span>
-          </div>
-          <span aria-hidden className="select-none px-1 md:px-2">·</span>
-          <div className="inline-flex items-center gap-2 md:px-1">
+              <div className="flex items-center gap-1">
+                <SavedNewsActions
+                  slug={news.slug}
+                  newsId={newsId}
+                  overlay
+                  unauthAction="toast"
+                  size="sm"
+                  variant="ghost"
+                  className="h-8 w-8 p-0"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 gap-1.5 text-muted-foreground hover:text-foreground"
+                  onClick={() => void handleShare()}
+                >
+                  <Share2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+            <div className="md:hidden mb-4">
+              <AdSlot placement="sidebar_widget" />
+            </div>
+            <h1 className="text-2xl font-bold leading-tight md:text-3xl">
+              {news.title}
+            </h1>
+            <div className="flex flex-wrap items-center  bg-background justify-between gap-x-2 gap-y-1">
+              <div className="flex items-center gap-2">
+                <Link
+                  href={`/category/${categorySlug}`}
+                  className="font-medium block my-2 hover:underline"
+                >
+                  {categoryLabel}
+                </Link>
+                {themeId && themeSlug ? (
+                  <>
+                    <span className="text-muted-foreground">•</span>
+                    <Link
+                      href={`/theme/${themeSlug}`}
+                      className="font-medium block my-2 text-foreground/80 hover:underline"
+                    >
+                      #{themeLabel}
+                    </Link>
+                  </>
+                ) : null}
+              </div>
+              <time dateTime={formatDateTime(news.publishedAt)} className="text-sm text-muted-foreground items-center gap-2 hidden">
+                <Calendar className="h-4 w-4 hidden md:block shrink-0" /> <span>{formatDateTimeDotSlash(news.publishedAt)}</span>
+              </time>
+            </div>
+            {news.description != null && news.description !== "" && (
+              <p className="leading-relaxed">
+                {news.description}
+              </p>
+            )}
+            <div className="my-4 flex items-center gap-2 text-muted-foreground text-sm">
+              <time dateTime={formatDateTime(news.publishedAt)} className="text-sm text-muted-foreground flex items-center gap-2">
+                <Calendar className="h-4 w-4 shrink-0" /> <span>{formatDateTimeDotSlash(news.publishedAt)}</span>
+              </time>
+              <span aria-hidden className="select-none px-1 md:px-2">·</span>
+              <div className="inline-flex items-center gap-2 md:px-1">
+                <Clock className="h-4 w-4" />
+                <span>{news.minutes}</span> <span className="hidden md:inline-block">{t("min_read")}</span>
+              </div>
+              <span aria-hidden className="select-none px-1 md:px-2">·</span>
+              <div className="inline-flex items-center gap-2 md:px-1">
+                <Eye className="h-4 w-4" />
+                {news.views} <span className="hidden md:inline-block">{t("views")}</span>
+              </div>
+              {/* <span aria-hidden className="select-none px-1 md:px-2">·</span> */}
+              {/* <div className="inline-flex items-center gap-2 md:px-1">
             <MessageSquare className="h-4 w-4" />
             {commentTotal} <span className="hidden md:inline-block">{t("comments")}</span>
             <span aria-hidden className="select-none px-1 md:px-2">·</span>
@@ -314,207 +349,215 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
               <Heart className="h-4 w-4" />
               {reactionTotal} <span className="hidden md:inline-block">{t("reactions")}</span>
             </div>
-          </div>
-        </div>
-        {news.audioUrl && (
-          <div className="mb-6 rounded-xl border bg-foreground/10 p-4 shadow-sm">
-            <div className="mb-2 flex items-center gap-2 text-sm font-medium">
-              <Volume2 className="size-4" />
-              <span>Audio xabarni tinglang</span>
+          </div> */}
             </div>
-            <audio
-              src={news.audioUrl}
-              controls
-              className="w-full"
-            >
-              Brauzeringiz audio qo'llab-quvvatlamaydi.
-            </audio>
-          </div>
-        )}
 
-        {hasVideo && (() => {
-          const youtubeEmbed = getYoutubeEmbedUrl(news.videoUrl ?? "")
-          return (
-            <div className="relative mb-6 aspect-video w-full overflow-hidden rounded-lg bg-muted">
-              {youtubeEmbed ? (
-                <iframe
-                  src={youtubeEmbed}
-                  title={news.title}
-                  className="absolute inset-0 h-full w-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              ) : (
-                <video
-                  key={news.videoUrl ?? "video"}
-                  src={getVideoSrc(news.videoUrl)}
-                  controls
-                  controlsList="nodownload"
-                  disablePictureInPicture
-                  onContextMenu={(e) => e.preventDefault()}
-                  className="h-full w-full object-cover"
-                  poster={videoPoster}
-                >
-                  {t("your_browser_does_not_support_the_video_tag")}
-                </video>
-              )}
-              {/* <div className="absolute right-3 top-3 z-10">
+
+            {hasVideo && (() => {
+              const youtubeEmbed = getYoutubeEmbedUrl(news.videoUrl ?? "")
+              return (
+                <div className="relative mb-6 aspect-video w-full overflow-hidden rounded-lg bg-muted">
+                  {youtubeEmbed ? (
+                    <iframe
+                      src={youtubeEmbed}
+                      title={news.title}
+                      className="absolute inset-0 h-full w-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  ) : (
+                    <video
+                      key={news.videoUrl ?? "video"}
+                      src={getVideoSrc(news.videoUrl)}
+                      controls
+                      controlsList="nodownload"
+                      disablePictureInPicture
+                      onContextMenu={(e) => e.preventDefault()}
+                      className="h-full w-full object-cover"
+                      poster={videoPoster}
+                    >
+                      {t("your_browser_does_not_support_the_video_tag")}
+                    </video>
+                  )}
+                  {/* <div className="absolute right-3 top-3 z-10">
                 <SavedNewsActions slug={news.slug} newsId={newsId} overlay />
               </div> */}
-            </div>
-          )
-        })()}
-
-        {!hasVideo && displayImages.length === 1 && (
-          <div className="relative mb-6 w-full">
-            {getSafeImageSrc(displayImages[0]) ? (
-              <>
-                <img
-                  src={getSafeImageSrc(displayImages[0])}
-                  alt={news.title}
-                  className="block w-full h-auto rounded-lg"
-                />
-                {/* <div className="absolute right-3 top-3 z-10">
-                  <SavedNewsActions slug={news.slug} newsId={newsId} overlay />
-                </div> */}
-              </>
-            ) : (
-              <div className="flex min-h-[200px] w-full items-center justify-center rounded-lg bg-muted px-2 text-sm text-muted-foreground text-center">
-                Rasmni yuklab bo&apos;lmadi
-              </div>
-            )}
-          </div>
-        )}
-        {!hasVideo && hasManyImages && (
-          <div className="relative mb-6 w-full">
-            <Carousel opts={{ align: "start", loop: true }} className="w-full">
-              <CarouselContent className="ml-0">
-                {displayImages.map((src, i) => (
-                  <CarouselItem key={`${src}-${i}`} className="pl-0">
-                    <div className="relative aspect-video w-full overflow-hidden rounded-lg">
-                      {getSafeImageSrc(src) ? (
-                        <Image
-                          src={getSafeImageSrc(src)}
-                          alt={`${news.title} — ${i + 1}`}
-                          fill
-                          className="object-cover"
-                          priority={i === 0}
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center px-2 text-xs text-muted-foreground text-center">
-                          Rasmni yuklab bo&apos;lmadi
-                        </div>
-                      )}
-                    </div>
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-              <div className="absolute right-2 top-2 z-10 flex translate-y-0 gap-2">
-                <CarouselPrevious className="static size-10 translate-x-0 translate-y-0 rounded-sm border-none bg-background/90 hover:bg-background" />
-                <CarouselNext className="static size-10 translate-x-0 translate-y-0 rounded-sm border-none bg-background/90 hover:bg-background" />
-              </div>
-            </Carousel>
-          </div>
-        )}
-
-
-        {hasVideo && displayImages.length > 0 && (
-          <div className="mb-6 w-full">
-            <p className="mb-3 text-sm font-medium text-muted-foreground">{t("images")}</p>
-            {displayImages.length === 1 ? (
-              getSafeImageSrc(displayImages[0]) ? (
-                <img
-                  src={getSafeImageSrc(displayImages[0])}
-                  alt={`${news.title} — 1`}
-                  className="block w-full h-auto rounded-lg"
-                />
-              ) : (
-                <div className="flex min-h-[200px] w-full items-center justify-center rounded-lg bg-muted px-2 text-sm text-muted-foreground text-center">
-                  Rasmni yuklab bo&apos;lmadi
                 </div>
               )
-            ) : (
-              <Carousel opts={{ align: "start", loop: true }} className="w-full">
-                <CarouselContent className="ml-0">
-                  {displayImages.map((src, i) => (
-                    <CarouselItem key={`${src}-${i}`} className="pl-0">
-                      <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-muted">
-                        {getSafeImageSrc(src) ? (
-                          <Image
-                            src={getSafeImageSrc(src)}
-                            alt={`${news.title} — ${i + 1}`}
-                            fill
-                            className="object-cover"
-                          />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center px-2 text-xs text-muted-foreground text-center">
-                            Rasmni yuklab bo&apos;lmadi
+            })()}
+
+            {!hasVideo && displayImages.length === 1 && (
+              <div className="relative mb-6 w-full">
+                {getSafeImageSrc(displayImages[0]) ? (
+                  <>
+                    <img
+                      src={getSafeImageSrc(displayImages[0])}
+                      alt={news.title}
+                      className="block w-full h-auto rounded-lg"
+                    />
+                    {/* <div className="absolute right-3 top-3 z-10">
+                  <SavedNewsActions slug={news.slug} newsId={newsId} overlay />
+                </div> */}
+                  </>
+                ) : (
+                  <div className="flex min-h-[200px] w-full items-center justify-center rounded-lg bg-muted px-2 text-sm text-muted-foreground text-center">
+                    Rasmni yuklab bo&apos;lmadi
+                  </div>
+                )}
+              </div>
+            )}
+            {!hasVideo && hasManyImages && (
+              <div className="relative mb-6 w-full">
+                <Carousel opts={{ align: "start", loop: true }} className="w-full">
+                  <CarouselContent className="ml-0">
+                    {displayImages.map((src, i) => (
+                      <CarouselItem key={`${src}-${i}`} className="pl-0">
+                        <div className="relative aspect-video w-full overflow-hidden rounded-lg">
+                          {getSafeImageSrc(src) ? (
+                            <Image
+                              src={getSafeImageSrc(src)}
+                              alt={`${news.title} — ${i + 1}`}
+                              fill
+                              className="object-cover"
+                              priority={i === 0}
+                            />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center px-2 text-xs text-muted-foreground text-center">
+                              Rasmni yuklab bo&apos;lmadi
+                            </div>
+                          )}
+                        </div>
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                  <div className="absolute right-2 top-2 z-10 flex translate-y-0 gap-2">
+                    <CarouselPrevious className="static size-10 translate-x-0 translate-y-0 rounded-sm border-none bg-background/90 hover:bg-background" />
+                    <CarouselNext className="static size-10 translate-x-0 translate-y-0 rounded-sm border-none bg-background/90 hover:bg-background" />
+                  </div>
+                </Carousel>
+              </div>
+            )}
+
+
+            {hasVideo && displayImages.length > 0 && (
+              <div className="mb-6 w-full">
+                <p className="mb-3 text-sm font-medium text-muted-foreground">{t("images")}</p>
+                {displayImages.length === 1 ? (
+                  getSafeImageSrc(displayImages[0]) ? (
+                    <img
+                      src={getSafeImageSrc(displayImages[0])}
+                      alt={`${news.title} — 1`}
+                      className="block w-full h-auto rounded-lg"
+                    />
+                  ) : (
+                    <div className="flex min-h-[200px] w-full items-center justify-center rounded-lg bg-muted px-2 text-sm text-muted-foreground text-center">
+                      Rasmni yuklab bo&apos;lmadi
+                    </div>
+                  )
+                ) : (
+                  <Carousel opts={{ align: "start", loop: true }} className="w-full">
+                    <CarouselContent className="ml-0">
+                      {displayImages.map((src, i) => (
+                        <CarouselItem key={`${src}-${i}`} className="pl-0">
+                          <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-muted">
+                            {getSafeImageSrc(src) ? (
+                              <Image
+                                src={getSafeImageSrc(src)}
+                                alt={`${news.title} — ${i + 1}`}
+                                fill
+                                className="object-cover"
+                              />
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center px-2 text-xs text-muted-foreground text-center">
+                                Rasmni yuklab bo&apos;lmadi
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </div>
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-                <div className="absolute right-2 top-2 z-10 flex translate-y-0 gap-2">
-                  <CarouselPrevious className="static size-10 translate-x-0 translate-y-0 rounded-sm border-none bg-background/90 hover:bg-background" />
-                  <CarouselNext className="static size-10 translate-x-0 translate-y-0 rounded-sm border-none bg-background/90 hover:bg-background" />
+                        </CarouselItem>
+                      ))}
+                    </CarouselContent>
+                    <div className="absolute right-2 top-2 z-10 flex translate-y-0 gap-2">
+                      <CarouselPrevious className="static size-10 translate-x-0 translate-y-0 rounded-sm border-none bg-background/90 hover:bg-background" />
+                      <CarouselNext className="static size-10 translate-x-0 translate-y-0 rounded-sm border-none bg-background/90 hover:bg-background" />
+                    </div>
+                  </Carousel>
+                )}
+              </div>
+            )}
+            {news.audioUrl && (
+              <div className="mb-6 rounded-xl border bg-foreground/10 p-4 shadow-sm">
+                <div className="mb-2 flex items-center gap-2 text-sm font-medium">
+                  <Volume2 className="size-4" />
+                  <span>Audio xabarni tinglang</span>
                 </div>
-              </Carousel>
+                <audio
+                  src={news.audioUrl}
+                  controls
+                  className="w-full"
+                >
+                  Brauzeringiz audio qo'llab-quvvatlamaydi.
+                </audio>
+              </div>
             )}
           </div>
-        )}
 
-        {news.content != null && news.content !== "" && (
-          isRichContent(news.content) ? (
-            <RichContentBlocks blocks={news.content} />
-          ) : parsedRichFromString ? (
-            <RichContentBlocks blocks={parsedRichFromString} />
-          ) : (
-            <TextContentRenderer content={news.content} />
-          )
-        )}
-        <div className="flex flex-wrap gap-2 mt-4">
-          {tagsEnabled && localizedTags.length > 0 && localizedTags.map((tag) => (
-            <span key={tag} className="text-sm text-muted-foreground bg-muted px-2 py-1 rounded-xs">
-              #{" "}{tag}
-            </span>
-          ))}
-        </div>
-        <div className="my-6 w-full flex md:flex-row flex-col gap-2">
-          <CreatedBy author={news.author} />
-        </div>
+          {/* <div
+            className="relative z-10 hidden min-h-[min(50vh,380px)] w-full shrink-0 bg-transparent md:block"
+            aria-hidden
+          /> */}
 
-
-        <div className="my-6" />
-
-
-        {telegramWidgetPost ? (
-          <div className="mt-4 w-full">
-            <div className="flex items-center justify-between gap-3">
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                onClick={() => setShowTelegramPost((p) => !p)}
-                className="flex items-center gap-2 justify-center h-auto py-2"
-              >
-                <Send className="size-4" />
-                <span>Telegram Post</span>
-                {/* {showTelegramPost ? <Eye /> : <EyeOff />} */}
-              </Button>
+          <div className="relative z-10 bg-background">
+            {news.content != null && news.content !== "" && (
+              isRichContent(news.content) ? (
+                <RichContentBlocks blocks={news.content} />
+              ) : parsedRichFromString ? (
+                <RichContentBlocks blocks={parsedRichFromString} />
+              ) : (
+                <TextContentRenderer content={news.content} />
+              )
+            )}
+            <div className="flex flex-wrap gap-2 mt-4">
+              {tagsEnabled && localizedTags.length > 0 && localizedTags.map((tag) => (
+                <span key={tag} className="text-sm text-muted-foreground bg-muted px-2 py-1 rounded-xs">
+                  #{" "}{tag}
+                </span>
+              ))}
+            </div>
+            <div className="my-6 w-full flex md:flex-row flex-col gap-2">
+              <CreatedBy author={news.author} />
             </div>
 
 
-            {showTelegramPost ? (
-              <div className="mt-3 rounded-xl border bg-background p-3 pt-4 shadow-sm">
-                <div ref={telegramWidgetHostRef} className="w-full" />
+            <div className="my-6" />
+
+
+            {telegramWidgetPost ? (
+              <div className="mt-4 w-full">
+                <div className="flex items-center justify-between gap-3">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setShowTelegramPost((p) => !p)}
+                    className="flex items-center gap-2 justify-center h-auto py-2"
+                  >
+                    <Send className="size-4" />
+                    <span>Telegram Post</span>
+                    {/* {showTelegramPost ? <Eye /> : <EyeOff />} */}
+                  </Button>
+                </div>
+
+
+                {showTelegramPost ? (
+                  <div className="mt-3 rounded-xl border bg-background p-3 pt-4 shadow-sm">
+                    <div ref={telegramWidgetHostRef} className="w-full" />
+                  </div>
+                ) : null}
               </div>
             ) : null}
-          </div>
-        ) : null}
 
-        <NewsEngagement slug={news.slug} newsId={newsId} />
-        {/* <section className="my-8">
+            <NewsEngagement slug={news.slug} newsId={newsId} />
+            {/* <section className="my-8">
           <div className="rounded-lg border border-border px-4 py-3 md:px-6 md:py-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-3">
               <Image src="/images/icons/telegram.png" alt="Telegram" width={48} height={48} />
@@ -546,11 +589,15 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
             </div>
           </div>
         </section> */}
-        <div className="mt-6">
-          <AdSlot placement="article_bottom_full" />
-        </div>
-      </article>
-      <RelatedNews categorySlug={news.categorySlug} excludeSlug={news.slug} />
+            <div className="mt-6">
+              <AdSlot placement="article_bottom_full" />
+            </div>
+          </div>
+        </article>
+      </div>
+      <div className="relative z-10 bg-background">
+        <RelatedNews categorySlug={news.categorySlug} excludeSlug={news.slug} />
+      </div>
     </div>
   )
 }

@@ -21,35 +21,48 @@ import {
 } from '@/shared/common/components/ui/card'
 import { ChevronDown, X } from 'lucide-react'
 
-type CategoryOption = { slug: string; name: string }
-type TagOption = { slug: string; name: string }
+type CategoryOption = { id: string; slug: string; name: string }
+type ThemeOption = { id: string; slug: string; name: string }
+type TagOption = { id: string; slug: string; name: string }
+type AuthorOption = { id: string; name: string }
 
 type GeneralsFormProps = {
   categories: CategoryOption[]
+  themes: ThemeOption[]
   tags: TagOption[]
-  authors: string[]
-  categorySlug: string
+  authors: AuthorOption[]
+  categoryId: string
   categoryName: string
+  themeId: string
+  themeName: string
   selectedTags: TagOption[]
-  selectedTagSlugsSet: Set<string>
-  author: string
+  selectedTagIdsSet: Set<string>
+  authorId: string
+  authorName: string
   minutes: number | ''
-  onCategoryChange: (slug: string) => void
-  onToggleTag: (slug: string) => void
-  onAuthorChange: (author: string) => void
+  onCategoryChange: (id: string) => void
+  onThemeChange: (id: string) => void
+  onToggleTag: (id: string) => void
+  onAuthorChange: (authorId: string) => void
   onMinutesChange: (value: number | '') => void
 }
 
 export function GeneralsForm({
   categories,
+  themes,
   tags,
   authors,
+  categoryId,
   categoryName,
+  themeId,
+  themeName,
   selectedTags,
-  selectedTagSlugsSet,
-  author,
+  selectedTagIdsSet,
+  authorId,
+  authorName,
   minutes,
   onCategoryChange,
+  onThemeChange,
   onToggleTag,
   onAuthorChange,
   onMinutesChange,
@@ -74,31 +87,65 @@ export function GeneralsForm({
               <DropdownMenuLabel>Kategoriyani tanlang</DropdownMenuLabel>
               <DropdownMenuSeparator />
               {categories.map((c) => (
-                <DropdownMenuItem key={c.slug} onClick={() => onCategoryChange(c.slug)}>
+                <DropdownMenuItem key={c.id} onClick={() => onCategoryChange(c.id)}>
                   {c.name}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
+          {categoryId ? (
+            <p className="text-xs text-muted-foreground">
+              Tanlangan kategoriya: <span className="font-medium">{categoryName}</span>
+            </p>
+          ) : null}
         </div>
+        <div className="space-y-2">
+          <Label>Tema (ixtiyoriy)</Label>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="w-full justify-between">
+                {themeName || "Temani tanlang"}
+                <ChevronDown className="size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-(--radix-dropdown-menu-trigger-width)">
+              <DropdownMenuLabel>Temani tanlang</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onSelect={() => onThemeChange('')}>
+                <span className="text-muted-foreground italic font-light">Tanlanmagan</span>
+              </DropdownMenuItem>
+              {themes.map((th) => (
+                <DropdownMenuItem key={th.id} onSelect={() => onThemeChange(th.id)}>
+                  {th.name}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          {themeId ? (
+            <p className="text-xs text-muted-foreground">
+              Tanlangan tema: <span className="font-medium">{themeName}</span>
+            </p>
+          ) : null}
+        </div>
+
         <div className="space-y-2">
           <Label>Muallif</Label>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="w-full justify-between">
-                {author || 'Muallifni tanlang'}
+                {authorName || 'Muallifni tanlang'}
                 <ChevronDown className="size-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-(--radix-dropdown-menu-trigger-width)">
               <DropdownMenuLabel>Muallif</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => onAuthorChange("")}>
-                <span className="text-muted-foreground italic font-light italic">Tanlanmagan</span>
+              <DropdownMenuItem onSelect={() => onAuthorChange("")}>
+                <span className="text-muted-foreground italic font-light">Tanlanmagan</span>
               </DropdownMenuItem>
               {authors.map((a) => (
-                <DropdownMenuItem key={a} onClick={() => onAuthorChange(a)}>
-                  {a}
+                <DropdownMenuItem key={a.id} onSelect={() => onAuthorChange(a.id)}>
+                  {a.name}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
@@ -118,9 +165,9 @@ export function GeneralsForm({
               <DropdownMenuSeparator />
               {tags.map((t) => (
                 <DropdownMenuCheckboxItem
-                  key={t.slug}
-                  checked={selectedTagSlugsSet.has(t.slug)}
-                  onCheckedChange={() => onToggleTag(t.slug)}
+                  key={t.id}
+                  checked={selectedTagIdsSet.has(t.id)}
+                  onCheckedChange={() => onToggleTag(t.id)}
                 >
                   {t.name}
                 </DropdownMenuCheckboxItem>
@@ -131,13 +178,13 @@ export function GeneralsForm({
             <div className="flex flex-wrap gap-2 mt-2">
               {selectedTags.map((t) => (
                 <span
-                  key={t.slug}
+                  key={t.id}
                   className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-1 text-sm"
                 >
                   {t.name}
                   <button
                     type="button"
-                    onClick={() => onToggleTag(t.slug)}
+                    onClick={() => onToggleTag(t.id)}
                     className="rounded-full p-0.5 hover:bg-muted-foreground/20"
                     aria-label="O&apos;chirish"
                   >

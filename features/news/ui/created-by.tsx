@@ -32,9 +32,9 @@ export default function CreatedBy({ author, authorImage }: CreatedByProps) {
         : ""
 
   return (
-    <Card className="w-full overflow-hidden rounded-xl border p-0  bg-background shadow-sm">
+    <Card className="w-full overflow-hidden rounded-xl border p-0 bg-[#eee] dark:bg-card shadow-sm">
       <div className="flex items-center gap-4 p-4 rounded-md">
-        <div className="relative flex h-12 w-12 shrink-0 overflow-hidden rounded-full bg-primary/10 md:h-14 md:w-14">
+        <div className="relative flex h-12 w-12 shrink-0 overflow-hidden rounded-full bg-primary/10 md:h-14 md:w-14 ring-2 ring-white dark:ring-foreground/50">
           {hasImage && imageSrc ? (
             <Image
               src={imageSrc}

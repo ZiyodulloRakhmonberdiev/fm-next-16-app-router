@@ -38,7 +38,8 @@ function normalizeRaw(item: NewsListResponse["data"][number]): RawNewsItem {
 async function fetchInitial(
   locale: AppLocale,
   variant: NewsListingVariant,
-  categorySlugs?: string[]
+  categorySlugs?: string[],
+  themeIds?: string[]
 ) {
   const sortBy = variant === "trending" ? "views" : "publishedAt"
   const h = await headers()
@@ -52,6 +53,9 @@ async function fetchInitial(
   params.set("limit", "4")
   for (const slug of categorySlugs ?? []) {
     if (slug) params.append("category", slug)
+  }
+  for (const id of themeIds ?? []) {
+    if (id) params.append("theme", id)
   }
   const res = await fetch(`${origin}/api/news?${params.toString()}`, {
     next: { revalidate: 60 },
@@ -72,13 +76,16 @@ export async function NewsListingPage({
   locale,
   variant = "latest",
   initialCategorySlug,
+  initialThemeId,
 }: {
   locale: AppLocale
   variant?: NewsListingVariant
   initialCategorySlug?: string
+  initialThemeId?: string
 }) {
   const categorySlugs = initialCategorySlug ? [initialCategorySlug] : undefined
-  const initial = await fetchInitial(locale, variant, categorySlugs)
+  const themeIds = initialThemeId ? [initialThemeId] : undefined
+  const initial = await fetchInitial(locale, variant, categorySlugs, themeIds)
   return (
     <ClientSiteNothingGate>
       <div className="block md:hidden">
@@ -93,6 +100,7 @@ export async function NewsListingPage({
                 variant={variant}
                 initial={initial}
                 initialCategorySlug={initialCategorySlug}
+                initialThemeId={initialThemeId}
               />
             </div>
           </ClientServerOffGate>

@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { Pause, Play, Share2, SkipBack, SkipForward, Volume1, Volume2, VolumeX, X } from 'lucide-react'
+import { Pause, Play, Share2, SkipBack, SkipForward, Volume1, VolumeX } from 'lucide-react'
 import { Button } from '@/shared/common/components/ui/button'
 import { cn } from '@/shared/common/lib/utils'
 import type { NewsItem } from '@/features/news/model'
@@ -152,11 +152,11 @@ export function AudioPlayerBar({
 
   return (
     <div
-      className="sticky inset-x-0 z-10 bg-background"
+      className="sticky inset-x-0 z-10 bg-white dark:bg-accent/80 shadow-md backdrop-blur"
       style={{ top: 'var(--header-bar-height, 57px)' }}
     >
-      <div className='md:pt-4'>
-        <div className="border-b border-border md:bg-background/95 md:shadow-sm backdrop-blur md:px-0 md:pr-4">
+      <div className='md:pt-4 md:p-4 bg-white dark:bg-accent/80'>
+        <div className="backdrop-blur md:px-0 md:pr-4">
           <div className="mx-auto max-w-7xl">
             {/* Mobile: controls + share, progress + time */}
             <div className="md:hidden py-2">

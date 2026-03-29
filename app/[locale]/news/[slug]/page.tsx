@@ -10,6 +10,7 @@ import { LatestNews } from "@/shared/common/components/news-sections"
 import { isAppLocale } from "@/shared/common/lib/locale-api"
 import { dbConnect } from "@/shared/common/lib/db"
 import { NewsModel } from "@/features/news/model/news.model"
+import { UserModel } from "@/features/users/model/user.model"
 import { Link } from "@/i18n/navigation"
 import { CategoryListForNewsPage } from "@/entities/category/ui/category-list"
 import ClientSiteNothingGate from "../../_components/client-site-nothing-gate"
@@ -31,17 +32,17 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, slug } = await params
   const currentLocale = isAppLocale(locale) ? locale : "uz"
-  
+
   await dbConnect()
   const raw = await NewsModel.findOne({ slug, status: "published" }).lean()
   if (!raw) return {}
-  
+
   const news = pickNewsForLocale(raw as RawNewsItem, currentLocale)
   if (!news) return {}
 
   const description = news.description || news.title || ""
   const url = `https://ferganamedia.uz/${locale}/news/${slug}`
-  
+
   return {
     title: `${news.title} | Fergana Media`,
     description: description.slice(0, 160),
@@ -74,6 +75,12 @@ export default async function NewsPage({ params }: Props) {
   await dbConnect()
   const raw = await NewsModel.findOne({ slug, status: "published" }).lean()
   if (!raw) notFound()
+  if (raw.authorId) {
+    const author = await UserModel.findById(raw.authorId).select({ _id: 1, full_name: 1 }).lean()
+    if (author?.full_name) {
+      raw.author = author.full_name
+    }
+  }
   const news = pickNewsForLocale(raw as RawNewsItem, currentLocale)
   if (!news) notFound()
 
@@ -101,14 +108,14 @@ export default async function NewsPage({ params }: Props) {
       </div>
       <div className="flex w-full flex-1 flex-col">
         <Header />
-        <main className="flex-1 py-4 px-4 md:px-6">
+        <main className="flex-1 md:py-4 ">
           <ClientServerOffGate model="news">
             <div className="mx-auto max-w-7xl grid grid-cols-1 gap-6 lg:grid-cols-7">
               <aside className="hidden lg:flex lg:flex-col lg:col-span-1 lg:sticky lg:top-20 lg:self-start gap-4">
                 <div className="px-4 text-lg">
                   <nav className="flex flex-col gap-4">
                     <Link href="/" className="flex items-center gap-3">
-                     <HomeIcon className="w-5 h-5" /> <span className="text-lg">{t("nav_home")}</span>
+                      <HomeIcon className="w-5 h-5" /> <span className="text-lg">{t("nav_home")}</span>
                     </Link>
                     <Link href="/news/trending" className="flex items-center gap-3">
                       <Flame className="w-5 h-5" /> <span className="text-lg">{t("nav_trending")}</span>
@@ -139,11 +146,12 @@ export default async function NewsPage({ params }: Props) {
               </aside>
 
               <div className="min-w-0 lg:col-span-4">
+                
                 <NewsPageContent news={news} newsId={newsId} />
               </div>
 
-              <aside className="hidden md:flex flex-col gap-6 lg:col-span-2">
-                <AdSlot placement="sidebar_widget" />
+              <aside className="hidden md:flex flex-col gap-6 lg:col-span-2 px-4 md:px-6">
+                {/* <AdSlot placement="sidebar_widget" /> */}
                 <LatestNews excludeSlug={news.slug} initialNews={await getCachedPublicNews()} />
               </aside>
             </div>

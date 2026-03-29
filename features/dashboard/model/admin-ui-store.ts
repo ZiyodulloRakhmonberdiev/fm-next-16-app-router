@@ -23,5 +23,6 @@ function createCrudUiStore() {
 }
 
 export const useCategoriesUiStore = createCrudUiStore()
+export const useThemesUiStore = createCrudUiStore()
 export const useTagsUiStore = createCrudUiStore()
 export const useUsersUiStore = createCrudUiStore()

@@ -1,6 +1,9 @@
 import { NextRequest } from 'next/server'
 import { dbConnect } from '@/shared/common/lib/db'
 import { NewsModel } from '@/features/news/model/news.model'
+import { CategoryModel } from '@/features/category/model/category.model'
+import { TagModel } from '@/features/tags/model/tag.model'
+import { UserModel } from '@/features/users/model/user.model'
 import { createNewsSchema } from '@/features/news/model/schemas'
 import { deleteNewsFromTelegram, sendNewsToTelegram } from '@/shared/infra/telegram'
 import { requireAdminSession } from '@/shared/server/require-admin-session'
@@ -62,6 +65,45 @@ async function syncTelegramForNews(news: any, origin: string) {
   await news.save()
 }
 
+async function resolveCategoryAndTagsForUpdate(update: Record<string, unknown>) {
+  if (typeof update.categoryId === 'string' && update.categoryId.trim()) {
+    const category = await CategoryModel.findById(update.categoryId)
+      .select({ _id: 1, slug: 1 })
+      .lean()
+    if (!category) {
+      throw new Error('Tanlangan kategoriya topilmadi.')
+    }
+    update.categorySlug = category.slug
+  }
+  if (Array.isArray(update.tagIds)) {
+    if (update.tagIds.length > 0) {
+      const tags = await TagModel.find({ _id: { $in: update.tagIds as string[] } })
+        .select({ _id: 1, slug: 1 })
+        .lean()
+      const slugById = new Map(tags.map((t) => [t._id, t.slug]))
+      update.tagIds = tags.map((t) => t._id)
+      update.tagSlugs = (update.tagIds as string[])
+        .map((id) => slugById.get(id))
+        .filter(Boolean) as string[]
+    } else {
+      update.tagSlugs = []
+    }
+  }
+  if (typeof update.authorId === 'string' && update.authorId.trim()) {
+    const user = await UserModel.findById(update.authorId).select({ _id: 1, full_name: 1 }).lean()
+    if (!user) {
+      throw new Error('Tanlangan muallif topilmadi.')
+    }
+    update.author = user.full_name
+  }
+  if (update.authorId === null) {
+    update.$unset = { ...(update.$unset as Record<string, unknown>), authorId: 1, author: 1 }
+    delete update.authorId
+    delete update.author
+  }
+  return update
+}
+
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -74,6 +116,11 @@ export async function GET(
 
   if (!news) {
     return Response.json({ error: 'Yangilik topilmadi' }, { status: 404 })
+  }
+
+  if (news.authorId) {
+    const author = await UserModel.findById(news.authorId).select({ _id: 1, full_name: 1 }).lean()
+    if (author?.full_name) news.author = author.full_name
   }
 
   return Response.json(news)
@@ -97,27 +144,35 @@ export async function PUT(
     )
   }
 
-  const updated = await NewsModel.findByIdAndUpdate(
-    (await params).id,
-    (() => {
-      const safeData = { ...parsed.data }
-      delete (safeData as { views?: number }).views
-      const update: Record<string, unknown> = { ...safeData }
-      if (update.videoSource === null || update.videoUrl === null) {
-        update.$unset = {
-          ...(update.videoSource === null && { videoSource: 1 }),
-          ...(update.videoUrl === null && { videoUrl: 1 }),
-        }
-        delete update.videoSource
-        delete update.videoUrl
-      }
-      if (Array.isArray(update.images)) {
-        update.images = update.images.filter((u: unknown): u is string => typeof u === 'string' && u.trim() !== '')
-      }
-      return update
-    })(),
-    { new: true, runValidators: true }
-  )
+  const safeData = { ...parsed.data }
+  delete (safeData as { views?: number }).views
+  let update: Record<string, unknown> = { ...safeData }
+  if (update.videoSource === null || update.videoUrl === null || update.themeId === null) {
+    update.$unset = {
+      ...(update.videoSource === null && { videoSource: 1 }),
+      ...(update.videoUrl === null && { videoUrl: 1 }),
+      ...(update.themeId === null && { themeId: 1 }),
+    }
+    if (update.videoSource === null) delete update.videoSource
+    if (update.videoUrl === null) delete update.videoUrl
+    if (update.themeId === null) delete update.themeId
+  }
+  if (Array.isArray(update.images)) {
+    update.images = update.images.filter((u: unknown): u is string => typeof u === 'string' && u.trim() !== '')
+  }
+  try {
+    update = await resolveCategoryAndTagsForUpdate(update)
+  } catch (err) {
+    return Response.json(
+      { error: 'Validation error', message: err instanceof Error ? err.message : 'Validation error' },
+      { status: 400 }
+    )
+  }
+
+  const updated = await NewsModel.findByIdAndUpdate((await params).id, update, {
+    new: true,
+    runValidators: true,
+  })
 
   if (!updated) {
     return Response.json({ error: 'Yangilik topilmadi' }, { status: 404 })
@@ -152,27 +207,35 @@ export async function PATCH(
     )
   }
 
-  const updated = await NewsModel.findByIdAndUpdate(
-    (await params).id,
-    (() => {
-      const safeData = { ...parsed.data }
-      delete (safeData as { views?: number }).views
-      const update: Record<string, unknown> = { ...safeData }
-      if (update.videoSource === null || update.videoUrl === null) {
-        update.$unset = {
-          ...(update.videoSource === null && { videoSource: 1 }),
-          ...(update.videoUrl === null && { videoUrl: 1 }),
-        }
-        delete update.videoSource
-        delete update.videoUrl
-      }
-      if (Array.isArray(update.images)) {
-        update.images = update.images.filter((u: unknown): u is string => typeof u === 'string' && u.trim() !== '')
-      }
-      return update
-    })(),
-    { new: true, runValidators: true }
-  )
+  const safeData = { ...parsed.data }
+  delete (safeData as { views?: number }).views
+  let update: Record<string, unknown> = { ...safeData }
+  if (update.videoSource === null || update.videoUrl === null || update.themeId === null) {
+    update.$unset = {
+      ...(update.videoSource === null && { videoSource: 1 }),
+      ...(update.videoUrl === null && { videoUrl: 1 }),
+      ...(update.themeId === null && { themeId: 1 }),
+    }
+    if (update.videoSource === null) delete update.videoSource
+    if (update.videoUrl === null) delete update.videoUrl
+    if (update.themeId === null) delete update.themeId
+  }
+  if (Array.isArray(update.images)) {
+    update.images = update.images.filter((u: unknown): u is string => typeof u === 'string' && u.trim() !== '')
+  }
+  try {
+    update = await resolveCategoryAndTagsForUpdate(update)
+  } catch (err) {
+    return Response.json(
+      { error: 'Validation error', message: err instanceof Error ? err.message : 'Validation error' },
+      { status: 400 }
+    )
+  }
+
+  const updated = await NewsModel.findByIdAndUpdate((await params).id, update, {
+    new: true,
+    runValidators: true,
+  })
 
   if (!updated) {
     return Response.json({ error: 'Yangilik topilmadi' }, { status: 404 })

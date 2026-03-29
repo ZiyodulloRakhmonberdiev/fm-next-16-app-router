@@ -10,6 +10,7 @@ import {
   getCategoryNameFromApi,
   usePublicCategoriesQuery,
 } from "@/features/category/model/public-categories-query"
+import { getThemeListingHeading, usePublicThemesQuery } from "@/features/theme/model/public-themes-query"
 import {
   type FilterType,
   type LayoutType,
@@ -33,6 +34,7 @@ export function NewsListingPageContent({
   initial,
   initialFilter,
   initialCategorySlug,
+  initialThemeId,
   layout = "list",
   showAuthorsChoice = true,
   forceVideoOnly = false,
@@ -43,6 +45,7 @@ export function NewsListingPageContent({
   initial: { items: NewsItem[]; page: number; totalPages: number }
   initialFilter?: FilterType
   initialCategorySlug?: string
+  initialThemeId?: string
   layout?: LayoutType
   showAuthorsChoice?: boolean
   forceVideoOnly?: boolean
@@ -52,6 +55,7 @@ export function NewsListingPageContent({
   const locale = useLocale() as AppLocale
   const t = useTranslations("common")
   const { data: categories = [] } = usePublicCategoriesQuery()
+  const { data: themes = [] } = usePublicThemesQuery()
   const searchParams = useSearchParams()
 
   const initialFilterResolved: FilterType =
@@ -59,6 +63,9 @@ export function NewsListingPageContent({
   const [activeFilter, setActiveFilter] = React.useState<FilterType>(initialFilterResolved)
   const [selectedCategorySlugs, setSelectedCategorySlugs] = React.useState<string[]>(() =>
     initialCategorySlug ? [initialCategorySlug] : []
+  )
+  const [selectedThemeSlugs] = React.useState<string[]>(() =>
+    initialThemeId ? [initialThemeId] : []
   )
   const [items, setItems] = React.useState<NewsItem[]>(initial.items)
   const [page, setPage] = React.useState(initial.page)
@@ -73,7 +80,7 @@ export function NewsListingPageContent({
   const hasMore = page < totalPages
 
   const buildQuery = React.useCallback(
-    (nextPage: number, filter: FilterType, slugs: string[]) => {
+    (nextPage: number, filter: FilterType, slugs: string[], themeSlugs: string[]) => {
       const params = new URLSearchParams()
       params.set("status", "published")
       params.set("page", String(nextPage))
@@ -87,16 +94,19 @@ export function NewsListingPageContent({
       for (const slug of slugs) {
         params.append("category", slug)
       }
+      for (const slug of themeSlugs) {
+        params.append("theme", slug)
+      }
       return `/api/news?${params.toString()}`
     },
     [pageSize, forceVideoOnly, forceBreakingOnly]
   )
 
   const fetchFirstPage = React.useCallback(
-    async (filter: FilterType, slugs: string[]) => {
+    async (filter: FilterType, slugs: string[], themeSlugs: string[]) => {
       setLoading(true)
       try {
-        const res = await fetch(buildQuery(1, filter, slugs))
+        const res = await fetch(buildQuery(1, filter, slugs, themeSlugs))
         if (!res.ok) return
         const json = (await res.json()) as NewsListResponse
         const raw = Array.isArray(json.data) ? json.data.map(normalizeRaw) : []
@@ -140,9 +150,10 @@ export function NewsListingPageContent({
     const next = raw as FilterType
     setActiveFilter(next)
     const categorySlugs = initialCategorySlug ? [initialCategorySlug] : []
-    void fetchFirstPage(next, categorySlugs)
+    const themeIds = initialThemeId ? [initialThemeId] : []
+    void fetchFirstPage(next, categorySlugs, themeIds)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams, fetchFirstPage, initialCategorySlug])
+  }, [searchParams, fetchFirstPage, initialCategorySlug, initialThemeId])
 
   React.useEffect(() => {
     const slugs = items.map((i) => i.slug)
@@ -184,7 +195,7 @@ export function NewsListingPageContent({
     setLoading(true)
     try {
       const nextPage = page + 1
-      const res = await fetch(buildQuery(nextPage, activeFilter, selectedCategorySlugs))
+      const res = await fetch(buildQuery(nextPage, activeFilter, selectedCategorySlugs, selectedThemeSlugs))
       if (!res.ok) return
       const json = (await res.json()) as NewsListResponse
       const raw = Array.isArray(json.data) ? json.data.map(normalizeRaw) : []
@@ -195,15 +206,34 @@ export function NewsListingPageContent({
     } finally {
       setLoading(false)
     }
-  }, [loading, hasMore, page, totalPages, buildQuery, locale, activeFilter, selectedCategorySlugs])
+  }, [loading, hasMore, page, totalPages, buildQuery, locale, activeFilter, selectedCategorySlugs, selectedThemeSlugs])
 
   const selectedCount = selectedCategorySlugs.length
 
   const pageHeading = React.useMemo(() => {
     if (forceBreakingOnly) return t("filter_breaking")
+    if (initialThemeId) {
+      const parts = getThemeListingHeading(themes, initialThemeId, locale)
+      if (parts.kind === "subtitle") {
+        return parts.subtitle
+      }
+      if (parts.kind === "titleDescription") {
+        return (
+          <span className="flex flex-col items-start gap-1">
+            <span className="font-extrabold">{parts.title}</span>
+            {parts.description ? (
+              <span className="text-base font-normal leading-snug text-muted-foreground ">
+                {parts.description}
+              </span>
+            ) : null}
+          </span>
+        )
+      }
+      return parts.title
+    }
     if (!initialCategorySlug) return t("news")
     return getCategoryNameFromApi(categories, initialCategorySlug, locale)
-  }, [forceBreakingOnly, initialCategorySlug, categories, locale, t])
+  }, [forceBreakingOnly, initialCategorySlug, initialThemeId, categories, themes, locale, t])
 
   const onCategoryToggle = React.useCallback((slug: string, checked: boolean) => {
     setSelectedCategorySlugs((prev) => {
@@ -233,10 +263,10 @@ export function NewsListingPageContent({
             selectedCount={selectedCount}
             onFilterChange={(nextFilter) => {
               setActiveFilter(nextFilter)
-              void fetchFirstPage(nextFilter, selectedCategorySlugs)
+              void fetchFirstPage(nextFilter, selectedCategorySlugs, selectedThemeSlugs)
             }}
             onCategoryToggle={onCategoryToggle}
-            onApplyCategories={() => void fetchFirstPage(activeFilter, selectedCategorySlugs)}
+            onApplyCategories={() => void fetchFirstPage(activeFilter, selectedCategorySlugs, selectedThemeSlugs)}
             onClearCategories={() => setSelectedCategorySlugs([])}
             labels={{
               filterLatest: t("filter_latest"),

@@ -1,5 +1,6 @@
 "use client"
 
+import type { ReactNode } from "react"
 import { ChevronDown } from "lucide-react"
 import { Button } from "@/shared/common/components/ui/button"
 import {
@@ -15,7 +16,7 @@ import type { AppLocale } from "@/shared/common/lib/formatter"
 import type { FilterType } from "./news-listing-types"
 
 type NewsListingFilterToolbarProps = {
-  pageHeading: string
+  pageHeading: ReactNode
   locale: AppLocale
   categories: PublicCategory[]
   activeFilter: FilterType
@@ -57,11 +58,11 @@ export function NewsListingFilterToolbar({
   ]
 
   return (
-    <div className="mb-4 hidden md:flex flex-col gap-1 bg-background py-2 sm:flex-row sm:items-center sm:justify-between md:top-17 md:gap-3 sticky top-22 z-20 border-b">
-      <h1 className="text-xl font-semibold">{pageHeading}</h1>
+    <div className="mb-4 hidden md:flex flex-col gap-1 bg-background py-2 sm:flex-row sm:items-center sm:justify-between md:top-17 md:gap-3 z-20 border-b">
+      <h1 className="text-xl md:text-3xl mt-4 font-semibold">{pageHeading}</h1>
       <div className="flex items-center gap-2">
         <div className="w-full flex-wrap">
-          <div className="flex flex-wrap items-center gap-4 rounded-md bg-background py-1">
+          <div className="hidden flex-wrap items-center gap-4 rounded-md bg-background py-1">
             {filterButtons.map((btn) => (
               <Button
                 key={btn.key}
@@ -82,55 +83,57 @@ export function NewsListingFilterToolbar({
           </div>
         </div>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button type="button" size="sm" variant="ghost" className="h-8 gap-2">
-              <span>{labels.categories}</span>
-              {selectedCount > 0 ? (
-                <span className="text-muted-foreground">({selectedCount})</span>
-              ) : null}
-              <ChevronDown className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>{labels.categories}</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {categories.map((c) => {
-              const checked = selectedCategorySlugs.includes(c.slug)
-              return (
-                <DropdownMenuCheckboxItem
-                  key={c.slug}
-                  checked={checked}
-                  onSelect={(e) => e.preventDefault()}
-                  onCheckedChange={(next) => onCategoryToggle(c.slug, Boolean(next))}
+        <div className="hidden">
+          <DropdownMenu >
+            <DropdownMenuTrigger asChild>
+              <Button type="button" size="sm" variant="ghost" className="h-8 gap-2">
+                <span>{labels.categories}</span>
+                {selectedCount > 0 ? (
+                  <span className="text-muted-foreground">({selectedCount})</span>
+                ) : null}
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>{labels.categories}</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {categories.map((c) => {
+                const checked = selectedCategorySlugs.includes(c.slug)
+                return (
+                  <DropdownMenuCheckboxItem
+                    key={c.slug}
+                    checked={checked}
+                    onSelect={(e) => e.preventDefault()}
+                    onCheckedChange={(next) => onCategoryToggle(c.slug, Boolean(next))}
+                  >
+                    {getCategoryLabel(c, locale)}
+                  </DropdownMenuCheckboxItem>
+                )
+              })}
+              <DropdownMenuSeparator />
+              <div className="flex w-full flex-row gap-2 p-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  className="h-8 justify-start gap-2 bg-foreground text-background"
+                  onClick={onApplyCategories}
                 >
-                  {getCategoryLabel(c, locale)}
-                </DropdownMenuCheckboxItem>
-              )
-            })}
-            <DropdownMenuSeparator />
-            <div className="flex w-full flex-row gap-2 p-2">
-              <Button
-                type="button"
-                size="sm"
-                variant="ghost"
-                className="h-8 justify-start gap-2 bg-foreground text-background"
-                onClick={onApplyCategories}
-              >
-                {labels.apply}
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                className="h-8 justify-start gap-2"
-                onClick={onClearCategories}
-              >
-                {labels.clear}
-              </Button>
-            </div>
-          </DropdownMenuContent>
-        </DropdownMenu>
+                  {labels.apply}
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="h-8 justify-start gap-2"
+                  onClick={onClearCategories}
+                >
+                  {labels.clear}
+                </Button>
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
     </div>
   )

@@ -8,8 +8,12 @@ export type EditNewsInitialData = {
   id?: string
   translations: Record<AppLocale, { title: string; description: string }>
   slugs: Record<AppLocale, string>
+  categoryId: string
   categorySlug: string
+  themeId: string
+  tagIds: string[]
   tagSlugs: string[]
+  authorId: string
   author: string
   imageUrls: string[]
   minutes: number
@@ -62,8 +66,12 @@ export function rawNewsToEditInitialData(raw: RawNewsItem): EditNewsInitialData 
     id: (raw as { _id?: string })._id,
     translations,
     slugs,
+    categoryId: raw.categoryId ?? '',
     categorySlug: raw.categorySlug ?? '',
+    themeId: raw.themeId ?? '',
+    tagIds: raw.tagIds ?? [],
     tagSlugs: raw.tagSlugs ?? [],
+    authorId: raw.authorId ?? '',
     author: raw.author ?? '',
     imageUrls: Array.isArray(raw.images) ? [...raw.images] : [],
     minutes: typeof raw.minutes === 'number' ? raw.minutes : 3,

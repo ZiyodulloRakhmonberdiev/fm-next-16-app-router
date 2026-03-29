@@ -107,9 +107,9 @@ export function AdSlot({ placement }: Props) {
     placement === "sidebar_widget" || placement === "article_bottom_full"
 
   return (
-    <div data-ad-slot className="relative w-full py-2">
-      <div className={cn("relative w-full overflow-hidden rounded-xl border bg-card shadow-sm aspect-video max-h-[120px] md:max-h-[140px] lg:max-h-[200px]")}>
-         <span className="absolute left-2 top-2 z-10 rounded bg-black/60 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-white/95" aria-hidden>
+    <div data-ad-slot className="relative w-full md:py-2">
+      <div className={cn("relative w-full overflow-hidden aspect-video max-h-[160px] md:max-h-[180px] lg:max-h-[220px]")}>
+         <span className="hidden md:block absolute left-2 top-3 z-10 rounded px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-white/95 bg-black/90" aria-hidden>
           Reklama
         </span> 
         {panelOpen ? (
@@ -120,20 +120,20 @@ export function AdSlot({ placement }: Props) {
             onAdSectionClosed={handleAdSectionClosed}
           />
         ) : ad.type === "image" ? (
-          <div className="relative h-full w-full bg-muted">
+          <div className="relative h-full w-full mb-auto">
             {currentMedia ? (
               mediaKind === "video" ? (
-                <video key={currentMedia} src={currentMedia} className="absolute inset-0 h-full w-full object-cover"
+                <video key={currentMedia} src={currentMedia} className="absolute inset-0 h-full w-full object-contain"
                   style={{ objectPosition: "center center" }} autoPlay muted loop playsInline />
               ) : (
-                <img key={currentMedia} src={currentMedia} alt={ad.title ?? "Reklama"} className="absolute inset-0 h-full w-full object-cover"
+                <img key={currentMedia} src={currentMedia} alt={ad.title ?? "Reklama"} className="absolute inset-0 h-full w-full object-cover md:object-contain"
                   style={{ objectPosition: "center center" }} />
               )
             ) : null}
             <Button
               size="icon"
               variant="secondary"
-              className="absolute right-2 top-2 z-10 size-7"
+              className="absolute right-2 top-3 z-10 size-7"
               onClick={openPanel}
               aria-label="Reklama menyusi"
             >
@@ -146,13 +146,13 @@ export function AdSlot({ placement }: Props) {
         ) : (
           <>
             {/* Mobil: faqat media (content yashirin) */}
-            <div className="relative h-full w-full bg-muted md:hidden">
+            <div className="relative h-full w-full md:hidden">
               {currentMedia ? (
                 mediaKind === "video" ? (
-                  <video key={currentMedia} src={currentMedia} className="absolute inset-0 h-full w-full object-cover"
+                  <video key={currentMedia} src={currentMedia} className="absolute inset-0 h-full w-full object-contain"
                     style={{ objectPosition: "center center" }} autoPlay muted loop playsInline />
                 ) : (
-                  <img key={currentMedia} src={currentMedia} alt={ad.title ?? "Reklama"} className="absolute inset-0 h-full w-full object-cover"
+                  <img key={currentMedia} src={currentMedia} alt={ad.title ?? "Reklama"} className="absolute inset-0 h-full w-full object-contain"
                     style={{ objectPosition: "center center" }} />
                 )
               ) : null}
@@ -176,18 +176,18 @@ export function AdSlot({ placement }: Props) {
                   adHref ? (
                     <a href={adHref} target="_blank" rel="noopener noreferrer sponsored nofollow" className="block h-full w-full">
                       {mediaKind === "video" ? (
-                        <video key={currentMedia} src={currentMedia} className="h-full w-full object-cover"
+                        <video key={currentMedia} src={currentMedia} className="h-full w-full object-contain"
                           style={{ objectPosition: "center center" }} autoPlay muted loop playsInline />
                       ) : (
-                        <img key={currentMedia} src={currentMedia} alt={ad.title ?? "Reklama"} className="h-full w-full object-cover"
+                        <img key={currentMedia} src={currentMedia} alt={ad.title ?? "Reklama"} className="h-full w-full object-contain"
                           style={{ objectPosition: "center center" }} />
                       )}
                     </a>
                   ) : mediaKind === "video" ? (
-                    <video key={currentMedia} src={currentMedia} className="h-full w-full object-cover"
+                    <video key={currentMedia} src={currentMedia} className="h-full w-full object-contain"
                       style={{ objectPosition: "center center" }} autoPlay muted loop playsInline />
                   ) : (
-                    <img key={currentMedia} src={currentMedia} alt={ad.title ?? "Reklama"} className="h-full w-full object-cover"
+                    <img key={currentMedia} src={currentMedia} alt={ad.title ?? "Reklama"} className="h-full w-full object-contain"
                       style={{ objectPosition: "center center" }} />
                   )
                 ) : null}
