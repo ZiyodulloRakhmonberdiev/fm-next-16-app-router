@@ -10,6 +10,7 @@ import { useTheme } from 'next-themes'
 import type { AppLocale } from '@/shared/common/lib/locale-api'
 import { usePublicSiteSettingsQuery } from '@/shared/server/public-site-settings-query'
 import { Button } from '@/shared/common/components/ui/button'
+import { ClientBottomNav } from '@/widgets/client-bottom-nav'
 
 export default function Footer() {
   const { resolvedTheme } = useTheme()
@@ -45,21 +46,23 @@ export default function Footer() {
           {/* Description */}
           <div className='w-full border-b md:border-none border-border pb-2 flex gap-2 flex-col'>
             <p className="text-sm text-foreground/70 max-w-md">{description}</p>
-            <div className="flex items-center gap-2 text-sm text-foreground/70">
-              <Mail className="size-4 text-foreground/70" />
-              <a href={`mailto:${email}`}>{email}</a>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-foreground/70">
-              <Phone className="size-4 text-foreground/70" />
-              <a href={`tel:${phone}`}>{phone}</a>
-            </div>
-            <div className="flex items-center gap-2">
-              <MapPin className="size-4 text-foreground/70" />
-              <span className="text-sm text-foreground/70">{address}</span>
+            <div className='hidden md:flex flex-col gap-2'>
+              <div className="flex items-center gap-2 text-sm text-foreground/70">
+                <Mail className="size-4 text-foreground/70" />
+                <a href={`mailto:${email}`}>{email}</a>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-foreground/70">
+                <Phone className="size-4 text-foreground/70" />
+                <a href={`tel:${phone}`}>{phone}</a>
+              </div>
+              <div className="flex items-center gap-2">
+                <MapPin className="size-4 text-foreground/70" />
+                <span className="text-sm text-foreground/70">{address}</span>
+              </div>
             </div>
           </div>
           {/* Social and links */}
-          <div className="flex items-center gap-x-4 gap-y-1 text-sm py-4 md:pt-0 md:py-0 text-foreground/70 border-b md:border-none border-border flex-wrap">
+          <div className="hidden md:flex items-center gap-x-4 gap-y-1 text-sm py-4 md:pt-0 md:py-0 text-foreground/70 border-b md:border-none border-border flex-wrap">
             <span className='font-bold'>{t("quick_links")}: </span>{seed.links.map((item) => {
               const isExternal = /^https?:\/\//i.test(item.href)
               return (
@@ -73,36 +76,43 @@ export default function Footer() {
             </div>
           </div>
           <div className="flex items-start pt-2 md:pt-0 flex-col gap-2">
-            <span className="font-bold text-sm text-foreground/70">{t("follow_us")}:</span>
-            <SocialMediaButtons
-              variant="icon-only"
-              className="flex items-center flex-wrap gap-2 md:hidden"
-              linkClassName="text-xs md:text-sm"
-            />
-            <SocialMediaButtons
-              variant="button"
-              className="hidden md:flex items-center flex-wrap gap-2"
-              linkClassName="text-xs md:text-sm"
-            />
+            <span className="hidden md:block font-bold text-sm text-foreground/70">{t("follow_us")}:</span>
+            <div className='flex items-center my-2 justify-between gap-2 w-full'>
+              <SocialMediaButtons
+                variant="icon-only"
+                className="flex items-center flex-wrap gap-2 md:hidden"
+                linkClassName="text-xs md:text-sm"
+              />
+              <SocialMediaButtons
+                variant="button"
+                className="hidden md:flex items-center flex-wrap gap-2"
+                linkClassName="text-xs md:text-sm"
+              />
+              <div className='flex md:hidden ml-auto '>
+                <Button className='w-10 font-bold ml-auto bg-white dark:bg-black' size='icon' variant='outline' type='button'
+                >16+</Button>
+              </div>
+            </div>
           </div>
         </div>
-        <div className='flex items-center justify-end'>
+        <div className='hidden md:flex items-center jstart justify-end mt-2 md:mt-0'>
           <Button className='w-10 font-bold ml-auto bg-white dark:bg-black' size='icon' variant='outline' type='button'
           >16+</Button>
         </div>
-        <div className="flex flex-col items-center justify-center gap-4 py-4 mt-4 border-t border-border">
+        <div className="flex flex-col items-center justify-center gap-4 py-4 mt-2 md:mt-4 border-t border-border">
           <p className="text-sm text-foreground/70 text-center">{seed.copyright[locale]} </p>
           <Link href="/" className="flex md:hidden">
             <Image
               src={'/images/footer-logo.png'}
               alt="Logo"
-              width={80}
-              height={80}
+              width={60}
+              height={60}
               className=""
             />
           </Link>
         </div>
       </div>
+      <ClientBottomNav />
     </div>
   )
 }

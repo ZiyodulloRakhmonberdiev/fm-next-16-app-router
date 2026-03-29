@@ -93,9 +93,9 @@ export function ContactPageClient() {
   }
 
   return (
-    <div className="min-h-screen bg-background py-16 md:py-24">
+    <div className="min-h-screen bg-background py-8 md:py-24">
       <div className="mx-auto max-w-7xl px-4 md:px-6">
-        <div className="mb-20">
+        <div className="mb-4 md:mb-20">
           <h1 className="text-4xl font-light tracking-tight text-foreground md:text-6xl mb-6">
             {t("form_title")}
           </h1>
@@ -103,14 +103,14 @@ export function ContactPageClient() {
             {t("form_subtitle")}
           </p>
         </div>
-
-        <div className="grid gap-x-12 gap-y-16 lg:grid-cols-[1fr_400px]">
+     
+        <div className="grid gap-x-12 gap-y-8 lg:grid-cols-[1fr_400px]">
           {/* Form Section */}
           <section className="space-y-12">
-            <form onSubmit={handleSubmit} className="space-y-8">
-              <div className="grid gap-8 sm:grid-cols-2">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid gap-4 md:gap-8 sm:grid-cols-2">
                 <div className="space-y-3">
-                  <Label htmlFor="firstName" className="text-xs uppercase tracking-widest text-muted-foreground">
+                  <Label htmlFor="firstName" className="hidden md:block text-xs uppercase tracking-widest text-muted-foreground">
                     {t("first_name")}
                   </Label>
                   <Input
@@ -119,11 +119,11 @@ export function ContactPageClient() {
                     placeholder={t("placeholder_first_name")}
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
-                    className="border-0 border-b border-border bg-transparent px-0 rounded-none focus-visible:ring-0 focus-visible:border-foreground transition-colors placeholder:text-muted-foreground/40"
+                    className="py-3 h-auto"
                   />
                 </div>
                 <div className="space-y-3">
-                  <Label htmlFor="lastName" className="text-xs uppercase tracking-widest text-muted-foreground">
+                  <Label htmlFor="lastName" className="hidden md:block text-xs uppercase tracking-widest text-muted-foreground">
                     {t("last_name")}
                   </Label>
                   <Input
@@ -131,14 +131,14 @@ export function ContactPageClient() {
                     placeholder={t("placeholder_last_name")}
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
-                    className="border-0 border-b border-border bg-transparent px-0 rounded-none focus-visible:ring-0 focus-visible:border-foreground transition-colors placeholder:text-muted-foreground/40"
+                    className="py-3 h-auto"
                   />
                 </div>
               </div>
 
-              <div className="grid gap-8 sm:grid-cols-2">
+              <div className="grid gap-4 md:gap-8 sm:grid-cols-2">
                 <div className="space-y-3">
-                  <Label htmlFor="email" className="text-xs uppercase tracking-widest text-muted-foreground">
+                  <Label htmlFor="email" className="hidden md:block text-xs uppercase tracking-widest text-muted-foreground">
                     {t("email")}
                   </Label>
                   <Input
@@ -148,16 +148,16 @@ export function ContactPageClient() {
                     placeholder={t("placeholder_email")}
                     value={emailField}
                     onChange={(e) => setEmailField(e.target.value)}
-                    className="border-0 border-b border-border bg-transparent px-0 rounded-none focus-visible:ring-0 focus-visible:border-foreground transition-colors placeholder:text-muted-foreground/40"
+                    className="py-3 h-auto"
                   />
                 </div>
                 <div className="space-y-3">
-                  <Label className="text-xs uppercase tracking-widest text-muted-foreground">
+                  <Label className="hidden md:block text-xs uppercase tracking-widest text-muted-foreground">
                     {t("contact_details")}
                   </Label>
                   <div className="flex gap-4">
-                    <Select value={dial} onValueChange={setDial}>
-                      <SelectTrigger className="w-[80px] border-0 border-b border-border bg-transparent px-0 rounded-none focus:ring-0 focus:border-foreground">
+                    {/* <Select value={dial} onValueChange={setDial}>
+                      <SelectTrigger className="w-[80px] py-3 h-auto">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -167,19 +167,19 @@ export function ContactPageClient() {
                           </SelectItem>
                         ))}
                       </SelectContent>
-                    </Select>
+                    </Select> */}
                     <Input
                       placeholder={t("placeholder_phone")}
                       value={phoneLocal}
                       onChange={(e) => setPhoneLocal(e.target.value)}
-                      className="border-0 border-b border-border bg-transparent px-0 rounded-none focus-visible:ring-0 focus-visible:border-foreground transition-colors placeholder:text-muted-foreground/40"
+                      className="py-3 h-auto"
                     />
                   </div>
                 </div>
               </div>
 
               <div className="space-y-3">
-                <Label htmlFor="message" className="text-xs uppercase tracking-widest text-muted-foreground">
+                <Label htmlFor="message" className="hidden md:block text-xs uppercase tracking-widest text-muted-foreground">
                   {t("message")}
                 </Label>
                 <div className="relative">
@@ -190,15 +190,15 @@ export function ContactPageClient() {
                     placeholder={t("placeholder_message")}
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    className="min-h-[120px] border-0 border-b border-border bg-transparent px-0 rounded-none focus-visible:ring-0 focus-visible:border-foreground transition-colors resize-none placeholder:text-muted-foreground/40"
+                    className="min-h-[120px] py-3 h-auto resize-none"
                   />
-                  <div className="absolute bottom-0 right-0 text-[10px] uppercase tracking-widest text-muted-foreground/50 py-1">
+                  <div className="absolute bottom-2 right-2 text-[10px] uppercase tracking-widest text-muted-foreground/50 py-1">
                     {message.length} / 1024
                   </div>
                 </div>
               </div>
 
-              <div className="pt-6">
+              <div className="pt-4">
                 <Button
                   type="submit"
                   disabled={submitting}
@@ -210,9 +210,26 @@ export function ContactPageClient() {
               </div>
             </form>
           </section>
-
+          <div className="grid md:hidden text-muted-foreground gap-4 mb-4">
+          <div className="group flex items-start gap-4 border rounded-md px-3 py-2">
+            <Mail className="size-5 text-muted-foreground mt-1" />
+            <div>
+              <a href={`mailto:${email}`} className="text-lg hover:text-muted-foreground transition-colors break-all underline-offset-4 hover:underline">
+                {email}
+              </a>
+            </div>
+          </div>
+          <div className="group flex items-start gap-4 border rounded-md px-3 py-2">
+            <Headphones className="size-5 text-muted-foreground mt-1" />
+            <div>
+              <a href={`tel:${phone.replace(/\s/g, "")}`} className="text-lg hover:text-muted-foreground transition-colors underline-offset-4 hover:underline">
+                {phone}
+              </a>
+            </div>
+          </div>
+        </div>
           {/* Info Section */}
-          <aside className="lg:sticky lg:top-32 space-y-16">
+          <aside className="hidden md:block lg:sticky lg:top-32 space-y-16 bg-card p-8 rounded-lg">
             <div className="space-y-8">
               <h2 className="text-xs uppercase tracking-widest text-muted-foreground font-semibold">
                 {t("connect_title")}
@@ -240,10 +257,10 @@ export function ContactPageClient() {
             </div>
 
             <div className="space-y-8">
-               <h2 className="text-xs uppercase tracking-widest text-muted-foreground font-semibold">
+              {/* <h2 className="text-xs uppercase tracking-widest text-muted-foreground font-semibold">
                 Social
-              </h2>
-              <div className="flex flex-wrap gap-4">
+              </h2> */}
+              {/* <div className="flex flex-wrap gap-4">
                 {socialLinks.map(({ slug, name, href }) => {
                   const style = getSocialStyle(slug)
                   const isExternal = href.startsWith("http")
@@ -260,7 +277,7 @@ export function ContactPageClient() {
                     </Link>
                   )
                 })}
-              </div>
+              </div> */}
             </div>
           </aside>
         </div>
