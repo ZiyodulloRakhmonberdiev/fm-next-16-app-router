@@ -114,7 +114,7 @@ export function AudioNewsPageClient({ initial }: Props) {
 
       <section className="w-full pt-6">
         {/* Page heading */}
-        <div className="pb-6">
+        {/* <div className="pb-6">
           <div className="inline-flex items-center gap-3">
             <div>
               <h1 className="text-2xl font-bold md:text-3xl tracking-tight">Audio</h1>
@@ -123,7 +123,7 @@ export function AudioNewsPageClient({ initial }: Props) {
               </p>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Two-column layout: news list + authors choice sidebar */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-start">

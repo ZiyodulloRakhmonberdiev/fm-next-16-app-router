@@ -170,9 +170,9 @@ export function AudioPlayerBar({
                   >
                     {muted || volume === 0 ? <VolumeX className="size-4 text-brand fill-brand opacity-70" /> : <Volume1 className="size-4 text-brand fill-brand opacity-70" />}
                   </button>
-                  <div className="relative h-1.5 w-20 rounded-full bg-brand/5">
+                  <div className="relative h-1.5 w-20 rounded-full bg-brand/5 dark:bg-foreground/10">
                     <div
-                      className="absolute inset-y-0 left-0 rounded-full bg-brand/20"
+                      className="absolute inset-y-0 left-0 rounded-full bg-brand/20 dark:bg-foreground/10"
                       style={{ width: `${(muted ? 0 : volume) * 100}%` }}
                     />
                     <input
@@ -212,13 +212,13 @@ export function AudioPlayerBar({
                   <button
                     type="button"
                     onClick={togglePlay}
-                    className="inline-flex size-11 items-center justify-center rounded-full p-2 bg-brand/10 hover:bg-brand/90"
+                    className="inline-flex size-11 items-center justify-center rounded-full p-2 bg-brand/10 hover:bg-brand/90 dark:bg-foreground/10"
                     aria-label={isPlaying ? 'Pause' : 'Play'}
                   >
                     {isPlaying ? (
-                      <Pause className="size-4 text-brand/70 fill-brand/70" />
+                      <Pause className="size-4 text-brand/70 fill-brand/70 dark:fill-foreground/50 dark:text-foreground/10" />
                     ) : (
-                      <Play className="size-4 text-brand/70 fill-brand/70 ml-0.5" />
+                      <Play className="size-4 text-brand/70 fill-brand/70 ml-0.5 dark:fill-foreground/50 dark:text-foreground/10" />
                     )}
                   </button>
                   <button
@@ -231,28 +231,15 @@ export function AudioPlayerBar({
                     <SkipForward className="size-4 text-brand/70 fill-brand/70" />
                   </button>
                 </div>
-                {/* <button
-                type="button"
-                onClick={onClose}
-                className="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
-                aria-label="Yopish"
-              >
-                <X className="size-4" />
-              </button> */}
-
               </div>
               <div className="mt-2 flex items-center gap-2">
-                <div className="h-0.5 flex-1 cursor-pointer rounded-full bg-brand/10" onClick={handleSeek}>
-                  {/* <div
-                    className="h-full rounded-full bg-brand transition-[width] duration-100"
-                    style={{ width: `${progress}%` }}
-                  /> */}
+                <div className="h-0.5 flex-1 cursor-pointer rounded-full bg-brand/10 dark:bg-foreground/10" onClick={handleSeek}>
                   <div
-                    className="relative h-full rounded-full bg-brand transition-[width] duration-100"
+                    className="relative h-full rounded-full bg-brand/70 transition-[width] duration-100"
                     style={{ width: `${progress}%` }}
 
                   >
-                    <span className="absolute -right-1 -top-1 size-2.5 rounded-full bg-brand shadow-sm" />
+                    <span className="absolute -right-1 -top-1 size-3 rounded-full bg-brand shadow-sm" />
                   </div>
                 </div>
                 <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground">
@@ -286,14 +273,13 @@ export function AudioPlayerBar({
                   <SkipForward className="size-6 text-brand fill-brand" />
                 </Button>
               </div>
-              <div className="mx-2 h-1.5 flex-1 cursor-pointer rounded-full bg-brand/5" onClick={handleSeek}>
-                {/* <div className="h-full rounded-full bg-brand transition-[width] duration-100" style={{ width: `${progress}%` }} /> */}
+              <div className="mx-2 h-1.5 flex-1 cursor-pointer rounded-full bg-brand/5 dark:bg-foreground/10" onClick={handleSeek}>
                 <div
-                  className="relative h-full rounded-full bg-brand transition-[width] duration-100"
+                  className="relative h-full rounded-full bg-brand/70 transition-[width] duration-100"
                   style={{ width: `${progress}%` }}
 
                 >
-                  <span className="absolute -right-1 -top-1 size-3.5 rounded-full bg-brand shadow-sm" />
+                  <span className="absolute -right-1 -top-1 size-4 rounded-full bg-brand shadow-sm" />
                 </div>
               </div>
               <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
@@ -311,9 +297,9 @@ export function AudioPlayerBar({
                 >
                   {muted || volume === 0 ? <VolumeX className="size-6 text-brand/70" /> : <Volume1 className="size-6 text-brand/70" />}
                 </button>
-                <div className="relative h-1.5 w-20 rounded-full bg-brand/5">
+                <div className="relative h-1.5 w-20 rounded-full bg-brand/10 dark:bg-foreground/5">
                   <div
-                    className="absolute inset-y-0 left-0 rounded-full bg-brand/20"
+                    className="absolute inset-y-0 left-0 rounded-full bg-brand/30 dark:bg-foreground/10"
                     style={{ width: `${(muted ? 0 : volume) * 100}%` }}
                   />
                   <input

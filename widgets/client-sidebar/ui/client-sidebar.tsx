@@ -29,12 +29,12 @@ export default function ClientSidebar() {
         <div className='font-medium px-4 border-b border-border pb-2'>
           <LanguageSwitcherForSidebar />
         </div>
-        <div className="px-4 py-2 border-b border-border">
+        {/* <div className="px-4 py-2 border-b border-border">
           <Link href="/news/audio" className="flex items-center gap-3 text-sm font-medium hover:text-brand transition-colors">
             <Volume2 className="size-4" />
             Audio
           </Link>
-        </div>
+        </div> */}
         <CategoryListForSidebar />
         <div className='text-center flex flex-col gap-2 border-t border-border py-4'>
           <Link href="/about">

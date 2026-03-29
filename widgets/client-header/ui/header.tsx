@@ -18,7 +18,7 @@ import { ThemeSwitcherForHeader } from '@/widgets/theme-switcher'
 
 function AdSlotHeader() {
   return (
-    <div className="border-b-0 border-border bg-background has-data-ad-slot:border-b">
+    <div className="hidden md:block border-b-0 border-border bg-background has-data-ad-slot:border-b">
       <div className="mx-auto max-w-7xl px-4 md:px-6">
         <AdSlot placement="header_top_full" />
       </div>
@@ -94,9 +94,6 @@ export default function Header() {
               <CategoryList />
             </div>
           </div>
-          {/* <div className="z-[2] flex shrink-0 items-center md:hidden">
-            <span className="inline-flex size-9 shrink-0" aria-hidden />
-          </div> */}
           <Link
             href="/"
             className="flex h-8 items-center md:hidden"
@@ -131,7 +128,7 @@ export default function Header() {
             </div>
           </div>
         </div>
-        <div className="max-w-7xl mx-auto px-4 md:px-6">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 hidden">
           <CategoryListForMobile />
         </div>
       </div>

@@ -92,6 +92,7 @@
     "reaction_delete_failed": "Couldn't remove reaction"
   },
   "common": {
+    "audio": "Audio",
     "top_news": "Top news",
     "team_title": "Our team",
     "news_telegram_card_text": "Don’t miss the latest news — join our <telegram>Telegram</telegram> channel.",

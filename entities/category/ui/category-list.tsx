@@ -40,7 +40,7 @@ export function CategoryListForSidebar() {
       <Link href="/news" className="text-sm">
         <span className="text-xl font-medium">{t("news")}</span>
       </Link>
-      {categories.map((category) => (
+      {/* {categories.map((category) => (
         <Link
           key={category.slug}
           href={category.href || `/category/${category.slug}`}
@@ -48,9 +48,12 @@ export function CategoryListForSidebar() {
         >
           <span className="text-xl font-medium">{category.name[locale] ?? category.name.uz ?? category.slug}</span>
         </Link>
-      ))}
+      ))} */}
       <Link href="/news/video" className="text-sm">
         <span className="text-xl font-medium">{t("video")}</span>
+      </Link>
+      <Link href="/news/audio" className="text-sm">
+        <span className="text-xl font-medium">{t("audio")}</span>
       </Link>
     </div>
   );

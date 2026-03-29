@@ -4,9 +4,9 @@ import * as React from "react"
 import { Link } from "@/i18n/navigation"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { Calendar, Clock, Eye, EyeOff, Facebook, Heart, Link2, MessageSquare, Send, Share2, Volume2 } from "lucide-react"
+import { ArrowLeft, Calendar, ChevronLeft, Clock, Eye, EyeOff, Heart, MessageSquare, Send, Share2, Volume2 } from "lucide-react"
 import { Button } from "@/shared/common/components/ui/button"
-import { formatDateISO, formatDateTimeLocale } from "@/shared/common/lib/formatter"
+import { formatDateISO, formatDateTime, formatDateTimeDotSlash, formatDateTimeLocale } from "@/shared/common/lib/formatter"
 import type { AppLocale } from "@/shared/common/lib/formatter"
 import { RelatedNews } from "@/shared/common/components/news-sections"
 import { toast } from "sonner"
@@ -28,20 +28,6 @@ import { TextContentRenderer } from "@/features/news/ui/text-content-renderer"
 import { NewsEngagement } from "@/features/news/ui/news-engagement"
 import { SavedNewsActions } from "@/features/news/ui/saved-news-actions"
 import { usePublicSiteSettingsQuery } from "@/shared/server/public-site-settings-query"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/shared/common/components/ui/dropdown-menu"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/shared/common/components/ui/tooltip"
-import { SOCIAL_ICONS } from "@/shared/common/components/ui/social-media-buttons"
 import { useCategoryLabel } from "@/features/category/model/use-category-label"
 import type { LocaleMap } from "@/shared/common/lib/locale-types"
 import { AdSlot } from "@/features/ads/ui/ad-slot"
@@ -98,7 +84,6 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
   const hasVideo = Boolean(news.videoUrl?.trim())
   const hasManyImages = displayImages.length > 1
 
-  const [shareUrl, setShareUrl] = React.useState("")
   const [reactionTotal, setReactionTotal] = React.useState(0)
   const [commentTotal, setCommentTotal] = React.useState(0)
   const [tagsCatalog, setTagsCatalog] = React.useState<Array<{ slug: string; name: LocaleMap }>>([])
@@ -133,10 +118,6 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
     script.dataset.width = "100%"
     host.appendChild(script)
   }, [showTelegramPost, telegramWidgetPost])
-
-  React.useEffect(() => {
-    if (typeof window !== "undefined") setShareUrl(window.location.href)
-  }, [])
 
   React.useEffect(() => {
     let cancelled = false
@@ -180,16 +161,6 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
     return () => ac.abort()
   }, [newsRef])
 
-  const copyLink = React.useCallback(async () => {
-    if (!shareUrl) return
-    try {
-      await navigator.clipboard.writeText(shareUrl)
-      toast.success(t("copied"), { position: "bottom-center" })
-    } catch {
-      toast.error(t("copy_failed"))
-    }
-  }, [shareUrl, t])
-
   const categoryLabelRaw = useCategoryLabel(categorySlug, locale, news.category)
   const categoryLabel = React.useMemo(() => {
     const name = categoryLabelRaw
@@ -218,32 +189,27 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
     })
   }, [locale, news.tags, tagsCatalog])
 
-  const openShare = React.useCallback(
-    async (type: "telegram" | "facebook" | "whatsapp" | "instagram") => {
-      const u = encodeURIComponent(shareUrl)
-      const titleEnc = encodeURIComponent(news.title ?? "")
-      if (type === "instagram") {
-        try {
-          await navigator.clipboard.writeText(shareUrl)
-          toast.success(t("copied"), {
-            position: "bottom-center",
-            description: t("instagram_share_hint"),
-          })
-        } catch {
-          toast.error(t("copy_failed"))
-        }
-        window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer")
+  const handleShare = React.useCallback(async () => {
+    if (typeof window === "undefined") return
+    const pathParts = window.location.pathname.split("/").filter(Boolean)
+    const localeFromPath = pathParts[0] || locale || "uz"
+    const shareUrl = `${window.location.origin}/${localeFromPath}/news/${news.slug}`
+    const shareText = `${news.title}\n${shareUrl}`
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: news.title,
+          text: news.title,
+          url: shareUrl,
+        })
         return
       }
-      const urls = {
-        telegram: `https://t.me/share/url?url=${u}&text=${titleEnc}`,
-        facebook: `https://www.facebook.com/sharer/sharer.php?u=${u}`,
-        whatsapp: `https://wa.me/?text=${titleEnc}%20${u}`,
-      } as const
-      window.open(urls[type], "_blank", "noopener,noreferrer")
-    },
-    [shareUrl, news.title, t]
-  )
+      await navigator.clipboard.writeText(shareText)
+      toast.success(t("copied"), { position: "bottom-center" })
+    } catch {
+      toast.error(t("copy_failed"))
+    }
+  }, [locale, news.slug, news.title, t])
 
   React.useEffect(() => {
     if (typeof window === "undefined") return
@@ -276,104 +242,54 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
           </Button>
         </div> */}
 
-        <TooltipProvider>
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-x-2 gap-y-2 text-sm text-muted-foreground bg-muted p-2 rounded-sm">
-            <div className="flex flex-wrap items-center justify-start gap-x-0 gap-y-1">
-              <time dateTime={formatDateISO(news.publishedAt)} className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 shrink-0" /> <span>{formatDateTimeLocale(news.publishedAt, locale)}</span>
-              </time>
-            </div>
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-x-2 gap-y-2 text-sm text-muted-foreground rounded-sm">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-8 gap-1.5 px-2 bg-foreground/10 text-muted-foreground hover:text-foreground"
+            onClick={() => router.back()}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
 
-            <div className="flex items-center gap-1">
-              <SavedNewsActions
-                slug={news.slug}
-                newsId={newsId}
-                overlay
-                unauthAction="toast"
-                size="sm"
-                variant="ghost"
-                className="h-8 w-8 p-0"
-              />
-              <DropdownMenu>
-                <Tooltip>
-                  <DropdownMenuTrigger asChild>
-                    <TooltipTrigger asChild>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 gap-1.5 text-muted-foreground hover:text-foreground"
-                      >
-                        <Share2 className="h-4 w-4" />
-                      </Button>
-                    </TooltipTrigger>
-                  </DropdownMenuTrigger>
-                  <TooltipContent>{t("share")}</TooltipContent>
-                </Tooltip>
-                <DropdownMenuContent align="end" className="min-w-50">
-                  <DropdownMenuItem
-                    onSelect={() => void openShare("telegram")}
-                    className="flex cursor-pointer items-center gap-2"
-                  >
-                    <span className="flex size-8 shrink-0 items-center justify-center rounded-full border [&_svg]:size-3">
-                      <Send className="size-4" aria-hidden />
-                    </span>
-                    Telegram
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onSelect={() => void openShare("whatsapp")}
-                    className="flex cursor-pointer items-center gap-2"
-                  >
-                    <span className="flex size-8 shrink-0 items-center justify-center rounded-full border [&_svg]:size-3">
-                      <svg className="size-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.435 9.884-9.881 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                      </svg>
-                    </span>
-                    WhatsApp
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onSelect={() => void openShare("instagram")}
-                    className="flex cursor-pointer items-center gap-2"
-                  >
-                    <span className="flex size-8 shrink-0 items-center justify-center rounded-full border [&_svg]:size-3">
-                      {SOCIAL_ICONS.instagram.icon}
-                    </span>
-                    Instagram
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onSelect={() => void openShare("facebook")}
-                    className="flex cursor-pointer items-center gap-2"
-                  >
-                    <span className="flex size-8 shrink-0 items-center justify-center rounded-full border">
-                      <Facebook className="size-4" aria-hidden />
-                    </span>
-                    Facebook
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onSelect={() => void copyLink()}
-                    className="flex cursor-pointer items-center gap-2"
-                  >
-                    <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-foreground">
-                      <Link2 className="size-4" aria-hidden />
-                    </span>
-                    {t("copy_link")}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+
+          <div className="flex items-center gap-1">
+            <SavedNewsActions
+              slug={news.slug}
+              newsId={newsId}
+              overlay
+              unauthAction="toast"
+              size="sm"
+              variant="ghost"
+              className="h-8 w-8 p-0"
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-8 gap-1.5 text-muted-foreground hover:text-foreground"
+              onClick={() => void handleShare()}
+            >
+              <Share2 className="h-4 w-4" />
+            </Button>
           </div>
-        </TooltipProvider>
+        </div>
 
         <h1 className="text-2xl font-bold leading-tight md:text-3xl">
           {news.title}
         </h1>
-        <Link
-          href={`/category/${categorySlug}`}
-          className="font-medium block my-2 text-brand hover:underline"
-        >
-          {categoryLabel}
-        </Link>
+        <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
+          <Link
+            href={`/category/${categorySlug}`}
+            className="font-medium block my-2 text-brand hover:underline"
+          >
+            {categoryLabel}
+          </Link>
+          <time dateTime={formatDateTime(news.publishedAt)} className="text-sm text-muted-foreground flex items-center gap-2">
+            <Calendar className="h-4 w-4 hidden md:block shrink-0" /> <span>{formatDateTimeDotSlash(news.publishedAt)}</span>
+          </time>
+        </div>
         {news.description != null && news.description !== "" && (
           <p className="leading-relaxed">
             {news.description}

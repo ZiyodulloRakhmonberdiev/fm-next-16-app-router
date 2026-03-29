@@ -23,16 +23,17 @@ export function LoadMoreButton({
   return (
     <Button
       type={type}
+      variant="outline"
       className={cn(
-        "mt-2 md:mt-4 group transition rounded-sm cursor-pointer h-auto py-2",
+        "mt-2 md:mt-4 group transition rounded-full cursor-pointer h-auto py-3 w-3/4 mx-auto px-6",
         className
       )}
       {...props}
     >
       {showChevron ? (
-        <ChevronRight className="block size-6 shrink-0 bg-background text-foreground rounded-full p-1 transition duration-200" aria-hidden />
+        <ChevronRight className="ml-6 block size-6 shrink-0 bg-background text-foreground rounded-full p-1 transition duration-200" aria-hidden />
       ) : null}
-      {label}
+      <span className="mr-6 text-md font-medium">{label}</span>
       {/* {showChevron ? (
         <ChevronRight className="hidden group-hover:block size-7 shrink-0 bg-background text-foreground rounded-full p-1" aria-hidden />
       ) : null} */}
