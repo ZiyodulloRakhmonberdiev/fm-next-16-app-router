@@ -62,18 +62,8 @@ export function AudioListingCard({
           : "border-border/60 bg-card hover:border-brand/20 hover:shadow-sm hover:bg-card/80"
       )}
     >
-      {/* Active left accent bar */}
-      {/* <span
-        className={cn(
-          "absolute left-0 inset-y-0 w-[3px] rounded-r-full transition-all duration-300",
-          isActive ? "bg-brand opacity-100" : "opacity-0"
-        )}
-        aria-hidden
-      /> */}
-
       <div className="flex w-full gap-0 sm:gap-0">
         {/* Thumbnail */}
-
         <div className="relative md:w-24 md:h-24 w-16 h-16 shrink-0 overflow-hidden rounded-sm bg-muted">
           {thumbSrc ? (
             <>
@@ -82,39 +72,12 @@ export function AudioListingCard({
                 alt={item.title}
                 fill
                 className={cn(
-                  "object-cover transition-all duration-500",
-                  isActive ? "" : ""
+                  "object-cover transition-all duration-500"
                 )}
               />
-              {/* Gradient overlay */}
-              {/* <div
-                className={cn(
-                  "absolute inset-0 transition-opacity duration-300",
-                  isActive ? "bg-linear-to-t from-brand/60 via-brand/10 to-transparent opacity-100" : "opacity-0 group-hover:opacity-60"
-                )}
-              /> */}
             </>
           ) : (
-            <div
-              className={cn(
-                "flex h-full w-full items-center justify-center transition-colors duration-300",
-                isActive ? "bg-brand/20" : "bg-muted group-hover:bg-brand/10"
-              )}
-            >
-              {/* Sound wave illustration */}
-              {/* <span className="inline-flex items-end gap-[3px] h-8" aria-hidden>
-                {[5, 10, 7, 14, 9, 12, 6].map((h, i) => (
-                  <span
-                    key={i}
-                    className={cn(
-                      "w-[3px] rounded-full transition-colors duration-300",
-                      isActive ? "bg-brand" : "bg-muted-foreground/30 group-hover:bg-brand/40"
-                    )}
-                    style={{ height: `${h}px` }}
-                  />
-                ))}
-              </span> */}
-            </div>
+            null
           )}
 
 
@@ -126,7 +89,7 @@ export function AudioListingCard({
           <div className="hidden md:flex flex-wrap items-center justify-between gap-2 mb-2">
             <div className="flex items-center gap-2">
               {/* AUDIO badge */}
-              <span
+              {/* <span
                 className={cn(
                   "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase transition-colors duration-200",
                   isActive
@@ -151,13 +114,13 @@ export function AudioListingCard({
                   </span>
                 )}
                 Audio
-              </span>
+              </span> */}
 
               <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground capitalize">
                 <span
                   className={cn(
                     "block h-1.5 w-1.5 rounded-full transition-colors",
-                    isActive ? "bg-brand" : "bg-muted-foreground/40"
+                    isActive ? "bg-brand" : "bg-brand"
                   )}
                 />
                 {categoryLabel}

@@ -60,7 +60,7 @@ export async function uploadVideoViaApiOrCloudinary(
 
 export async function uploadFileViaPresignedUrl(
   file: File,
-  kind: "image" | "video"
+  kind: "image" | "video" | "audio"
 ): Promise<string> {
   let fileToUpload = file
   if (kind === "image") {
@@ -84,7 +84,9 @@ export async function uploadFileViaPresignedUrl(
   const res2 = await fetch(data1.presignedUrl, {
     method: "PUT",
     headers: {
-      "Content-Type": fileToUpload.type || (kind === "image" ? "image/jpeg" : "video/mp4"),
+      "Content-Type":
+        fileToUpload.type ||
+        (kind === "image" ? "image/jpeg" : kind === "video" ? "video/mp4" : "audio/mpeg"),
     },
     body: fileToUpload,
   })

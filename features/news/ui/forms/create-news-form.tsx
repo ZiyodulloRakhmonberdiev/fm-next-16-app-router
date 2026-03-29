@@ -16,6 +16,7 @@ import { ImageForm } from './image-section'
 import { VideoForm } from './video-section'
 import { AudioForm } from './audio-section'
 import { ContentForm } from './content-section'
+import { SettingsForm } from './settings-section'
 import type { NewsStatus } from '@/features/news/model'
 import type { EditNewsInitialData } from '@/features/news/lib/raw-to-edit-initial'
 import { adminQueryKeys } from '@/features/dashboard/model/admin-hooks'
@@ -907,7 +908,7 @@ export function CreateNewsForm({
           pushedToTelegramAt={pushedToTelegramAt}
           onStatusChange={
             isEditMode
-              ? async (newStatus) => {
+              ? async (newStatus: NewsStatus) => {
                   setEditStatus(newStatus)
                   try {
                     const saved = await saveNews.mutateAsync({ status: newStatus, videoFile, videoUrl }) as {
