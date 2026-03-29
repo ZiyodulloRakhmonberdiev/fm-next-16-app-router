@@ -2,7 +2,7 @@ import { MetadataRoute } from "next"
 import { getSitemapData } from "@/shared/server/public-data-server"
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const { news, categories } = await getSitemapData()
+  const { news, categories, themes } = await getSitemapData()
   const baseUrl = "https://ferganamedia.uz"
   const locales = ["uz", "uzb", "ru", "en"]
 
@@ -38,6 +38,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }))
   )
 
+  const themeEntries: MetadataRoute.Sitemap = locales.flatMap((locale) =>
+    themes.map((theme: any) => ({
+      url: `${baseUrl}/${locale}/theme/${theme.slug}`,
+      lastModified: theme.updatedAt ? new Date(theme.updatedAt) : lastModified,
+      changeFrequency: "daily" as const,
+      priority: 0.55,
+    }))
+  )
+
   const newsEntries: MetadataRoute.Sitemap = locales.flatMap((locale) => 
     news.map((item: any) => ({
       url: `${baseUrl}/${locale}/news/${item.slug}`,
@@ -47,5 +56,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }))
   )
 
-  return [...staticEntries, ...categoryEntries, ...newsEntries]
+  return [...staticEntries, ...categoryEntries, ...themeEntries, ...newsEntries]
 }

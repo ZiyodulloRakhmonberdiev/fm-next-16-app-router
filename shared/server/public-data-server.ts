@@ -2,8 +2,10 @@ import { unstable_cache } from "next/cache"
 import { dbConnect } from "@/shared/common/lib/db"
 import { NewsModel } from "@/features/news/model/news.model"
 import { CategoryModel } from "@/features/category/model/category.model"
+import { ThemeModel } from "@/features/theme/model/theme.model"
 import { TagModel } from "@/features/tags/model/tag.model"
 import { AdModel } from "@/features/ads/model/ads.model"
+import { UserModel } from "@/features/users/model/user.model"
 
 /**
  * Bu funksiyalar faqat SERVER COMPONENTLAR ichida chaqiriladi.
@@ -19,8 +21,23 @@ export const getCachedPublicNews = unstable_cache(
       .limit(120)
       .lean()
 
+    const authorIds = Array.from(
+      new Set(news.map((n) => n.authorId).filter((id): id is string => typeof id === "string" && id.trim() !== ""))
+    )
+    const authorNameById = new Map<string, string>()
+    if (authorIds.length > 0) {
+      const users = await UserModel.find({ _id: { $in: authorIds } })
+        .select({ _id: 1, full_name: 1 })
+        .lean()
+      for (const user of users) authorNameById.set(user._id, user.full_name)
+    }
+    const normalizedNews = news.map((item) => ({
+      ...item,
+      author: item.authorId ? (authorNameById.get(item.authorId) ?? item.author) : item.author,
+    }))
+
     // Mongoose hujjatlarini plain JSON qilib qaytaramiz (Date ob'ektlarini string qilib)
-    return JSON.parse(JSON.stringify(news))
+    return JSON.parse(JSON.stringify(normalizedNews))
   },
   ["public-news-list"],
   { revalidate: 60, tags: ["news"] }
@@ -36,6 +53,18 @@ export const getCachedPublicCategories = unstable_cache(
   },
   ["public-categories-list"],
   { revalidate: 300, tags: ["categories"] }
+)
+
+export const getCachedPublicThemes = unstable_cache(
+  async () => {
+    await dbConnect()
+    const themes = await ThemeModel.find({ status: "active" })
+      .sort({ createdAt: -1 })
+      .lean()
+    return JSON.parse(JSON.stringify(themes))
+  },
+  ["public-themes-list"],
+  { revalidate: 300, tags: ["themes"] }
 )
 
 export const getCachedPublicTags = unstable_cache(
@@ -78,6 +107,17 @@ export const getCachedCategoryBySlug = unstable_cache(
   { revalidate: 3600, tags: ["categories"] }
 )
 
+export const getCachedThemeBySlug = unstable_cache(
+  async (slug: string) => {
+    await dbConnect()
+    const theme = await ThemeModel.findOne({ slug, status: "active" }).lean()
+    if (!theme) return null
+    return JSON.parse(JSON.stringify(theme))
+  },
+  ["theme-by-slug"],
+  { revalidate: 3600, tags: ["themes"] }
+)
+
 /**
  * Sitemap uchun barcha e'lon qilingan yangiliklar va kategoriyalarni olamiz.
  */
@@ -91,9 +131,13 @@ export async function getSitemapData() {
   const categories = await CategoryModel.find()
     .select("slug updatedAt")
     .lean()
+  const themes = await ThemeModel.find({ status: "active" })
+    .select("slug updatedAt")
+    .lean()
 
   return {
     news: JSON.parse(JSON.stringify(news)),
     categories: JSON.parse(JSON.stringify(categories)),
+    themes: JSON.parse(JSON.stringify(themes)),
   }
 }

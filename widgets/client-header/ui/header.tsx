@@ -62,7 +62,9 @@ export default function Header() {
   return (
     <div>
       <div ref={topBlockRef}>
-        <AdSlotHeader />
+        <div className="hidden md:block">
+          <AdSlotHeader />
+        </div>
         <div className="border-b border-border bg-background">
           <Headline />
         </div>
@@ -73,7 +75,7 @@ export default function Header() {
       <div
         ref={barRef}
         className={cn(
-          'bg-background border-b border-border shadow-sm z-50',
+          'bg-card border-b border-border shadow-sm z-50',
           isPinned ? 'fixed inset-x-0 top-0' : 'relative'
         )}
       >

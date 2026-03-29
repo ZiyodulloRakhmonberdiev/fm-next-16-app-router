@@ -25,6 +25,15 @@ export type AdminTag = {
   name: LocaleMap
 }
 
+export type AdminTheme = {
+  _id: string
+  slug: string
+  name: LocaleMap
+  subtitle: LocaleMap
+  description: LocaleMap
+  status: "active" | "inactive"
+}
+
 export type AdminUserRole = 'ceo' | 'administrator' | 'moderator' | 'ads_manager' | 'user'
 
 export type AdminUser = {
@@ -47,6 +56,14 @@ export type CreateCategoryPayload = {
 export type CreateTagPayload = {
   slug: string
   name: LocaleMap
+}
+
+export type CreateThemePayload = {
+  slug: string
+  name: LocaleMap
+  subtitle: LocaleMap
+  description: LocaleMap
+  status: "active" | "inactive"
 }
 
 export type CreateUserPayload = {
@@ -104,6 +121,7 @@ export function getApiErrorDescription(error: unknown): string | undefined {
 async function apiFetch<T>(input: string, init?: RequestInit): Promise<T> {
   const res = await fetch(input, {
     ...init,
+    cache: 'no-store',
     headers: {
       'Content-Type': 'application/json',
       ...(init?.headers ?? {}),
@@ -154,6 +172,10 @@ export function getTags() {
   return apiFetch<AdminTag[]>('/api/tags')
 }
 
+export function getThemes() {
+  return apiFetch<AdminTheme[]>('/api/themes')
+}
+
 export function createTag(payload: CreateTagPayload) {
   return apiFetch<AdminTag>('/api/tags', {
     method: 'POST',
@@ -170,6 +192,24 @@ export function updateTag(id: string, payload: CreateTagPayload) {
 
 export function deleteTag(id: string) {
   return apiFetch<{ ok: true }>(`/api/tags/${id}`, { method: 'DELETE' })
+}
+
+export function createTheme(payload: CreateThemePayload) {
+  return apiFetch<AdminTheme>('/api/themes', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
+
+export function updateTheme(id: string, payload: CreateThemePayload) {
+  return apiFetch<AdminTheme>(`/api/themes/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  })
+}
+
+export function deleteTheme(id: string) {
+  return apiFetch<{ ok: true }>(`/api/themes/${id}`, { method: 'DELETE' })
 }
 
 export function getUsers() {
@@ -198,6 +238,7 @@ export function getNews(status?: NewsStatus) {
   const qs = new URLSearchParams({
     page: '1',
     limit: '500',
+    admin: '1',
   })
   if (status) qs.set('status', status)
   return apiFetch<ApiNewsListResponse>(`/api/news?${qs.toString()}`)

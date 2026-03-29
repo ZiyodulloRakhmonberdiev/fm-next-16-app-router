@@ -12,6 +12,7 @@ import { NewsReactionModel } from '@/features/news/model/reaction.model'
 import { SavedNewsModel } from '@/features/news/model/saved-news.model'
 import { TagModel } from '@/features/tags/model/tag.model'
 import { TeamMemberModel } from '@/features/team/model/team.model'
+import { ThemeModel } from '@/features/theme/model/theme.model'
 import { UserModel } from '@/features/users/model/user.model'
 import type { DatabaseBackupSettings } from '@/shared/common/lib/site-settings-types'
 
@@ -42,6 +43,7 @@ export async function createDatabaseBackupArchive(): Promise<DatabaseBackupArchi
     news: await NewsModel.find({}).lean(),
     users: await UserModel.find({}).lean(),
     categories: await CategoryModel.find({}).lean(),
+    themes: await ThemeModel.find({}).lean(),
     tags: await TagModel.find({}).lean(),
     siteSettings: await SiteSettingsModel.find({}).lean(),
     ads: await AdModel.find({}).lean(),

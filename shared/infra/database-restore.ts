@@ -12,6 +12,7 @@ import { NewsModel } from '@/features/news/model/news.model'
 import { SavedNewsModel } from '@/features/news/model/saved-news.model'
 import { TagModel } from '@/features/tags/model/tag.model'
 import { TeamMemberModel } from '@/features/team/model/team.model'
+import { ThemeModel } from '@/features/theme/model/theme.model'
 import { UserModel } from '@/features/users/model/user.model'
 
 export type DatabaseRestoreResult = {
@@ -29,6 +30,7 @@ type BackupArchive = {
     news?: unknown[]
     users?: unknown[]
     categories?: unknown[]
+    themes?: unknown[]
     tags?: unknown[]
     siteSettings?: unknown[]
     ads?: unknown[]
@@ -65,6 +67,7 @@ export async function restoreDatabase(
       NewsModel.deleteMany({}),
       UserModel.deleteMany({}),
       CategoryModel.deleteMany({}),
+      ThemeModel.deleteMany({}),
       TagModel.deleteMany({}),
       AdModel.deleteMany({}),
       AdFeedbackModel.deleteMany({}),
@@ -80,6 +83,7 @@ export async function restoreDatabase(
     const collectionsNews = Array.isArray(collections.news) ? collections.news : []
     const collectionsUsers = Array.isArray(collections.users) ? collections.users : []
     const collectionsCategories = Array.isArray(collections.categories) ? collections.categories : []
+    const collectionsThemes = Array.isArray(collections.themes) ? collections.themes : []
     const collectionsTags = Array.isArray(collections.tags) ? collections.tags : []
     const collectionsSiteSettings = Array.isArray(collections.siteSettings) ? collections.siteSettings : []
     const collectionsAds = Array.isArray(collections.ads) ? collections.ads : []
@@ -100,6 +104,10 @@ export async function restoreDatabase(
     if (collectionsCategories.length) {
       await CategoryModel.insertMany(collectionsCategories, { ordered: false })
       inserted.categories = collectionsCategories.length
+    }
+    if (collectionsThemes.length) {
+      await ThemeModel.insertMany(collectionsThemes, { ordered: false })
+      inserted.themes = collectionsThemes.length
     }
     if (collectionsTags.length) {
       await TagModel.insertMany(collectionsTags, { ordered: false })

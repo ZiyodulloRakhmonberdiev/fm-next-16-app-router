@@ -10,9 +10,13 @@ export interface INews {
   title: NewsTitleLocale
   description?: NewsOptionalLocale<string>
   content?: NewsOptionalLocale<NewsContent>
+  categoryId: string
   categorySlug: string
+  themeId?: string
+  tagIds: string[]
   tagSlugs: string[]
   images: string[]
+  authorId?: string | null
   author?: string | null
   minutes: number
   views: number
@@ -65,9 +69,13 @@ const NewsSchema = new Schema<INews>(
       ru: Schema.Types.Mixed,
       en: Schema.Types.Mixed,
     },
+    categoryId: { type: String, required: true, index: true },
     categorySlug: { type: String, required: true },
+    themeId: { type: String, required: false },
+    tagIds: { type: [String], default: [], index: true },
     tagSlugs: { type: [String], default: [] },
     images: { type: [String], default: [] },
+    authorId: { type: String, required: false, index: true },
     author: { type: String, required: false },
     minutes: { type: Number, default: 1 },
     views: { type: Number, default: 0 },
@@ -103,9 +111,25 @@ const NewsSchema = new Schema<INews>(
 )
 
 NewsSchema.index({ categorySlug: 1 })
+NewsSchema.index({ categoryId: 1 })
+NewsSchema.index({ themeId: 1 })
 NewsSchema.index({ status: 1, publishedAt: -1 })
+NewsSchema.index({ tagIds: 1 })
 NewsSchema.index({ tagSlugs: 1 })
+NewsSchema.index({ authorId: 1 })
 NewsSchema.index({ telegramMessageId: 1 })
 
-export const NewsModel =
-  models.News || model<INews>('News', NewsSchema)
+const existingNewsModel = models.News
+if (
+  existingNewsModel &&
+  (
+    !existingNewsModel.schema.path('themeId') ||
+    !existingNewsModel.schema.path('categoryId') ||
+    !existingNewsModel.schema.path('tagIds') ||
+    !existingNewsModel.schema.path('authorId')
+  )
+) {
+  delete models.News
+}
+
+export const NewsModel = models.News || model<INews>('News', NewsSchema)

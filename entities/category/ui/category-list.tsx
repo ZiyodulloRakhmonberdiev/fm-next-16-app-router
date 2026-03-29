@@ -27,6 +27,9 @@ export default function CategoryList() {
       <Link href="/news/video" className="text-sm">
         <span>{t("video")}</span>
       </Link>
+      <Link href="/news/audio" className="text-sm">
+        <span>{t("audio")}</span>
+      </Link>
     </div>
   );
 }

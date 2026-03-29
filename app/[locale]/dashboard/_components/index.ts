@@ -1,5 +1,7 @@
 export { CategoriesPage } from './categories-page'
 export type { CategoryRow } from './categories-page'
+export { ThemesPage } from './themes-page'
+export type { ThemeRow } from './themes-page'
 export { TagsPage } from './tags-page'
 export type { TagRow } from './tags-page'
 export { ConfigsPage } from './configs-page'
