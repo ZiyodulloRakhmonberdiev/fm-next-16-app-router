@@ -40,8 +40,10 @@ export default function Header() {
   useEffect(() => {
     const updatePinned = () => {
       const topHeight = topBlockRef.current?.offsetHeight ?? 0
+      const h = barRef.current?.offsetHeight ?? 0
       setIsPinned(window.scrollY > topHeight)
-      setBarHeight(barRef.current?.offsetHeight ?? 0)
+      setBarHeight(h)
+      document.documentElement.style.setProperty('--header-bar-height', `${h}px`)
     }
     updatePinned()
     window.addEventListener('scroll', updatePinned, { passive: true })
@@ -90,9 +92,6 @@ export default function Header() {
             </Link>
             <div className="ml-12 md:ml-16 flex items-center gap-6">
               <CategoryList />
-              <Link href="/news/audio" className="text-sm font-medium hover:text-brand transition-colors">
-                Audio
-              </Link>
             </div>
           </div>
           {/* <div className="z-[2] flex shrink-0 items-center md:hidden">

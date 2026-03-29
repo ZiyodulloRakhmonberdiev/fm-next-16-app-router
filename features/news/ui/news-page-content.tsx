@@ -401,8 +401,8 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
           </div>
         </div>
         {news.audioUrl && (
-          <div className="mb-6 rounded-xl border bg-muted/30 p-4 shadow-sm">
-            <div className="mb-2 flex items-center gap-2 text-sm font-medium text-brand">
+          <div className="mb-6 rounded-xl border bg-foreground/10 p-4 shadow-sm">
+            <div className="mb-2 flex items-center gap-2 text-sm font-medium">
               <Volume2 className="size-4" />
               <span>Audio xabarni tinglang</span>
             </div>
