@@ -51,7 +51,7 @@
 :root {
   color-scheme: light;
   --radius: 0.625rem;
-  --background: #ffffff;
+  --background: rgb(245, 245, 245);
   /* --foreground: #0a0a0a; */
   --bg-muted: #f5f5f5;
   --foreground: #111;

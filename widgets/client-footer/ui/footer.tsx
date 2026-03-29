@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react'
 import { useTheme } from 'next-themes'
 import type { AppLocale } from '@/shared/common/lib/locale-api'
 import { usePublicSiteSettingsQuery } from '@/shared/server/public-site-settings-query'
+import { Button } from '@/shared/common/components/ui/button'
 
 export default function Footer() {
   const { resolvedTheme } = useTheme()
@@ -28,20 +29,18 @@ export default function Footer() {
 
   const t = useTranslations("common")
   return (
-    <div className="py-4 border-t border-border shadow-sm">
+    <div className="py-4 border-t border-border shadow-sm mt-4">
       <div className="max-w-7xl mx-auto px-4 md:px-6">
-        <div className="flex items-start md:items-center justify-between gap-2 flex-col md:flex-row mb-2">
-          <Link href="/" className="flex h-8 shrink-0 items-center md:h-10">
-            <Image
-              src={mounted ? logoSrc : '/images/fm-logo-dark.svg'}
-              alt="Logo"
-              width={130}
-              height={40}
-              className="h-6 w-auto max-h-6 object-contain object-left md:h-8 md:max-h-8"
-              sizes="(max-width: 768px) 100px, 130px"
-            />
-          </Link>
-        </div>
+        <Link href="/" className="flex h-8 shrink-0 items-center md:h-10 mb-2">
+          <Image
+            src={mounted ? logoSrc : '/images/fm-logo-dark.svg'}
+            alt="Logo"
+            width={130}
+            height={40}
+            className="h-6 w-auto max-h-6 object-contain object-left md:h-8 md:max-h-8"
+            sizes="(max-width: 768px) 100px, 130px"
+          />
+        </Link>
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0 md:gap-4 lg:gap-6 items-start justify-between'>
           {/* Description */}
           <div className='w-full border-b md:border-none border-border pb-2 flex gap-2 flex-col'>
@@ -87,8 +86,21 @@ export default function Footer() {
             />
           </div>
         </div>
-        <div className="flex items-center justify-center gap-2 py-4 mt-4 border-t border-border">
+        <div className='flex items-center justify-end'>
+          <Button className='w-10 font-bold ml-auto bg-white dark:bg-black' size='icon' variant='outline' type='button'
+          >16+</Button>
+        </div>
+        <div className="flex flex-col items-center justify-center gap-4 py-4 mt-4 border-t border-border">
           <p className="text-sm text-foreground/70 text-center">{seed.copyright[locale]} </p>
+          <Link href="/" className="flex md:hidden">
+            <Image
+              src={'/images/footer-logo.png'}
+              alt="Logo"
+              width={80}
+              height={80}
+              className=""
+            />
+          </Link>
         </div>
       </div>
     </div>
