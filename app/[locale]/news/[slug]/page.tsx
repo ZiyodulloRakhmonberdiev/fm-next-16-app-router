@@ -111,7 +111,7 @@ export default async function NewsPage({ params }: Props) {
         <main className="flex-1 md:py-4 ">
           <ClientServerOffGate model="news">
             <div className="mx-auto max-w-7xl grid grid-cols-1 gap-6 lg:grid-cols-7">
-              <aside className="hidden lg:flex lg:flex-col lg:col-span-1 lg:sticky lg:top-20 lg:self-start gap-4">
+              <aside className="hidden lg:flex lg:flex-col lg:col-span-1 gap-4">
                 <div className="px-4 text-lg">
                   <nav className="flex flex-col gap-4">
                     <Link href="/" className="flex items-center gap-3">

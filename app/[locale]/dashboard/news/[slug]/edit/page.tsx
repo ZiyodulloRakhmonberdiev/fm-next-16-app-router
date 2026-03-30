@@ -32,7 +32,7 @@ export default async function EditNewsPage({ params }: Props) {
     fetch(await getServerApiUrl('/api/categories'), opts),
     fetch(await getServerApiUrl('/api/themes?admin=1'), opts),
     fetch(await getServerApiUrl('/api/tags'), opts),
-    fetch(await getServerApiUrl('/api/news?page=1&limit=500'), opts),
+    fetch(await getServerApiUrl('/api/news?page=1&limit=500&admin=1'), opts),
     fetch(await getServerApiUrl('/api/users'), opts),
   ])
   const failed = [

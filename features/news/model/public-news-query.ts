@@ -39,7 +39,7 @@ function normalizeNews(item: RawNewsItemApi): RawNewsItem {
 }
 
 function isPublishedForPublic(item: RawNewsItem): boolean {
-  return (item.status ?? "published") === "published"
+  return (item.status ?? "published") === "published" && item.ad !== true && item.stats !== true
 }
 
 async function fetchPublishedNews(): Promise<RawNewsItem[]> {

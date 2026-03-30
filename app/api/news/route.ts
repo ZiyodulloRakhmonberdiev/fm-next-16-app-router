@@ -45,9 +45,14 @@ export async function GET(req: NextRequest) {
     const breaking = searchParams.get("breaking") ?? searchParams.get("isBreaking")
     const video = searchParams.get("video") ?? searchParams.get("hasVideo") ?? searchParams.get("has_video")
     const audio = searchParams.get("audio") ?? searchParams.get("hasAudio") ?? searchParams.get("has_audio")
+    const includeAd = searchParams.get("includeAd") ?? searchParams.get("include_ad")
     const skip = (page - 1) * limit
 
     const filter: Record<string, unknown> = {}
+    if (!wantsAdmin && includeAd !== "1" && includeAd !== "true") {
+      filter.ad = { $ne: true }
+      filter.stats = { $ne: true }
+    }
     if (status) filter.status = status
     const categorySlugs = [
       ...categoryList.flatMap((v) => String(v).split(",").map((s) => s.trim()).filter(Boolean)),

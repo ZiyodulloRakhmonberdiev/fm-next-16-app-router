@@ -4,6 +4,7 @@ import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { MenuIcon, PanelLeftIcon, PanelRight } from "lucide-react"
 import { Slot } from "radix-ui"
+import { FiAlignRight } from "react-icons/fi";
 
 import { useIsMobile } from "@/shared/hooks/use-mobile"
 import { cn } from "@/shared/common/lib/utils"
@@ -281,7 +282,7 @@ function SidebarTrigger({
       }}
       {...props}
     >
-      <MenuIcon />
+      <FiAlignRight />
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
   )

@@ -21,14 +21,14 @@ export async function GET(req: NextRequest) {
   const slugsLegacy = Array.from(new Set(rows.map((r) => r.newsSlug).filter(Boolean) as string[]))
   const [byId, bySlug] = await Promise.all([
     ids.length > 0
-      ? NewsModel.find({ _id: { $in: ids }, status: "published" })
+      ? NewsModel.find({ _id: { $in: ids }, status: "published", ad: { $ne: true }, stats: { $ne: true } })
           .select(
             "slug title description images publishedAt videoUrl videoSource categorySlug tagSlugs author minutes views"
           )
           .lean()
       : [],
     slugsLegacy.length > 0
-      ? NewsModel.find({ slug: { $in: slugsLegacy }, status: "published" })
+      ? NewsModel.find({ slug: { $in: slugsLegacy }, status: "published", ad: { $ne: true }, stats: { $ne: true } })
           .select(
             "slug title description images publishedAt videoUrl videoSource categorySlug tagSlugs author minutes views"
           )
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
   const newsSlug = body?.newsSlug?.trim()
   if (!newsId && newsSlug) {
     await dbConnect()
-    const news = await NewsModel.findOne({ slug: newsSlug, status: "published" }).select("_id slug").lean()
+    const news = await NewsModel.findOne({ slug: newsSlug, status: "published", ad: { $ne: true }, stats: { $ne: true } }).select("_id slug").lean()
     if (news && (news as { _id?: unknown })._id != null) {
       newsId = String((news as { _id: unknown })._id)
     }
@@ -74,8 +74,11 @@ export async function POST(req: NextRequest) {
   }
   let slugForDoc = newsSlug
   if (!slugForDoc) {
-    const news = await NewsModel.findById(newsId).select("slug").lean()
-    if (news) slugForDoc = news.slug
+    const news = await NewsModel.findById(newsId).select("slug status ad").lean()
+    if (news && news.status === "published" && news.ad !== true && news.stats !== true) slugForDoc = news.slug
+  }
+  if (!slugForDoc) {
+    return Response.json({ error: "Yangilik topilmadi yoki saqlab bo'lmaydi" }, { status: 404 })
   }
   await SavedNewsModel.create({
     userId: session.user.id,

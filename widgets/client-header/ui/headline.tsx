@@ -5,6 +5,8 @@ import { SocialMediaButtons } from "@/shared/common/components/ui/social-media-b
 import { useLocale } from "next-intl"
 import type { AppLocale } from "@/shared/common/lib/locale-api"
 import { usePublicSiteSettingsQuery } from "@/shared/server/public-site-settings-query"
+import { WeatherWidget } from "@/shared/common/components/market/weather-widget"
+import { CurrencyWidget } from "@/shared/common/components/market/currency-widget"
 
 export default function Headline() {
   const locale = useLocale() as AppLocale
@@ -16,9 +18,10 @@ export default function Headline() {
     ""
 
   return (
-    <div className="w-full bg-foreground/10 py-2 hidden md:block space-y-2">
+    <div className="w-full py-2 hidden md:block space-y-2">
       <div className="max-w-7xl mx-auto flex items-center px-4 md:px-6 justify-between">
-        <div className="min-h-5">
+        <div className="min-h-5 flex items-center gap-4">
+          <WeatherWidget compact />
           {enabled && headline.trim() ? (
             <p className="text-sm text-foreground font-normal flex items-center">
               <AlertOctagon className="w-4 h-4" />
@@ -27,6 +30,7 @@ export default function Headline() {
           ) : null}
         </div>
         <div className="flex items-center gap-3">
+          <CurrencyWidget variant="desktop" />
           <SocialMediaButtons variant="icon-only" />
         </div>
       </div>

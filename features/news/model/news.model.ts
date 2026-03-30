@@ -29,6 +29,8 @@ export interface INews {
   isPopular?: boolean
   isTop?: boolean
   isBreaking?: boolean
+  ad?: boolean
+  stats?: boolean
   pushedToTelegram?: boolean
   pushedToTelegramAt?: Date
   telegramMessageId?: number
@@ -92,6 +94,8 @@ const NewsSchema = new Schema<INews>(
     isPopular: { type: Boolean, default: false },
     isTop: { type: Boolean, default: false },
     isBreaking: { type: Boolean, default: false },
+    ad: { type: Boolean, default: false },
+    stats: { type: Boolean, default: false },
     pushedToTelegram: { type: Boolean, default: false },
     pushedToTelegramAt: Date,
     telegramMessageId: Number,
@@ -114,6 +118,8 @@ NewsSchema.index({ categorySlug: 1 })
 NewsSchema.index({ categoryId: 1 })
 NewsSchema.index({ themeId: 1 })
 NewsSchema.index({ status: 1, publishedAt: -1 })
+NewsSchema.index({ status: 1, ad: 1, publishedAt: -1 })
+NewsSchema.index({ status: 1, stats: 1, publishedAt: -1 })
 NewsSchema.index({ tagIds: 1 })
 NewsSchema.index({ tagSlugs: 1 })
 NewsSchema.index({ authorId: 1 })
@@ -126,7 +132,9 @@ if (
     !existingNewsModel.schema.path('themeId') ||
     !existingNewsModel.schema.path('categoryId') ||
     !existingNewsModel.schema.path('tagIds') ||
-    !existingNewsModel.schema.path('authorId')
+    !existingNewsModel.schema.path('authorId') ||
+    !existingNewsModel.schema.path('ad') ||
+    !existingNewsModel.schema.path('stats')
   )
 ) {
   delete models.News

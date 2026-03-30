@@ -27,7 +27,7 @@ export function NewsListingListCard({ item, locale, stats, imagesLabel, imageOve
   const mediaSrc = thumbSrc || videoPoster
 
   return (
-    <Card className="gap-0 overflow-hidden border-none rounded-lg group p-0 py-0 shadow-none transition-colors bg-foreground/5 hover:bg-background/30 mt-6 md:mt-0">
+    <Card className="gap-0 overflow-hidden border-none rounded-lg group p-0 py-0 shadow-none transition-colors bg-foreground/5 hover:bg-background/30">
       <div className="flex flex-col gap-3 p-0 sm:flex-row">
         <div className="relative h-44 w-full overflow-hidden rounded-md bg-muted sm:h-48 sm:basis-1/3">
           <Link href={`/news/${item.slug}`} className="absolute inset-0 z-0 block">

@@ -15,6 +15,7 @@ import { Input } from '@/shared/common/components/ui/input'
 import { Label } from '@/shared/common/components/ui/label'
 import { Button } from '@/shared/common/components/ui/button'
 import { Textarea } from '@/shared/common/components/ui/textarea'
+import { Switch } from '@/shared/common/components/ui/switch'
 import {
   Dialog,
   DialogContent,
@@ -61,6 +62,7 @@ export type ThemeRow = {
   name: Record<AppLocale, string>
   subtitle: Record<AppLocale, string>
   description: Record<AppLocale, string>
+  showInHomePage?: boolean
   status: ThemeStatus
 }
 
@@ -78,6 +80,8 @@ export function ThemesPage({ locale }: ThemesPageProps) {
   const { createOpen, editId, deleteId, setCreateOpen, setEditId, setDeleteId } = useThemesUiStore()
   const [createStatus, setCreateStatus] = useState<ThemeStatus>('active')
   const [editStatus, setEditStatus] = useState<ThemeStatus>('active')
+  const [createShowInHomePage, setCreateShowInHomePage] = useState(false)
+  const [editShowInHomePage, setEditShowInHomePage] = useState(false)
 
   const themes = useMemo<ThemeRow[]>(
     () =>
@@ -87,6 +91,7 @@ export function ThemesPage({ locale }: ThemesPageProps) {
         name: t.name,
         subtitle: t.subtitle ?? emptyLocaleMap(),
         description: t.description ?? emptyLocaleMap(),
+        showInHomePage: Boolean(t.showInHomePage),
         status: t.status ?? 'active',
       })),
     [data]
@@ -137,11 +142,12 @@ export function ThemesPage({ locale }: ThemesPageProps) {
       return
     }
     create.mutate(
-      { slug, name, subtitle, description, status: createStatus },
+      { slug, name, subtitle, description, showInHomePage: createShowInHomePage, status: createStatus },
       {
         onSuccess: () => {
           setCreateOpen(false)
           setCreateStatus('active')
+          setCreateShowInHomePage(false)
           toast.success("Tema muvaffaqiyatli qo'shildi")
         },
         onError: showMutationError,
@@ -186,7 +192,7 @@ export function ThemesPage({ locale }: ThemesPageProps) {
       return
     }
     update.mutate(
-      { id: editTheme._id, payload: { slug, name, subtitle, description, status: editStatus } },
+      { id: editTheme._id, payload: { slug, name, subtitle, description, showInHomePage: editShowInHomePage, status: editStatus } },
       {
         onSuccess: () => {
           setEditId(null)
@@ -219,7 +225,7 @@ export function ThemesPage({ locale }: ThemesPageProps) {
             </CardTitle>
             <CardDescription>Yangiliklarni mavzu bo'yicha birlashtirish uchun temalar ro'yxati.</CardDescription>
           </div>
-          <Button onClick={() => setCreateOpen(true)} size="lg" className="shrink-0 w-full md:w-auto">
+          <Button onClick={() => { setCreateShowInHomePage(false); setCreateOpen(true) }} size="lg" className="shrink-0 w-full md:w-auto">
             <PlusCircle className="size-4 mr-2" />
             Yangi tema
           </Button>
@@ -248,6 +254,7 @@ export function ThemesPage({ locale }: ThemesPageProps) {
                   <TableHead>Nom (en)</TableHead>
                   <TableHead>Subtitle (uz)</TableHead>
                   <TableHead>Description (uz)</TableHead>
+                  <TableHead>Home</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="w-[170px]">Amallar</TableHead>
                 </TableRow>
@@ -255,7 +262,7 @@ export function ThemesPage({ locale }: ThemesPageProps) {
               <TableBody>
                 {themes.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
+                    <TableCell colSpan={10} className="text-center text-muted-foreground py-8">
                       Tema topilmadi
                     </TableCell>
                   </TableRow>
@@ -272,6 +279,13 @@ export function ThemesPage({ locale }: ThemesPageProps) {
                         <span className="line-clamp-2">{row.description.uz}</span>
                       </TableCell>
                       <TableCell>
+                        {row.showInHomePage ? (
+                          <span className="rounded-full bg-emerald-500/15 text-emerald-600 px-2 py-1 text-xs font-medium">true</span>
+                        ) : (
+                          <span className="rounded-full bg-muted text-muted-foreground px-2 py-1 text-xs font-medium">false</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
                         <span
                           className={
                             row.status === 'active'
@@ -286,6 +300,7 @@ export function ThemesPage({ locale }: ThemesPageProps) {
                         <div className="flex items-center gap-2">
                           <Button variant="secondary" size="sm" title="Tahrirlash" onClick={() => {
                             setEditStatus(row.status)
+                            setEditShowInHomePage(Boolean(row.showInHomePage))
                             setEditId(row._id)
                           }}>
                             <Pencil className="size-4" />
@@ -343,6 +358,14 @@ export function ThemesPage({ locale }: ThemesPageProps) {
                   </div>
                 </div>
               ))}
+              <div className="flex items-center justify-between rounded-md border p-3">
+                <Label htmlFor="create-show-in-home-page">Home page da ko'rsatilsin</Label>
+                <Switch
+                  id="create-show-in-home-page"
+                  checked={createShowInHomePage}
+                  onCheckedChange={setCreateShowInHomePage}
+                />
+              </div>
               <div className="space-y-2">
                 <Label>Status</Label>
                 <Select value={createStatus} onValueChange={(value: ThemeStatus) => setCreateStatus(value)}>
@@ -416,6 +439,14 @@ export function ThemesPage({ locale }: ThemesPageProps) {
                     </div>
                   </div>
                 ))}
+                <div className="flex items-center justify-between rounded-md border p-3">
+                  <Label htmlFor="edit-show-in-home-page">Home page da ko'rsatilsin</Label>
+                  <Switch
+                    id="edit-show-in-home-page"
+                    checked={editShowInHomePage}
+                    onCheckedChange={setEditShowInHomePage}
+                  />
+                </div>
                 <div className="space-y-2">
                   <Label>Status</Label>
                   <Select value={editStatus} onValueChange={(value: ThemeStatus) => setEditStatus(value)}>

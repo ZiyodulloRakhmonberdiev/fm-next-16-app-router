@@ -15,6 +15,8 @@ export function EditNewsStatusForm({ initialStatus = 'pending' }: EditNewsStatus
   const [authorsChoice, setAuthorsChoice] = useState(false)
   const [isPopular, setIsPopular] = useState(false)
   const [isBreaking, setIsBreaking] = useState(false)
+  const [ad, setAd] = useState(false)
+  const [stats, setStats] = useState(false)
   const [pushedToTelegram, setPushedToTelegram] = useState(false)
   const [status, setStatus] = useState<NewsStatus>(initialStatus)
 
@@ -22,17 +24,17 @@ export function EditNewsStatusForm({ initialStatus = 'pending' }: EditNewsStatus
 
   const handleSavePending = () => {
     setStatus('pending')
-    toast.success("Status 'pending' holatida saqlandi")
+    toast.success("Status 'Kutilmoqda' holatida saqlandi")
   }
 
   const handlePublish = () => {
     setStatus('published')
-    toast.success('Yangilik nashr qilingan (published) holatiga o‘tkazildi')
+    toast.success('Yangilik nashr qilindi!')
   }
 
   const handleStatusChange = (newStatus: NewsStatus) => {
     setStatus(newStatus)
-    if (newStatus === 'published') toast.success('Yangilik nashr qilingan (published)')
+    if (newStatus === 'published') toast.success('Yangilik nashr qilindi!')
     else if (newStatus === 'cancelled') toast.success('Yangilik bekor qilindi')
     else if (newStatus === 'deleted') toast.success("Yangilik Savatga o‘tkazildi")
     else if (newStatus === 'archived') toast.success('Yangilik arxivlandi')
@@ -46,6 +48,8 @@ export function EditNewsStatusForm({ initialStatus = 'pending' }: EditNewsStatus
       isTrending={isTrending}
       onChangeIsTrending={setIsTrending}
       isPopular={isPopular}
+      ad={ad}
+      stats={stats}
       pushedToTelegram={pushedToTelegram}
       onChangePushedToTelegram={setPushedToTelegram}
       canPublish={canPublish}
@@ -54,6 +58,8 @@ export function EditNewsStatusForm({ initialStatus = 'pending' }: EditNewsStatus
       onChangeAuthorsChoice={setAuthorsChoice}
       onChangeIsBreaking={setIsBreaking}
       onChangeIsPopular={setIsPopular}
+      onChangeAd={setAd}
+      onChangeStats={setStats}
       onSavePending={handleSavePending}
       onPublish={handlePublish}
       mode="edit"
