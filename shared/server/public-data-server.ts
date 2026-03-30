@@ -16,7 +16,7 @@ export const getCachedPublicNews = unstable_cache(
   async () => {
     await dbConnect()
     // Home sahifasi uchun faqat oxirgi 120 ta maqola yetarli (pagination kerak emas home da)
-    const news = await NewsModel.find({ status: "published" })
+    const news = await NewsModel.find({ status: "published", ad: { $ne: true }, stats: { $ne: true } })
       .sort({ publishedAt: -1 })
       .limit(120)
       .lean()
@@ -40,7 +40,65 @@ export const getCachedPublicNews = unstable_cache(
     return JSON.parse(JSON.stringify(normalizedNews))
   },
   ["public-news-list"],
-  { revalidate: 60, tags: ["news"] }
+  { revalidate: 10, tags: ["news"] }
+)
+
+export const getCachedPublicAdNews = unstable_cache(
+  async () => {
+    await dbConnect()
+    const news = await NewsModel.find({ status: "published", ad: true })
+      .sort({ publishedAt: -1 })
+      .limit(40)
+      .lean()
+
+    const authorIds = Array.from(
+      new Set(news.map((n) => n.authorId).filter((id): id is string => typeof id === "string" && id.trim() !== ""))
+    )
+    const authorNameById = new Map<string, string>()
+    if (authorIds.length > 0) {
+      const users = await UserModel.find({ _id: { $in: authorIds } })
+        .select({ _id: 1, full_name: 1 })
+        .lean()
+      for (const user of users) authorNameById.set(user._id, user.full_name)
+    }
+    const normalizedNews = news.map((item) => ({
+      ...item,
+      author: item.authorId ? (authorNameById.get(item.authorId) ?? item.author) : item.author,
+    }))
+
+    return JSON.parse(JSON.stringify(normalizedNews))
+  },
+  ["public-ad-news-list"],
+  { revalidate: 10, tags: ["news"] }
+)
+
+export const getCachedPublicStatsNews = unstable_cache(
+  async () => {
+    await dbConnect()
+    const news = await NewsModel.find({ status: "published", stats: true })
+      .sort({ publishedAt: -1 })
+      .limit(60)
+      .lean()
+
+    const authorIds = Array.from(
+      new Set(news.map((n) => n.authorId).filter((id): id is string => typeof id === "string" && id.trim() !== ""))
+    )
+    const authorNameById = new Map<string, string>()
+    if (authorIds.length > 0) {
+      const users = await UserModel.find({ _id: { $in: authorIds } })
+        .select({ _id: 1, full_name: 1 })
+        .lean()
+      for (const user of users) authorNameById.set(user._id, user.full_name)
+    }
+    const normalizedNews = news.map((item) => ({
+      ...item,
+      author: item.authorId ? (authorNameById.get(item.authorId) ?? item.author) : item.author,
+    }))
+
+    return JSON.parse(JSON.stringify(normalizedNews))
+  },
+  ["public-stats-news-list"],
+  { revalidate: 10, tags: ["news"] }
 )
 
 export const getCachedPublicCategories = unstable_cache(
@@ -52,7 +110,7 @@ export const getCachedPublicCategories = unstable_cache(
     return JSON.parse(JSON.stringify(categories))
   },
   ["public-categories-list"],
-  { revalidate: 300, tags: ["categories"] }
+  { revalidate: 10, tags: ["categories"] }
 )
 
 export const getCachedPublicThemes = unstable_cache(
@@ -64,7 +122,7 @@ export const getCachedPublicThemes = unstable_cache(
     return JSON.parse(JSON.stringify(themes))
   },
   ["public-themes-list"],
-  { revalidate: 300, tags: ["themes"] }
+  { revalidate: 10, tags: ["themes"] }
 )
 
 export const getCachedPublicTags = unstable_cache(
@@ -74,7 +132,7 @@ export const getCachedPublicTags = unstable_cache(
     return JSON.parse(JSON.stringify(tags))
   },
   ["public-tags-list"],
-  { revalidate: 600, tags: ["tags"] }
+  { revalidate: 10, tags: ["tags"] }
 )
 
 export const getCachedPublicAds = unstable_cache(
@@ -90,7 +148,7 @@ export const getCachedPublicAds = unstable_cache(
     return JSON.parse(JSON.stringify(ads))
   },
   ["public-ads-list"],
-  { revalidate: 120, tags: ["ads"] }
+  { revalidate: 10, tags: ["ads"] }
 )
 
 /**
@@ -123,7 +181,7 @@ export const getCachedThemeBySlug = unstable_cache(
  */
 export async function getSitemapData() {
   await dbConnect()
-  const news = await NewsModel.find({ status: "published" })
+  const news = await NewsModel.find({ status: "published", ad: { $ne: true }, stats: { $ne: true } })
     .select("slug updatedAt")
     .sort({ publishedAt: -1 })
     .lean()

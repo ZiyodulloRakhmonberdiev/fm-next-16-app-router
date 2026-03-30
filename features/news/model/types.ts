@@ -32,6 +32,8 @@ export type RawNewsItem = {
   isPopular?: boolean
   isTop?: boolean
   isBreaking?: boolean
+  ad?: boolean
+  stats?: boolean
   pushedToTelegram?: boolean
   pushedToTelegramAt?: Date
   telegramMessageId?: number
@@ -69,6 +71,8 @@ export type NewsItem = {
   isTop?: boolean
   type?: string
   isBreaking?: boolean
+  ad?: boolean
+  stats?: boolean
   pushedToTelegram?: boolean
   pushedToTelegramAt?: Date
   telegramMessageId?: number
@@ -128,6 +132,8 @@ export function pickNewsForLocale(
     isTop: raw.isTop ?? false,
     type: raw.type,
     isBreaking: raw.isBreaking ?? false,
+    ad: raw.ad ?? false,
+    stats: raw.stats ?? false,
     pushedToTelegram: raw.pushedToTelegram,
     pushedToTelegramAt: raw.pushedToTelegramAt,
     telegramMessageId: raw.telegramMessageId,

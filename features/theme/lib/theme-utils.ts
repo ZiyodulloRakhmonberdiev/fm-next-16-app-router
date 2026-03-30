@@ -7,6 +7,7 @@ export type PublicTheme = {
   name: LocaleMap
   subtitle: LocaleMap
   description: LocaleMap
+  showInHomePage?: boolean
   status: "active" | "inactive"
 }
 

@@ -52,6 +52,9 @@ export function CategoryListForSidebar() {
           <span className="text-xl font-medium">{category.name[locale] ?? category.name.uz ?? category.slug}</span>
         </Link>
       ))} */}
+      <Link href="/news/articles" className="text-sm">
+        <span className="text-xl font-medium">{t("articles")}</span>
+      </Link>
       <Link href="/news/video" className="text-sm">
         <span className="text-xl font-medium">{t("video")}</span>
       </Link>

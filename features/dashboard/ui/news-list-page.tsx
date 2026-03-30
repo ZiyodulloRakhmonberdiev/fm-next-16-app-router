@@ -81,10 +81,18 @@ const TOP_OPTIONS: { value: '' | 'yes' | 'no'; label: string }[] = [
   { value: 'no', label: "Yo'q" },
 ]
 
-const TYPE_OPTIONS_FULL: { value: '' | 'video' | 'image'; label: string }[] = [
+const TYPE_OPTIONS_FULL: { value: '' | 'video' | 'image' | 'text' | 'audio'; label: string }[] = [
   { value: '', label: 'Barcha turlar' },
   { value: 'video', label: 'Video' },
   { value: 'image', label: 'Rasm' },
+  { value: 'text', label: 'Matn' },
+  { value: 'audio', label: 'Audio' },
+]
+
+const AD_OPTIONS: { value: '' | 'yes' | 'no'; label: string }[] = [
+  { value: '', label: 'Barchasi' },
+  { value: 'yes', label: 'Reklama (Ha)' },
+  { value: 'no', label: "Reklama emas (Yo'q)" },
 ]
 
 const COLUMN_KEYS = [
@@ -196,6 +204,8 @@ export function DashboardNewsListPage({
           author: raw.author ?? '',
           status: raw.status ?? 'published',
           isTop: raw.isTop ?? false,
+          ad: raw.ad ?? false,
+          stats: raw.stats ?? false,
           type: raw.type,
           isBreaking: raw.isBreaking ?? false,
           pushedToTelegram: raw.pushedToTelegram,
@@ -233,7 +243,8 @@ export function DashboardNewsListPage({
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<'' | NewsStatus>(initialStatus)
   const [isTopFilter, setIsTopFilter] = useState<'' | 'yes' | 'no'>('')
-  const [typeFilter, setTypeFilter] = useState<'' | 'video' | 'image'>('')
+  const [adFilter, setAdFilter] = useState<'' | 'yes' | 'no'>('')
+  const [typeFilter, setTypeFilter] = useState<'' | 'video' | 'image' | 'text' | 'audio'>('')
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
   const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>(() =>
@@ -269,6 +280,8 @@ export function DashboardNewsListPage({
     if (statusFilter) list = list.filter((item) => (item.status ?? 'published') === statusFilter)
     if (isTopFilter === 'yes') list = list.filter((item) => item.isTop === true)
     if (isTopFilter === 'no') list = list.filter((item) => item.isTop !== true)
+    if (adFilter === 'yes') list = list.filter((item) => item.ad === true)
+    if (adFilter === 'no') list = list.filter((item) => item.ad !== true)
     if (typeFilter) list = list.filter((item) => (item.type ?? '') === typeFilter)
     if (dateFrom) {
       const from = new Date(dateFrom)
@@ -281,7 +294,7 @@ export function DashboardNewsListPage({
       list = list.filter((item) => new Date(item.publishedAt) <= to)
     }
     return list
-  }, [news, search, statusFilter, isTopFilter, typeFilter, dateFrom, dateTo])
+  }, [news, search, statusFilter, isTopFilter, adFilter, typeFilter, dateFrom, dateTo])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE))
   const currentPage = Math.min(page, totalPages)
@@ -305,6 +318,7 @@ export function DashboardNewsListPage({
     setSearch('')
     setStatusFilter('')
     setIsTopFilter('')
+    setAdFilter('')
     setTypeFilter('')
     setDateFrom('')
     setDateTo('')
@@ -381,11 +395,13 @@ export function DashboardNewsListPage({
           <NewsListFilterPanel
             statusFilter={statusFilter}
             isTopFilter={isTopFilter}
+            adFilter={adFilter}
             typeFilter={typeFilter}
             dateFrom={dateFrom}
             dateTo={dateTo}
             onStatusChange={setStatusFilter}
             onTopChange={setIsTopFilter}
+            onAdChange={setAdFilter}
             onTypeChange={setTypeFilter}
             onDateFromChange={setDateFrom}
             onDateToChange={setDateTo}
@@ -395,6 +411,8 @@ export function DashboardNewsListPage({
                 <FilterSelect label="Status" value={statusFilter} options={STATUS_OPTIONS} onSelect={setStatusFilter} />
               ) : kind === 'top' ? (
                 <FilterSelect label="Top" value={isTopFilter} options={TOP_OPTIONS} onSelect={setIsTopFilter} />
+              ) : kind === 'ad' ? (
+                <FilterSelect label="Reklama" value={adFilter} options={AD_OPTIONS} onSelect={setAdFilter} />
               ) : (
                 <FilterSelect label="Turi" value={typeFilter} options={TYPE_OPTIONS_FULL} onSelect={setTypeFilter} />
               )

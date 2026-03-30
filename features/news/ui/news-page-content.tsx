@@ -196,6 +196,16 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
     })
   }, [locale, news.tags, tagsCatalog])
 
+  const adBadgeLabel = React.useMemo(() => {
+    const map: Record<AppLocale, string> = {
+      uz: "Reklama",
+      uzb: "Реклама",
+      ru: "Реклама",
+      en: "Advertisement",
+    }
+    return map[locale]
+  }, [locale])
+
   const handleShare = React.useCallback(async () => {
     if (typeof window === "undefined") return
     const pathParts = window.location.pathname.split("/").filter(Boolean)
@@ -235,8 +245,11 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
   }, [news.slug])
 
   return (
-    <div className="px-4 md:px-6 bg-background">
-      <div className="relative isolate">
+    <div className="bg-background">
+         <div className="md:hidden mb-4">
+              <AdSlot placement="sidebar_widget" />
+            </div>
+      <div className="relative isolate px-4 md:px-6 ">
         {/* Reklama viewport markazida qotib turadi; kontent ustidan scroll bo‘ladi, oraliqda “deraza” orqali ko‘rinadi. */}
         {/* <div className="pointer-events-none flex fixed md:inset-0 md:z-0 md:items-center md:justify-center md:px-4">
           <div className="pointer-events-auto w-full max-w-xl">
@@ -246,18 +259,6 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
 
         <article className="overflow-x-hidden">
           <div className="relative z-10 bg-background">
-            {/* <div className="mb-6 flex flex-col gap-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="w-fit gap-1.5 -ml-2"
-            onClick={() => router.back()}
-          >
-            <ArrowLeft className="h-4 w-4" />
-            {t("back")}
-          </Button>
-        </div> */}
-
             <div className="my-2 flex flex-wrap items-center justify-between gap-x-2 gap-y-2 text-sm text-muted-foreground rounded-sm shadow-sm md:shadow-none border-b pb-2">
               <Button
                 type="button"
@@ -291,9 +292,14 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
                 </Button>
               </div>
             </div>
-            <div className="md:hidden mb-4">
-              <AdSlot placement="sidebar_widget" />
-            </div>
+         
+            {news.ad ? (
+              <div className="mt-2 mb-2">
+                <span className="inline-flex rounded-sm bg-amber-500/20 px-2 py-1 text-xs font-semibold text-amber-700 dark:text-amber-300">
+                  {adBadgeLabel}
+                </span>
+              </div>
+            ) : null}
             <h1 className="text-2xl font-bold leading-tight md:text-3xl">
               {news.title}
             </h1>
@@ -516,15 +522,15 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
                 <TextContentRenderer content={news.content} />
               )
             )}
-            <div className="flex flex-wrap gap-2 mt-4">
-              {tagsEnabled && localizedTags.length > 0 && localizedTags.map((tag) => (
-                <span key={tag} className="text-sm text-muted-foreground bg-muted px-2 py-1 rounded-xs">
-                  #{" "}{tag}
-                </span>
-              ))}
-            </div>
             <div className="my-6 w-full flex md:flex-row flex-col gap-2">
               <CreatedBy author={news.author} />
+            </div>
+            <div className="flex flex-wrap gap-2 mt-4 bg-foreground/5 p-2 w-full">
+              {tagsEnabled && localizedTags.length > 0 && localizedTags.map((tag) => (
+                <div key={tag} className="text-sm bg-white dark:bg-foreground/10 px-2 py-1 rounded-xs">
+                  <span>#</span>{" "}{tag}
+                </div>
+              ))}
             </div>
 
 
@@ -595,7 +601,7 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
           </div>
         </article>
       </div>
-      <div className="relative z-10 bg-background">
+      <div className="relative z-10 bg-background px-4 md:px-6">
         <RelatedNews categorySlug={news.categorySlug} excludeSlug={news.slug} />
       </div>
     </div>

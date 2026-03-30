@@ -28,6 +28,8 @@ export type EditNewsInitialData = {
   isLatest: boolean
   isPopular: boolean
   isBreaking: boolean
+  ad: boolean
+  stats: boolean
   pushedToTelegram: boolean
   telegramMessageId?: number
   telegramMessageLink?: string
@@ -86,6 +88,8 @@ export function rawNewsToEditInitialData(raw: RawNewsItem): EditNewsInitialData 
     isLatest: raw.isLatest ?? false,
     isPopular: raw.isPopular ?? false,
     isBreaking: raw.isBreaking ?? false,
+    ad: raw.ad ?? false,
+    stats: raw.stats ?? false,
     pushedToTelegram: raw.pushedToTelegram ?? false,
     telegramMessageId: raw.telegramMessageId,
     telegramMessageLink: raw.telegramMessageLink,

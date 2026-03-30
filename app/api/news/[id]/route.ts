@@ -110,6 +110,11 @@ export async function GET(
 ) {
   const isProtected = await protectPublicApi(req)
   if (isProtected) return isProtected
+  const wantsAdmin = req.nextUrl.searchParams.get("admin") === "1"
+  if (wantsAdmin) {
+    const unauthorized = await requireAdminSession(['ceo', 'administrator', 'moderator'])
+    if (unauthorized) return unauthorized
+  }
 
   await dbConnect()
   const news = await NewsModel.findById((await params).id).lean()
@@ -117,7 +122,6 @@ export async function GET(
   if (!news) {
     return Response.json({ error: 'Yangilik topilmadi' }, { status: 404 })
   }
-
   if (news.authorId) {
     const author = await UserModel.findById(news.authorId).select({ _id: 1, full_name: 1 }).lean()
     if (author?.full_name) news.author = author.full_name

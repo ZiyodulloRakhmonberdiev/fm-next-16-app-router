@@ -259,6 +259,8 @@ export function CreateNewsForm({
   const [isPopular, setIsPopular] = useState(initialData?.isPopular ?? false)
   const [isTop, setIsTop] = useState(initialData?.isTop ?? false)
   const [isBreaking, setIsBreaking] = useState(initialData?.isBreaking ?? false)
+  const [ad, setAd] = useState(initialData?.ad ?? false)
+  const [stats, setStats] = useState(initialData?.stats ?? false)
   const [pushedToTelegram, setPushedToTelegram] = useState(initialData?.pushedToTelegram ?? false)
   const [telegramMessageId, setTelegramMessageId] = useState<number | undefined>(initialData?.telegramMessageId)
   const [telegramMessageLink, setTelegramMessageLink] = useState<string | undefined>(initialData?.telegramMessageLink)
@@ -356,6 +358,8 @@ export function CreateNewsForm({
         isPopular,
         isTop,
         isBreaking,
+        ad,
+        stats,
         pushedToTelegram: pushedToTelegramOverride ?? pushedToTelegram,
         videoSource: finalVideoSource,
         videoUrl: finalVideoUrl,
@@ -506,6 +510,8 @@ export function CreateNewsForm({
       isLatest,
       isPopular,
       isBreaking,
+      ad,
+      stats,
       audioUrl: audioUrl.trim() || undefined,
       audioFile: audioFile?.name,
       pushedToTelegram,
@@ -913,6 +919,8 @@ export function CreateNewsForm({
             isTrending={isTrending}
             isPopular={isPopular}
             isBreaking={isBreaking}
+            ad={ad}
+            stats={stats}
             pushedToTelegram={pushedToTelegram}
             canPublish={canPublish}
             publishDisabledReason={publishDisabledReason}
@@ -922,6 +930,8 @@ export function CreateNewsForm({
             onChangeIsPopular={setIsPopular}
             onChangeIsTop={setIsTop}
             onChangeIsBreaking={setIsBreaking}
+            onChangeAd={setAd}
+            onChangeStats={setStats}
             onChangePushedToTelegram={setPushedToTelegram}
             onSavePending={() => void savePendingWithoutRedirect(saveStatus === 'published' ? 'published' : 'pending')}
             // Create rejimida chop etgandan keyin redirect bo‘lmasin.

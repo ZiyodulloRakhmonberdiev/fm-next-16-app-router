@@ -10,6 +10,7 @@ export interface ITheme {
   name: LocaleMap
   subtitle: LocaleMap
   description: LocaleMap
+  showInHomePage?: boolean
   status: ThemeStatus
   createdAt: Date
   updatedAt: Date
@@ -37,6 +38,7 @@ const ThemeSchema = new Schema<ITheme>(
       ru: { type: String, default: "" },
       en: { type: String, default: "" },
     },
+    showInHomePage: { type: Boolean, default: false },
     status: {
       type: String,
       enum: ["active", "inactive"],
@@ -54,7 +56,8 @@ if (
   existingThemeModel &&
   (
     !existingThemeModel.schema.path("subtitle") ||
-    !existingThemeModel.schema.path("description")
+    !existingThemeModel.schema.path("description") ||
+    !existingThemeModel.schema.path("showInHomePage")
   )
 ) {
   delete models.Theme

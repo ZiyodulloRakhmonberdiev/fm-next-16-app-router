@@ -14,18 +14,28 @@ import {
   BannerSection,
   BreakingSection,
   ColumnSection,
+  AdNewsSection,
   HeaderNewsCarousel,
   SlideNewsSection,
+  StatsNewsSection,
   TextNewsSection,
 } from "@/shared/common/components/news-sections"
 import RowSection from "@/shared/common/components/news-sections/row-section"
 import VideoNewsSection2 from "@/shared/common/components/news-sections/video-news-section-2"
 import { AdSlot } from "@/features/ads/ui/ad-slot"
-import { getCachedPublicNews, getCachedPublicCategories, getCachedPublicThemes } from "@/shared/server/public-data-server"
+import {
+  getCachedPublicAdNews,
+  getCachedPublicNews,
+  getCachedPublicCategories,
+  getCachedPublicStatsNews,
+  getCachedPublicThemes,
+} from "@/shared/server/public-data-server"
 import type { AppLocale } from "@/shared/common/lib/locale-api"
 
 export default async function HomeMainContent() {
   const publicNews = await getCachedPublicNews()
+  const adNews = await getCachedPublicAdNews()
+  const statsNews = await getCachedPublicStatsNews()
   const categories = await getCachedPublicCategories()
   const themes = await getCachedPublicThemes()
   const locale = (await getLocale()) as AppLocale
@@ -75,6 +85,22 @@ export default async function HomeMainContent() {
     return null
   }
 
+  const getSafeImageSrc = (raw?: string) => {
+    if (!raw?.trim()) return ""
+    const candidate =
+      raw.startsWith("http://") || raw.startsWith("https://") || raw.startsWith("/")
+        ? raw
+        : `/uploads/images/${raw}`
+    try {
+      new URL(candidate, "http://localhost")
+      return candidate
+    } catch {
+      return ""
+    }
+  }
+
+  const featuredThemes = themes.filter((theme: any) => Boolean(theme.showInHomePage))
+
   return (
     <>
       {themes.length > 0 ? (
@@ -123,6 +149,67 @@ export default async function HomeMainContent() {
         initialNews={publicNews}
         initialCategories={categories}
       />
+      {featuredThemes.map((theme: any) => {
+        const themeSubtitle = (theme.subtitle?.[locale] ?? theme.subtitle?.uz ?? "").trim()
+        const themeDescription = (theme.description?.[locale] ?? theme.description?.uz ?? "").trim()
+        const items = publicNews
+          .filter((n: any) => n.themeId === theme._id)
+          .slice(0, 8)
+        if (items.length < 1) return null
+
+        return (
+          <section key={theme._id} className="px-4 py-4 md:px-6">
+            <div className="mb-3 border-b pb-2">
+              <Link href={`/theme/${theme.slug}`} className="text-xl font-semibold hover:underline">
+                {theme.name?.[locale] ?? theme.name?.uz ?? theme.slug}
+              </Link>
+              {themeSubtitle ? (
+                <p className="mt-1 text-sm font-medium text-foreground/80">{themeSubtitle}</p>
+              ) : null}
+              {themeDescription ? (
+                <p className="mt-1 text-sm text-muted-foreground">{themeDescription}</p>
+              ) : null}
+            </div>
+
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              {items.map((item: any) => {
+                const title =
+                  item.title?.[locale] ||
+                  item.title?.uz ||
+                  item.slug
+                const desc =
+                  item.description?.[locale] ||
+                  item.description?.uz ||
+                  ""
+                const image = getSafeImageSrc(item.images?.[0])
+                return (
+                  <Link
+                    key={item.slug}
+                    href={`/news/${item.slug}`}
+                    className="group grid grid-cols-[120px_1fr] gap-3 rounded-sm border p-2 hover:bg-muted/40"
+                  >
+                    <div className="h-[86px] overflow-hidden rounded-sm bg-muted">
+                      {image ? (
+                        <img src={image} alt={title} className="h-full w-full object-cover" />
+                      ) : null}
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="line-clamp-2 text-sm font-semibold transition-colors group-hover:text-primary">
+                        {title}
+                      </h3>
+                      {desc ? (
+                        <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{desc}</p>
+                      ) : null}
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
+          </section>
+        )
+      })}
+      <StatsNewsSection initialNews={statsNews} initialCategories={categories} />
+      <AdNewsSection initialNews={adNews} />
       <VideoNewsSection2
         initialNews={publicNews}
         initialCategories={categories}

@@ -31,6 +31,8 @@ type SettingsFormProps = {
   isPopular: boolean
   isTop: boolean
   isBreaking: boolean
+  ad: boolean
+  stats: boolean
   pushedToTelegram?: boolean
   canPublish: boolean
   publishDisabledReason?: string
@@ -40,6 +42,8 @@ type SettingsFormProps = {
   onChangeIsPopular: (value: boolean) => void
   onChangeIsTop: (value: boolean) => void
   onChangeIsBreaking: (value: boolean) => void
+  onChangeAd: (value: boolean) => void
+  onChangeStats: (value: boolean) => void
   onChangePushedToTelegram: (value: boolean) => void
   onSavePending: () => void
   onPublish: () => void
@@ -64,6 +68,8 @@ export function SettingsForm({
   isPopular,
   isTop,
   isBreaking,
+  ad,
+  stats,
   pushedToTelegram = false,
   canPublish,
   publishDisabledReason,
@@ -73,6 +79,8 @@ export function SettingsForm({
   onChangeIsPopular,
   onChangeIsTop,
   onChangeIsBreaking,
+  onChangeAd,
+  onChangeStats,
   onChangePushedToTelegram,
   onSavePending,
   onPublish,
@@ -131,6 +139,18 @@ export function SettingsForm({
             Shoshilinch yangilik (Breaking)
           </Label>
           <Switch id="isBreaking" checked={isBreaking} onCheckedChange={onChangeIsBreaking} />
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border p-4">
+          <Label htmlFor="adNews" className="cursor-pointer">
+            Reklama yangilik (faqat home reklama slayderi)
+          </Label>
+          <Switch id="adNews" checked={ad} onCheckedChange={onChangeAd} />
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border p-4">
+          <Label htmlFor="statsNews" className="cursor-pointer">
+            Maqola (stats) yangilik
+          </Label>
+          <Switch id="statsNews" checked={stats} onCheckedChange={onChangeStats} />
         </div>
         <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border p-4">
           <Label htmlFor="pushedToTelegram" className="cursor-pointer">

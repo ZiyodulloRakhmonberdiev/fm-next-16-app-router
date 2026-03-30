@@ -81,6 +81,8 @@ export const createNewsSchema = z.object({
   isPopular: z.boolean().default(false),
   isTop: z.boolean().default(false),
   isBreaking: z.boolean().default(false),
+  ad: z.boolean().default(false),
+  stats: z.boolean().default(false),
   pushedToTelegram: z.boolean().default(false),
   pushedToTelegramAt: z.coerce.date().optional(),
   telegramMessageId: z.number().int().optional(),

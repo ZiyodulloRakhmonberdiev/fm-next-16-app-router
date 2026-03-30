@@ -62,9 +62,12 @@ export default function Header() {
   return (
     <div>
       <div ref={topBlockRef}>
-        <div className="hidden md:block">
+        <div className="">
           <AdSlotHeader />
         </div>
+        {/* <div className="block md:hidden">
+          <AdSlot placement="sidebar_widget" />
+        </div> */}
         <div className="border-b border-border bg-background">
           <Headline />
         </div>

@@ -8,6 +8,9 @@ import { HiLightningBolt } from "react-icons/hi";
 import { FaRadio } from "react-icons/fa6";
 import { IoTv } from "react-icons/io5";
 import { BsFillPlayCircleFill } from "react-icons/bs";
+import { LayoutDashboard } from "lucide-react";
+import { TbLayoutDashboardFilled } from "react-icons/tb";
+
 
 
 
@@ -16,7 +19,7 @@ const navItems = [
   { key: "news", href: "/news", label: "Yangiliklar", icon: HiLightningBolt },
   { key: "shows", href: "/news/video", label: "Ko'rsatuvlar", icon: IoTv },
   { key: "audio", href: "/news/audio", label: "Audio", icon: FaRadio },
-  { key: "menu", href: "/menu", label: "Menu", icon: RiMenuFill },
+  { key: "menu", href: "/menu", label: "Menu", icon: TbLayoutDashboardFilled },
 ] as const
 
 export default function ClientBottomNav() {
@@ -36,7 +39,7 @@ export default function ClientBottomNav() {
   return (
     <>
       <div className="h-12 md:hidden" aria-hidden />
-      <nav className="fixed inset-x-0 bottom-0 z-60 border-t border-border bg-background/95 backdrop-blur md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background/95 backdrop-blur md:hidden">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-2 pt-1 pb-[calc(env(safe-area-inset-bottom)+0.3rem)]">
           {navItems.map((item) => {
             const Icon = item.icon

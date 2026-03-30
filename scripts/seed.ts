@@ -169,8 +169,8 @@ export const seed = {
   ] as const,
 
   siteConfig: {
-    email: "info@ferganamedia.uz",
-    phone: "+998 90 123 45 67",
+    email: "farmaxt@gmail.com",
+    phone: "+998 91 677 05 50",
     address: {
       uz: "Farg'ona viloyati, Farg'ona shahar, Mash'al, Alisher Navoiy ko'chasi, 32",
       uzb: "Фарғона вилояти, Фарғона шаҳар, Машъал, Алишер Навоий кўчаси, 32",
