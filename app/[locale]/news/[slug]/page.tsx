@@ -108,7 +108,12 @@ export default async function NewsPage({ params }: Props) {
         <ClientSidebar />
       </div>
       <div className="flex w-full flex-1 flex-col">
-        <Header variant="news-page-header" shareTitle={news.title} />
+        <div className="md:hidden">
+          <Header variant="news-page-header" shareTitle={news.title} />
+        </div>
+        <div className="hidden md:block">
+          <Header />
+        </div>
         <main className="flex-1 md:py-4 pb-8">
           <ClientServerOffGate model="news">
             <div className="mx-auto max-w-7xl grid grid-cols-1 gap-6 lg:grid-cols-7">
