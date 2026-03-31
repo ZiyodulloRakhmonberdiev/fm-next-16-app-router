@@ -1,7 +1,8 @@
 'use client'
 /* eslint-disable react/no-unescaped-entities */
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import Image from 'next/image'
 import { toast } from 'sonner'
 import { Link } from '@/i18n/navigation'
 import {
@@ -46,6 +47,7 @@ import { cyrillicToLatinForSlug, slugify } from '@/shared/common/lib/slug'
 import { useThemesQuery, useThemeMutations } from '@/features/dashboard/model/admin-hooks'
 import { useThemesUiStore } from '@/features/dashboard/model/admin-ui-store'
 import { getApiErrorDescription } from '@/features/dashboard/model/admin-api'
+import { uploadThemeImage300 } from '@/shared/infra/cloudinary-client-upload'
 
 function generateSlugFromNames(name: Record<AppLocale, string>): string {
   const base = name.en?.trim() || ''
@@ -62,6 +64,7 @@ export type ThemeRow = {
   name: Record<AppLocale, string>
   subtitle: Record<AppLocale, string>
   description: Record<AppLocale, string>
+  imageUrl?: string
   showInHomePage?: boolean
   showInHomeList?: boolean
   status: ThemeStatus
@@ -85,6 +88,9 @@ export function ThemesPage({ locale }: ThemesPageProps) {
   const [createShowInHomeList, setCreateShowInHomeList] = useState(false)
   const [editShowInHomePage, setEditShowInHomePage] = useState(false)
   const [editShowInHomeList, setEditShowInHomeList] = useState(false)
+  const [createImageUrl, setCreateImageUrl] = useState<string>('')
+  const [editImageUrl, setEditImageUrl] = useState<string>('')
+  const [imageBusy, setImageBusy] = useState(false)
 
   const themes = useMemo<ThemeRow[]>(
     () =>
@@ -94,6 +100,7 @@ export function ThemesPage({ locale }: ThemesPageProps) {
         name: t.name,
         subtitle: t.subtitle ?? emptyLocaleMap(),
         description: t.description ?? emptyLocaleMap(),
+        imageUrl: (t as any).imageUrl || '',
         showInHomePage: Boolean(t.showInHomePage),
         showInHomeList: Boolean((t as any).showInHomeList),
         status: t.status ?? 'active',
@@ -103,6 +110,12 @@ export function ThemesPage({ locale }: ThemesPageProps) {
 
   const editTheme = useMemo(() => themes.find((t) => t._id === editId) ?? null, [themes, editId])
   const deleteTheme = useMemo(() => themes.find((t) => t._id === deleteId) ?? null, [themes, deleteId])
+
+  // keep edit image in sync when dialog opens
+  useEffect(() => {
+    if (!editTheme) return
+    setEditImageUrl((editTheme.imageUrl ?? '').trim())
+  }, [editTheme?._id])
 
   const showMutationError = (err: Error) => {
     toast.error(err.message || 'Validation error', {
@@ -146,13 +159,14 @@ export function ThemesPage({ locale }: ThemesPageProps) {
       return
     }
     create.mutate(
-      { slug, name, subtitle, description, showInHomePage: createShowInHomePage, showInHomeList: createShowInHomeList, status: createStatus },
+      { slug, name, subtitle, description, imageUrl: createImageUrl || undefined, showInHomePage: createShowInHomePage, showInHomeList: createShowInHomeList, status: createStatus },
       {
         onSuccess: () => {
           setCreateOpen(false)
           setCreateStatus('active')
           setCreateShowInHomePage(false)
           setCreateShowInHomeList(false)
+          setCreateImageUrl('')
           toast.success("Tema muvaffaqiyatli qo'shildi")
         },
         onError: showMutationError,
@@ -197,7 +211,7 @@ export function ThemesPage({ locale }: ThemesPageProps) {
       return
     }
     update.mutate(
-      { id: editTheme._id, payload: { slug, name, subtitle, description, showInHomePage: editShowInHomePage, showInHomeList: editShowInHomeList, status: editStatus } },
+      { id: editTheme._id, payload: { slug, name, subtitle, description, imageUrl: editImageUrl || undefined, showInHomePage: editShowInHomePage, showInHomeList: editShowInHomeList, status: editStatus } },
       {
         onSuccess: () => {
           setEditId(null)
@@ -206,6 +220,21 @@ export function ThemesPage({ locale }: ThemesPageProps) {
         onError: showMutationError,
       }
     )
+  }
+
+  const handleThemeImagePick = async (file: File | null, mode: 'create' | 'edit') => {
+    if (!file) return
+    setImageBusy(true)
+    try {
+      const url = await uploadThemeImage300(file)
+      if (mode === 'create') setCreateImageUrl(url)
+      else setEditImageUrl(url)
+      toast.success("Rasm yuklandi (300x300)")
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Rasmni yuklab bo'lmadi")
+    } finally {
+      setImageBusy(false)
+    }
   }
 
   const handleDeleteConfirm = () => {
@@ -351,6 +380,37 @@ export function ThemesPage({ locale }: ThemesPageProps) {
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 py-4 [scrollbar-width:thin]">
             <form id="create-theme-form" onSubmit={handleCreateSubmit} className="space-y-4">
+              <div className="rounded-lg border border-border/60 bg-muted/20 p-4">
+                <p className="text-sm font-medium text-foreground mb-3">Tema rasmi (300×300)</p>
+                <div className="flex items-center gap-4">
+                  <div className="relative size-14 overflow-hidden rounded-full bg-muted ring-1 ring-border">
+                    {createImageUrl ? (
+                      <Image src={createImageUrl} alt="Theme image" fill sizes="56px" className="object-cover" />
+                    ) : null}
+                  </div>
+                  <div className="flex-1">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      disabled={imageBusy || create.isPending}
+                      onChange={(e) => handleThemeImagePick(e.currentTarget.files?.[0] ?? null, 'create')}
+                    />
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      Rasm saqlanishidan oldin avtomatik center-crop qilinadi va 300×300 JPEG bo‘ladi.
+                    </p>
+                  </div>
+                  {createImageUrl ? (
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      disabled={imageBusy || create.isPending}
+                      onClick={() => setCreateImageUrl('')}
+                    >
+                      Olib tashlash
+                    </Button>
+                  ) : null}
+                </div>
+              </div>
               {LOCALES.map((loc) => (
                 <div key={loc} className="space-y-3 rounded-lg border border-border/60 bg-muted/20 p-4">
                   <p className="text-sm font-medium text-foreground">{LOCALE_LABELS[loc]}</p>
@@ -428,6 +488,37 @@ export function ThemesPage({ locale }: ThemesPageProps) {
           {editTheme ? (
             <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 py-4 [scrollbar-width:thin]">
               <form key={editTheme.slug} id="update-theme-form" onSubmit={handleUpdateSubmit} className="space-y-4">
+                <div className="rounded-lg border border-border/60 bg-muted/20 p-4">
+                  <p className="text-sm font-medium text-foreground mb-3">Tema rasmi (300×300)</p>
+                  <div className="flex items-center gap-4">
+                    <div className="relative size-14 overflow-hidden rounded-full bg-muted ring-1 ring-border">
+                      {editImageUrl ? (
+                        <Image src={editImageUrl} alt="Theme image" fill sizes="56px" className="object-cover" />
+                      ) : null}
+                    </div>
+                    <div className="flex-1">
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        disabled={imageBusy || update.isPending}
+                        onChange={(e) => handleThemeImagePick(e.currentTarget.files?.[0] ?? null, 'edit')}
+                      />
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        Rasm saqlanishidan oldin avtomatik center-crop qilinadi va 300×300 JPEG bo‘ladi.
+                      </p>
+                    </div>
+                    {editImageUrl ? (
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        disabled={imageBusy || update.isPending}
+                        onClick={() => setEditImageUrl('')}
+                      >
+                        Olib tashlash
+                      </Button>
+                    ) : null}
+                  </div>
+                </div>
                 {LOCALES.map((loc) => (
                   <div key={loc} className="space-y-3 rounded-lg border border-border/60 bg-muted/20 p-4">
                     <p className="text-sm font-medium text-foreground">{LOCALE_LABELS[loc]}</p>

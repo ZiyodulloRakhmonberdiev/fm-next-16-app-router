@@ -152,7 +152,7 @@ export default function SlideNewsSection({
           <div className="my-4 flex flex-wrap items-center justify-between gap-3 border-b-2 border-brand pb-3">
             <Link
               href={`/category/${categorySlug}`}
-              className="flex items-center gap-2 text-lg font-semibold hover:underline"
+              className="flex items-center gap-2 text-2xl md:text-4xl font-bold hover:underline"
             >
               <span>{categoryName}</span>
               <ExternalLink className="hidden size-4 md:inline-block" aria-hidden />
@@ -166,11 +166,11 @@ export default function SlideNewsSection({
             <div className="hidden shrink-0 items-center gap-2 md:flex md:gap-3">
               <CarouselPrevious
                 variant="outline"
-                className="static shrink-0 left-auto! right-auto! top-auto! translate-none! size-9 rounded-sm border bg-background shadow-sm md:size-10"
+                className="static shrink-0 left-auto! right-auto! top-auto! translate-none! size-9 rounded-full border bg-background shadow-sm md:size-10"
               />
               <CarouselNext
                 variant="outline"
-                className="static shrink-0 left-auto! right-auto! top-auto! translate-none! size-9 rounded-sm border bg-background shadow-sm md:size-10"
+                className="static shrink-0 left-auto! right-auto! top-auto! translate-none! size-9 rounded-full border bg-background shadow-sm md:size-10"
               />
             </div>
           </div>

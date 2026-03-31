@@ -33,6 +33,7 @@ export const createThemeSchema = z.object({
   name: localeMapSchema,
   subtitle: localeSubtitleSchema,
   description: localeDescriptionSchema,
+  imageUrl: z.string().trim().max(2048).optional().default(""),
   showInHomePage: z.boolean().default(false),
   showInHomeList: z.boolean().default(false),
   status: themeStatusSchema.default("active"),

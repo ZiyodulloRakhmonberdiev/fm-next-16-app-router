@@ -54,7 +54,7 @@ export default function VideoNewsSection2({
       .filter((n) => Boolean((n as RawNewsItem).videoUrl))
       .sort(
         (a, b) =>
-          new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+          new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
       )
       .slice(0, VIDEO_NEWS_LIMIT);
     return getNewsListForLocale(raw, locale);
@@ -82,7 +82,7 @@ export default function VideoNewsSection2({
             categories,
             false, // isPending not relevant with initial data or already fetched query data
             item,
-            locale
+            locale,
           );
           const metaLine = formatDateTimeDotSlash(item.publishedAt);
           return (
@@ -102,16 +102,21 @@ export default function VideoNewsSection2({
                   </span>
                 </div>
 
-                <div className="flex min-h-0 flex-1 flex-col gap-3 p-4 bg-accent/50">
+                <div className="flex min-h-0 flex-1 flex-col gap-3 p-4 bg-brand/5 dark:bg-card">
                   <h3 className="line-clamp-4 text-[15px] font-bold leading-snug tracking-tight text-foreground md:text-base">
                     {item.title}
                   </h3>
                   <div className="mt-auto text-[11px] leading-relaxed text-muted-foreground md:text-xs flex items-center gap-1">
                     <span className="line-clamp-1">{categoryLabel}</span>
-                    <span className="mx-1.5 text-muted-foreground/40" aria-hidden>
+                    <span
+                      className="mx-1.5 text-muted-foreground/40"
+                      aria-hidden
+                    >
                       |
                     </span>
-                    <time dateTime={formatDateISO(item.publishedAt)}>{metaLine}</time>
+                    <time dateTime={formatDateISO(item.publishedAt)}>
+                      {metaLine}
+                    </time>
                   </div>
                 </div>
               </button>

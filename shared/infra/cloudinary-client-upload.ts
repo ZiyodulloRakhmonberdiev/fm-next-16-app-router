@@ -4,7 +4,7 @@
  * Server tomonda media saqlash Contabo object storage (S3 compatible) orqali amalga oshiriladi.
  * Cloudinary faqat optional fallback sifatida qoldirilgan.
  */
-import { optimizeImage } from "@/shared/common/lib/image-optimizer"
+import { optimizeImage, optimizeImageToSquare } from "@/shared/common/lib/image-optimizer"
 
 // Direct Cloudinary upload yo'li hozircha ishlatilmaydi.
 export function isCloudinaryDirectVideoUploadConfigured(): boolean {
@@ -96,4 +96,16 @@ export async function uploadFileViaPresignedUrl(
   }
 
   return data1.publicUrl
+}
+
+/** Theme logo/avatar uchun: 300x300 center-crop qilib upload qiladi. */
+export async function uploadThemeImage300(file: File): Promise<string> {
+  let optimized = file
+  try {
+    optimized = await optimizeImageToSquare(file, { size: 300, quality: 0.85 })
+  } catch (err) {
+    console.warn("Theme image optimize xato:", err)
+  }
+  // This will not resize again significantly; it will just ensure JPEG etc.
+  return uploadFileViaPresignedUrl(optimized, "image")
 }

@@ -1,14 +1,9 @@
-import * as React from "react"
-import { getLocale } from "next-intl/server"
-import { Link } from "@/i18n/navigation"
-import {
-  StayConnected,
-  TopBanner,
-} from "@/shared/common/components/organisms"
-import { ServerUnavailable } from "@/shared/common/components/molecules"
-import {
-  sortCategoriesByPriority,
-} from "@/features/category/lib/category-utils"
+import * as React from "react";
+import { getLocale } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
+import { StayConnected, TopBanner } from "@/shared/common/components/organisms";
+import { ServerUnavailable } from "@/shared/common/components/molecules";
+import { sortCategoriesByPriority } from "@/features/category/lib/category-utils";
 import {
   AdsShowcaseSection,
   BannerSection,
@@ -21,90 +16,80 @@ import {
   TextNewsSection,
   ThemeSection,
   ThemesTopScroller,
-} from "@/shared/common/components/news-sections"
-import RowSection from "@/shared/common/components/news-sections/row-section"
-import VideoNewsSection2 from "@/shared/common/components/news-sections/video-news-section-2"
-import { AdSlot } from "@/features/ads/ui/ad-slot"
+} from "@/shared/common/components/news-sections";
+import RowSection from "@/shared/common/components/news-sections/row-section";
+import VideoNewsSection2 from "@/shared/common/components/news-sections/video-news-section-2";
+import { AdSlot } from "@/features/ads/ui/ad-slot";
 import {
   getCachedPublicAdNews,
   getCachedPublicNews,
   getCachedPublicCategories,
   getCachedPublicStatsNews,
   getCachedPublicThemes,
-} from "@/shared/server/public-data-server"
-import type { AppLocale } from "@/shared/common/lib/locale-api"
+} from "@/shared/server/public-data-server";
+import type { AppLocale } from "@/shared/common/lib/locale-api";
 
 export default async function HomeMainContent() {
-  const publicNews = await getCachedPublicNews()
-  const adNews = await getCachedPublicAdNews()
-  const statsNews = await getCachedPublicStatsNews()
-  const categories = await getCachedPublicCategories()
-  const themes = await getCachedPublicThemes()
-  const locale = (await getLocale()) as AppLocale
+  const publicNews = await getCachedPublicNews();
+  const adNews = await getCachedPublicAdNews();
+  const statsNews = await getCachedPublicStatsNews();
+  const categories = await getCachedPublicCategories();
+  const themes = await getCachedPublicThemes();
+  const locale = (await getLocale()) as AppLocale;
 
   if (!publicNews || !categories) {
-    return <ServerUnavailable />
+    return <ServerUnavailable />;
   }
 
-  const categoriesByPriority = sortCategoriesByPriority(categories)
+  const categoriesByPriority = sortCategoriesByPriority(categories);
 
-  const firstCategorySlug = categoriesByPriority[0]?.slug ?? "politics"
+  const firstCategorySlug = categoriesByPriority[0]?.slug ?? "politics";
   const secondCategorySlug =
-    categoriesByPriority[1]?.slug ?? categoriesByPriority[0]?.slug ?? "society"
+    categoriesByPriority[1]?.slug ?? categoriesByPriority[0]?.slug ?? "society";
   const thirdCategorySlug =
     categoriesByPriority[2]?.slug ??
     categoriesByPriority[1]?.slug ??
     categoriesByPriority[0]?.slug ??
-    "uzbekistan"
+    "uzbekistan";
   const fourthCategorySlug =
     categoriesByPriority[3]?.slug ??
     categoriesByPriority[2]?.slug ??
     categoriesByPriority[1]?.slug ??
     categoriesByPriority[0]?.slug ??
-    "world"
+    "world";
 
-  const fifthCategorySlug =
-    categoriesByPriority[4]?.slug ??
-    "rights"
+  const fifthCategorySlug = categoriesByPriority[4]?.slug ?? "rights";
 
-  const sixthCategorySlug =
-    categoriesByPriority[5]?.slug ??
-    "economy"
-  const seventhCategorySlug =
-    categoriesByPriority[6]?.slug ??
-    "health"
-  const eighthCategorySlug =
-    categoriesByPriority[7]?.slug ??
-    "science"
-  const ninthCategorySlug =
-    categoriesByPriority[8]?.slug ??
-    "technology"
-  const tenthCategorySlug =
-    categoriesByPriority[9]?.slug ??
-    "sports"
+  const sixthCategorySlug = categoriesByPriority[5]?.slug ?? "economy";
+  const seventhCategorySlug = categoriesByPriority[6]?.slug ?? "health";
+  const eighthCategorySlug = categoriesByPriority[7]?.slug ?? "science";
+  const ninthCategorySlug = categoriesByPriority[8]?.slug ?? "technology";
+  const tenthCategorySlug = categoriesByPriority[9]?.slug ?? "sports";
 
   if (publicNews.length === 0) {
-    return null
+    return null;
   }
 
   const getSafeImageSrc = (raw?: string) => {
-    if (!raw?.trim()) return ""
+    if (!raw?.trim()) return "";
     const candidate =
-      raw.startsWith("http://") || raw.startsWith("https://") || raw.startsWith("/")
+      raw.startsWith("http://") ||
+        raw.startsWith("https://") ||
+        raw.startsWith("/")
         ? raw
-        : `/uploads/images/${raw}`
+        : `/uploads/images/${raw}`;
     try {
-      new URL(candidate, "http://localhost")
-      return candidate
+      new URL(candidate, "http://localhost");
+      return candidate;
     } catch {
-      return ""
+      return "";
     }
-  }
+  };
 
   // Top scroller shows all active themes (themes API is active-only for public).
   const featuredThemes = themes.filter((theme: any) =>
-    Boolean(theme.showInHomeList ?? theme.showInHomePage)
-  )
+    Boolean(theme.showInHomeList ?? theme.showInHomePage),
+  );
 
   return (
     <>
@@ -136,16 +121,10 @@ export default async function HomeMainContent() {
         initialNews={publicNews}
         initialCategories={categories}
       />
-      {featuredThemes.map((theme: any) => (
-        <ThemeSection
-          key={theme._id}
-          theme={theme}
-          locale={locale}
-          allNews={publicNews}
-          limit={8}
-        />
-      ))}
-      <StatsNewsSection initialNews={statsNews} initialCategories={categories} />
+      <StatsNewsSection
+        initialNews={statsNews}
+        initialCategories={categories}
+      />
       <VideoNewsSection2
         initialNews={publicNews}
         initialCategories={categories}
@@ -153,11 +132,7 @@ export default async function HomeMainContent() {
       {/* <div className="px-4 md:px-6 py-4">
         <AdSlot placement="home_bottom_full" />
       </div> */}
-      <RowSection
-        categorySlug={thirdCategorySlug}
-        initialNews={publicNews}
-        initialCategories={categories}
-      />
+
       <AdNewsSection initialNews={adNews} />
       <SlideNewsSection
         categorySlug={fifthCategorySlug}
@@ -171,6 +146,20 @@ export default async function HomeMainContent() {
       />
       <RowSection
         categorySlug={seventhCategorySlug}
+        initialNews={publicNews}
+        initialCategories={categories}
+      />
+      {featuredThemes.map((theme: any) => (
+        <ThemeSection
+          key={theme._id}
+          theme={theme}
+          locale={locale}
+          allNews={publicNews}
+          limit={8}
+        />
+      ))}
+      <RowSection
+        categorySlug={thirdCategorySlug}
         initialNews={publicNews}
         initialCategories={categories}
       />
@@ -191,5 +180,5 @@ export default async function HomeMainContent() {
         initialCategories={categories}
       />
     </>
-  )
+  );
 }

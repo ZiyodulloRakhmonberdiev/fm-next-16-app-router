@@ -60,8 +60,8 @@ export function WeatherWidget({ compact = false }: { compact?: boolean }) {
           size="sm"
           className={
             compact
-              ? "h-7 w-auto justify-start gap-1 border-none px-0 py-0 shadow-none [&>svg]:ml-0 [&>svg]:opacity-60"
-              : "h-8 w-auto justify-start gap-1 border-none px-0 py-0 shadow-none [&>svg]:ml-0 [&>svg]:opacity-60"
+              ? "h-7 w-auto justify-start gap-1 border-none bg-transparent px-0 py-0 shadow-none hover:bg-transparent! focus:bg-transparent! dark:bg-transparent! dark:hover:bg-transparent! [&>svg]:ml-0 [&>svg]:opacity-60"
+              : "h-8 w-auto justify-start gap-1 border-none bg-transparent px-0 py-0 shadow-none hover:bg-transparent! focus:bg-transparent! dark:bg-transparent! dark:hover:bg-transparent! [&>svg]:ml-0 [&>svg]:opacity-60"
           }
         >
           <SelectValue className="">{selectedRegion.name[locale]}</SelectValue>
@@ -71,7 +71,11 @@ export function WeatherWidget({ compact = false }: { compact?: boolean }) {
           className="max-h-64 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {UZBEK_REGIONS.map((r) => (
-            <SelectItem key={r.key} value={r.key} className="">
+            <SelectItem
+              key={r.key}
+              value={r.key}
+              className="data-[state=checked]:bg-transparent! data-[state=checked]:focus:bg-transparent! data-[state=checked]:data-highlighted:bg-transparent!"
+            >
               {r.name[locale]}
             </SelectItem>
           ))}

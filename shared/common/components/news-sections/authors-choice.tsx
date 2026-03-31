@@ -45,7 +45,7 @@ export default function AuthorsChoice() {
 
   return (
     <div className="w-full">
-      <h2 className="mb-4 text-lg font-semibold">{t("authors_choice")}</h2>
+      <h2 className="mb-4 text-2xl md:text-4xl font-bold">{t("authors_choice")}</h2>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {items.map((item: NewsItem, idx: number) => (

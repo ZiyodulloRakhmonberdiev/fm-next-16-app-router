@@ -91,3 +91,62 @@ export async function optimizeImage(
     }
   })
 }
+
+/**
+ * Center-crop to a square and resize to `size x size` (for avatars/logos).
+ * Always outputs JPEG to keep files small.
+ */
+export async function optimizeImageToSquare(
+  file: File,
+  config: { size?: number; quality?: number } = { size: 300, quality: 0.85 }
+): Promise<File> {
+  if (!file.type.startsWith("image/")) return file
+  const size = Math.max(32, Math.floor(config.size ?? 300))
+  const quality = config.quality ?? 0.85
+  const targetType = "image/jpeg"
+
+  return new Promise((resolve) => {
+    const reader = new FileReader()
+    reader.readAsDataURL(file)
+    reader.onload = (event) => {
+      const img = new Image()
+      img.src = event.target?.result as string
+      img.onload = () => {
+        const canvas = document.createElement("canvas")
+        canvas.width = size
+        canvas.height = size
+        const ctx = canvas.getContext("2d")
+        if (!ctx) return resolve(file)
+
+        ctx.imageSmoothingEnabled = true
+        ctx.imageSmoothingQuality = "high"
+        ctx.fillStyle = "#FFFFFF"
+        ctx.fillRect(0, 0, size, size)
+
+        const srcW = img.width
+        const srcH = img.height
+        const crop = Math.min(srcW, srcH)
+        const sx = Math.floor((srcW - crop) / 2)
+        const sy = Math.floor((srcH - crop) / 2)
+
+        ctx.drawImage(img, sx, sy, crop, crop, 0, 0, size, size)
+
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) return resolve(file)
+            resolve(
+              new File([blob], file.name.replace(/\.[^.]+$/, "") + ".jpg", {
+                type: targetType,
+                lastModified: Date.now(),
+              })
+            )
+          },
+          targetType,
+          quality
+        )
+      }
+      img.onerror = () => resolve(file)
+    }
+    reader.onerror = () => resolve(file)
+  })
+}

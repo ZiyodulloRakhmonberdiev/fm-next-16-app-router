@@ -31,6 +31,7 @@ export type AdminTheme = {
   name: LocaleMap
   subtitle: LocaleMap
   description: LocaleMap
+  imageUrl?: string
   showInHomePage?: boolean
   showInHomeList?: boolean
   status: "active" | "inactive"
@@ -65,6 +66,7 @@ export type CreateThemePayload = {
   name: LocaleMap
   subtitle: LocaleMap
   description: LocaleMap
+  imageUrl?: string
   showInHomePage?: boolean
   showInHomeList?: boolean
   status: "active" | "inactive"

@@ -12,7 +12,7 @@ export type NewsSectionHeaderVariant =
   | "subtle"
   | "brandThin"
   | "brandAccent"
-  | "inline";
+  | "inline"
 
 export type NewsSectionHeaderProps = {
   title: ReactNode;
@@ -22,7 +22,7 @@ export type NewsSectionHeaderProps = {
   titleClassName?: string;
   viewAllClassName?: string;
   /** `link` — Button variant="link" (banner, row); `ghost` — column-section */
-  linkWrap?: "none" | "link" | "ghost";
+  linkWrap?: "none" | "link" | "ghost" | "onlyDesktop";
   /** row-section: pastida brand chiziq */
   showBrandLine?: boolean;
   /** `linkWrap="link"` bo‘lsa: matn va tugma `text-primary` o‘rniga oddiy foreground (oq/qora) */
@@ -38,7 +38,7 @@ function rowClass(variant: NewsSectionHeaderVariant): string {
     case "brandThin":
       return "flex flex-wrap items-center justify-between gap-3 border-b border-brand pb-2 pt-4 px-4 md:px-6";
     case "brandAccent":
-      return "flex items-center justify-between gap-2 border-b-2 border-brand pb-2 mb-4 text-brand";
+      return "flex items-center justify-between gap-2 pb-2 mb-4 text-brand";
     case "inline":
       return "flex items-center justify-between gap-3 px-4 py-3";
     default:
@@ -49,11 +49,11 @@ function rowClass(variant: NewsSectionHeaderVariant): string {
 function defaultTitleClass(variant: NewsSectionHeaderVariant): string {
   switch (variant) {
     case "subtle":
-      return "text-lg font-bold tracking-tight text-foreground md:text-xl";
+      return "text-2xl md:text-4xl font-bold tracking-tight text-foreground";
     case "inline":
-      return "text-base font-semibold";
+      return "text-2xl md:text-4xl font-bold";
     default:
-      return "text-lg font-semibold";
+      return "text-2xl md:text-4xl font-bold";
   }
 }
 
@@ -63,6 +63,9 @@ function defaultViewAllClass(
 ): string {
   if (linkWrap === "link" || linkWrap === "ghost") {
     return "";
+  }
+  if (linkWrap === "onlyDesktop") {
+    return "hidden md:flex items-center gap-1 text-xs font-medium hover:underline md:text-sm"
   }
   switch (variant) {
     case "subtle":

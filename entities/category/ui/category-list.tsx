@@ -11,23 +11,26 @@ export default function CategoryList() {
   const t = useTranslations("common");
   const { data: categories = [] } = usePublicCategoriesQuery();
   return (
-    <div className="hidden md:flex items-center gap-4 flex-wrap p-2 md:p-4">
-      <Link href="/news" className="text-sm">
+    <div className="hidden md:flex items-center gap-4 text-[16px] flex-wrap p-2 md:p-4">
+      <Link href="/news" className="">
         <span>{t("news")}</span>
+      </Link>
+      <Link href="/articles" className="">
+        <span>{t("articles")}</span>
       </Link>
       {categories.map((category) => (
         <Link
           key={category.slug}
           href={category.href || `/category/${category.slug}`}
-          className="text-sm"
+          className=""
         >
           <span>{category.name[locale] ?? category.name.uz ?? category.slug}</span>
         </Link>
       ))}
-      <Link href="/news/video" className="text-sm">
+      <Link href="/news/video" className="">
         <span>{t("video")}</span>
       </Link>
-      <Link href="/news/audio" className="text-sm">
+      <Link href="/news/audio" className="">
         <span>{t("audio")}</span>
       </Link>
     </div>

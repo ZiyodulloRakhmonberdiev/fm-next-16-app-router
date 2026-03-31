@@ -27,7 +27,7 @@ export default function ClientSidebar() {
     setOpen(pressed)
   }
   return (
-    <Sidebar className='bg-background'>
+    <Sidebar className=''>
       <SidebarHeader>
         <div className='flex items-center justify-between w-full gap-2 px-6 border-b border-border py-4'>
           <Image src="/images/fm-logo.svg" alt="logo" width={100} height={100} className="hidden dark:block h-8 w-auto object-contain" priority />

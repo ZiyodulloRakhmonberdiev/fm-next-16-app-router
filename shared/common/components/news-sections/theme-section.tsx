@@ -1,20 +1,22 @@
-import { Link } from "@/i18n/navigation"
-import { getNewsListForLocale, type RawNewsItem } from "@/features/news/model"
-import type { AppLocale } from "@/shared/common/lib/locale-api"
-import type { LocaleMap } from "@/shared/common/lib/locale-types"
-import { NewsSectionHeader } from "@/shared/common/components/news-sections/news-section-header"
-import { MiniNewsCard } from "@/features/news/ui/mini-news-card"
+import { Link } from "@/i18n/navigation";
+import { getNewsListForLocale, type RawNewsItem } from "@/features/news/model";
+import type { AppLocale } from "@/shared/common/lib/locale-api";
+import type { LocaleMap } from "@/shared/common/lib/locale-types";
+import { NewsSectionHeader } from "@/shared/common/components/news-sections/news-section-header";
+import { MiniNewsCard } from "@/features/news/ui/mini-news-card";
+import Image from "next/image";
 
 type ThemeLike = {
-  _id: string
-  slug: string
-  name?: LocaleMap
-  subtitle?: LocaleMap
-  description?: LocaleMap
-}
+  _id: string;
+  slug: string;
+  name?: LocaleMap;
+  subtitle?: LocaleMap;
+  description?: LocaleMap;
+  imageUrl?: string;
+};
 
 function line(map: LocaleMap | undefined, locale: AppLocale): string {
-  return (map?.[locale] ?? map?.uz ?? "").trim()
+  return (map?.[locale] ?? map?.uz ?? "").trim();
 }
 
 export function ThemeSection({
@@ -23,55 +25,75 @@ export function ThemeSection({
   allNews,
   limit = 8,
 }: {
-  theme: ThemeLike
-  locale: AppLocale
-  allNews: RawNewsItem[]
-  limit?: number
+  theme: ThemeLike;
+  locale: AppLocale;
+  allNews: RawNewsItem[];
+  limit?: number;
 }) {
-  const subtitle = line(theme.subtitle, locale)
-  const description = line(theme.description, locale)
+  const subtitle = line(theme.subtitle, locale);
+  const description = line(theme.description, locale);
   const items = getNewsListForLocale(
     allNews.filter((n) => n.themeId === theme._id).slice(0, limit),
-    locale
-  )
+    locale,
+  );
 
-  if (items.length === 0) return null
+  if (items.length === 0) return null;
 
-  const title = theme.name?.[locale] ?? theme.name?.uz ?? theme.slug
+  const title = theme.name?.[locale] ?? theme.name?.uz ?? theme.slug;
 
   return (
     <section className="w-full px-4 pt-4 md:px-6">
-      <div className="rounded-lg border bg-background">
+      <div className="">
         <NewsSectionHeader
+        className="border-none pb-0 mb-0"
           title={
-            <Link href={`/theme/${theme.slug}`} className="hover:underline">
-              {title}
-            </Link>
+            subtitle || description ? (
+              <div className="md:px-4 md:py-3 max-w-4xl">
+                <div className="flex items-center gap-3">
+                  {theme.imageUrl ? (
+                    <div className="hidden md:block relative mt-0.5 size-12 md:size-20 shrink-0 overflow-hidden rounded-full bg-muted ring-1 ring-border">
+                      <Image
+                        src={theme.imageUrl}
+                        alt={title}
+                        fill
+                        sizes="44px"
+                        className="object-cover"
+                      />
+                    </div>
+                  ) : null}
+                  <div className="min-w-0">
+                    {subtitle ? (
+                      <p className="text-2xl font-bold">{subtitle}</p>
+                    ) : null}
+                    {description ? (
+                      <p className="hidden md:block mt-1 text-sm text-muted-foreground">
+                        {description}
+                      </p>
+                    ) : null}
+                  </div>
+                </div>
+              </div>
+            ) : null
           }
           viewAllHref={`/theme/${theme.slug}`}
-          variant="inline"
-          linkWrap="link"
-          showBrandLine
+          linkWrap="onlyDesktop"
         />
 
-        {(subtitle || description) ? (
-          <div className="px-4 pb-3 -mt-1">
-            {subtitle ? (
-              <p className="text-sm font-medium text-foreground/80">{subtitle}</p>
-            ) : null}
-            {description ? (
-              <p className="mt-1 text-sm text-muted-foreground">{description}</p>
-            ) : null}
-          </div>
-        ) : null}
+        {/* <Link href={`/theme/${theme.slug}`} className="hover:underline">
+          {title}
+        </Link> */}
 
-        <div className="grid grid-cols-1 gap-x-8 gap-y-4 p-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 md:gap-x-8 gap-y-4 mt-4 md:p-4 md:grid-cols-2">
           {items.map((item) => (
-            <MiniNewsCard key={item.slug} item={item} locale={locale} variant="row" />
+            <MiniNewsCard
+              key={item.slug}
+              item={item}
+              locale={locale}
+              variant="row"
+            />
           ))}
         </div>
       </div>
     </section>
-  )
+  );
 }
-

@@ -10,6 +10,8 @@ export interface ITheme {
   name: LocaleMap
   subtitle: LocaleMap
   description: LocaleMap
+  /** 300x300 logo/avatar (public URL) */
+  imageUrl?: string
   showInHomePage?: boolean
   /** Home sahifasidagi yuqori themes scroller’da ko‘rsatish */
   showInHomeList?: boolean
@@ -40,6 +42,7 @@ const ThemeSchema = new Schema<ITheme>(
       ru: { type: String, default: "" },
       en: { type: String, default: "" },
     },
+    imageUrl: { type: String, default: "" },
     showInHomePage: { type: Boolean, default: false },
     showInHomeList: { type: Boolean, default: false },
     status: {
@@ -60,6 +63,7 @@ if (
   (
     !existingThemeModel.schema.path("subtitle") ||
     !existingThemeModel.schema.path("description") ||
+    !existingThemeModel.schema.path("imageUrl") ||
     !existingThemeModel.schema.path("showInHomePage") ||
     !existingThemeModel.schema.path("showInHomeList")
   )
