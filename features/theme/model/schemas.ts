@@ -34,6 +34,7 @@ export const createThemeSchema = z.object({
   subtitle: localeSubtitleSchema,
   description: localeDescriptionSchema,
   showInHomePage: z.boolean().default(false),
+  showInHomeList: z.boolean().default(false),
   status: themeStatusSchema.default("active"),
 })
 

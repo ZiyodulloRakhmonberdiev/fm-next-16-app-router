@@ -63,6 +63,7 @@ export type ThemeRow = {
   subtitle: Record<AppLocale, string>
   description: Record<AppLocale, string>
   showInHomePage?: boolean
+  showInHomeList?: boolean
   status: ThemeStatus
 }
 
@@ -81,7 +82,9 @@ export function ThemesPage({ locale }: ThemesPageProps) {
   const [createStatus, setCreateStatus] = useState<ThemeStatus>('active')
   const [editStatus, setEditStatus] = useState<ThemeStatus>('active')
   const [createShowInHomePage, setCreateShowInHomePage] = useState(false)
+  const [createShowInHomeList, setCreateShowInHomeList] = useState(false)
   const [editShowInHomePage, setEditShowInHomePage] = useState(false)
+  const [editShowInHomeList, setEditShowInHomeList] = useState(false)
 
   const themes = useMemo<ThemeRow[]>(
     () =>
@@ -92,6 +95,7 @@ export function ThemesPage({ locale }: ThemesPageProps) {
         subtitle: t.subtitle ?? emptyLocaleMap(),
         description: t.description ?? emptyLocaleMap(),
         showInHomePage: Boolean(t.showInHomePage),
+        showInHomeList: Boolean((t as any).showInHomeList),
         status: t.status ?? 'active',
       })),
     [data]
@@ -142,12 +146,13 @@ export function ThemesPage({ locale }: ThemesPageProps) {
       return
     }
     create.mutate(
-      { slug, name, subtitle, description, showInHomePage: createShowInHomePage, status: createStatus },
+      { slug, name, subtitle, description, showInHomePage: createShowInHomePage, showInHomeList: createShowInHomeList, status: createStatus },
       {
         onSuccess: () => {
           setCreateOpen(false)
           setCreateStatus('active')
           setCreateShowInHomePage(false)
+          setCreateShowInHomeList(false)
           toast.success("Tema muvaffaqiyatli qo'shildi")
         },
         onError: showMutationError,
@@ -192,7 +197,7 @@ export function ThemesPage({ locale }: ThemesPageProps) {
       return
     }
     update.mutate(
-      { id: editTheme._id, payload: { slug, name, subtitle, description, showInHomePage: editShowInHomePage, status: editStatus } },
+      { id: editTheme._id, payload: { slug, name, subtitle, description, showInHomePage: editShowInHomePage, showInHomeList: editShowInHomeList, status: editStatus } },
       {
         onSuccess: () => {
           setEditId(null)
@@ -255,6 +260,7 @@ export function ThemesPage({ locale }: ThemesPageProps) {
                   <TableHead>Subtitle (uz)</TableHead>
                   <TableHead>Description (uz)</TableHead>
                   <TableHead>Home</TableHead>
+                  <TableHead>Home list</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="w-[170px]">Amallar</TableHead>
                 </TableRow>
@@ -286,6 +292,13 @@ export function ThemesPage({ locale }: ThemesPageProps) {
                         )}
                       </TableCell>
                       <TableCell>
+                        {row.showInHomeList ? (
+                          <span className="rounded-full bg-emerald-500/15 text-emerald-600 px-2 py-1 text-xs font-medium">true</span>
+                        ) : (
+                          <span className="rounded-full bg-muted text-muted-foreground px-2 py-1 text-xs font-medium">false</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
                         <span
                           className={
                             row.status === 'active'
@@ -301,6 +314,7 @@ export function ThemesPage({ locale }: ThemesPageProps) {
                           <Button variant="secondary" size="sm" title="Tahrirlash" onClick={() => {
                             setEditStatus(row.status)
                             setEditShowInHomePage(Boolean(row.showInHomePage))
+                            setEditShowInHomeList(Boolean(row.showInHomeList))
                             setEditId(row._id)
                           }}>
                             <Pencil className="size-4" />
@@ -364,6 +378,14 @@ export function ThemesPage({ locale }: ThemesPageProps) {
                   id="create-show-in-home-page"
                   checked={createShowInHomePage}
                   onCheckedChange={setCreateShowInHomePage}
+                />
+              </div>
+              <div className="flex items-center justify-between rounded-md border p-3">
+                <Label htmlFor="create-show-in-home-list">Home tepadagi listda ko'rsatilsin</Label>
+                <Switch
+                  id="create-show-in-home-list"
+                  checked={createShowInHomeList}
+                  onCheckedChange={setCreateShowInHomeList}
                 />
               </div>
               <div className="space-y-2">
@@ -445,6 +467,14 @@ export function ThemesPage({ locale }: ThemesPageProps) {
                     id="edit-show-in-home-page"
                     checked={editShowInHomePage}
                     onCheckedChange={setEditShowInHomePage}
+                  />
+                </div>
+                <div className="flex items-center justify-between rounded-md border p-3">
+                  <Label htmlFor="edit-show-in-home-list">Home tepadagi listda ko'rsatilsin</Label>
+                  <Switch
+                    id="edit-show-in-home-list"
+                    checked={editShowInHomeList}
+                    onCheckedChange={setEditShowInHomeList}
                   />
                 </div>
                 <div className="space-y-2">

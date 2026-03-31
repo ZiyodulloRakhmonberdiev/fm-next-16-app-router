@@ -24,6 +24,7 @@ import {
 } from "@/features/dashboard/configs/site-settings.model"
 import { AdSlot } from "@/features/ads/ui/ad-slot"
 import { getCachedPublicNews } from "@/shared/server/public-data-server"
+import { ClientBottomNav } from "@/widgets/client-bottom-nav"
 
 type Props = {
   params: Promise<{ locale: string; slug: string }>
@@ -107,15 +108,15 @@ export default async function NewsPage({ params }: Props) {
         <ClientSidebar />
       </div>
       <div className="flex w-full flex-1 flex-col">
-        <Header />
-        <main className="flex-1 md:py-4 ">
+        <Header variant="news-page-header" shareTitle={news.title} />
+        <main className="flex-1 md:py-4 pb-8">
           <ClientServerOffGate model="news">
             <div className="mx-auto max-w-7xl grid grid-cols-1 gap-6 lg:grid-cols-7">
               <aside className="hidden lg:flex lg:flex-col lg:col-span-1 gap-4">
                 <div className="px-4 text-lg">
                   <nav className="flex flex-col gap-4">
-                    <Link href="/" className="flex items-center gap-3">
-                      <HomeIcon className="w-5 h-5" /> <span className="text-lg">{t("nav_home")}</span>
+                    <Link href="/" className="flex items-center gap-2">
+                      <HomeIcon className="w-5 h-5" /> <span className="text-lg whitespace-nowrap">{t("nav_home")}</span>
                     </Link>
                     <Link href="/news/trending" className="flex items-center gap-3">
                       <Flame className="w-5 h-5" /> <span className="text-lg">{t("nav_trending")}</span>
@@ -157,7 +158,10 @@ export default async function NewsPage({ params }: Props) {
             </div>
           </ClientServerOffGate>
         </main>
-        <Footer />
+        <ClientBottomNav />
+        <div className="hidden md:block">
+          <Footer />
+        </div>
       </div>
     </ClientSiteNothingGate>
   )

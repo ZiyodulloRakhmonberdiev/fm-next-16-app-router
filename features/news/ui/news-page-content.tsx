@@ -33,6 +33,8 @@ import type { LocaleMap } from "@/shared/common/lib/locale-types"
 import { AdSlot } from "@/features/ads/ui/ad-slot"
 import { useThemeLabel } from "@/features/theme/model/use-theme-label"
 import { usePublicThemesQuery } from "@/features/theme/model/public-themes-query"
+import { IoEyeSharp } from "react-icons/io5"
+import { MdTimer } from "react-icons/md";
 
 export type { NewsItem }
 
@@ -246,9 +248,9 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
 
   return (
     <div className="bg-background">
-         <div className="md:hidden mb-4">
-              <AdSlot placement="sidebar_widget" />
-            </div>
+      <div className="md:hidden mb-4">
+        <AdSlot placement="sidebar_widget" />
+      </div>
       <div className="relative isolate px-4 md:px-6 ">
         {/* Reklama viewport markazida qotib turadi; kontent ustidan scroll bo‘ladi, oraliqda “deraza” orqali ko‘rinadi. */}
         {/* <div className="pointer-events-none flex fixed md:inset-0 md:z-0 md:items-center md:justify-center md:px-4">
@@ -259,7 +261,7 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
 
         <article className="overflow-x-hidden">
           <div className="relative z-10 bg-background">
-            <div className="my-2 flex flex-wrap items-center justify-between gap-x-2 gap-y-2 text-sm text-muted-foreground rounded-sm shadow-sm md:shadow-none border-b pb-2">
+            {/* <div className="my-2 flex flex-wrap items-center justify-between gap-x-2 gap-y-2 text-sm text-muted-foreground rounded-sm shadow-sm md:shadow-none border-b pb-2">
               <Button
                 type="button"
                 variant="ghost"
@@ -272,6 +274,7 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
 
 
               <div className="flex items-center gap-1">
+
                 <SavedNewsActions
                   slug={news.slug}
                   newsId={newsId}
@@ -291,27 +294,19 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
                   <Share2 className="h-4 w-4" />
                 </Button>
               </div>
-            </div>
-         
-            {news.ad ? (
-              <div className="mt-2 mb-2">
-                <span className="inline-flex rounded-sm bg-amber-500/20 px-2 py-1 text-xs font-semibold text-amber-700 dark:text-amber-300">
-                  {adBadgeLabel}
-                </span>
-              </div>
-            ) : null}
-            <h1 className="text-2xl font-bold leading-tight md:text-3xl">
+            </div> */}
+              <h1 className="text-2xl font-bold leading-tight md:text-3xl">
               {news.title}
             </h1>
-            <div className="flex flex-wrap items-center  bg-background justify-between gap-x-2 gap-y-1">
+            <div className="flex flex-wrap items-center my-3 bg-background justify-between md:justify-start gap-x-3 gap-y-1">
               <div className="flex items-center gap-2">
                 <Link
                   href={`/category/${categorySlug}`}
-                  className="font-medium block my-2 hover:underline"
+                  className="font-medium hover:underline hidden md:block"
                 >
                   {categoryLabel}
                 </Link>
-                {themeId && themeSlug ? (
+                {/* {themeId && themeSlug ? (
                   <>
                     <span className="text-muted-foreground">•</span>
                     <Link
@@ -321,33 +316,27 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
                       #{themeLabel}
                     </Link>
                   </>
-                ) : null}
-              </div>
-              <time dateTime={formatDateTime(news.publishedAt)} className="text-sm text-muted-foreground items-center gap-2 hidden">
-                <Calendar className="h-4 w-4 hidden md:block shrink-0" /> <span>{formatDateTimeDotSlash(news.publishedAt)}</span>
-              </time>
-            </div>
-            {news.description != null && news.description !== "" && (
-              <p className="leading-relaxed">
-                {news.description}
-              </p>
-            )}
-            <div className="my-4 flex items-center gap-2 text-muted-foreground text-sm">
-              <time dateTime={formatDateTime(news.publishedAt)} className="text-sm text-muted-foreground flex items-center gap-2">
-                <Calendar className="h-4 w-4 shrink-0" /> <span>{formatDateTimeDotSlash(news.publishedAt)}</span>
-              </time>
-              <span aria-hidden className="select-none px-1 md:px-2">·</span>
-              <div className="inline-flex items-center gap-2 md:px-1">
-                <Clock className="h-4 w-4" />
-                <span>{news.minutes}</span> <span className="hidden md:inline-block">{t("min_read")}</span>
-              </div>
-              <span aria-hidden className="select-none px-1 md:px-2">·</span>
-              <div className="inline-flex items-center gap-2 md:px-1">
-                <Eye className="h-4 w-4" />
-                {news.views} <span className="hidden md:inline-block">{t("views")}</span>
-              </div>
-              {/* <span aria-hidden className="select-none px-1 md:px-2">·</span> */}
-              {/* <div className="inline-flex items-center gap-2 md:px-1">
+                ) : null} */}
+                <span aria-hidden className="select-none px-1 text-muted-foreground hidden md:block md:px-2">|</span>
+                <div className="flex items-center gap-3 text-muted-foreground text-xs">
+                  <time dateTime={formatDateTime(news.publishedAt)} className="text-xs text-muted-foreground flex items-center gap-2">
+                    <Calendar className="h-4 w-4 shrink-0 md:hidden" />
+                    <span> {formatDateTimeDotSlash(news.publishedAt)}</span>
+                  </time>
+                  {/* <span aria-hidden className="select-none px-1 md:px-2">·</span> */}
+                  {/* <span aria-hidden className="select-none px-1 md:px-2">·</span> */}
+                  <div className="inline-flex items-center gap-1 md:px-1">
+                    <IoEyeSharp className="h-4 w-4" />
+                    {news.views}
+                    {/* <span className="hidden md:inline-block">{t("views")}</span> */}
+                  </div>
+                  <div className="hidden md:inline-flex items-center gap-1 md:px-1">
+                    <MdTimer className="h-4 w-4" />
+                    <span>{news.minutes}</span>
+                    <span className="hidden md:inline-block">{t("min_read")}</span>
+                  </div>
+
+                  {/* <div className="inline-flex items-center gap-2 md:px-1">
             <MessageSquare className="h-4 w-4" />
             {commentTotal} <span className="hidden md:inline-block">{t("comments")}</span>
             <span aria-hidden className="select-none px-1 md:px-2">·</span>
@@ -356,7 +345,30 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
               {reactionTotal} <span className="hidden md:inline-block">{t("reactions")}</span>
             </div>
           </div> */}
+                </div>
+
+              </div>
+              {/* <time dateTime={formatDateTime(news.publishedAt)} className="text-sm text-muted-foreground items-center gap-2 hidden">
+                <Calendar className="h-4 w-4 hidden md:block shrink-0" /> 
+                <span>{formatDateTimeDotSlash(news.publishedAt)}</span>
+              </time> */}
+              <div>
+                {news.ad ? (
+                  <div className="">
+                    <span className="inline-flex rounded-full bg-brand/5 px-2 py-0.5 text-xs font-semibold text-brand dark:text-white dark:bg-brand/30">
+                      {adBadgeLabel}
+                    </span>
+                  </div>
+                ) : null}
+              </div>
             </div>
+          
+            {news.description != null && news.description !== "" && (
+              <p className="leading-relaxed my-3">
+                {news.description}
+              </p>
+            )}
+
 
 
             {hasVideo && (() => {

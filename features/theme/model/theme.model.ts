@@ -11,6 +11,8 @@ export interface ITheme {
   subtitle: LocaleMap
   description: LocaleMap
   showInHomePage?: boolean
+  /** Home sahifasidagi yuqori themes scroller’da ko‘rsatish */
+  showInHomeList?: boolean
   status: ThemeStatus
   createdAt: Date
   updatedAt: Date
@@ -39,6 +41,7 @@ const ThemeSchema = new Schema<ITheme>(
       en: { type: String, default: "" },
     },
     showInHomePage: { type: Boolean, default: false },
+    showInHomeList: { type: Boolean, default: false },
     status: {
       type: String,
       enum: ["active", "inactive"],
@@ -57,7 +60,8 @@ if (
   (
     !existingThemeModel.schema.path("subtitle") ||
     !existingThemeModel.schema.path("description") ||
-    !existingThemeModel.schema.path("showInHomePage")
+    !existingThemeModel.schema.path("showInHomePage") ||
+    !existingThemeModel.schema.path("showInHomeList")
   )
 ) {
   delete models.Theme
