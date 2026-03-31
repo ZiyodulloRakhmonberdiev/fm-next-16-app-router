@@ -149,6 +149,7 @@ export function AudioNewsPageClient({ initial }: Props) {
               <div className="pt-2">
                 <LoadMoreButton
                   label={loading ? "Yuklanmoqda…" : "Ko'proq yuklash"}
+                  loading={loading}
                   onClick={() => void loadMore()}
                 />
               </div>

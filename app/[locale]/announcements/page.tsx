@@ -34,7 +34,7 @@ export default async function AdsNewsPage() {
           <ClientServerOffGate model="news">
             <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 lg:grid-cols-4">
               <div className="min-w-0 px-4 md:px-6 lg:col-span-3">
-                <SpecialNewsPageContent title="Reklama yangiliklar" initialNews={list} />
+                <SpecialNewsPageContent title="E'lonlar" initialNews={list} />
               </div>
               <aside className="hidden md:flex flex-col gap-6 px-4 md:px-6 lg:col-span-1">
                 <LatestNews initialNews={await getCachedPublicNews()} />

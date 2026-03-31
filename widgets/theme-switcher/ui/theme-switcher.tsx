@@ -101,7 +101,7 @@ export function ThemeSwitcherForHeader() {
         {isDark ? (
           <MoonIcon className="size-4 text-white shrink-0" strokeWidth={2} />
         ) : (
-          <SunIcon className="size-4 text-white shrink-0" strokeWidth={2} />
+          <SunIcon className="size-4 text-white fill-current shrink-0" strokeWidth={2} />
         )}
       </span>
     </button>

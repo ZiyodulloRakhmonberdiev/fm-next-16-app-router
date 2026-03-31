@@ -146,7 +146,6 @@ export default async function HomeMainContent() {
         />
       ))}
       <StatsNewsSection initialNews={statsNews} initialCategories={categories} />
-      <AdNewsSection initialNews={adNews} />
       <VideoNewsSection2
         initialNews={publicNews}
         initialCategories={categories}
@@ -159,6 +158,7 @@ export default async function HomeMainContent() {
         initialNews={publicNews}
         initialCategories={categories}
       />
+      <AdNewsSection initialNews={adNews} />
       <SlideNewsSection
         categorySlug={fifthCategorySlug}
         initialNews={publicNews}

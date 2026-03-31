@@ -35,9 +35,9 @@ export default async function TeamPage() {
       </div>
       <div className="flex w-full flex-1 flex-col bg-background">
         <Header />
-        <main className="flex-1 py-16 px-4 md:px-6">
+        <main className="flex-1 py-4 md:py-16 px-4 md:px-6">
           <ClientServerOffGate model="categories">
-            <div className="max-w-7xl mx-auto space-y-20">
+            <div className="max-w-7xl mx-auto space-y-6 md:space-y-20">
               
               {/* Minimalist Header */}
               <section className="space-y-6">
@@ -54,11 +54,11 @@ export default async function TeamPage() {
               </section>
 
               {/* Minimalist Member Grid */}
-              <div className="grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="grid gap-x-6 gap-y-4 md:gap-y-6 sm:grid-cols-2 lg:grid-cols-4">
                 {items.map((m) => (
                   <div
                     key={m._id}
-                    className="group space-y-4"
+                    className="group"
                   >
                     <div className="relative overflow-hidden rounded-xl border border-border bg-muted/10 transition-colors duration-500 group-hover:border-foreground/20">
                       {(m.image || m.badgeImage) ? (
@@ -80,14 +80,14 @@ export default async function TeamPage() {
                       </div>
                     </div>
                     
-                    <div className="space-y-1 px-1">
+                    {/* <div className="space-y-1 px-1">
                       <h3 className="text-lg font-medium tracking-tight text-foreground">
                         {m.fullName}
                       </h3>
                       <p className="text-sm font-light text-muted-foreground">
                         {m.position}
                       </p>
-                    </div>
+                    </div> */}
                   </div>
                 ))}
               </div>

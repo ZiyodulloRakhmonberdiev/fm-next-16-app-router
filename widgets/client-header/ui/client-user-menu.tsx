@@ -133,13 +133,13 @@ export function ClientUserMenu() {
                 <LiaUserEditSolid className="size-4" />
                 {t("edit_profile")}
               </DropdownMenuItem>
-              <span className="my-1 block h-[0.5px] w-full bg-foreground/10"></span>
-              <DropdownMenuItem asChild>
+              {/* <span className="my-1 block h-[0.5px] w-full bg-foreground/10"></span> */}
+              {/* <DropdownMenuItem asChild>
                 <Link href="/news/saved" className="flex items-center gap-2">
                   <Bookmark className="size-4" />
                   {t("saved_news")}
                 </Link>
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
               <span className="my-1 block h-[0.5px] w-full bg-foreground/10"></span>
               <DropdownMenuItem asChild>
                 <Link href="/user/comments" className="flex items-center gap-2">

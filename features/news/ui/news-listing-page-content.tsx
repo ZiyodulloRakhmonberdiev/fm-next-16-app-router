@@ -299,7 +299,11 @@ export function NewsListingPageContent({
 
           <div className="mt-5 flex justify-start">
             {hasMore ? (
-              <LoadMoreButton label={t("load_more")} onClick={() => void loadMore()} />
+              <LoadMoreButton
+                label={t("load_more")}
+                loading={loading}
+                onClick={() => void loadMore()}
+              />
             ) : null}
           </div>
         </div>

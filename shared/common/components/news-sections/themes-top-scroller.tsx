@@ -24,7 +24,7 @@ export function ThemesTopScroller({
           <Link
             key={theme._id}
             href={`/theme/${theme.slug}`}
-            className="shrink-0 rounded-full bg-background px-3 py-1.5 text-md font-medium flex items-center gap-3"
+            className="shrink-0 rounded-full bg-background px-4 py-1.5 text-xs md:text-md font-medium flex items-center gap-3 border md:border-none"
           >
             <span className="hidden md:block size-2 shrink-0 bg-foreground/50 rounded-full" />
             <span>{theme.name?.[locale] ?? theme.name?.uz ?? theme.slug}</span>

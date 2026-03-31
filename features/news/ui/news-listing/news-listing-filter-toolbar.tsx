@@ -59,7 +59,7 @@ export function NewsListingFilterToolbar({
 
   return (
     <div className="mb-4 hidden md:flex flex-col gap-1 bg-background py-2 sm:flex-row sm:items-center sm:justify-between md:top-17 md:gap-3 z-20 border-b">
-      <h1 className="text-xl md:text-3xl mt-4 font-semibold">{pageHeading}</h1>
+      <h1 className="text-xl md:text-3xl mt-4 mb-2 font-bold">{pageHeading}</h1>
       <div className="flex items-center gap-2">
         <div className="w-full flex-wrap">
           <div className="hidden flex-wrap items-center gap-4 rounded-md bg-background py-1">

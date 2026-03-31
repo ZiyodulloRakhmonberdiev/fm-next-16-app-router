@@ -6,9 +6,9 @@ import { useLocale } from "next-intl"
 import { usePublicCategoriesQuery } from "@/features/category/model/public-categories-query"
 import type { AppLocale } from "@/shared/common/lib/locale-api"
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/common/components/ui/card"
-import { LanguageSwitcherForSidebar } from "@/widgets/language-switcher"
+import { LanguageSwitcher, LanguageSwitcherForSidebar } from "@/widgets/language-switcher"
 import { ThemeSwitcherForHeader } from "@/widgets/theme-switcher"
-import { Bell, ChevronRight, Globe, Mail, Moon, Phone } from "lucide-react"
+import { Bell, ChevronRight, FileText, Flag, Globe, Info, Languages, LockOpen, Mail, Moon, Phone, PhoneCall, User, UsersRound } from "lucide-react"
 import { Switch } from "@/shared/common/components/ui/switch"
 import { cn } from "@/shared/common/lib/utils"
 import { usePathname, useRouter } from "@/i18n/navigation"
@@ -53,14 +53,11 @@ const copyByLocale: Record<AppLocale, MenuCopy> = {
     lightModeValue: "Kunduzgi",
     sections: [
       { title: "Yangiliklar", href: "/news" },
+      { title: "Maqolalar", href: "/articles" },
       { title: "Audio", href: "/news/audio" },
       { title: "Video", href: "/news/video" },
       { title: "Dolzarb yangiliklar", href: "/news/breaking" },
       { title: "Muallif tanlovi", href: "/news" },
-      { title: "Bizning jamoa", href: "/team" },
-      { title: "Biz haqimizda", href: "/about" },
-      { title: "Maxfiylik siyosati", href: "/privacy" },
-      { title: "Foydalanish shartlari", href: "/terms" },
     ],
   },
   uzb: {
@@ -77,14 +74,11 @@ const copyByLocale: Record<AppLocale, MenuCopy> = {
     lightModeValue: "Кундузги",
     sections: [
       { title: "Янгиликлар", href: "/news" },
+      { title: "Мақолалар", href: "/articles" },
       { title: "Видео", href: "/news/video" },
       { title: "Аудио", href: "/news/audio" },
       { title: "Долзарб янгиликлар", href: "/news/breaking" },
-      { title: "Муаллиф танлови", href: "/news" },
-      { title: "Бизнинг жамоа", href: "/team" },
-      { title: "Биз ҳақимизда", href: "/about" },
-      { title: "Махфийлик сиёсати", href: "/privacy" },
-      { title: "Фойдаланиш шартлари", href: "/terms" },
+      { title: "Муаллиф танлови", href: "/news" }
     ],
   },
   ru: {
@@ -101,14 +95,11 @@ const copyByLocale: Record<AppLocale, MenuCopy> = {
     lightModeValue: "Светлый",
     sections: [
       { title: "Новости", href: "/news" },
+      { title: "Статьи", href: "/articles" },
       { title: "Видео", href: "/news/video" },
       { title: "Аудио", href: "/news/audio" },
       { title: "Срочные новости", href: "/news/breaking" },
-      { title: "Выбор автора", href: "/news" },
-      { title: "Наша команда", href: "/team" },
-      { title: "О нас", href: "/about" },
-      { title: "Условия использования", href: "/terms" },
-      { title: "Политика конфиденциальности", href: "/privacy" },
+      { title: "Выбор автора", href: "/news" }
     ],
   },
   en: {
@@ -125,14 +116,11 @@ const copyByLocale: Record<AppLocale, MenuCopy> = {
     lightModeValue: "Light",
     sections: [
       { title: "News", href: "/news" },
+      { title: "Articles", href: "/articles" },
       { title: "Video", href: "/news/video" },
       { title: "Audio", href: "/news/audio" },
       { title: "Breaking news", href: "/news/breaking" },
-      { title: "Author's choice", href: "/news" },
-      { title: "Our team", href: "/team" },
-      { title: "About us", href: "/about" },
-      { title: "Privacy policy", href: "/privacy" },
-      { title: "Terms of use", href: "/terms" },
+      { title: "Author's choice", href: "/news" }
     ],
   },
 }
@@ -199,15 +187,81 @@ export default function MenuPageClient() {
           ))}
         </div>
       </section>
+      <section className="space-y-2">
+        <h2 className="text-lg font-semibold">{copy.settingsTitle}</h2>
+        <div className="flex justify-between items-center">
+            <Link
+              href="/contact"
+              className="flex items-center gap-3 rounded-xl py-2 text-sm font-medium transition-colors"
+            >
+              <PhoneCall className="text-muted-foreground" />
+              <span>Murojaat yo'llash</span>
+            </Link>
+            <ChevronRight className="size-5" />
+        </div>
+        <div className="flex justify-between items-center">
+            <Link
+              href="/partners"
+              className="flex items-center gap-3 rounded-xl py-2 text-sm font-medium transition-colors"
+            >
+              <Flag className="text-muted-foreground" />
+              <span>Reklama</span>
+            </Link>
+            <ChevronRight className="size-5" />
+        </div>
+        <div className="flex justify-between items-center">
+            <Link
+              href="/team"
+              className="flex items-center gap-3 rounded-xl py-2 text-sm font-medium transition-colors"
+            >
+              <UsersRound className="text-muted-foreground" />
+              <span>Bizning jamoa</span>
+            </Link>
+            <ChevronRight className="size-5" />
+        </div>
+        <div className="flex justify-between items-center">
+            <Link
+              href="/terms"
+              className="flex items-center gap-3 rounded-xl py-2 text-sm font-medium transition-colors"
+            >
+              <FileText className="text-muted-foreground" />
+              <span>Foydalanish shartlari</span>
+            </Link>
+            <ChevronRight className="size-5" />
+        </div>
+        <div className="flex justify-between items-center">
+            <Link
+              href="/privacy"
+              className="flex items-center gap-3 rounded-xl py-2 text-sm font-medium transition-colors"
+            >
+              <LockOpen className="text-muted-foreground" />
+              <span>Maxfiylik siyosati</span>
+            </Link>
+            <ChevronRight className="size-5" />
+        </div>
+        <div className="flex justify-between items-center">
+            <Link
+              href="/about"
+              className="flex items-center gap-3 rounded-xl py-2 text-sm font-medium transition-colors"
+            >
+              <Info className="text-muted-foreground" />
+              <span>Sayt haqida</span>
+            </Link>
+            <ChevronRight className="size-5" />
+        </div>
+      </section>
 
-      <Card className="gap-3">
+      {/* <Card className="gap-3">
         <CardHeader className="px-4 pb-0">
           <CardTitle>{copy.settingsTitle}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 px-4">
-          <div className="flex items-center justify-between gap-3 rounded-lg border border-border px-3 py-2">
-            <span className="text-sm font-medium">Til</span>
-            <LanguageSwitcherForSidebar />
+          <div className="flex items-center justify-between gap-3 py-2">
+          <div className="flex items-center gap-3">
+            <PhoneCall />
+            <span className="text-sm font-medium">Murojaat yo'llash</span>
+          </div>
+            <ChevronRight className="size-4" />
           </div>
           <div className="flex items-center justify-between gap-3 rounded-lg border border-border px-3 py-2">
             <span className="text-sm font-medium">Theme</span>
@@ -221,7 +275,7 @@ export default function MenuPageClient() {
             {copy.contactLabel}
           </Link>
         </CardContent>
-      </Card>
+      </Card> */}
 
     </div>
   )

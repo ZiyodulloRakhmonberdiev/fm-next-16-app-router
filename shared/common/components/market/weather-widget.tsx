@@ -64,14 +64,14 @@ export function WeatherWidget({ compact = false }: { compact?: boolean }) {
               : "h-8 w-auto justify-start gap-1 border-none px-0 py-0 shadow-none [&>svg]:ml-0 [&>svg]:opacity-60"
           }
         >
-          <SelectValue>{selectedRegion.name[locale]}</SelectValue>
+          <SelectValue className="">{selectedRegion.name[locale]}</SelectValue>
         </SelectTrigger>
         <SelectContent
           align="start"
           className="max-h-64 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {UZBEK_REGIONS.map((r) => (
-            <SelectItem key={r.key} value={r.key}>
+            <SelectItem key={r.key} value={r.key} className="">
               {r.name[locale]}
             </SelectItem>
           ))}

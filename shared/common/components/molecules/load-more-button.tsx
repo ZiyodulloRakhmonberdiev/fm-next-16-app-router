@@ -11,11 +11,13 @@ export type LoadMoreButtonProps = Omit<
 > & {
   label: string
   showChevron?: boolean
+  loading?: boolean
 }
 
 export function LoadMoreButton({
   label,
   showChevron = true,
+  loading = false,
   className,
   type = "button",
   ...props
@@ -28,10 +30,17 @@ export function LoadMoreButton({
         "mt-2 md:mt-4 group transition rounded-full cursor-pointer h-auto py-3 mx-auto px-6 bg-foreground/5",
         className
       )}
+      disabled={props.disabled ?? loading}
       {...props}
     >
       {showChevron ? (
-        <RefreshCw className="ml-6 block size-8 stroke-1 shrink-0 text-foreground rounded-full p-1 transition duration-200" aria-hidden />
+        <RefreshCw
+          className={cn(
+            "ml-6 block size-8 stroke-1 shrink-0 text-foreground rounded-full p-1 transition duration-200",
+            loading ? "animate-spin" : ""
+          )}
+          aria-hidden
+        />
       ) : null}
       <span className="mr-6 text-md font-medium">{label}</span>
       {/* {showChevron ? (

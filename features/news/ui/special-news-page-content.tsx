@@ -39,8 +39,10 @@ export function SpecialNewsPageContent({
   )
 
   return (
-    <section className="space-y-4">
-      <h1 className="text-2xl font-bold md:text-3xl">{title}</h1>
+    <section className="space-y-4 max-w-3xl mx-auto pt-4">
+      <div className="border-b flex justify-start">
+      <h1 className="text-2xl font-bold md:text-3xl text-center bg-brand text-white inline-block px-3 py-2 rounded-xs">{title}</h1>
+      </div>
       <div className="space-y-3">
         {items.map((item) => {
           const thumb = getSafeImageSrc(item.images?.[0])
@@ -49,15 +51,15 @@ export function SpecialNewsPageContent({
             <Link
               key={item.slug}
               href={`/news/${item.slug}`}
-              className="group grid grid-cols-1 overflow-hidden rounded-sm border bg-background md:grid-cols-3"
+              className="group grid grid-cols-1 overflow-hidden rounded-sm bg-background md:grid-cols-3"
             >
-              <div className="order-2 flex min-h-[150px] flex-col justify-between gap-3 p-4 md:order-1 md:col-span-2">
+              <div className="order-2 flex min-h-[150px] flex-col justify-center gap-3 p-4 md:order-1 md:col-span-2 font-semibold">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <span className="line-clamp-1">{categoryLabel}</span>
                   <span>|</span>
                   <time dateTime={formatDateISO(item.publishedAt)}>{formatDateTimeDotSlash(item.publishedAt)}</time>
                 </div>
-                <h2 className="line-clamp-3 text-lg font-semibold leading-snug transition-colors group-hover:text-primary">
+                <h2 className="line-clamp-3 text-lg md:text-xl font-bold leading-snug transition-colors group-hover:text-brand">
                   {item.title}
                 </h2>
               </div>
