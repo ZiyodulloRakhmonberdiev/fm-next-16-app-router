@@ -32,9 +32,10 @@ export default function ThemeSwitcher() {
       aria-label="Toggle theme"
     >
       {isDark ? (
-        <SunIcon className="size-4" />
+        // <MoonIcon className="size-5" />
+        <SunIcon className="size-5 fill-current" />
       ) : (
-        <MoonIcon className="size-4" />
+        <SunIcon className="size-5 fill-current" />
       )}
     </button>
   );
@@ -93,9 +94,8 @@ export function ThemeSwitcherForHeader() {
       className="relative inline-flex h-7 w-14 shrink-0 cursor-pointer items-center rounded-full overflow-hidden bg-brand py-0.5 transition-colors"
     >
       <span
-        className={`absolute top-1/2 -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded-full  shadow-sm transition-[left] duration-300 ease-in-out ${
-          isDark ? "left-[calc(100%-1.65rem)]" : "left-0.5"
-        }`}
+        className={`absolute top-1/2 -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded-full  shadow-sm transition-[left] duration-300 ease-in-out ${isDark ? "left-[calc(100%-1.65rem)]" : "left-0.5"
+          }`}
         aria-hidden
       >
         {isDark ? (

@@ -11,10 +11,13 @@ import { SearchBar } from '@/widgets/client-searchbar'
 import { AdSlot } from '@/features/ads/ui/ad-slot'
 import { ClientUserMenu } from '@/widgets/client-header/ui/client-user-menu'
 import { Button } from '@/shared/common/components/ui/button'
-import { Search } from 'lucide-react'
+import { ArrowLeft, ChevronLeft, Search, Share2 } from 'lucide-react'
 import { LanguageSwitcher } from '@/widgets/language-switcher'
 import { cn } from '@/shared/common/lib/utils'
-import { ThemeSwitcherForHeader } from '@/widgets/theme-switcher'
+import { ThemeSwitcher, ThemeSwitcherForHeader } from '@/widgets/theme-switcher'
+import { useRouter } from 'next/navigation'
+
+export type HeaderVariant = 'default' | 'news-page-header'
 
 function AdSlotHeader() {
   return (
@@ -26,7 +29,15 @@ function AdSlotHeader() {
   )
 }
 
-export default function Header() {
+export default function Header({
+  variant = 'default',
+  shareTitle,
+}: {
+  variant?: HeaderVariant
+  /** news-page-header uchun share title (ixtiyoriy) */
+  shareTitle?: string
+}) {
+  const router = useRouter()
   const [searchOpen, setSearchOpen] = useState(false)
   const { resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
@@ -58,6 +69,69 @@ export default function Header() {
     mounted && resolvedTheme === 'light'
       ? '/images/fm-logo-dark.svg'
       : '/images/fm-logo.svg'
+
+  const handleShare = async () => {
+    const url = typeof window !== 'undefined' ? window.location.href : ''
+    const title = shareTitle ?? (typeof document !== 'undefined' ? document.title : '')
+    try {
+      if (navigator.share && url) {
+        await navigator.share({ title, text: title, url })
+        return
+      }
+      if (navigator.clipboard && url) {
+        await navigator.clipboard.writeText(url)
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  if (variant === 'news-page-header') {
+    return (
+      <div
+        ref={barRef}
+        className={cn('bg-card border-b border-border shadow-sm z-50 sticky top-0')}
+      >
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-3 py-2 md:px-6">
+          <div className="flex items-center gap-2 min-w-0">
+            <Button
+              type="button"
+              variant="outline"
+              size="icon-sm"
+              onClick={() => router.back()}
+              aria-label="Orqaga"
+              className="shrink-0 "
+            >
+              <ChevronLeft className="size-4" />
+            </Button>
+            {/* <Link href="/" className="flex h-8 shrink-0 items-center">
+              <Image
+                src={mounted ? logoSrc : '/images/fm-logo-dark.svg'}
+                alt="Logo"
+                width={120}
+                height={36}
+                className="h-6 w-auto object-contain"
+                priority
+              />
+            </Link> */}
+          </div>
+
+          <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+            <LanguageSwitcher />
+            <ThemeSwitcher />
+            <button
+              type="button"
+              onClick={() => void handleShare()}
+              aria-label="Ulashish"
+              className="pl-2"
+            >
+              <Share2 className="size-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div>

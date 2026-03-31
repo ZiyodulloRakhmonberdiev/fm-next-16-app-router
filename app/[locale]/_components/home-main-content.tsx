@@ -19,6 +19,8 @@ import {
   SlideNewsSection,
   StatsNewsSection,
   TextNewsSection,
+  ThemeSection,
+  ThemesTopScroller,
 } from "@/shared/common/components/news-sections"
 import RowSection from "@/shared/common/components/news-sections/row-section"
 import VideoNewsSection2 from "@/shared/common/components/news-sections/video-news-section-2"
@@ -99,29 +101,14 @@ export default async function HomeMainContent() {
     }
   }
 
-  const featuredThemes = themes.filter((theme: any) => Boolean(theme.showInHomePage))
+  // Top scroller shows all active themes (themes API is active-only for public).
+  const featuredThemes = themes.filter((theme: any) =>
+    Boolean(theme.showInHomeList ?? theme.showInHomePage)
+  )
 
   return (
     <>
-      {themes.length > 0 ? (
-        <section className="px-4 md:px-6 pt-2 pb-1">
-          <div className="flex items-center justify-between gap-4 border-b pb-2 overflow-x-auto whitespace-nowrap scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-            {themes.map((theme: { _id: string; slug: string; name?: Record<string, string> }) => (
-              <Link
-                key={theme._id}
-                href={`/theme/${theme.slug}`}
-                className="shrink-0 rounded-full bg-background px-3 py-1.5 text-md font-medium flex items-center gap-3"
-              >
-                <span className="block size-2 shrink-0 bg-foreground/50 rounded-full"></span>
-                <span>
-                  {theme.name?.[locale] ?? theme.name?.uz ?? theme.slug}
-
-                </span>
-              </Link>
-            ))}
-          </div>
-        </section>
-      ) : null}
+      <ThemesTopScroller themes={themes} locale={locale} />
       <HeaderNewsCarousel initialNews={publicNews} />
       <TopBanner />
       <BannerSection
@@ -149,74 +136,24 @@ export default async function HomeMainContent() {
         initialNews={publicNews}
         initialCategories={categories}
       />
-      {featuredThemes.map((theme: any) => {
-        const themeSubtitle = (theme.subtitle?.[locale] ?? theme.subtitle?.uz ?? "").trim()
-        const themeDescription = (theme.description?.[locale] ?? theme.description?.uz ?? "").trim()
-        const items = publicNews
-          .filter((n: any) => n.themeId === theme._id)
-          .slice(0, 8)
-        if (items.length < 1) return null
-
-        return (
-          <section key={theme._id} className="px-4 py-4 md:px-6">
-            <div className="mb-3 border-b pb-2">
-              <Link href={`/theme/${theme.slug}`} className="text-xl font-semibold hover:underline">
-                {theme.name?.[locale] ?? theme.name?.uz ?? theme.slug}
-              </Link>
-              {themeSubtitle ? (
-                <p className="mt-1 text-sm font-medium text-foreground/80">{themeSubtitle}</p>
-              ) : null}
-              {themeDescription ? (
-                <p className="mt-1 text-sm text-muted-foreground">{themeDescription}</p>
-              ) : null}
-            </div>
-
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-              {items.map((item: any) => {
-                const title =
-                  item.title?.[locale] ||
-                  item.title?.uz ||
-                  item.slug
-                const desc =
-                  item.description?.[locale] ||
-                  item.description?.uz ||
-                  ""
-                const image = getSafeImageSrc(item.images?.[0])
-                return (
-                  <Link
-                    key={item.slug}
-                    href={`/news/${item.slug}`}
-                    className="group grid grid-cols-[120px_1fr] gap-3 rounded-sm border p-2 hover:bg-muted/40"
-                  >
-                    <div className="h-[86px] overflow-hidden rounded-sm bg-muted">
-                      {image ? (
-                        <img src={image} alt={title} className="h-full w-full object-cover" />
-                      ) : null}
-                    </div>
-                    <div className="min-w-0">
-                      <h3 className="line-clamp-2 text-sm font-semibold transition-colors group-hover:text-primary">
-                        {title}
-                      </h3>
-                      {desc ? (
-                        <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{desc}</p>
-                      ) : null}
-                    </div>
-                  </Link>
-                )
-              })}
-            </div>
-          </section>
-        )
-      })}
+      {featuredThemes.map((theme: any) => (
+        <ThemeSection
+          key={theme._id}
+          theme={theme}
+          locale={locale}
+          allNews={publicNews}
+          limit={8}
+        />
+      ))}
       <StatsNewsSection initialNews={statsNews} initialCategories={categories} />
       <AdNewsSection initialNews={adNews} />
       <VideoNewsSection2
         initialNews={publicNews}
         initialCategories={categories}
       />
-      <div className="px-4 md:px-6 py-4">
+      {/* <div className="px-4 md:px-6 py-4">
         <AdSlot placement="home_bottom_full" />
-      </div>
+      </div> */}
       <RowSection
         categorySlug={thirdCategorySlug}
         initialNews={publicNews}

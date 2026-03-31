@@ -19,7 +19,7 @@ import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
 import { usePublicCategoriesQuery } from "@/features/category/model/public-categories-query"
 import { getCategoryLabelForNewsItem } from "@/features/category/model/use-category-label"
 import { cn } from "@/shared/common/lib/utils"
-import { AppLocale, formatDateISO, formatDateTimeLocale } from "../../lib/formatter"
+import { AppLocale, formatDateISO, formatDateTimeDotSlash, formatDateTimeLocale } from "../../lib/formatter"
 
 function CarouselDots({
   count,
@@ -127,7 +127,7 @@ export default function TopNewsCarousel() {
                         </p>
                       </div>
                       <time className="text-xs" dateTime={formatDateISO(item.publishedAt)}>
-                        {formatDateTimeLocale(item.publishedAt, locale)}
+                        {formatDateTimeDotSlash(item.publishedAt)}
                       </time>
                     </div>
                     <Link
@@ -146,9 +146,9 @@ export default function TopNewsCarousel() {
                         <div className="absolute inset-0 bg-muted" aria-hidden />
                       )}
                       <div className="absolute inset-0 bg-black/30" aria-hidden />
-                      <span className="absolute left-3 top-3 z-10 bg-primary rounded-xs px-1.5 py-0.5 text-xs font-semibold text-primary-foreground">
+                      {/* <span className="absolute left-3 top-3 z-10 bg-primary rounded-xs px-1.5 py-0.5 text-xs font-semibold text-primary-foreground">
                         Top
-                      </span>
+                      </span> */}
                     </Link>
                   </div>
                 </Card>
