@@ -111,7 +111,6 @@ export default async function NewsPage({ params }: Props) {
         <div className="md:hidden">
           <Header variant="news-page-header" shareTitle={news.title} />
         </div>
-        <span></span>
         <div className="hidden md:block">
           <Header />
         </div>
