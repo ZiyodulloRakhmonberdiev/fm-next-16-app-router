@@ -35,7 +35,7 @@ export function AdsList({ items, deletingId, onEditItem, onRemove }: AdsListProp
                 <p className="mt-1 text-sm text-muted-foreground">{item.siteName}</p>
                 <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
                   <span>Faol: {item.active ? "Ha" : "Yo'q"}</span>
-                  <span>Ustuvorlik: {item.priority}</span>
+                  {/* Hozircha priority ko'rsatilmaydi. */}
                 </div>
                 <div className="mt-4 flex gap-2">
                   <Button
@@ -75,14 +75,14 @@ export function AdsList({ items, deletingId, onEditItem, onRemove }: AdsListProp
               <TableHead>Reklama nomi</TableHead>
               <TableHead>Sayt</TableHead>
               <TableHead>Faol</TableHead>
-              <TableHead>Ustuvorlik</TableHead>
+              {/* Hozircha priority ko'rsatilmaydi. */}
               <TableHead className="w-[120px]">Amallar</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {items.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
+                <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
                   Reklama yo&apos;q
                 </TableCell>
               </TableRow>
@@ -92,7 +92,6 @@ export function AdsList({ items, deletingId, onEditItem, onRemove }: AdsListProp
                   <TableCell className="max-w-[200px] truncate font-medium">{item.title}</TableCell>
                   <TableCell className="max-w-[160px] truncate">{item.siteName}</TableCell>
                   <TableCell>{item.active ? "Ha" : "Yo'q"}</TableCell>
-                  <TableCell>{item.priority}</TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-1">
                       <Button

@@ -3,6 +3,7 @@
 import * as React from "react"
 import {
   getNewsListForLocale,
+  isVideoRawNews,
   type NewsItem,
   type RawNewsItem,
 } from "@/features/news/model"
@@ -22,11 +23,6 @@ import { VideoCardMediaPreview } from "@/features/news/ui/news-listing/video-car
 
 const PAGE_SIZE = 30
 
-function isVideoNewsItem(item: RawNewsItem): boolean {
-  const hasVideo = !!(item.videoSource && item.videoUrl)
-  return item.type === "video" || hasVideo
-}
-
 export function VideoCategoryPageContent() {
   const locale = useLocale() as AppLocale
   const t = useTranslations("common")
@@ -36,7 +32,7 @@ export function VideoCategoryPageContent() {
 
   const allItems = React.useMemo(() => {
     const raw = [...publicNews]
-      .filter(isVideoNewsItem)
+      .filter(isVideoRawNews)
       .sort(
         (a, b) =>
           new Date(b.publishedAt).getTime() -

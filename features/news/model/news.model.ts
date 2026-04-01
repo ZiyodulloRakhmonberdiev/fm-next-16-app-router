@@ -23,6 +23,10 @@ export interface INews {
   publishedAt: Date
   status: NewsStatus
   type?: string
+  hasText?: boolean
+  hasImage?: boolean
+  hasVideo?: boolean
+  hasAudio?: boolean
   authorsChoice?: boolean
   isTrending?: boolean
   isLatest?: boolean
@@ -39,8 +43,11 @@ export interface INews {
   telegramPushReason?: string
   telegramLastAttemptAt?: Date
   videoUrl?: string
+  videoCaption?: string
   audioSource?: 'local' | 'external'
   audioUrl?: string
+  audioCaption?: string
+  imageCaption?: string
   /** Yangilikni yaratgan admin foydalanuvchi */
   createdBy?: { userId: string; name: string }
   createdAt: Date
@@ -88,6 +95,10 @@ const NewsSchema = new Schema<INews>(
       default: 'pending',
     },
     type: String,
+    hasText: { type: Boolean, default: false, index: true },
+    hasImage: { type: Boolean, default: false, index: true },
+    hasVideo: { type: Boolean, default: false, index: true },
+    hasAudio: { type: Boolean, default: false, index: true },
     authorsChoice: { type: Boolean, default: false },
     isTrending: { type: Boolean, default: false },
     isLatest: { type: Boolean, default: false },
@@ -104,8 +115,11 @@ const NewsSchema = new Schema<INews>(
     telegramPushReason: String,
     telegramLastAttemptAt: Date,
     videoUrl: String,
+    videoCaption: String,
     audioSource: { type: String, enum: ['local', 'external'] },
     audioUrl: String,
+    audioCaption: String,
+    imageCaption: String,
     createdBy: {
       userId: { type: String },
       name: { type: String },

@@ -3,6 +3,7 @@
 import * as React from "react"
 import {
   getNewsListForLocale,
+  isVideoRawNews,
   type NewsItem,
   type RawNewsItem,
 } from "@/features/news/model"
@@ -20,11 +21,6 @@ import { usePublicCategoriesQuery } from "@/features/category/model/public-categ
 import { getCategoryLabelForNewsItem } from "@/features/category/model/use-category-label"
 import { getCloudinaryVideoPosterUrl } from "@/shared/infra/cloudinary"
 import { getYoutubeThumbnailUrl, getYoutubeEmbedUrl } from "@/features/news/lib/youtube"
-
-function isVideoNewsItem(item: RawNewsItem): boolean {
-  const hasVideo = Boolean(item.videoSource && item.videoUrl)
-  return item.type === "video" || hasVideo
-}
 
 function getSafeImageSrc(raw?: string): string {
   if (!raw?.trim()) return ""
@@ -55,7 +51,7 @@ export default function VideoNewsSection() {
 
   const items = React.useMemo(() => {
     const raw = [...publicNews]
-      .filter(isVideoNewsItem)
+      .filter(isVideoRawNews)
       .sort(
         (a, b) =>
           new Date(b.publishedAt).getTime() -

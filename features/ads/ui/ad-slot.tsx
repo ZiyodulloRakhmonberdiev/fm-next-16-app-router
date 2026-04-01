@@ -27,7 +27,6 @@ export function AdSlot({ placement }: Props) {
   const { data: settings } = usePublicSiteSettingsQuery()
   const { data: ads = [] } = usePublicAdsQuery(placement)
   const [adIndex, setAdIndex] = useState(0)
-  const [mediaIndex, setMediaIndex] = useState(0)
   const [allHidden, setAllHidden] = useState(adsHiddenUntilRefresh)
   const [panelOpen, setPanelOpen] = useState(false)
   const isMobile = useIsMobile()
@@ -41,7 +40,7 @@ export function AdSlot({ placement }: Props) {
     return Array.isArray(ad.mediaMobile) ? ad.mediaMobile : [ad.mediaMobile]
   }, [ad?.mediaMobile])
   const effectiveMediaList = isMobile && mediaMobileList.length > 0 ? mediaMobileList : mediaList
-  const currentMedia = effectiveMediaList[mediaIndex] ?? effectiveMediaList[0] ?? ""
+  const currentMedia = effectiveMediaList[0] ?? ""
 
   const adsExplicitlyDisabled = settings?.clientDelivery?.models?.ads === false
 
@@ -52,33 +51,20 @@ export function AdSlot({ placement }: Props) {
   }, [ads, adIndex])
 
   useEffect(() => {
-    if (!ads.length || ads.length === 1) return
-    const seconds = Math.max(3, Number(ad?.displaySeconds ?? 12))
-    const timer = window.setTimeout(() => {
-      setAdIndex((prev) => (prev + 1) % ads.length)
-    }, seconds * 1000)
-    return () => window.clearTimeout(timer)
-  }, [ads, adIndex, ad?.displaySeconds])
+    if (!ads.length) return
+    // Hozircha auto-rotation o'chirilgan:
+    // sahifa yangilanmaguncha bitta ad ko'rsatiladi,
+    // refresh bo'lganda esa keyingi ad chiqadi.
+    const key = `fm:ad-slot-index:${placement}`
+    const prevRaw = window.sessionStorage.getItem(key)
+    const prevIndex = Number.isFinite(Number(prevRaw)) ? Number(prevRaw) : -1
+    const nextIndex = (prevIndex + 1 + ads.length) % ads.length
+    window.sessionStorage.setItem(key, String(nextIndex))
+    setAdIndex(nextIndex)
+  }, [ads, placement])
 
-  useEffect(() => {
-    setMediaIndex(0)
-  }, [ad?._id])
-
-  useEffect(() => {
-    if (effectiveMediaList.length > 0 && mediaIndex >= effectiveMediaList.length) {
-      setMediaIndex(0)
-    }
-  }, [effectiveMediaList.length, mediaIndex])
-
-  useEffect(() => {
-    if (effectiveMediaList.length <= 1) return
-    const totalSeconds = Math.max(3, Number(ad?.displaySeconds ?? 12))
-    const perMediaMs = (totalSeconds * 1000) / effectiveMediaList.length
-    const timer = window.setTimeout(() => {
-      setMediaIndex((prev) => (prev + 1) % effectiveMediaList.length)
-    }, perMediaMs)
-    return () => window.clearTimeout(timer)
-  }, [ad?._id, ad?.displaySeconds, mediaIndex, effectiveMediaList.length])
+  // Hozircha media carousel ham o'chirilgan:
+  // bitta ad ichida faqat birinchi media ko'rsatiladi.
 
   if (adsExplicitlyDisabled) return null
   if (allHidden) return null
@@ -105,10 +91,26 @@ export function AdSlot({ placement }: Props) {
   const adHref = toAbsoluteExternalHref(ad.adUrl)
   const hideExtraLinks =
     placement === "sidebar_widget" || placement === "article_bottom_full"
+  const isArticleBottomFull = placement === "article_bottom_full"
+  const primaryLink = ad.links?.[0]
+  const primaryLinkHref = toAbsoluteExternalHref(primaryLink?.href)
 
   return (
-    <div data-ad-slot className="relative w-full md:py-2">
-      <div className={cn("relative w-full overflow-hidden aspect-video max-h-[160px] md:max-h-[180px] lg:max-h-[220px]")}>
+    <div
+      data-ad-slot
+      className={cn(
+        "relative w-full md:py-2",
+        isArticleBottomFull && "w-screen max-w-none md:w-full"
+      )}
+    >
+      <div
+        className={cn(
+          "relative w-full overflow-hidden",
+          isArticleBottomFull
+            ? "h-screen min-h-screen md:h-auto md:min-h-0 md:aspect-video"
+            : "aspect-video max-h-[160px] md:max-h-[180px] lg:max-h-[220px]"
+        )}
+      >
          <span className="hidden md:block absolute left-2 top-3 z-10 rounded px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-white/95 bg-black/90" aria-hidden>
           Reklama
         </span> 
@@ -119,14 +121,74 @@ export function AdSlot({ placement }: Props) {
             onClose={closePanel}
             onAdSectionClosed={handleAdSectionClosed}
           />
+        ) : isArticleBottomFull ? (
+          <div className="relative h-full w-full">
+            {currentMedia ? (
+              mediaKind === "video" ? (
+                <video
+                  key={currentMedia}
+                  src={currentMedia}
+                  className="absolute inset-0 h-full w-full object-cover md:object-contain"
+                  style={{ objectPosition: "center center" }}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                />
+              ) : (
+                <img
+                  key={currentMedia}
+                  src={currentMedia}
+                  alt={ad.title ?? "Reklama"}
+                  className="absolute inset-0 h-full w-full object-cover md:object-contain"
+                  style={{ objectPosition: "center center" }}
+                />
+              )
+            ) : null}
+
+            <Button
+              size="icon"
+              variant="secondary"
+              className="absolute right-2 top-3 z-20 size-7"
+              onClick={openPanel}
+              aria-label="Reklama menyusi"
+            >
+              <MoreVertical className="size-4" />
+            </Button>
+
+            {/* Mobile: article_bottom_full uchun faqat links[0] absolute CTA */}
+            {primaryLinkHref && primaryLink?.label ? (
+              <div className="pointer-events-none absolute inset-x-0 bottom-24 flex justify-center md:hidden">
+                <a
+                  href={primaryLinkHref}
+                  target="_blank"
+                  rel="noopener noreferrer sponsored nofollow"
+                  className="pointer-events-auto inline-flex items-center justify-center bg-white/95 px-6 py-3 text-sm font-semibold text-black shadow-xl"
+                  style={{ animation: "ad-cta-pulse 2s ease-in-out infinite" }}
+                >
+                  {primaryLink.label}
+                </a>
+              </div>
+            ) : null}
+
+            {adHref ? (
+              <a
+                href={adHref}
+                target="_blank"
+                rel="noopener noreferrer sponsored nofollow"
+                className="absolute inset-0 hidden md:block"
+                aria-label={ad.title ?? "Reklama"}
+              />
+            ) : null}
+          </div>
         ) : ad.type === "image" ? (
-          <div className="relative h-full w-full mb-auto">
+          <div className="relative h-full w-full mb-auto z-100">
             {currentMedia ? (
               mediaKind === "video" ? (
                 <video key={currentMedia} src={currentMedia} className="absolute inset-0 h-full w-full object-contain"
                   style={{ objectPosition: "center center" }} autoPlay muted loop playsInline />
               ) : (
-                <img key={currentMedia} src={currentMedia} alt={ad.title ?? "Reklama"} className="absolute inset-0 h-full w-full object-cover md:object-contain"
+                <img key={currentMedia} src={currentMedia} alt={ad.title ?? "Reklama"} className=" h-full w-full object-cover md:object-contain"
                   style={{ objectPosition: "center center" }} />
               )
             ) : null}
@@ -152,7 +214,7 @@ export function AdSlot({ placement }: Props) {
                   <video key={currentMedia} src={currentMedia} className="absolute inset-0 h-full w-full object-contain"
                     style={{ objectPosition: "center center" }} autoPlay muted loop playsInline />
                 ) : (
-                  <img key={currentMedia} src={currentMedia} alt={ad.title ?? "Reklama"} className="absolute inset-0 h-full w-full object-contain"
+                  <img key={currentMedia} src={currentMedia} alt={ad.title ?? "Reklama"} className="object-cover"
                     style={{ objectPosition: "center center" }} />
                 )
               ) : null}
@@ -253,6 +315,17 @@ export function AdSlot({ placement }: Props) {
           </>
         )}
       </div>
+      <style jsx>{`
+        @keyframes ad-cta-pulse {
+          0%,
+          100% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.08);
+          }
+        }
+      `}</style>
     </div>
   )
 }

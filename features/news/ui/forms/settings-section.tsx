@@ -225,12 +225,20 @@ export function SettingsForm({
             />
           </div>
         ) : null}
+        <div className="space-y-2 rounded-lg border p-4">
+          <p className="text-sm font-medium">News status</p>
+          <p className="text-xs text-muted-foreground">
+            Joriy holat: <span className="font-semibold">{statusLabel}</span>
+          </p>
+          {mode === 'create' ? (
+            <p className="text-xs text-muted-foreground">
+              Create rejimida status "Chop etish" bosilganda `published` ga o‘tadi.
+            </p>
+          ) : null}
+        </div>
         {mode === 'edit' && onStatusChange && (
           <div className="space-y-3 rounded-lg border p-4">
-            <p className="text-sm font-medium">Status</p>
-            <p className="text-xs text-muted-foreground mb-3">
-              Joriy status: <span className="font-semibold">{statusLabel}</span>
-            </p>
+            <p className="text-sm font-medium">Status amallari</p>
             <div className="flex flex-wrap gap-2">
               {canRestore && (
                 <Button variant="default" size="sm" className="gap-2" onClick={() => onStatusChange('published')}>

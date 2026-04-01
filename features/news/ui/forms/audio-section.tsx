@@ -9,7 +9,9 @@ type AudioFormProps = {
   audioUrl: string
   audioDisplayUrl: string
   hasAudioFile: boolean
+  audioCaption: string
   onAudioUrlChange: (value: string) => void
+  onAudioCaptionChange: (value: string) => void
   onAudioFileChange: (file: File | null) => void
 }
 
@@ -17,7 +19,9 @@ export function AudioForm({
   audioUrl,
   audioDisplayUrl,
   hasAudioFile,
+  audioCaption,
   onAudioUrlChange,
+  onAudioCaptionChange,
   onAudioFileChange,
 }: AudioFormProps) {
   const hasAudio = Boolean(audioUrl.trim() || hasAudioFile)
@@ -55,6 +59,14 @@ export function AudioForm({
               }}
             />
           </div>
+        </div>
+        <div className="max-w-xl space-y-2">
+          <Label>Audio caption (ixtiyoriy)</Label>
+          <Input
+            value={audioCaption}
+            onChange={(e) => onAudioCaptionChange(e.target.value)}
+            placeholder="Audio ostida ko‘rinadigan qisqa izoh"
+          />
         </div>
         
         {hasAudio ? (

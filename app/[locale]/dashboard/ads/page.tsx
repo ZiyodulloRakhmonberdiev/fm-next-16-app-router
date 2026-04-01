@@ -45,33 +45,17 @@ function DashboardAdsPage() {
     return uploadFileViaPresignedUrl(file, kind)
   }
 
-  async function handleMediaFileChange(e: React.ChangeEvent<HTMLInputElement>, atIndex?: number) {
+  async function handleMediaFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files
     if (!files?.length) return
-    const maxNew = 10 - (form.media.length - (form.media.filter(Boolean).length ? 0 : 1))
-    if (maxNew <= 0) {
-      toast.error("Maksimum 10 ta media")
-      return
-    }
     setMediaUploading(true)
     try {
-      const urls: string[] = []
-      for (let i = 0; i < Math.min(files.length, maxNew); i++) {
-        const file = files[i]
-        const ext = (file.name?.split(".").pop() ?? "").toLowerCase()
-        const kind = ["mp4", "webm", "ogg", "mov", "m4v"].includes(ext) ? "video" : "image"
-        const url = await uploadMedia(file, kind)
-        urls.push(url)
-      }
+      const file = files[0]
+      const ext = (file.name?.split(".").pop() ?? "").toLowerCase()
+      const kind = ["mp4", "webm", "ogg", "mov", "m4v"].includes(ext) ? "video" : "image"
+      const url = await uploadMedia(file, kind)
       setForm((p) => {
-        const list = [...p.media]
-        const filled = list.filter(Boolean)
-        if (atIndex !== undefined && atIndex >= 0 && atIndex < list.length) {
-          list[atIndex] = urls[0] ?? ""
-          return { ...p, media: list }
-        }
-        const newList = filled.length ? [...filled, ...urls] : [urls[0] ?? "", ...urls.slice(1)]
-        return { ...p, media: newList.slice(0, 10) }
+        return { ...p, media: [url] }
       })
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Media yuklab bo'lmadi")
@@ -130,10 +114,6 @@ function DashboardAdsPage() {
       toast.error("Kamida bitta media majburiy")
       return
     }
-    if (mediaList.length > 10) {
-      toast.error("Maksimum 10 ta media")
-      return
-    }
     if (!form.adUrl?.trim()) {
       toast.error("Reklama URL majburiy")
       return
@@ -166,9 +146,10 @@ function DashboardAdsPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         ...form,
-        media: mediaList,
-        priority: Number(form.priority) || 0,
-        displaySeconds: Number(form.displaySeconds) || 12,
+        media: [mediaList[0]],
+        // Hozircha prioritet va soniya bo'yicha rotation ishlatilmaydi.
+        priority: 0,
+        displaySeconds: 12,
         type: form.type ?? "content",
         placements: form.placements.length ? form.placements : ["header_top_full"],
         placement: form.placements[0] ?? "header_top_full",

@@ -22,16 +22,16 @@ export const createAdSchemaInput = z.object({
   media: z
     .union([
       z.string().min(1, "Media majburiy"),
-      z.array(z.string().min(1, "Media URL majburiy")).min(1, "Kamida bitta media").max(10, "Maksimum 10 ta media"),
+      z.array(z.string().min(1, "Media URL majburiy")).length(1, "Hozircha faqat 1 ta media mumkin"),
     ])
-    .transform((v) => (Array.isArray(v) ? v : [v])),
+    .transform((v) => (Array.isArray(v) ? [v[0]] : [v])),
   mediaMobile: z
     .union([
       z.string().min(1),
-      z.array(z.string().min(1)).max(10),
+      z.array(z.string().min(1)).length(1, "Hozircha faqat 1 ta mobile media mumkin"),
     ])
     .optional()
-    .transform((v) => (v == null || (Array.isArray(v) && v.length === 0) ? undefined : Array.isArray(v) ? v : [v])),
+    .transform((v) => (v == null || (Array.isArray(v) && v.length === 0) ? undefined : Array.isArray(v) ? [v[0]] : [v])),
   adUrl: z.string().min(1, "Reklama URL majburiy"),
   logo: z.string().min(1, "Logo majburiy"),
   siteName: z.string().min(1, "Sayt nomi majburiy"),

@@ -14,12 +14,12 @@ import {
 } from "@/shared/common/components/ui/dialog"
 import { Textarea } from "@/shared/common/components/ui/textarea"
 import { toast } from "sonner"
-import { formatDateTimeLocale } from "@/shared/common/lib/formatter"
 import type { AppLocale } from "@/shared/common/lib/formatter"
 import { useTranslations } from "next-intl"
 import { useLocale } from "next-intl"
 import { AuthModal } from "@/features/auth/ui/auth-modal"
 import { LoadMoreButton } from "@/shared/common/components/molecules/load-more-button"
+import { formatDateTimeDotSlash } from "@/shared/common/lib/formatter"
 
 type ReactionType = "like" | "love" | "laugh" | "sad" | "angry"
 type CommentItem = {
@@ -176,7 +176,7 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
   function formatCommentDate(createdAt: string): string {
     try {
       const loc: AppLocale = ["en", "ru", "uz", "uzb"].includes(locale) ? (locale as AppLocale) : "uz"
-      return formatDateTimeLocale(createdAt, loc)
+      return formatDateTimeDotSlash(createdAt)
     } catch {
       return createdAt
     }
@@ -317,7 +317,7 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
             <div className="min-w-0 flex-1 space-y-1">
               <div>
                 <p className="font-semibold text-foreground">{c.userName}</p>
-                <p className="text-xs text-muted-foreground">{formatCommentDate(c.createdAt)}</p>
+                <p className="text-xs text-muted-foreground">{formatDateTimeDotSlash(c.createdAt)}</p>
               </div>
               {c.replyToUserLogin ? (
                 <p className="text-xs text-muted-foreground">↪ @{c.userName}</p>

@@ -9,6 +9,7 @@ import { UserModel } from '@/features/users/model/user.model'
 import { NewsCommentModel } from '@/features/news/model/comment.model'
 import { NewsReactionModel } from '@/features/news/model/reaction.model'
 import { createNewsSchema } from '@/features/news/model/schemas'
+import { computeNewsMediaFlags } from '@/features/news/lib/news-media-flags'
 import { sendNewsToTelegram } from '@/shared/infra/telegram'
 import { logAdminAction } from '@/features/admin-logs/lib/log-action'
 import { requireAdminSession } from '@/shared/server/require-admin-session'
@@ -88,19 +89,19 @@ export async function GET(req: NextRequest) {
     if (top === "1" || top === "true") filter.isTop = true
     if (authorsChoice === "1" || authorsChoice === "true") filter.authorsChoice = true
     if (breaking === "1" || breaking === "true") filter.isBreaking = true
-    /** UI (`video-news-section-2`): `type === "video"` yoki `videoSource` + `videoUrl` */
+    /** Video filter: endi asosiy mezon `hasVideo` */
     if (video === "1" || video === "true") {
       filter.$or = [
-        { type: "video", videoUrl: { $exists: true, $ne: "" } },
-        {
-          videoUrl: { $exists: true, $ne: "" },
-          videoSource: { $in: ["youtube", "local"] },
-        },
+        { hasVideo: true },
+        { videoUrl: { $exists: true, $nin: [null, ""] } },
       ]
     }
-    /** Audio filter: audioUrl mavjud bo'lsa */
+    /** Audio filter: endi asosiy mezon `hasAudio` */
     if (audio === "1" || audio === "true") {
-      filter.audioUrl = { $exists: true, $ne: "" }
+      filter.$or = [
+        { hasAudio: true },
+        { audioUrl: { $exists: true, $nin: [null, ""] } },
+      ]
     }
     if (Number.isFinite(recentMonths) && recentMonths > 0) {
       const now = new Date()
@@ -273,6 +274,16 @@ export async function POST(req: NextRequest) {
     if (Array.isArray(createData.images)) {
       createData.images = createData.images.filter((u): u is string => typeof u === 'string' && u.trim() !== '')
     }
+    const flags = computeNewsMediaFlags({
+      title: createData.title as { uz?: string; uzb?: string; ru?: string; en?: string } | null | undefined,
+      images: createData.images,
+      videoUrl: createData.videoUrl,
+      audioUrl: createData.audioUrl,
+    })
+    createData.hasText = flags.hasText
+    createData.hasImage = flags.hasImage
+    createData.hasVideo = flags.hasVideo
+    createData.hasAudio = flags.hasAudio
 
     const news = await NewsModel.create({
       ...createData,

@@ -19,8 +19,11 @@ export type EditNewsInitialData = {
   minutes: number
   views: number
   videoUrl: string
+  videoCaption: string
   audioSource?: 'local' | 'external'
   audioUrl: string
+  audioCaption: string
+  imageCaption: string
   contents: Record<AppLocale, string>
   isTop: boolean
   authorsChoice: boolean
@@ -79,8 +82,11 @@ export function rawNewsToEditInitialData(raw: RawNewsItem): EditNewsInitialData 
     minutes: typeof raw.minutes === 'number' ? raw.minutes : 3,
     views: typeof raw.views === 'number' ? raw.views : 0,
     videoUrl: raw.videoUrl ?? '',
+    videoCaption: raw.videoCaption ?? '',
     audioSource: raw.audioSource,
     audioUrl: raw.audioUrl ?? '',
+    audioCaption: raw.audioCaption ?? '',
+    imageCaption: raw.imageCaption ?? '',
     contents,
     isTop: raw.isTop ?? false,
     authorsChoice: raw.authorsChoice ?? false,

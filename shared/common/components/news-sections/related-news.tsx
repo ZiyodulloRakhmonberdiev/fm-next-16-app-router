@@ -50,7 +50,7 @@ export default function RelatedNews(props: RelatedNewsProps) {
   return (
     <section
       className={cn(
-        sidebar ? "mt-0 border-0 pt-0" : "mt-10 border-t border-border pt-8"
+        sidebar ? "mt-0 border-0 pt-0" : "border-t border-border pt-12"
       )}
     >
       <h2

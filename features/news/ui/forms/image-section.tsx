@@ -18,7 +18,9 @@ type ImageFormProps = {
   imageUrls: string[]
   imageFiles: File[]
   imageFilePreviewUrls: string[]
+  imageCaption: string
   onImageUrlInputChange: (value: string) => void
+  onImageCaptionChange: (value: string) => void
   onAddImageUrl: () => void
   onAddImageFiles: (e: React.ChangeEvent<HTMLInputElement>) => void
   onRemoveImageUrl: (index: number) => void
@@ -30,7 +32,9 @@ export function ImageForm({
   imageUrls,
   imageFiles,
   imageFilePreviewUrls,
+  imageCaption,
   onImageUrlInputChange,
+  onImageCaptionChange,
   onAddImageUrl,
   onAddImageFiles,
   onRemoveImageUrl,
@@ -69,6 +73,15 @@ export function ImageForm({
               onChange={onAddImageFiles}
             />
           </div>
+        </div>
+        <div className="max-w-xl space-y-2">
+          <Label htmlFor="image-caption">Rasm caption (ixtiyoriy)</Label>
+          <Input
+            id="image-caption"
+            value={imageCaption}
+            onChange={(e) => onImageCaptionChange(e.target.value)}
+            placeholder="Rasm ostida ko‘rinadigan qisqa izoh"
+          />
         </div>
         {(imageUrls.length > 0 || imageFiles.length > 0) && (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">

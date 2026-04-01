@@ -245,13 +245,16 @@ export function CreateNewsForm({
   const [tagIds, setTagIds] = useState<string[]>(() => initialData?.tagIds ?? [])
   const [authorId, setAuthorId] = useState(initialData?.authorId ?? '')
   const [imageUrls, setImageUrls] = useState<string[]>(() => initialData?.imageUrls ?? [])
+  const [imageCaption, setImageCaption] = useState(initialData?.imageCaption ?? '')
   const [imageUrlInput, setImageUrlInput] = useState('')
   const [imageFiles, setImageFiles] = useState<File[]>([])
   const [minutes, setMinutes] = useState<number | ''>(initialData?.minutes ?? 3)
   const [videoUrl, setVideoUrl] = useState(initialData?.videoUrl ?? '')
+  const [videoCaption, setVideoCaption] = useState(initialData?.videoCaption ?? '')
   const [videoFile, setVideoFile] = useState<File | null>(null)
   const [activeTab, setActiveTab] = useState<AppLocale>('uz')
   const [audioUrl, setAudioUrl] = useState(initialData?.audioUrl ?? '')
+  const [audioCaption, setAudioCaption] = useState(initialData?.audioCaption ?? '')
   const [audioFile, setAudioFile] = useState<File | null>(null)
   const [authorsChoice, setAuthorsChoice] = useState(initialData?.authorsChoice ?? false)
   const [isTrending, setIsTrending] = useState(initialData?.isTrending ?? false)
@@ -363,8 +366,11 @@ export function CreateNewsForm({
         pushedToTelegram: pushedToTelegramOverride ?? pushedToTelegram,
         videoSource: finalVideoSource,
         videoUrl: finalVideoUrl,
+        videoCaption: videoCaption.trim() || undefined,
         audioSource: finalAudioSource,
         audioUrl: finalAudioUrl,
+        audioCaption: audioCaption.trim() || undefined,
+        imageCaption: imageCaption.trim() || undefined,
       }
 
       const targetId = savedNewsId
@@ -513,6 +519,9 @@ export function CreateNewsForm({
       ad,
       stats,
       audioUrl: audioUrl.trim() || undefined,
+      audioCaption: audioCaption.trim() || undefined,
+      videoCaption: videoCaption.trim() || undefined,
+      imageCaption: imageCaption.trim() || undefined,
       audioFile: audioFile?.name,
       pushedToTelegram,
       status,
@@ -551,6 +560,7 @@ export function CreateNewsForm({
       setPushedToTelegramAt(
         saved.pushedToTelegramAt ? new Date(saved.pushedToTelegramAt).toISOString() : undefined
       )
+      setEditStatus(status)
       toast.success("Yangilik saqlandi")
       return true
     } catch (err) {
@@ -587,6 +597,7 @@ export function CreateNewsForm({
       setPushedToTelegramAt(
         saved.pushedToTelegramAt ? new Date(saved.pushedToTelegramAt).toISOString() : undefined
       )
+      setEditStatus(status)
       if (status === 'published') {
         toast.success("Yangilik muvaffaqiyatli chop etildi")
       } else {
@@ -776,7 +787,9 @@ export function CreateNewsForm({
             imageUrls={imageUrls}
             imageFiles={imageFiles}
             imageFilePreviewUrls={imageFilePreviewUrls}
+            imageCaption={imageCaption}
             onImageUrlInputChange={setImageUrlInput}
+            onImageCaptionChange={setImageCaption}
             onAddImageUrl={addImageUrl}
             onAddImageFiles={addImageFiles}
             onRemoveImageUrl={removeImageUrl}
@@ -788,7 +801,9 @@ export function CreateNewsForm({
             videoDisplayUrl={videoDisplayUrl}
             youtubeEmbedUrl={youtubeEmbedUrl}
             hasVideoFile={Boolean(videoFile)}
+            videoCaption={videoCaption}
             onVideoUrlChange={setVideoUrl}
+            onVideoCaptionChange={setVideoCaption}
             onVideoFileChange={setVideoFile}
           />
 
@@ -796,7 +811,9 @@ export function CreateNewsForm({
             audioUrl={audioUrl}
             audioDisplayUrl={audioDisplayUrl}
             hasAudioFile={Boolean(audioFile)}
+            audioCaption={audioCaption}
             onAudioUrlChange={setAudioUrl}
+            onAudioCaptionChange={setAudioCaption}
             onAudioFileChange={setAudioFile}
           />
 

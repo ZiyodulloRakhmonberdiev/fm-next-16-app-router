@@ -4,7 +4,7 @@ import { ClientSidebar } from "@/widgets/client-sidebar"
 import ClientSiteNothingGate from "../../_components/client-site-nothing-gate"
 import ClientServerOffGate from "../../_components/client-server-off-gate"
 import type { AppLocale } from "@/shared/common/lib/formatter"
-import { getNewsListForLocale, type RawNewsItem } from "@/features/news/model"
+import { getNewsListForLocale, isAudioRawNews, type RawNewsItem } from "@/features/news/model"
 import { headers } from "next/headers"
 import { AudioNewsPageClient } from "./audio-page-client"
 
@@ -46,8 +46,9 @@ async function fetchInitial(locale: AppLocale) {
   if (!res.ok) return { items: [], page: 1, totalPages: 1 }
   const json = (await res.json()) as NewsListResponse
   const raw = Array.isArray(json.data) ? json.data.map(normalizeRaw) : []
+  const audioRaw = raw.filter(isAudioRawNews)
   return {
-    items: getNewsListForLocale(raw, locale),
+    items: getNewsListForLocale(audioRaw, locale),
     page: Number(json.meta?.page ?? 1),
     totalPages: Math.max(1, Number(json.meta?.totalPages ?? 1)),
   }

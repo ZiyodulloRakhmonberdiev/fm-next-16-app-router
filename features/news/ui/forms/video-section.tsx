@@ -11,7 +11,9 @@ type VideoFormProps = {
   videoDisplayUrl: string
   youtubeEmbedUrl: string | null
   hasVideoFile: boolean
+  videoCaption: string
   onVideoUrlChange: (value: string) => void
+  onVideoCaptionChange: (value: string) => void
   onVideoFileChange: (file: File | null) => void
 }
 
@@ -20,7 +22,9 @@ export function VideoForm({
   videoDisplayUrl,
   youtubeEmbedUrl,
   hasVideoFile,
+  videoCaption,
   onVideoUrlChange,
+  onVideoCaptionChange,
   onVideoFileChange,
 }: VideoFormProps) {
   const hasVideo = Boolean(videoUrl.trim() || hasVideoFile)
@@ -60,6 +64,14 @@ export function VideoForm({
               }}
             />
           </div>
+        </div>
+        <div className="max-w-xl space-y-2">
+          <Label>Video caption (ixtiyoriy)</Label>
+          <Input
+            value={videoCaption}
+            onChange={(e) => onVideoCaptionChange(e.target.value)}
+            placeholder="Video ostida ko‘rinadigan qisqa izoh"
+          />
         </div>
         {hasVideo ? (
           <div className="relative rounded-lg border overflow-hidden bg-muted aspect-video max-w-2xl">

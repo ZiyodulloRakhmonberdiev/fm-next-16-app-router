@@ -232,7 +232,7 @@ export function AudioPlayerBar({
                   </button>
                 </div>
               </div>
-              <div className="mt-2 flex items-center gap-2">
+              <div className="mt-2 flex items-center gap-2 px-2">
                 <div className="h-0.5 flex-1 cursor-pointer rounded-full bg-brand/10 dark:bg-foreground/10" onClick={handleSeek}>
                   <div
                     className="relative h-full rounded-full bg-brand/70 transition-[width] duration-100"
@@ -295,7 +295,7 @@ export function AudioPlayerBar({
                   className="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground"
                   aria-label="Volume toggle"
                 >
-                  {muted || volume === 0 ? <VolumeX className="size-6 text-brand/70" /> : <Volume1 className="size-6 text-brand/70" />}
+                  {muted || volume === 0 ? <VolumeX className="size-6 text-brand fill-brand" /> : <Volume1 className="size-6 text-brand fill-brand" />}
                 </button>
                 <div className="relative h-1.5 w-20 rounded-full bg-brand/10 dark:bg-foreground/5">
                   <div

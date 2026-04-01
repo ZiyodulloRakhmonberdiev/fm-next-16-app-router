@@ -56,7 +56,16 @@ export function MiniNewsCard({
         </Link>
 
         <div className="flex flex-col justify-between gap-0.5 py-1">
-          <NewsCardContent item={item} locale={locale} categoryLabel={categoryLabel} variant="stacked" dateVariant="dateTimeSlash" descriptionClassName="hidden" titleClassName="line-clamp-2" />
+          <NewsCardContent
+            item={item}
+            locale={locale}
+            categoryLabel={categoryLabel}
+            variant="stacked"
+            dateVariant="dateTimeSlash"
+            descriptionClassName="hidden"
+            titleClassName="line-clamp-2"
+            showMediaIndicators
+          />
         </div>
       </div>
     </Card>

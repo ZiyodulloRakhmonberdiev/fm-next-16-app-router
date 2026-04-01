@@ -29,31 +29,7 @@ export function AdsFormMetaFields({ form, setForm }: AdsFormMetaFieldsProps) {
           className="min-w-0"
         />
       </div>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:col-span-2">
-        <div className="space-y-2">
-          <Label>Ustuvorlik *</Label>
-          <Input
-            type="number"
-            inputMode="numeric"
-            className="min-w-0"
-            value={form.priority}
-            onChange={(e) => setForm((p) => ({ ...p, priority: Number(e.target.value) }))}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label>Davomiylik *</Label>
-          <Input
-            type="number"
-            inputMode="numeric"
-            className="min-w-0"
-            value={form.displaySeconds}
-            onChange={(e) => setForm((p) => ({ ...p, displaySeconds: Number(e.target.value) }))}
-            min={3}
-            max={120}
-          />
-        </div>
-      </div>
+      {/* Hozircha priority/displaySeconds ishlatilmaydi (rotation vaqtincha o'chirilgan). */}
 
       <div className="space-y-2">
         <Label>Reklama tavsifi *</Label>

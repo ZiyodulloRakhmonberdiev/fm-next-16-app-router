@@ -3,6 +3,7 @@
 import * as React from "react";
 import {
   getNewsListForLocale,
+  isVideoRawNews,
   type NewsItem,
   type RawNewsItem,
 } from "@/features/news/model";
@@ -28,11 +29,6 @@ type VideoNewsSection2Props = {
 
 const VIDEO_NEWS_LIMIT = 8;
 
-function isVideoNewsItem(item: RawNewsItem): boolean {
-  const hasVideo = Boolean(item.videoSource && item.videoUrl);
-  return item.type === "video" || hasVideo;
-}
-
 export default function VideoNewsSection2({
   initialNews,
   initialCategories,
@@ -49,7 +45,7 @@ export default function VideoNewsSection2({
 
   const items = React.useMemo(() => {
     const raw = [...publicNews]
-      .filter(isVideoNewsItem)
+      .filter(isVideoRawNews)
       // Poster bo'lmasa ham card ko'rinishi kerak — faqat videoUrl bo'lmaganlarni chiqarib yuboramiz.
       .filter((n) => Boolean((n as RawNewsItem).videoUrl))
       .sort(

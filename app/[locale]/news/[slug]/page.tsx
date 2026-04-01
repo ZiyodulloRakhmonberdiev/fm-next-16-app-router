@@ -114,7 +114,7 @@ export default async function NewsPage({ params }: Props) {
         <div className="hidden md:block">
           <Header />
         </div>
-        <main className="flex-1 md:py-4 pb-8">
+        <main className="flex-1 md:py-4">
           <ClientServerOffGate model="news">
             <div className="mx-auto max-w-7xl grid grid-cols-1 gap-6 lg:grid-cols-7">
               <aside className="hidden lg:flex lg:flex-col lg:col-span-1 gap-4">
@@ -156,15 +156,15 @@ export default async function NewsPage({ params }: Props) {
                 <NewsPageContent news={news} newsId={newsId} />
               </div>
 
-              <aside className="hidden md:flex flex-col gap-6 lg:col-span-2 px-4 md:px-6">
+              <aside className="hidden md:flex flex-col gap-6 lg:col-span-2 px-4 md:px-6 pb-16">
                 {/* <AdSlot placement="sidebar_widget" /> */}
                 <LatestNews excludeSlug={news.slug} initialNews={await getCachedPublicNews()} />
               </aside>
             </div>
           </ClientServerOffGate>
         </main>
-        <ClientBottomNav />
-        <div className="hidden md:block">
+        {/* <ClientBottomNav /> */}
+        <div className="bg-background z-100">
           <Footer />
         </div>
       </div>

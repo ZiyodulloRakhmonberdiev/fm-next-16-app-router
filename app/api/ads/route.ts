@@ -33,7 +33,8 @@ export async function GET(req: NextRequest) {
     if (placement) {
       filter.$or = [{ placements: placement }, { placement }]
     }
-    const ads = await AdModel.find(filter).sort({ priority: -1, createdAt: -1 }).lean()
+    // Hozircha priority ishlatilmaydi, oddiy tartib: oxirgisi birinchi.
+    const ads = await AdModel.find(filter).sort({ createdAt: -1 }).lean()
     return Response.json(ads, {
       headers: publicCacheHeaders(CACHE_TIMINGS.ads.maxAge, CACHE_TIMINGS.ads.stale),
     })

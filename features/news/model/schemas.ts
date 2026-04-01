@@ -75,6 +75,10 @@ export const createNewsSchema = z.object({
   publishedAt: z.coerce.date().optional(),
   status: newsStatusSchema.default('pending'),
   type: z.string().optional(),
+  hasText: z.boolean().optional(),
+  hasImage: z.boolean().optional(),
+  hasVideo: z.boolean().optional(),
+  hasAudio: z.boolean().optional(),
   authorsChoice: z.boolean().default(false),
   isTrending: z.boolean().default(false),
   isLatest: z.boolean().default(false),
@@ -101,12 +105,15 @@ export const createNewsSchema = z.object({
     )
     .optional()
     .nullable(),
+  videoCaption: z.string().optional(),
   audioSource: z.enum(['local', 'external']).optional().nullable(),
   audioUrl: z
     .string()
     .min(1, "Audio URL bo'sh bo'lmasligi kerak")
     .optional()
     .nullable(),
+  audioCaption: z.string().optional(),
+  imageCaption: z.string().optional(),
 })
 
 export type CreateNewsInput = z.infer<typeof createNewsSchema>

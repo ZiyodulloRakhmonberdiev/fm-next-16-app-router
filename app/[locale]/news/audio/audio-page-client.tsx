@@ -4,7 +4,7 @@ import * as React from "react"
 import { useLocale } from "next-intl"
 import { Volume2 } from "lucide-react"
 import type { AppLocale } from "@/shared/common/lib/formatter"
-import { getNewsListForLocale, type NewsItem, type RawNewsItem } from "@/features/news/model"
+import { getNewsListForLocale, isAudioRawNews, type NewsItem, type RawNewsItem } from "@/features/news/model"
 import { AudioListingCard } from "@/features/news/ui/news-listing/audio-listing-card"
 import { NewsListingAuthorsChoiceSidebar } from "@/features/news/ui/news-listing/news-listing-authors-choice-sidebar"
 import { AudioPlayerBar } from "@/widgets/audio-player-bar/ui/audio-player-bar"
@@ -19,7 +19,14 @@ type Props = {
 
 export function AudioNewsPageClient({ initial }: Props) {
   const locale = useLocale() as AppLocale
-  const [items, setItems] = React.useState<NewsItem[]>(initial.items)
+  const hasAudioForItem = React.useCallback(
+    (item: Pick<NewsItem, "hasAudio" | "audioUrl">) =>
+      (typeof item.hasAudio === "boolean" ? item.hasAudio : Boolean(item.audioUrl?.trim())),
+    []
+  )
+  const [items, setItems] = React.useState<NewsItem[]>(
+    () => initial.items.filter(hasAudioForItem)
+  )
   const [page, setPage] = React.useState(initial.page)
   const [totalPages, setTotalPages] = React.useState(initial.totalPages)
   const [loading, setLoading] = React.useState(false)
@@ -32,6 +39,27 @@ export function AudioNewsPageClient({ initial }: Props) {
   const hasNext = activeIndex !== null && activeIndex < items.length - 1
 
   const hasMore = page < totalPages
+
+  React.useEffect(() => {
+    if (items.length > 0) return
+    let cancelled = false
+    setLoading(true)
+    fetch(`/api/news?status=published&audio=1&sortBy=publishedAt&page=1&limit=9`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((json) => {
+        if (!json || cancelled) return
+        const raw: RawNewsItem[] = Array.isArray(json.data) ? json.data.map(normalizeRaw) : []
+        const audioRaw = raw.filter(isAudioRawNews)
+        const localized = getNewsListForLocale(audioRaw, locale)
+        if (localized.length > 0) setItems(localized)
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [items.length, locale])
 
   React.useEffect(() => {
     setAuthorsChoiceLoading(true)
@@ -56,7 +84,10 @@ export function AudioNewsPageClient({ initial }: Props) {
       if (!res.ok) return
       const json = (await res.json()) as NewsListResponse
       const raw = Array.isArray(json.data) ? json.data.map(normalizeRaw) : []
-      const nextItems = getNewsListForLocale(raw, locale)
+      const nextItems = getNewsListForLocale(
+        raw.filter(isAudioRawNews),
+        locale
+      )
       setItems((prev) => [...prev, ...nextItems])
       setPage(Number(json.meta?.page ?? nextPage))
       setTotalPages(Math.max(1, Number(json.meta?.totalPages ?? totalPages)))
@@ -114,20 +145,21 @@ export function AudioNewsPageClient({ initial }: Props) {
 
       <section className="w-full pt-6">
         {/* Page heading */}
-        {/* <div className="pb-6">
-          <div className="inline-flex items-center gap-3">
-            <div>
-              <h1 className="text-2xl font-bold md:text-3xl tracking-tight">Audio</h1>
-              <p className="text-sm text-muted-foreground mt-0.5">
-                Oxirgi audio xabarlar va tahlillar
-              </p>
-            </div>
-          </div>
-        </div> */}
 
         {/* Two-column layout: news list + authors choice sidebar */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-start">
           <div className="lg:col-span-2 space-y-4">
+          <div className="pb-6">
+          <div className="inline-flex items-center gap-3">
+            <div>
+              <h1 className="text-2xl font-bold md:text-3xl tracking-tight">Audio</h1>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                {/* Oxirgi audio xabarlar va tahlillar */}
+              </p>
+            </div>
+          </div>
+        </div>
+
             {items.length === 0 && !loading ? (
               <div className="rounded-xl border bg-background p-8 text-center text-sm text-muted-foreground">
                 Audio xabarlar topilmadi
@@ -146,7 +178,7 @@ export function AudioNewsPageClient({ initial }: Props) {
             )}
 
             {hasMore ? (
-              <div className="pt-2">
+              <div className="pt-2 mx-auto">
                 <LoadMoreButton
                   label={loading ? "Yuklanmoqda…" : "Ko'proq yuklash"}
                   loading={loading}

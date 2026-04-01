@@ -9,6 +9,8 @@ export {
   isTextOnlyRawNews,
   isVisualRawNews,
   isImageTypeRawNews,
+  isVideoRawNews,
+  isAudioRawNews,
 } from "./types"
 export { createNewsSchema, newsStatusSchema } from "./schemas"
 export type { CreateNewsInput } from "./schemas"

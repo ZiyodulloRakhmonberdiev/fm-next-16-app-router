@@ -30,7 +30,7 @@ export default function Footer() {
 
   const t = useTranslations("common")
   return (
-    <div className="py-4 border-t bg-card border-border shadow-sm mt-4">
+    <div className="py-4 md:border-t bg-card shadow-sm mt-4">
       <div className="max-w-7xl mx-auto px-4 md:px-6">
         <Link href="/" className="flex h-8 shrink-0 items-center md:h-10 mb-2">
           <Image

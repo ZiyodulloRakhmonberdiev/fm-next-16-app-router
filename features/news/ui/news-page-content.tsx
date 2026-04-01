@@ -4,7 +4,7 @@ import * as React from "react"
 import { Link } from "@/i18n/navigation"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { ArrowLeft, Calendar, ChevronLeft, Clock, Eye, EyeOff, Heart, MessageSquare, Send, Share2, Volume2 } from "lucide-react"
+import { ArrowLeft, Calendar, ChevronLeft, Clock, Eye, EyeOff, Heart, MessageSquare, Send, Share2, Volume1, Volume2 } from "lucide-react"
 import { Button } from "@/shared/common/components/ui/button"
 import { formatDateISO, formatDateTime, formatDateTimeDotSlash, formatDateTimeLocale } from "@/shared/common/lib/formatter"
 import type { AppLocale } from "@/shared/common/lib/formatter"
@@ -88,6 +88,9 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
 
   const hasVideo = Boolean(news.videoUrl?.trim())
   const hasManyImages = displayImages.length > 1
+  const imageCaption = news.imageCaption?.trim()
+  const videoCaption = news.videoCaption?.trim()
+  const audioCaption = news.audioCaption?.trim()
 
   const [reactionTotal, setReactionTotal] = React.useState(0)
   const [commentTotal, setCommentTotal] = React.useState(0)
@@ -247,20 +250,18 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
   }, [news.slug])
 
   return (
-    <div className="bg-background">
-      <div className="md:hidden mb-4">
-        <AdSlot placement="sidebar_widget" />
-      </div>
-      <div className="relative isolate px-4 md:px-6 ">
-        {/* Reklama viewport markazida qotib turadi; kontent ustidan scroll bo‘ladi, oraliqda “deraza” orqali ko‘rinadi. */}
-        {/* <div className="pointer-events-none flex fixed md:inset-0 md:z-0 md:items-center md:justify-center md:px-4">
-          <div className="pointer-events-auto w-full max-w-xl">
-            <AdSlot placement="sidebar_widget" />
-          </div>
-        </div> */}
-
+    <div className="">
+      <div className="relative">
+        {/* Mobil: ad fon sifatida turadi, scroll paytida "window/reveal" bo'limida ko'rinadi. */}
+          <div className="md:hidden">
+            <AdSlot placement='sidebar_widget' />
+        </div>
+        <div className="pointer-events-none fixed inset-0 z-0 flex items-center justify-center px-0 md:hidden">
+            <AdSlot placement='article_bottom_full' />
+        </div>
         <article className="overflow-x-hidden">
-          <div className="relative z-10 bg-background">
+          <div className="relative z-10 bg-transparent">
+            <div className="px-4 md:px-6 bg-background pt-4 pb-2">
             {/* <div className="my-2 flex flex-wrap items-center justify-between gap-x-2 gap-y-2 text-sm text-muted-foreground rounded-sm shadow-sm md:shadow-none border-b pb-2">
               <Button
                 type="button"
@@ -295,7 +296,7 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
                 </Button>
               </div>
             </div> */}
-              <h1 className="text-2xl font-bold leading-tight md:text-3xl">
+              <h1 className="text-2xl font-bold leading-tight md:text-3xl ">
               {news.title}
             </h1>
             <div className="flex flex-wrap items-center my-3 bg-background justify-between md:justify-start gap-x-3 gap-y-1">
@@ -319,7 +320,7 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
                 ) : null} */}
                 <span aria-hidden className="select-none px-1 text-muted-foreground hidden md:block md:px-2">|</span>
                 <div className="flex items-center gap-3 text-muted-foreground text-xs">
-                  <time dateTime={formatDateTime(news.publishedAt)} className="text-xs text-muted-foreground flex items-center gap-2">
+                  <time dateTime={formatDateTimeDotSlash(news.publishedAt)} className="text-xs text-muted-foreground flex items-center gap-2">
                     <Calendar className="h-4 w-4 shrink-0 md:hidden" />
                     <span> {formatDateTimeDotSlash(news.publishedAt)}</span>
                   </time>
@@ -362,9 +363,11 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
                 ) : null}
               </div>
             </div>
-          
+            {/* <h1 className="md:hidden text-2xl font-bold leading-tight md:text-3xl">
+              {news.title}
+            </h1> */}
             {news.description != null && news.description !== "" && (
-              <p className="leading-relaxed my-3">
+              <p className="leading-relaxed my-3 text-lg font-semibold">
                 {news.description}
               </p>
             )}
@@ -374,32 +377,39 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
             {hasVideo && (() => {
               const youtubeEmbed = getYoutubeEmbedUrl(news.videoUrl ?? "")
               return (
-                <div className="relative mb-6 aspect-video w-full overflow-hidden rounded-lg bg-muted">
-                  {youtubeEmbed ? (
-                    <iframe
-                      src={youtubeEmbed}
-                      title={news.title}
-                      className="absolute inset-0 h-full w-full"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                    />
-                  ) : (
-                    <video
-                      key={news.videoUrl ?? "video"}
-                      src={getVideoSrc(news.videoUrl)}
-                      controls
-                      controlsList="nodownload"
-                      disablePictureInPicture
-                      onContextMenu={(e) => e.preventDefault()}
-                      className="h-full w-full object-cover"
-                      poster={videoPoster}
-                    >
-                      {t("your_browser_does_not_support_the_video_tag")}
-                    </video>
-                  )}
-                  {/* <div className="absolute right-3 top-3 z-10">
+                <div className="mb-6">
+                  <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-muted">
+                    {youtubeEmbed ? (
+                      <iframe
+                        src={youtubeEmbed}
+                        title={news.title}
+                        className="absolute inset-0 h-full w-full"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    ) : (
+                      <video
+                        key={news.videoUrl ?? "video"}
+                        src={getVideoSrc(news.videoUrl)}
+                        controls
+                        controlsList="nodownload"
+                        disablePictureInPicture
+                        onContextMenu={(e) => e.preventDefault()}
+                        className="h-full w-full object-cover"
+                        poster={videoPoster}
+                      >
+                        {t("your_browser_does_not_support_the_video_tag")}
+                      </video>
+                    )}
+                    {/* <div className="absolute right-3 top-3 z-10">
                 <SavedNewsActions slug={news.slug} newsId={newsId} overlay />
               </div> */}
+                  </div>
+                  {videoCaption ? (
+                    <p className="px-2 py-1 text-xs mt-1">
+                      {videoCaption}
+                    </p>
+                  ) : null}
                 </div>
               )
             })()}
@@ -422,6 +432,11 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
                     Rasmni yuklab bo&apos;lmadi
                   </div>
                 )}
+                {imageCaption ? (
+                  <p className="px-2 py-1 text-xs mt-1">
+                    {imageCaption}
+                  </p>
+                ) : null}
               </div>
             )}
             {!hasVideo && hasManyImages && (
@@ -453,6 +468,11 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
                     <CarouselNext className="static size-10 translate-x-0 translate-y-0 rounded-sm border-none bg-background/90 hover:bg-background" />
                   </div>
                 </Carousel>
+                {imageCaption ? (
+                  <p className="px-2 py-1 text-xs">
+                    {imageCaption}
+                  </p>
+                ) : null}
               </div>
             )}
 
@@ -505,7 +525,7 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
             {news.audioUrl && (
               <div className="mb-6 rounded-xl border bg-foreground/10 p-4 shadow-sm">
                 <div className="mb-2 flex items-center gap-2 text-sm font-medium">
-                  <Volume2 className="size-4" />
+                  <Volume1 className="size-4 fill-current" />
                   <span>Audio xabarni tinglang</span>
                 </div>
                 <audio
@@ -517,6 +537,15 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
                 </audio>
               </div>
             )}
+            {audioCaption ? (
+              <p className="px-2 -mt-4 text-xs">
+                {audioCaption}
+              </p>
+            ) : null}
+
+            {/* Mobil: media va content orasida ad fonini ochib beradigan bo'lim. */}
+          </div>
+          <div className="relative z-0 -mx-4 min-h-screen md:min-h-0 bg-transparent   md:hidden" aria-hidden />
           </div>
 
           {/* <div
@@ -524,7 +553,11 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
             aria-hidden
           /> */}
 
-          <div className="relative z-10 bg-background">
+          <div className="relative z-10 bg-background px-4 md:px-6 py-4">
+            {/* Desktop: ad oddiy relative blok sifatida chiqadi. */}
+            <div className="mb-6 hidden md:block">
+              <AdSlot placement="article_bottom_full" />
+            </div>
             {news.content != null && news.content !== "" && (
               isRichContent(news.content) ? (
                 <RichContentBlocks blocks={news.content} />
@@ -607,9 +640,9 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
             </div>
           </div>
         </section> */}
-            <div className="mt-6">
+            {/* <div className="mt-6">
               <AdSlot placement="article_bottom_full" />
-            </div>
+            </div> */}
           </div>
         </article>
       </div>

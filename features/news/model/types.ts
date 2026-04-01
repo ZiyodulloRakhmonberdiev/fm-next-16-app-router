@@ -26,6 +26,10 @@ export type RawNewsItem = {
   updatedAt?: Date
   status?: NewsStatus
   type?: string
+  hasText?: boolean
+  hasImage?: boolean
+  hasVideo?: boolean
+  hasAudio?: boolean
   authorsChoice?: boolean
   isTrending?: boolean
   isLatest?: boolean
@@ -43,8 +47,11 @@ export type RawNewsItem = {
   telegramLastAttemptAt?: Date
   videoSource?: "youtube" | "local"
   videoUrl?: string
+  videoCaption?: string
   audioSource?: "local" | "external"
   audioUrl?: string
+  audioCaption?: string
+  imageCaption?: string
   createdBy?: { userId?: string; name?: string }
   commentCount?: number
   reactionCount?: number
@@ -70,6 +77,10 @@ export type NewsItem = {
   status?: NewsStatus
   isTop?: boolean
   type?: string
+  hasText?: boolean
+  hasImage?: boolean
+  hasVideo?: boolean
+  hasAudio?: boolean
   isBreaking?: boolean
   ad?: boolean
   stats?: boolean
@@ -82,8 +93,11 @@ export type NewsItem = {
   telegramLastAttemptAt?: Date
   videoSource?: "youtube" | "local"
   videoUrl?: string
+  videoCaption?: string
   audioSource?: "local" | "external"
   audioUrl?: string
+  audioCaption?: string
+  imageCaption?: string
   createdBy?: { userId?: string; name?: string }
   commentCount?: number
   reactionCount?: number
@@ -131,6 +145,17 @@ export function pickNewsForLocale(
     status: raw.status ?? "published",
     isTop: raw.isTop ?? false,
     type: raw.type,
+    hasText: raw.hasText ?? Boolean(raw.title?.uz?.trim()),
+    hasImage:
+      raw.hasImage ??
+      (Array.isArray(raw.images) &&
+        raw.images.some((s) => typeof s === "string" && s.trim() !== "")),
+    hasVideo:
+      raw.hasVideo ??
+      (typeof raw.videoUrl === "string" && raw.videoUrl.trim() !== ""),
+    hasAudio:
+      raw.hasAudio ??
+      (typeof raw.audioUrl === "string" && raw.audioUrl.trim() !== ""),
     isBreaking: raw.isBreaking ?? false,
     ad: raw.ad ?? false,
     stats: raw.stats ?? false,
@@ -143,8 +168,11 @@ export function pickNewsForLocale(
     telegramLastAttemptAt: raw.telegramLastAttemptAt,
     videoSource: raw.videoSource,
     videoUrl: raw.videoUrl,
+    videoCaption: raw.videoCaption,
     audioSource: raw.audioSource,
     audioUrl: raw.audioUrl,
+    audioCaption: raw.audioCaption,
+    imageCaption: raw.imageCaption,
     commentCount: raw.commentCount ?? 0,
     reactionCount: raw.reactionCount ?? 0,
   }
@@ -172,9 +200,12 @@ export function getPublishedNewsListForLocale(
 
 /** Faqat matnli yangiliklar (image/video yo'q va type=text). */
 export function isTextOnlyRawNews(item: RawNewsItem): boolean {
-  const hasVideo = Boolean(item.videoSource && item.videoUrl)
-  const hasImages = Array.isArray(item.images) && item.images.length > 0
-  return item.type === "text" && !hasVideo && !hasImages
+  const hasVideo = item.hasVideo ?? Boolean(item.videoUrl && item.videoUrl.trim())
+  const hasAudio = item.hasAudio ?? Boolean(item.audioUrl && item.audioUrl.trim())
+  const hasImages =
+    item.hasImage ??
+    (Array.isArray(item.images) && item.images.some((s) => typeof s === "string" && s.trim() !== ""))
+  return !hasVideo && !hasAudio && !hasImages
 }
 
 /** Rasmli/video cardlarda ko'rsatish mumkin bo'lgan yangiliklar. */
@@ -184,9 +215,19 @@ export function isVisualRawNews(item: RawNewsItem): boolean {
 
 /** Faqat rasmli yangiliklar — top/latest/related kabi joylarda ko'rsatish uchun. Type video va text ko'rinmasin. */
 export function isImageTypeRawNews(item: RawNewsItem): boolean {
-  if (item.type !== "image") return false
-  const hasValidImage =
+  if (typeof item.hasImage === "boolean") return item.hasImage
+  return (
     Array.isArray(item.images) &&
     item.images.some((s) => typeof s === "string" && s.trim() !== "")
-  return hasValidImage
+  )
+}
+
+export function isVideoRawNews(item: RawNewsItem): boolean {
+  if (typeof item.hasVideo === "boolean") return item.hasVideo
+  return typeof item.videoUrl === "string" && item.videoUrl.trim() !== ""
+}
+
+export function isAudioRawNews(item: RawNewsItem): boolean {
+  if (typeof item.hasAudio === "boolean") return item.hasAudio
+  return typeof item.audioUrl === "string" && item.audioUrl.trim() !== ""
 }

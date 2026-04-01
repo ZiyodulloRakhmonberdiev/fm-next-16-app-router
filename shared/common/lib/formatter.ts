@@ -130,7 +130,7 @@ export function formatDateTime(
 export function formatDateTimeDotSlash(date: DateInput): string {
   const { year, month, day, hour, minute } = getTashkentParts(date)
   const pad = (n: number) => String(n).padStart(2, "0")
-  return `${pad(day)}.${pad(month)}.${year} / ${pad(hour)}.${pad(minute)}`
+  return `${pad(day)}.${pad(month)}.${year} / ${pad(hour)}:${pad(minute)}`
 }
 
 /**

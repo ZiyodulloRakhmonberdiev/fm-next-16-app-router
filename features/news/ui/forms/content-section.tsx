@@ -9,6 +9,9 @@ import {
   QuoteIcon,
   ImageIcon,
   PlaySquareIcon,
+  ListIcon,
+  ListOrderedIcon,
+  AudioLinesIcon,
 } from "lucide-react"
 import { Button } from "@/shared/common/components/ui/button"
 import {
@@ -50,10 +53,15 @@ export function ContentForm({
 }: ContentFormProps) {
   const [imageUrl, setImageUrl] = useState("")
   const [videoUrl, setVideoUrl] = useState("")
+  const [audioUrl, setAudioUrl] = useState("")
+  const [imageCaption, setImageCaption] = useState("")
+  const [videoCaption, setVideoCaption] = useState("")
+  const [audioCaption, setAudioCaption] = useState("")
   const [localImages, setLocalImages] = useState<LocalMedia[]>([])
   const [localVideos, setLocalVideos] = useState<LocalMedia[]>([])
   const [imageModalOpen, setImageModalOpen] = useState(false)
   const [videoModalOpen, setVideoModalOpen] = useState(false)
+  const [audioModalOpen, setAudioModalOpen] = useState(false)
   const [mediaSource, setMediaSource] = useState<"url" | "local">("url")
 
   const content = value
@@ -64,7 +72,10 @@ export function ContentForm({
     onChange(updater(content))
   }
 
-  const uploadMedia = async (file: File, kind: "image" | "video"): Promise<string> => {
+  const uploadMedia = async (
+    file: File,
+    kind: "image" | "video" | "audio"
+  ): Promise<string> => {
     return uploadFileViaPresignedUrl(file, kind)
   }
 
@@ -88,6 +99,25 @@ export function ContentForm({
       textarea.focus()
       textarea.setSelectionRange(pos, pos)
     })
+  }
+
+  const normalizeBlankLines = (text: string): string => {
+    const lines = text.split(/\r?\n/)
+    const out: string[] = []
+    let emptyStreak = 0
+
+    lines.forEach((line) => {
+      const isEmpty = line.trim() === ""
+      if (isEmpty) {
+        emptyStreak += 1
+        if (emptyStreak <= 1) out.push("")
+      } else {
+        emptyStreak = 0
+        out.push(line)
+      }
+    })
+
+    return out.join("\n")
   }
 
   const applyAroundSelection = (before: string, after: string = before) => {
@@ -116,20 +146,55 @@ export function ContentForm({
     applyAroundSelection("[", `](${url})`)
   }
 
+  const applyPrefixToSelectionLines = (prefixFactory: (lineIndex: number) => string) => {
+    const textarea = textareaRef.current
+    if (!textarea) return
+
+    const start = textarea.selectionStart ?? 0
+    const end = textarea.selectionEnd ?? 0
+    const beforeSelection = content.slice(0, start)
+    const selected = content.slice(start, end)
+    const afterSelection = content.slice(end)
+    const selectedLines = selected.split("\n")
+    const nextSelected = selectedLines
+      .map((line, idx) => {
+        if (!line.trim()) return line
+        return `${prefixFactory(idx)}${line}`
+      })
+      .join("\n")
+
+    const next = `${beforeSelection}${nextSelected}${afterSelection}`
+    onChange(next)
+  }
+
   const handleAddImageUrl = () => {
     const trimmed = imageUrl.trim()
     if (!trimmed) return
-    const line = `\n![rasm](${trimmed})\n`
+    const captionLine = imageCaption.trim() ? `@@caption(${imageCaption.trim()})\n` : ""
+    const line = `\n![rasm](${trimmed})\n${captionLine}`
     insertAtCursor(line)
     setImageUrl("")
+    setImageCaption("")
   }
 
   const handleAddVideoUrl = () => {
     const trimmed = videoUrl.trim()
     if (!trimmed) return
-    const line = `\n@@video(${trimmed})\n`
+    const captionLine = videoCaption.trim() ? `@@caption(${videoCaption.trim()})\n` : ""
+    const line = `\n@@video(${trimmed})\n${captionLine}`
     insertAtCursor(line)
     setVideoUrl("")
+    setVideoCaption("")
+  }
+
+  const handleAddAudioUrl = () => {
+    const trimmed = audioUrl.trim()
+    if (!trimmed) return
+    const captionLine = audioCaption.trim() ? `@@caption(${audioCaption.trim()})\n` : ""
+    const line = `\n@@audio(${trimmed})\n${captionLine}`
+    insertAtCursor(line)
+    setAudioUrl("")
+    setAudioCaption("")
   }
 
   const handleLocalImages = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -148,9 +213,17 @@ export function ContentForm({
     }
 
     if (uploadedUrls.length > 0) {
-      const markers = uploadedUrls.map((url) => `\n![rasm](${url})\n`).join("")
+      const markers = uploadedUrls
+        .map((url) => {
+          const captionLine = imageCaption.trim()
+            ? `@@caption(${imageCaption.trim()})\n`
+            : ""
+          return `\n![rasm](${url})\n${captionLine}`
+        })
+        .join("")
       insertAtCursor(markers)
     }
+    setImageCaption("")
     e.target.value = ""
   }
 
@@ -170,9 +243,47 @@ export function ContentForm({
     }
 
     if (uploadedUrls.length > 0) {
-      const markers = uploadedUrls.map((url) => `\n@@video(${url})\n`).join("")
+      const markers = uploadedUrls
+        .map((url) => {
+          const captionLine = videoCaption.trim()
+            ? `@@caption(${videoCaption.trim()})\n`
+            : ""
+          return `\n@@video(${url})\n${captionLine}`
+        })
+        .join("")
       insertAtCursor(markers)
     }
+    setVideoCaption("")
+    e.target.value = ""
+  }
+
+  const handleLocalAudios = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files) return
+
+    const selected = Array.from(files)
+    const uploadedUrls: string[] = []
+    for (const file of selected) {
+      try {
+        const uploadedUrl = await uploadMedia(file, "audio")
+        uploadedUrls.push(uploadedUrl)
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Audio upload bo'lmadi")
+      }
+    }
+
+    if (uploadedUrls.length > 0) {
+      const markers = uploadedUrls
+        .map((url) => {
+          const captionLine = audioCaption.trim()
+            ? `@@caption(${audioCaption.trim()})\n`
+            : ""
+          return `\n@@audio(${url})\n${captionLine}`
+        })
+        .join("")
+      insertAtCursor(markers)
+    }
+    setAudioCaption("")
     e.target.value = ""
   }
 
@@ -200,7 +311,7 @@ export function ContentForm({
             href={match[2]}
             target="_blank"
             rel="noreferrer"
-            className="text-blue-500 underline"
+            className="text-blue-500 no-underline hover:underline"
           >
             {match[1]}
           </a>
@@ -303,12 +414,49 @@ export function ContentForm({
 
       if (trimmed.startsWith(">")) {
         elements.push(
-          <blockquote
-            key={keyBase}
-            className="border-l-4 border-muted-foreground/40 pl-3 italic text-muted-foreground"
-          >
-            {renderInline(trimmed.replace(/^>\s?/, ""), keyBase)}
-          </blockquote>
+          <div key={keyBase} className="my-3 rounded-md bg-rose-50 p-4">
+            <div className="relative">
+              <span className="absolute -left-1 -top-5 text-4xl leading-none text-rose-300">
+                &ldquo;
+              </span>
+              <blockquote className="pl-5 italic text-foreground/90">
+                {renderInline(trimmed.replace(/^>\s?/, ""), keyBase)}
+              </blockquote>
+            </div>
+          </div>
+        )
+        return
+      }
+
+      if (/^[-*•]\s+/.test(trimmed)) {
+        elements.push(
+          <div key={keyBase} className="my-1 flex items-start gap-2">
+            <span className="mt-1.5 size-2 rounded-full border border-muted-foreground/50 bg-background" />
+            <p className="m-0">{renderInline(trimmed.replace(/^[-*•]\s+/, ""), keyBase)}</p>
+          </div>
+        )
+        return
+      }
+
+      if (/^\d+[.)]\s+/.test(trimmed)) {
+        const num = trimmed.match(/^(\d+)[.)]\s+/)?.[1] ?? "1"
+        elements.push(
+          <div key={keyBase} className="my-1 flex items-start gap-2">
+            <span className="mt-0.5 min-w-6 text-sm font-semibold text-muted-foreground">
+              {num}.
+            </span>
+            <p className="m-0">{renderInline(trimmed.replace(/^\d+[.)]\s+/, ""), keyBase)}</p>
+          </div>
+        )
+        return
+      }
+
+      const captionMatch = trimmed.match(/^@@caption\((.+)\)$/)
+      if (captionMatch) {
+        elements.push(
+          <p key={keyBase} className="mt-1 bg-white px-2 py-1 text-xs text-muted-foreground">
+            {renderInline(captionMatch[1], keyBase)}
+          </p>
         )
         return
       }
@@ -363,6 +511,22 @@ export function ContentForm({
             />
           )
         }
+        return
+      }
+
+      const audioMatch = trimmed.match(/^@@audio\((.+)\)$/)
+      if (audioMatch) {
+        const url = audioMatch[1]
+        elements.push(
+          <audio
+            key={keyBase}
+            src={url}
+            controls
+            controlsList="nodownload"
+            onContextMenu={(e) => e.preventDefault()}
+            className="my-3 w-full rounded-md border bg-background p-2"
+          />
+        )
         return
       }
 
@@ -458,6 +622,7 @@ export function ContentForm({
         // to'liq media markerlarini buzmaymiz
         if (
           /^@@video\(.+\)$/.test(trimmed) ||
+          /^@@audio\(.+\)$/.test(trimmed) ||
           /^@@local-image\(\d+\)$/.test(trimmed) ||
           /^@@local-video\(\d+\)$/.test(trimmed) ||
           /^!\[[^\]]*]\(((?:https?:\/\/|\/)[^\s)]+)\)$/.test(trimmed)
@@ -465,8 +630,15 @@ export function ContentForm({
           return line
         }
 
+        if (/^@@caption\(.+\)$/.test(trimmed)) {
+          return line.replace(
+            /^(\s*@@caption\()(.+)(\)\s*)$/,
+            (_m, p1: string, body: string, p3: string) => `${p1}${convert(body)}${p3}`
+          )
+        }
+
         // [text](url) bloklarini saqlab, tashqaridagi matnni translit qilamiz
-      const linkRegex = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g
+        const linkRegex = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g
         let result = ""
         let lastIndex = 0
         let match: RegExpExecArray | null
@@ -570,6 +742,22 @@ export function ContentForm({
           </button>
           <button
             type="button"
+            onClick={() => applyPrefixToSelectionLines(() => "- ")}
+            className="inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted"
+          >
+            <ListIcon className="size-3.5" />
+            Bullet
+          </button>
+          <button
+            type="button"
+            onClick={() => applyPrefixToSelectionLines((idx) => `${idx + 1}. `)}
+            className="inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted"
+          >
+            <ListOrderedIcon className="size-3.5" />
+            Number
+          </button>
+          <button
+            type="button"
             onClick={() => {
               setMediaSource("url")
               setImageModalOpen(true)
@@ -590,7 +778,18 @@ export function ContentForm({
             <PlaySquareIcon className="size-3.5" />
             Video
           </button>
-          
+          <button
+            type="button"
+            onClick={() => {
+              setMediaSource("url")
+              setAudioModalOpen(true)
+            }}
+            className="inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted"
+          >
+            <AudioLinesIcon className="size-3.5" />
+            Audio
+          </button>
+
         </div>
       </div>
 
@@ -649,6 +848,16 @@ export function ContentForm({
                     Qo&apos;shish
                   </Button>
                 </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Caption (ixtiyoriy)</Label>
+                  <input
+                    type="text"
+                    value={imageCaption}
+                    onChange={(e) => setImageCaption(e.target.value)}
+                    placeholder="Rasm uchun qisqa izoh..."
+                    className="w-full rounded-md border bg-background px-2 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  />
+                </div>
               </div>
             ) : (
               <div className="space-y-2">
@@ -663,6 +872,16 @@ export function ContentForm({
                   }}
                   className="w-full text-sm"
                 />
+                <div className="space-y-1">
+                  <Label className="text-xs">Caption (ixtiyoriy)</Label>
+                  <input
+                    type="text"
+                    value={imageCaption}
+                    onChange={(e) => setImageCaption(e.target.value)}
+                    placeholder="Rasm uchun qisqa izoh..."
+                    className="w-full rounded-md border bg-background px-2 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  />
+                </div>
               </div>
             )}
           </div>
@@ -724,6 +943,16 @@ export function ContentForm({
                     Qo&apos;shish
                   </Button>
                 </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Caption (ixtiyoriy)</Label>
+                  <input
+                    type="text"
+                    value={videoCaption}
+                    onChange={(e) => setVideoCaption(e.target.value)}
+                    placeholder="Video uchun qisqa izoh..."
+                    className="w-full rounded-md border bg-background px-2 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  />
+                </div>
               </div>
             ) : (
               <div className="space-y-2">
@@ -738,6 +967,111 @@ export function ContentForm({
                   }}
                   className="w-full text-sm"
                 />
+                <div className="space-y-1">
+                  <Label className="text-xs">Caption (ixtiyoriy)</Label>
+                  <input
+                    type="text"
+                    value={videoCaption}
+                    onChange={(e) => setVideoCaption(e.target.value)}
+                    placeholder="Video uchun qisqa izoh..."
+                    className="w-full rounded-md border bg-background px-2 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={audioModalOpen} onOpenChange={setAudioModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Audio qo&apos;shish</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setMediaSource("url")}
+                className={cn(
+                  "rounded-md border px-3 py-1.5 text-xs font-medium",
+                  mediaSource === "url"
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "hover:bg-muted"
+                )}
+              >
+                URL
+              </button>
+              <button
+                type="button"
+                onClick={() => setMediaSource("local")}
+                className={cn(
+                  "rounded-md border px-3 py-1.5 text-xs font-medium",
+                  mediaSource === "local"
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "hover:bg-muted"
+                )}
+              >
+                Local fayl
+              </button>
+            </div>
+            {mediaSource === "url" ? (
+              <div className="space-y-2">
+                <Label className="text-xs">Audio manzili</Label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={audioUrl}
+                    onChange={(e) => setAudioUrl(e.target.value)}
+                    placeholder="https://example.com/audio.mp3"
+                    className="flex-1 rounded-md border bg-background px-2 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  />
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => {
+                      handleAddAudioUrl()
+                      setAudioModalOpen(false)
+                    }}
+                    disabled={!audioUrl.trim()}
+                  >
+                    Qo&apos;shish
+                  </Button>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Caption (ixtiyoriy)</Label>
+                  <input
+                    type="text"
+                    value={audioCaption}
+                    onChange={(e) => setAudioCaption(e.target.value)}
+                    placeholder="Audio uchun qisqa izoh..."
+                    className="w-full rounded-md border bg-background px-2 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Label className="text-xs">Fayl tanlang</Label>
+                <input
+                  type="file"
+                  accept="audio/*"
+                  multiple
+                  onChange={(e) => {
+                    handleLocalAudios(e)
+                    setAudioModalOpen(false)
+                  }}
+                  className="w-full text-sm"
+                />
+                <div className="space-y-1">
+                  <Label className="text-xs">Caption (ixtiyoriy)</Label>
+                  <input
+                    type="text"
+                    value={audioCaption}
+                    onChange={(e) => setAudioCaption(e.target.value)}
+                    placeholder="Audio uchun qisqa izoh..."
+                    className="w-full rounded-md border bg-background px-2 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  />
+                </div>
               </div>
             )}
           </div>
@@ -750,6 +1084,11 @@ export function ContentForm({
             ref={textareaRef}
             value={content}
             onChange={(e) => onChange(e.target.value)}
+            onPaste={(e) => {
+              e.preventDefault()
+              const pastedText = e.clipboardData.getData("text")
+              insertAtCursor(normalizeBlankLines(pastedText))
+            }}
             placeholder={placeholder}
             className="min-h-64 w-full resize-vertical rounded-md border bg-background px-3 py-2 text-sm  outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40"
           />

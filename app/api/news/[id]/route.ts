@@ -5,6 +5,7 @@ import { CategoryModel } from '@/features/category/model/category.model'
 import { TagModel } from '@/features/tags/model/tag.model'
 import { UserModel } from '@/features/users/model/user.model'
 import { createNewsSchema } from '@/features/news/model/schemas'
+import { computeNewsMediaFlags } from '@/features/news/lib/news-media-flags'
 import { deleteNewsFromTelegram, sendNewsToTelegram } from '@/shared/infra/telegram'
 import { requireAdminSession } from '@/shared/server/require-admin-session'
 import { logAdminAction } from '@/features/admin-logs/lib/log-action'
@@ -104,6 +105,40 @@ async function resolveCategoryAndTagsForUpdate(update: Record<string, unknown>) 
   return update
 }
 
+function computeMergedFlags(
+  existing: {
+    title?: { uz?: string; uzb?: string; ru?: string; en?: string } | null
+    images?: unknown[]
+    videoUrl?: string | null
+    audioUrl?: string | null
+  },
+  update: Record<string, unknown>
+) {
+  const nextTitle =
+    typeof update.title === 'object' && update.title != null
+      ? {
+          ...(existing.title ?? {}),
+          ...(update.title as { uz?: string; uzb?: string; ru?: string; en?: string }),
+        }
+      : existing.title
+  const nextImages = Array.isArray(update.images) ? update.images : (existing.images ?? [])
+  const nextVideoUrl =
+    (update.$unset as Record<string, unknown> | undefined)?.videoUrl
+      ? null
+      : ('videoUrl' in update ? (update.videoUrl as string | null | undefined) : existing.videoUrl)
+  const nextAudioUrl =
+    (update.$unset as Record<string, unknown> | undefined)?.audioUrl
+      ? null
+      : ('audioUrl' in update ? (update.audioUrl as string | null | undefined) : existing.audioUrl)
+
+  return computeNewsMediaFlags({
+    title: nextTitle,
+    images: nextImages,
+    videoUrl: nextVideoUrl,
+    audioUrl: nextAudioUrl,
+  })
+}
+
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -148,17 +183,33 @@ export async function PUT(
     )
   }
 
+  const newsId = (await params).id
+  const existing = await NewsModel.findById(newsId).lean()
+  if (!existing) {
+    return Response.json({ error: 'Yangilik topilmadi' }, { status: 404 })
+  }
+
   const safeData = { ...parsed.data }
   delete (safeData as { views?: number }).views
   let update: Record<string, unknown> = { ...safeData }
-  if (update.videoSource === null || update.videoUrl === null || update.themeId === null) {
+  if (
+    update.videoSource === null ||
+    update.videoUrl === null ||
+    update.audioSource === null ||
+    update.audioUrl === null ||
+    update.themeId === null
+  ) {
     update.$unset = {
       ...(update.videoSource === null && { videoSource: 1 }),
       ...(update.videoUrl === null && { videoUrl: 1 }),
+      ...(update.audioSource === null && { audioSource: 1 }),
+      ...(update.audioUrl === null && { audioUrl: 1 }),
       ...(update.themeId === null && { themeId: 1 }),
     }
     if (update.videoSource === null) delete update.videoSource
     if (update.videoUrl === null) delete update.videoUrl
+    if (update.audioSource === null) delete update.audioSource
+    if (update.audioUrl === null) delete update.audioUrl
     if (update.themeId === null) delete update.themeId
   }
   if (Array.isArray(update.images)) {
@@ -172,8 +223,13 @@ export async function PUT(
       { status: 400 }
     )
   }
+  const flags = computeMergedFlags(existing, update)
+  update.hasText = flags.hasText
+  update.hasImage = flags.hasImage
+  update.hasVideo = flags.hasVideo
+  update.hasAudio = flags.hasAudio
 
-  const updated = await NewsModel.findByIdAndUpdate((await params).id, update, {
+  const updated = await NewsModel.findByIdAndUpdate(newsId, update, {
     new: true,
     runValidators: true,
   })
@@ -211,17 +267,33 @@ export async function PATCH(
     )
   }
 
+  const newsId = (await params).id
+  const existing = await NewsModel.findById(newsId).lean()
+  if (!existing) {
+    return Response.json({ error: 'Yangilik topilmadi' }, { status: 404 })
+  }
+
   const safeData = { ...parsed.data }
   delete (safeData as { views?: number }).views
   let update: Record<string, unknown> = { ...safeData }
-  if (update.videoSource === null || update.videoUrl === null || update.themeId === null) {
+  if (
+    update.videoSource === null ||
+    update.videoUrl === null ||
+    update.audioSource === null ||
+    update.audioUrl === null ||
+    update.themeId === null
+  ) {
     update.$unset = {
       ...(update.videoSource === null && { videoSource: 1 }),
       ...(update.videoUrl === null && { videoUrl: 1 }),
+      ...(update.audioSource === null && { audioSource: 1 }),
+      ...(update.audioUrl === null && { audioUrl: 1 }),
       ...(update.themeId === null && { themeId: 1 }),
     }
     if (update.videoSource === null) delete update.videoSource
     if (update.videoUrl === null) delete update.videoUrl
+    if (update.audioSource === null) delete update.audioSource
+    if (update.audioUrl === null) delete update.audioUrl
     if (update.themeId === null) delete update.themeId
   }
   if (Array.isArray(update.images)) {
@@ -235,8 +307,13 @@ export async function PATCH(
       { status: 400 }
     )
   }
+  const flags = computeMergedFlags(existing, update)
+  update.hasText = flags.hasText
+  update.hasImage = flags.hasImage
+  update.hasVideo = flags.hasVideo
+  update.hasAudio = flags.hasAudio
 
-  const updated = await NewsModel.findByIdAndUpdate((await params).id, update, {
+  const updated = await NewsModel.findByIdAndUpdate(newsId, update, {
     new: true,
     runValidators: true,
   })

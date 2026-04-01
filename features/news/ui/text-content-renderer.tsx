@@ -2,6 +2,9 @@
 
 import * as React from "react"
 import { getYoutubeEmbedUrl } from "@/features/news/lib/youtube"
+import { QuoteIcon } from "lucide-react"
+import { BiSolidQuoteAltLeft } from "react-icons/bi";
+
 
 type TextContentRendererProps = {
   content: string
@@ -28,7 +31,7 @@ function renderInline(text: string, keyBase: string): React.ReactNode[] {
         href={match[2]}
         target="_blank"
         rel="noreferrer"
-        className="text-blue-500 underline"
+        className="text-blue-500 no-underline hover:underline"
       >
         {match[1]}
       </a>
@@ -121,12 +124,39 @@ export function TextContentRenderer({ content }: TextContentRendererProps) {
       }
       if (trimmed.startsWith(">")) {
         elements.push(
-          <blockquote
-            key={keyBase}
-            className="border-l-4 border-muted-foreground/40 pl-3 italic text-muted-foreground"
-          >
-            {renderInline(trimmed.replace(/^>\s?/, ""), keyBase)}
-          </blockquote>
+          <div key={keyBase} className="my-3 rounded-md bg-brand/10 dark:bg-card p-4">
+            <div className="relative">
+              <span className="absolute -left-3 -top-4 text-4xl leading-none text-  e-300">
+                <BiSolidQuoteAltLeft className="size-7 text-brand/10 dark:text-muted-foreground/20" />
+              </span>
+              <blockquote className="italic text-foreground/90 pt-2">
+                {renderInline(trimmed.replace(/^>\s?/, ""), keyBase)}
+              </blockquote>
+            </div>
+          </div>
+        )
+        return
+      }
+
+      if (/^[-*•]\s+/.test(trimmed)) {
+        elements.push(
+          <div key={keyBase} className="my-1 flex items-center gap-2 ml-2">
+            <div className="mt-1.5 size-4 rounded-full border bg-foreground/80 flex items-center justify-center"><span className="size-2 rounded-full bg-background block"></span></div>
+            <p className="m-0 font-bold">{renderInline(trimmed.replace(/^[-*•]\s+/, ""), keyBase)}</p>
+          </div>
+        )
+        return
+      }
+
+      if (/^\d+[.)]\s+/.test(trimmed)) {
+        const num = trimmed.match(/^(\d+)[.)]\s+/)?.[1] ?? "1"
+        elements.push(
+          <div key={keyBase} className="my-1 flex items-start gap-2">
+            <span className="ml-2 mt-0.5 min-w-4 text-sm font-bold text-foreground/80">
+              {num}.
+            </span>
+            <p className="m-0 font-bold">{renderInline(trimmed.replace(/^\d+[.)]\s+/, ""), keyBase)}</p>
+          </div>
         )
         return
       }
@@ -138,9 +168,19 @@ export function TextContentRenderer({ content }: TextContentRendererProps) {
             <img
               src={imageMatch[2]}
               alt={imageMatch[1] || "image"}
-              className="h-auto w-full rounded-md border object-cover"
+              className="h-auto w-full object-cover"
             />
           </div>
+        )
+        return
+      }
+
+      const captionMatch = trimmed.match(/^@@caption\((.+)\)$/)
+      if (captionMatch) {
+        elements.push(
+          <p key={keyBase} className="px-2 text-xs -mt-1  ">
+            {renderInline(captionMatch[1], keyBase)}
+          </p>
         )
         return
       }
@@ -154,7 +194,7 @@ export function TextContentRenderer({ content }: TextContentRendererProps) {
             <div key={keyBase} className="my-3 aspect-video w-full">
               <iframe
                 src={embedUrl}
-                className="h-full w-full rounded-md border"
+                className="h-full w-full"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
                 title="YouTube video"
@@ -174,6 +214,22 @@ export function TextContentRenderer({ content }: TextContentRendererProps) {
             />
           )
         }
+        return
+      }
+
+      const audioMatch = trimmed.match(/^@@audio\((.+)\)$/)
+      if (audioMatch) {
+        const url = audioMatch[1]
+        elements.push(
+          <audio
+            key={keyBase}
+            src={url}
+            controls
+            controlsList="nodownload"
+            onContextMenu={(e) => e.preventDefault()}
+            className="my-3 w-full bg-foreground/10 border dark:border-0 rounded-full"
+          />
+        )
         return
       }
 
