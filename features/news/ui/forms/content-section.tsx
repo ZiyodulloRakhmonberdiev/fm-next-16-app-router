@@ -731,8 +731,8 @@ export function ContentForm({
   }
 
   return (
-    <div className="space-y-4 bg-background w-full overflow-hidden rounded-lg border p-4">
-      <div className="sticky top-14 z-20 -mx-4 flex flex-wrap items-center gap-2 border-b bg-background px-4 pb-2 pt-1 text-sm">
+    <div className="relative space-y-4 bg-background w-full overflow-hidden rounded-lg border p-4">
+      <div className="sticky inset-x-0 top-0 z-20 -mx-4 align-start  flex flex-wrap items-center gap-2 border-b bg-background px-4 pb-2 pt-1 text-sm">
         <span className="font-medium text-muted-foreground">Matn tahrirlash</span>
         <div className="ml-auto flex flex-wrap gap-1">
           <button
@@ -1188,7 +1188,7 @@ export function ContentForm({
               insertAtCursor(normalizeBlankLines(pastedText))
             }}
             placeholder={placeholder}
-            className="min-h-64 h-full w-full resize-vertical rounded-md border bg-background px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40 text-[16px]"
+            className="min-h-1/3 w-full resize-vertical rounded-md border bg-background px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40 text-[16px]"
           />
           <Button
             type="button"

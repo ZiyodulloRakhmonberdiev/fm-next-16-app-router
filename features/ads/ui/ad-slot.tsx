@@ -108,7 +108,7 @@ export function AdSlot({ placement }: Props) {
           "relative w-full overflow-hidden",
           isArticleBottomFull
             ? "h-screen min-h-screen md:h-auto md:min-h-0 md:aspect-video"
-            : "aspect-video max-h-[160px] md:max-h-[180px] lg:max-h-[220px]"
+            : "aspect-video max-h-[185px] lg:max-h-[220px]"
         )}
       >
          <span className="hidden md:block absolute left-2 top-3 z-10 rounded px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-white/95 bg-black/90" aria-hidden>
@@ -182,13 +182,13 @@ export function AdSlot({ placement }: Props) {
             ) : null}
           </div>
         ) : ad.type === "image" ? (
-          <div className="relative h-full w-full mb-auto z-100">
+          <div className="relative h-full w-full mb-auto z-10">
             {currentMedia ? (
               mediaKind === "video" ? (
                 <video key={currentMedia} src={currentMedia} className="absolute inset-0 h-full w-full object-contain"
                   style={{ objectPosition: "center center" }} autoPlay muted loop playsInline />
               ) : (
-                <img key={currentMedia} src={currentMedia} alt={ad.title ?? "Reklama"} className=" h-full w-full object-cover md:object-contain"
+                <img key={currentMedia} src={currentMedia} alt={ad.title ?? "Reklama"} className=" h-full w-full object-fill md:object-fill"
                   style={{ objectPosition: "center center" }} />
               )
             ) : null}

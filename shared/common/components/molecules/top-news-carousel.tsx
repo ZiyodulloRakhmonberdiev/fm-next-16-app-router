@@ -156,8 +156,8 @@ export default function TopNewsCarousel() {
             ))}
           </CarouselContent>
           <div className="absolute right-2 top-2 flex translate-y-0 gap-2">
-            <CarouselPrevious className="static size-10 translate-x-0 translate-y-0 rounded-full bg-transparent backdrop-blur-sm text-white border" />
-            <CarouselNext className="static size-10 translate-x-0 translate-y-0 rounded-full bg-transparent backdrop-blur-sm text-white border" />
+            <CarouselPrevious className="static size-10 translate-x-0 translate-y-0 rounded-full bg-transparent backdrop-blur-sm border-none text-white" />
+            <CarouselNext className="static size-10 translate-x-0 translate-y-0 rounded-full bg-transparent backdrop-blur-sm border-none text-white" />
           </div>
         </div>
         <CarouselDots

@@ -36,6 +36,7 @@ import { useThemeLabel } from "@/features/theme/model/use-theme-label"
 import { usePublicThemesQuery } from "@/features/theme/model/public-themes-query"
 import { IoEyeSharp } from "react-icons/io5"
 import { MdTimer } from "react-icons/md";
+import { FaTelegram } from "react-icons/fa6"
 
 export type { NewsItem }
 
@@ -254,20 +255,20 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
   }, [news.slug])
 
   return (
-    <div className="">
+    <div className="pt-12 md:pt-0">
       <div className="relative">
         {/* Mobil: ad fon sifatida turadi, scroll paytida "window/reveal" bo'limida ko'rinadi. */}
-        <div className="md:hidden">
+        <div className="md:hidden min-h-[185px]">
           <AdSlot placement='sidebar_widget' />
         </div>
         {hasArticleBottomAd ? (
-          <div className="pointer-events-none fixed inset-0 z-0 flex items-center justify-center px-0 md:hidden">
+          <div className="pointer-events-none fixed inset-0 flex items-center justify-center px-0 md:hidden">
             <AdSlot placement='article_bottom_full' />
           </div>
         ) : null}
         <article className="overflow-x-hidden">
           <div className="relative z-10 bg-transparent">
-            <div className="px-4 md:px-6 bg-background pt-4 pb-2">
+            <div className="px-4 md:px-6 bg-background pt-4 md:pt-0 pb-2">
               {/* <div className="my-2 flex flex-wrap items-center justify-between gap-x-2 gap-y-2 text-sm text-muted-foreground rounded-sm shadow-sm md:shadow-none border-b pb-2">
               <Button
                 type="button"
@@ -580,13 +581,13 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
             <div className="my-6 w-full flex md:flex-row flex-col gap-2">
               <CreatedBy author={news.author} authorId={news.authorId} authorImage={news.authorImage} />
             </div>
-            <div className="flex flex-wrap gap-2 mt-4 bg-foreground/5 p-2 w-full">
-              {tagsEnabled && localizedTags.length > 0 && localizedTags.map((tag) => (
-                <div key={tag} className="text-sm bg-white dark:bg-foreground/10 px-2 py-1 rounded-xs">
+            {tagsEnabled && localizedTags.length > 0 && localizedTags.map((tag) => (
+              <div key={tag} className="text-sm bg-white dark:bg-foreground/10 px-2 py-1 rounded-xs">
+                <div className="flex flex-wrap gap-2 mt-4 bg-foreground/5 p-2 w-full">
                   <span>#</span>{" "}{tag}
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
 
 
             <div className="my-6" />
@@ -602,7 +603,7 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
                     onClick={() => setShowTelegramPost((p) => !p)}
                     className="flex items-center gap-2 justify-center h-auto py-2"
                   >
-                    <Send className="size-4" />
+                    <FaTelegram className="size-4" />
                     <span>Telegram Post</span>
                     {/* {showTelegramPost ? <Eye /> : <EyeOff />} */}
                   </Button>

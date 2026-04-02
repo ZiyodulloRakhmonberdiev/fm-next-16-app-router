@@ -90,7 +90,7 @@ export default function Header({
     return (
       <div
         ref={barRef}
-        className={cn('bg-card border-b border-border shadow-sm z-50 sticky top-0')}
+        className={cn('bg-card border-b border-border shadow-sm z-50 fixed inset-x-0 top-0')}
       >
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-3 py-2 md:px-6">
           <div className="flex items-center gap-2 min-w-0">

@@ -18,7 +18,7 @@ export default function Headline() {
     ""
 
   return (
-    <div className="w-full py-2 bg-foreground/10 hidden md:block space-y-2">
+    <div className="w-full py-2 bg-foreground/5 hidden md:block space-y-2">
       <div className="max-w-7xl mx-auto flex items-center px-4 md:px-6 justify-between">
         <div className="min-h-5 flex items-center gap-4">
           <WeatherWidget compact />
@@ -27,6 +27,7 @@ export default function Headline() {
               <AlertOctagon className="w-4 h-4" />
               <span className="ml-2">{headline}</span>
             </p>
+
           ) : null}
         </div>
         <div className="flex items-center gap-3">

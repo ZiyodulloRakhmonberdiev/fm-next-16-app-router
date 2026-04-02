@@ -55,16 +55,16 @@ export function WeatherWidget({ compact = false }: { compact?: boolean }) {
     <div className="inline-flex items-center gap-2 text-sm">
       <span className={`inline-flex size-8 items-center justify-center ${iconColor}`}>{icon}</span>
       <span className="font-medium">{temp}°C</span>
-      <Select value={selected} onValueChange={(v) => setSelected(v as UzbekRegionKey)}>
+      <Select value={selected} onValueChange={(v) => setSelected(v as UzbekRegionKey)} >
         <SelectTrigger
           size="sm"
           className={
             compact
-              ? "h-7 w-auto justify-start gap-1 border-none bg-transparent px-0 py-0 shadow-none hover:bg-transparent! focus:bg-transparent! dark:bg-transparent! dark:hover:bg-transparent! [&>svg]:ml-0 [&>svg]:opacity-60"
-              : "h-8 w-auto justify-start gap-1 border-none bg-transparent px-0 py-0 shadow-none hover:bg-transparent! focus:bg-transparent! dark:bg-transparent! dark:hover:bg-transparent! [&>svg]:ml-0 [&>svg]:opacity-60"
+              ? "h-7 w-auto justify-start gap-1 border-none bg-transparent px-0 py-0 shadow-none hover:bg-transparent! focus:bg-transparent! dark:bg-transparent! dark:hover:bg-transparent! [&>svg]:ml-0 [&>svg]:opacity-60 outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+              : "h-8 w-auto justify-start gap-1 border-none bg-transparent px-0 py-0 shadow-none hover:bg-transparent! focus:bg-transparent! dark:bg-transparent! dark:hover:bg-transparent! [&>svg]:ml-0 [&>svg]:opacity-60 outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
           }
         >
-          <SelectValue className="">{selectedRegion.name[locale]}</SelectValue>
+          <SelectValue className="focus-visible:ring-0 focus-visible:ring-offset-0">{selectedRegion.name[locale]}</SelectValue>
         </SelectTrigger>
         <SelectContent
           align="start"
