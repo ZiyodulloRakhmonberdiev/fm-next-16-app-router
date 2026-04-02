@@ -1,16 +1,18 @@
 import { Metadata } from "next"
 import type { AppLocale } from "@/shared/common/lib/formatter"
 import { isAppLocale } from "@/shared/common/lib/locale-api"
-import { getCachedPublicNews, getCachedThemeBySlug } from "@/shared/server/public-data-server"
+import { getCachedThemeBySlug } from "@/shared/server/public-data-server"
 import { notFound } from "next/navigation"
 import { SpecialNewsPageContent } from "@/features/news/ui/special-news-page-content"
-import type { RawNewsItem } from "@/features/news/model"
 import ClientSiteNothingGate from "../../_components/client-site-nothing-gate"
 import ClientServerOffGate from "../../_components/client-server-off-gate"
 import { ClientSidebar } from "@/widgets/client-sidebar"
 import { Header } from "@/widgets/client-header"
 import { Footer } from "@/widgets/client-footer"
 import { LatestNews } from "@/shared/common/components/news-sections"
+import { dbConnect } from "@/shared/common/lib/db"
+import { NewsModel } from "@/features/news/model/news.model"
+import { getCachedPublicNews } from "@/shared/server/public-data-server"
 
 type Props = {
   params: Promise<{ locale: string; slug: string }>
@@ -52,15 +54,14 @@ export default async function ThemePage({ params }: Props) {
   const description = (theme?.description?.[currentLocale] ?? theme?.description?.uz ?? "").trim()
   const title = theme?.name?.[currentLocale] || theme?.name?.uz || slug
 
-  const raw = await getCachedPublicNews()
-  const themed = (raw as RawNewsItem[])
-    .filter((n: RawNewsItem) => n.themeId === theme._id)
-    .sort((a: RawNewsItem, b: RawNewsItem) => {
-      const ad = new Date(a.publishedAt ?? 0).getTime()
-      const bd = new Date(b.publishedAt ?? 0).getTime()
-      return bd - ad
-    })
-    .slice(0, 120)
+  await dbConnect()
+  const filter = { status: "published", themeId: theme._id, ad: { $ne: true }, stats: { $ne: true } }
+  const [themed, total] = await Promise.all([
+    NewsModel.find(filter).sort({ publishedAt: -1 }).limit(20).lean(),
+    NewsModel.countDocuments(filter),
+  ])
+  const totalPages = Math.max(1, Math.ceil(total / 10))
+  const initialPage = totalPages >= 2 ? 2 : 1
 
   return (
     <ClientSiteNothingGate>
@@ -79,6 +80,10 @@ export default async function ThemePage({ params }: Props) {
                   headerSubtitle={subtitle || undefined}
                   headerDescription={description || undefined}
                   initialNews={themed}
+                  initialPage={initialPage}
+                  initialTotalPages={totalPages}
+                  enableLoadMore
+                  loadMoreQuery={{ themeId: theme._id }}
                 />
               </div>
               <aside className="hidden md:flex flex-col gap-6 px-4 md:px-6 lg:col-span-1">

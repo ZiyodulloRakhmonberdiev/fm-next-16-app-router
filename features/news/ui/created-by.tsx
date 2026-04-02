@@ -5,9 +5,11 @@ import { Card } from "@/shared/common/components/ui/card"
 import { useTranslations } from "next-intl"
 import { User } from "lucide-react"
 import { cn } from "@/shared/common/lib/utils"
+import { Link } from "@/i18n/navigation"
 
 type CreatedByProps = {
   author: string
+  authorId?: string | null
   authorImage?: string | null
 }
 
@@ -20,7 +22,7 @@ function getInitials(name: string): string {
   return name.slice(0, 1).toUpperCase() || "?"
 }
 
-export default function CreatedBy({ author, authorImage }: CreatedByProps) {
+export default function CreatedBy({ author, authorId, authorImage }: CreatedByProps) {
   const t = useTranslations("common")
   const initials = getInitials(author)
   const hasImage = Boolean(authorImage?.trim())
@@ -59,7 +61,16 @@ export default function CreatedBy({ author, authorImage }: CreatedByProps) {
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             {t("createdBy")}
           </p>
-          <p className="mt-0.5 truncate font-semibold text-foreground">{author}</p>
+          {authorId ? (
+            <Link
+              href={`/author/${authorId}`}
+              className="mt-0.5 inline-block truncate font-semibold text-foreground hover:underline"
+            >
+              {author}
+            </Link>
+          ) : (
+            <p className="mt-0.5 truncate font-semibold text-foreground">{author}</p>
+          )}
         </div>
       </div>
     </Card>

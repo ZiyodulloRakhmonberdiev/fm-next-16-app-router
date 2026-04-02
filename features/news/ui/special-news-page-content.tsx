@@ -3,12 +3,13 @@
 import * as React from "react"
 import Image from "next/image"
 import { Link } from "@/i18n/navigation"
-import { useLocale } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import type { AppLocale } from "@/shared/common/lib/locale-api"
 import { getNewsListForLocale, type RawNewsItem } from "@/features/news/model"
 import { usePublicCategoriesQuery } from "@/features/category/model/public-categories-query"
 import { getCategoryLabelForNewsItem } from "@/features/category/model/use-category-label"
 import { formatDateISO, formatDateTimeDotSlash } from "@/shared/common/lib/formatter"
+import { LoadMoreButton } from "@/shared/common/components/molecules/load-more-button"
 
 function getSafeImageSrc(raw?: string): string {
   if (!raw?.trim()) return ""
@@ -30,19 +31,84 @@ export function SpecialNewsPageContent({
   headerSubtitle,
   headerDescription,
   initialNews,
+  initialPage = 1,
+  initialTotalPages = 1,
+  enableLoadMore = false,
+  loadMoreQuery,
 }: {
   title: string
   headerImageUrl?: string
   headerSubtitle?: string
   headerDescription?: string
   initialNews: RawNewsItem[]
+  initialPage?: number
+  initialTotalPages?: number
+  enableLoadMore?: boolean
+  loadMoreQuery?: {
+    stats?: boolean
+    themeId?: string
+    authorId?: string
+  }
 }) {
   const locale = useLocale() as AppLocale
+  const t = useTranslations("common")
   const { data: categories = [] } = usePublicCategoriesQuery()
-  const items = React.useMemo(
-    () => getNewsListForLocale(initialNews, locale),
-    [initialNews, locale]
-  )
+  const [rawItems, setRawItems] = React.useState<RawNewsItem[]>(initialNews)
+  const [page, setPage] = React.useState(initialPage)
+  const [totalPages, setTotalPages] = React.useState(Math.max(1, initialTotalPages))
+  const [loading, setLoading] = React.useState(false)
+  const hasMore = enableLoadMore && page < totalPages
+
+  React.useEffect(() => {
+    setRawItems(initialNews)
+  }, [initialNews])
+
+  const items = React.useMemo(() => getNewsListForLocale(rawItems, locale), [rawItems, locale])
+
+  const loadMore = React.useCallback(async () => {
+    if (!hasMore || loading) return
+    setLoading(true)
+    try {
+      const nextPage = page + 1
+      const params = new URLSearchParams()
+      params.set("status", "published")
+      params.set("page", String(nextPage))
+      params.set("limit", "10")
+      params.set("sortBy", "publishedAt")
+      params.set("locale", locale)
+      if (loadMoreQuery?.stats) params.set("stats", "1")
+      if (loadMoreQuery?.themeId) params.set("theme", loadMoreQuery.themeId)
+      if (loadMoreQuery?.authorId) params.set("authorId", loadMoreQuery.authorId)
+      const res = await fetch(`/api/news?${params.toString()}`)
+      if (!res.ok) return
+      const json = (await res.json()) as {
+        data: Array<Omit<RawNewsItem, "publishedAt" | "createdAt" | "updatedAt"> & {
+          publishedAt: string | Date
+          createdAt?: string | Date
+          updatedAt?: string | Date
+        }>
+        meta?: { page?: number; totalPages?: number }
+      }
+      const toDate = (value?: string | Date) => {
+        if (!value) return undefined
+        const d = value instanceof Date ? value : new Date(value)
+        return Number.isNaN(d.getTime()) ? undefined : d
+      }
+      const normalized = (Array.isArray(json.data) ? json.data : []).map((item) => ({
+        ...(item as RawNewsItem),
+        publishedAt: toDate(item.publishedAt) ?? new Date(0),
+        createdAt: toDate(item.createdAt),
+        updatedAt: toDate(item.updatedAt),
+      }))
+      setRawItems((prev) => [...prev, ...normalized].filter(
+        (item, idx, arr) => arr.findIndex((x) => x.slug === item.slug) === idx
+      ))
+      setPage(Number(json.meta?.page ?? nextPage))
+      setTotalPages(Math.max(1, Number(json.meta?.totalPages ?? totalPages)))
+    } finally {
+      setLoading(false)
+    }
+  }, [hasMore, loading, loadMoreQuery?.authorId, loadMoreQuery?.stats, loadMoreQuery?.themeId, locale, page, totalPages])
 
   return (
     <section className="space-y-4 mx-auto pt-4">
@@ -100,6 +166,11 @@ export function SpecialNewsPageContent({
           )
         })}
       </div>
+      {hasMore ? (
+        <div className="flex justify-start pt-2">
+          <LoadMoreButton label={t("load_more")} loading={loading} onClick={() => void loadMore()} />
+        </div>
+      ) : null}
     </section>
   )
 }

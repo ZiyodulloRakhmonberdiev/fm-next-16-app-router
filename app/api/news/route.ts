@@ -16,6 +16,8 @@ import { requireAdminSession } from '@/shared/server/require-admin-session'
 import { protectPublicApi } from '@/shared/server/protect-api'
 import { CACHE_TIMINGS, noStoreHeaders, publicCacheHeaders } from '@/shared/common/lib/http-cache'
 import type { SortOrder } from 'mongoose'
+import { isAppLocale, type AppLocale } from '@/shared/common/lib/locale-api'
+import { pickUserLocaleText } from '@/features/users/lib/user-locale'
 
 export async function GET(req: NextRequest) {
   const isProtected = await protectPublicApi(req)
@@ -39,20 +41,30 @@ export async function GET(req: NextRequest) {
     const themeList = searchParams.getAll("theme")
     const page = Math.max(1, Number(searchParams.get('page') ?? 1))
     const limit = Math.min(100, Math.max(1, Number(searchParams.get('limit') ?? 20)))
+    const localeParam = searchParams.get('locale')
+    const currentLocale: AppLocale = isAppLocale(localeParam ?? '') ? (localeParam as AppLocale) : 'uz'
     const sortBy = (searchParams.get("sortBy") ?? "publishedAt").toLowerCase()
     const recentMonths = Number(searchParams.get("recentMonths") ?? 0)
     const top = searchParams.get("top")
     const authorsChoice = searchParams.get("authorsChoice") ?? searchParams.get("authors_choice")
     const breaking = searchParams.get("breaking") ?? searchParams.get("isBreaking")
+    const stats = searchParams.get("stats")
+    const authorId = searchParams.get("authorId")
+    const authorIdList = searchParams.getAll("authorId")
     const video = searchParams.get("video") ?? searchParams.get("hasVideo") ?? searchParams.get("has_video")
     const audio = searchParams.get("audio") ?? searchParams.get("hasAudio") ?? searchParams.get("has_audio")
     const includeAd = searchParams.get("includeAd") ?? searchParams.get("include_ad")
     const skip = (page - 1) * limit
 
     const filter: Record<string, unknown> = {}
-    if (!wantsAdmin && includeAd !== "1" && includeAd !== "true") {
+    const wantsStats = stats === "1" || stats === "true"
+    if (!wantsAdmin && includeAd !== "1" && includeAd !== "true" && !wantsStats) {
       filter.ad = { $ne: true }
       filter.stats = { $ne: true }
+    }
+    if (wantsStats) {
+      filter.stats = true
+      filter.ad = { $ne: true }
     }
     if (status) filter.status = status
     const categorySlugs = [
@@ -89,6 +101,16 @@ export async function GET(req: NextRequest) {
     if (top === "1" || top === "true") filter.isTop = true
     if (authorsChoice === "1" || authorsChoice === "true") filter.authorsChoice = true
     if (breaking === "1" || breaking === "true") filter.isBreaking = true
+    const authorIds = [
+      ...authorIdList.flatMap((v) => String(v).split(",").map((s) => s.trim()).filter(Boolean)),
+      ...(authorId ? String(authorId).split(",").map((s) => s.trim()).filter(Boolean) : []),
+    ]
+    const uniqueAuthorIds = Array.from(new Set(authorIds))
+    if (uniqueAuthorIds.length === 1) {
+      filter.authorId = uniqueAuthorIds[0]
+    } else if (uniqueAuthorIds.length > 1) {
+      filter.authorId = { $in: uniqueAuthorIds }
+    }
     /** Video filter: endi asosiy mezon `hasVideo` */
     if (video === "1" || video === "true") {
       filter.$or = [
@@ -125,16 +147,16 @@ export async function GET(req: NextRequest) {
       NewsModel.countDocuments(filter),
     ])
 
-    const authorIds = Array.from(
+    const authorDocIds = Array.from(
       new Set(news.map((n) => n.authorId).filter((id): id is string => typeof id === 'string' && id.trim() !== ''))
     )
     const authorNameById = new Map<string, string>()
-    if (authorIds.length > 0) {
-      const users = await UserModel.find({ _id: { $in: authorIds } })
+    if (authorDocIds.length > 0) {
+      const users = await UserModel.find({ _id: { $in: authorDocIds } })
         .select({ _id: 1, full_name: 1 })
         .lean()
       for (const user of users) {
-        authorNameById.set(user._id, user.full_name)
+        authorNameById.set(user._id, pickUserLocaleText(user.full_name, currentLocale))
       }
     }
 
@@ -264,7 +286,7 @@ export async function POST(req: NextRequest) {
           { status: 400 }
         )
       }
-      createData.author = author.full_name
+      createData.author = pickUserLocaleText(author.full_name, 'uz')
     } else {
       delete createData.authorId
       delete createData.author

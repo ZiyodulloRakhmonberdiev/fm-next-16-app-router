@@ -11,6 +11,7 @@ import { cn } from "@/shared/common/lib/utils"
 import { formatDateTimeDotSlash } from "@/shared/common/lib/formatter"
 import { Video, Volume2 } from "lucide-react"
 import { IoPlayCircle } from "react-icons/io5"
+import { FaMicrophone } from "react-icons/fa6"
 
 export type NewsCardContentVariant = "inline" | "stacked"
 export type NewsCardDateVariant =
@@ -76,13 +77,16 @@ export function NewsCardContent({
         <>
           {showMediaIndicators && item.hasVideo ? (
             <IoPlayCircle className="size-5 fill-current text-brand" aria-label="Video" />
-          ) : <span className="block h-2 w-2 rounded-full bg-brand" />}
+          ) : null}
+          {showMediaIndicators && item.hasAudio ? (
+            <FaMicrophone className="size-3 fill-current text-brand" aria-label="Audio" />
+          ) : null}
+          {!item.hasAudio && !item.hasVideo ? (
+            <span className="block h-2 w-2 rounded-full bg-brand" />
+          ) : null}
           <span className={cn("capitalize text-muted-foreground font-semibold", categoryClassName)}>
             {categoryLabel}
           </span>
-          {showMediaIndicators && item.hasAudio ? (
-            <Volume2 className="size-3 text-muted-foreground" aria-label="Audio" />
-          ) : null}
         </>
       ) : null}
     </div>

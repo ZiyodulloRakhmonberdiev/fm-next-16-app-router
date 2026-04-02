@@ -25,6 +25,7 @@ import {
 import { AdSlot } from "@/features/ads/ui/ad-slot"
 import { getCachedPublicNews } from "@/shared/server/public-data-server"
 import { ClientBottomNav } from "@/widgets/client-bottom-nav"
+import { pickUserLocaleText } from "@/features/users/lib/user-locale"
 
 type Props = {
   params: Promise<{ locale: string; slug: string }>
@@ -77,9 +78,10 @@ export default async function NewsPage({ params }: Props) {
   const raw = await NewsModel.findOne({ slug, status: "published" }).lean()
   if (!raw) notFound()
   if (raw.authorId) {
-    const author = await UserModel.findById(raw.authorId).select({ _id: 1, full_name: 1 }).lean()
+    const author = await UserModel.findById(raw.authorId).select({ _id: 1, full_name: 1, image: 1 }).lean()
     if (author?.full_name) {
-      raw.author = author.full_name
+      ;(raw as RawNewsItem).author = pickUserLocaleText(author.full_name, currentLocale)
+      ;(raw as RawNewsItem).authorImage = typeof author.image === "string" ? author.image : null
     }
   }
   const news = pickNewsForLocale(raw as RawNewsItem, currentLocale)

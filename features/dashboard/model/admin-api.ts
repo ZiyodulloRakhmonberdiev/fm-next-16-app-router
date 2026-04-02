@@ -41,7 +41,8 @@ export type AdminUserRole = 'ceo' | 'administrator' | 'moderator' | 'ads_manager
 
 export type AdminUser = {
   _id: string
-  full_name: string
+  full_name: string | LocaleMap
+  description?: LocaleMap
   image: string | null
   role: AdminUserRole
   position: string
@@ -73,7 +74,8 @@ export type CreateThemePayload = {
 }
 
 export type CreateUserPayload = {
-  full_name: string
+  full_name: string | LocaleMap
+  description?: LocaleMap
   image: string | null
   role: AdminUserRole
   position: string | null

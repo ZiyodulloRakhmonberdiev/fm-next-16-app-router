@@ -47,7 +47,7 @@ import { cyrillicToLatinForSlug, slugify } from '@/shared/common/lib/slug'
 import { useThemesQuery, useThemeMutations } from '@/features/dashboard/model/admin-hooks'
 import { useThemesUiStore } from '@/features/dashboard/model/admin-ui-store'
 import { getApiErrorDescription } from '@/features/dashboard/model/admin-api'
-import { uploadThemeImage300 } from '@/shared/infra/cloudinary-client-upload'
+import { uploadThemeImage500 } from '@/shared/infra/cloudinary-client-upload'
 
 function generateSlugFromNames(name: Record<AppLocale, string>): string {
   const base = name.en?.trim() || ''
@@ -226,10 +226,10 @@ export function ThemesPage({ locale }: ThemesPageProps) {
     if (!file) return
     setImageBusy(true)
     try {
-      const url = await uploadThemeImage300(file)
+      const url = await uploadThemeImage500(file)
       if (mode === 'create') setCreateImageUrl(url)
       else setEditImageUrl(url)
-      toast.success("Rasm yuklandi (300x300)")
+      toast.success("Rasm yuklandi (500x500)")
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Rasmni yuklab bo'lmadi")
     } finally {
@@ -381,7 +381,7 @@ export function ThemesPage({ locale }: ThemesPageProps) {
           <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 py-4 [scrollbar-width:thin]">
             <form id="create-theme-form" onSubmit={handleCreateSubmit} className="space-y-4">
               <div className="rounded-lg border border-border/60 bg-muted/20 p-4">
-                <p className="text-sm font-medium text-foreground mb-3">Tema rasmi (300×300)</p>
+                <p className="text-sm font-medium text-foreground mb-3">Tema rasmi (500×500)</p>
                 <div className="flex items-center gap-4">
                   <div className="relative size-14 overflow-hidden rounded-full bg-muted ring-1 ring-border">
                     {createImageUrl ? (
@@ -396,7 +396,7 @@ export function ThemesPage({ locale }: ThemesPageProps) {
                       onChange={(e) => handleThemeImagePick(e.currentTarget.files?.[0] ?? null, 'create')}
                     />
                     <p className="mt-2 text-xs text-muted-foreground">
-                      Rasm saqlanishidan oldin avtomatik center-crop qilinadi va 300×300 JPEG bo‘ladi.
+                      Rasm saqlanishidan oldin avtomatik center-crop qilinadi va 500×500 JPEG bo‘ladi.
                     </p>
                   </div>
                   {createImageUrl ? (
@@ -489,7 +489,7 @@ export function ThemesPage({ locale }: ThemesPageProps) {
             <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 py-4 [scrollbar-width:thin]">
               <form key={editTheme.slug} id="update-theme-form" onSubmit={handleUpdateSubmit} className="space-y-4">
                 <div className="rounded-lg border border-border/60 bg-muted/20 p-4">
-                  <p className="text-sm font-medium text-foreground mb-3">Tema rasmi (300×300)</p>
+                  <p className="text-sm font-medium text-foreground mb-3">Tema rasmi (500×500)</p>
                   <div className="flex items-center gap-4">
                     <div className="relative size-14 overflow-hidden rounded-full bg-muted ring-1 ring-border">
                       {editImageUrl ? (
@@ -504,7 +504,7 @@ export function ThemesPage({ locale }: ThemesPageProps) {
                         onChange={(e) => handleThemeImagePick(e.currentTarget.files?.[0] ?? null, 'edit')}
                       />
                       <p className="mt-2 text-xs text-muted-foreground">
-                        Rasm saqlanishidan oldin avtomatik center-crop qilinadi va 300×300 JPEG bo‘ladi.
+                        Rasm saqlanishidan oldin avtomatik center-crop qilinadi va 500×500 JPEG bo‘ladi.
                       </p>
                     </div>
                     {editImageUrl ? (

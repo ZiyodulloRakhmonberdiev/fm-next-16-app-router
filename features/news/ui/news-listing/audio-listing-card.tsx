@@ -17,27 +17,6 @@ type AudioListingCardProps = {
   onPlay: (item: NewsItem) => void
 }
 
-/** Animated equalizer bars — playing animatsiyasi uchun */
-function EqualizerBars({ playing }: { playing: boolean }) {
-  return (
-    <span className="inline-flex items-end gap-[2px] h-4" aria-hidden>
-      {[1, 2, 3, 4].map((i) => (
-        <span
-          key={i}
-          className={cn(
-            "w-[3px] rounded-full bg-white origin-bottom",
-            playing ? "animate-equalizer" : ""
-          )}
-          style={{
-            height: playing ? undefined : `${[8, 12, 6, 10][i - 1]}px`,
-            animationDelay: `${(i - 1) * 0.12}s`,
-          }}
-        />
-      ))}
-    </span>
-  )
-}
-
 export function AudioListingCard({
   item,
   locale,
@@ -186,15 +165,16 @@ export function AudioListingCard({
             "inline-flex size-10 items-center justify-center rounded-full shadow-lg ring-2 transition-all duration-200",
             isActive
               ? "bg-brand text-white"
-              : "bg-background/90 text-brand scale-90 group-hover:scale-100"
+              : " scale-90 group-hover:scale-100"
           )}
         >
           {isActive && isPlaying ? (
-            <EqualizerBars playing />
+            <Pause className="size-4 fill-white ml-0.5 text-white" />
+            // <Play className="size-4 fill -white ml-0.5" />
           ) : isActive ? (
-            <Play className="size-4 fill-current ml-0.5" />
+            <Play className="size-4 fill-white ml-0.5" />
           ) : (
-            <Play className="size-4 fill-current ml-0.5" />
+            <Play className="size-4 fill-white ml-0.5" />
           )}
         </span>
       </button>

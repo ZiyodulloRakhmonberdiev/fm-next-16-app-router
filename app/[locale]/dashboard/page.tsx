@@ -277,8 +277,8 @@ async function DashboardNewsListsAsync({ locale, opts }: { locale: AppLocale, op
     locale
   ).sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
   
-  const topNews = topNewsRaw.length ? topNewsRaw : latestNews.slice(0, 20)
-  const authorsChoiceNews = authorsChoiceRaw.length ? authorsChoiceRaw : latestNews.slice(0, 20)
+  const topNews = topNewsRaw
+  const authorsChoiceNews = authorsChoiceRaw
   const mostReadNews = [...allNews].sort((a, b) => (b.views ?? 0) - (a.views ?? 0)).slice(0, 20)
   
   const topNewsWithIds = attachNewsIdsToItems(topNews, newsJson.data)

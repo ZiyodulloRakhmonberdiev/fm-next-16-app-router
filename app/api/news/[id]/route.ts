@@ -10,8 +10,13 @@ import { deleteNewsFromTelegram, sendNewsToTelegram } from '@/shared/infra/teleg
 import { requireAdminSession } from '@/shared/server/require-admin-session'
 import { logAdminAction } from '@/features/admin-logs/lib/log-action'
 import { protectPublicApi } from '@/shared/server/protect-api'
+import { pickUserLocaleText } from '@/features/users/lib/user-locale'
 
-async function syncTelegramForNews(news: any, origin: string) {
+async function syncTelegramForNews(
+  news: any,
+  origin: string,
+  previous?: { pushedToTelegram?: boolean; telegramMessageId?: number | null }
+) {
   // Agar pushedToTelegram false bo'lsa, lekin xabar yuborilgan bo'lsa - uni o'chirish kerak
   if (!news.pushedToTelegram) {
     if (news.telegramMessageId) {
@@ -37,7 +42,12 @@ async function syncTelegramForNews(news: any, origin: string) {
     return
   }
 
-  // Agar allaqachon yuborilgan bo'lsa va mantiq bo'yicha yangilash kerak bo'lsa - avval eskisini o'chiramiz
+  const wasPushedBefore = Boolean(previous?.pushedToTelegram)
+  const hadMessageBefore = Boolean(previous?.telegramMessageId)
+  const hasMessageNow = Boolean(news.telegramMessageId)
+  const shouldSendNow = !wasPushedBefore || (!hadMessageBefore && !hasMessageNow)
+  if (!shouldSendNow) return
+
   if (news.telegramMessageId) {
     try {
       await deleteNewsFromTelegram({ messageId: news.telegramMessageId })
@@ -95,7 +105,7 @@ async function resolveCategoryAndTagsForUpdate(update: Record<string, unknown>) 
     if (!user) {
       throw new Error('Tanlangan muallif topilmadi.')
     }
-    update.author = user.full_name
+    update.author = pickUserLocaleText(user.full_name, 'uz')
   }
   if (update.authorId === null) {
     update.$unset = { ...(update.$unset as Record<string, unknown>), authorId: 1, author: 1 }
@@ -139,6 +149,19 @@ function computeMergedFlags(
   })
 }
 
+function pickSubmittedUpdate(
+  parsedData: Record<string, unknown>,
+  rawJson: Record<string, unknown>
+): Record<string, unknown> {
+  const out: Record<string, unknown> = {}
+  for (const key of Object.keys(rawJson)) {
+    if (Object.prototype.hasOwnProperty.call(parsedData, key)) {
+      out[key] = parsedData[key]
+    }
+  }
+  return out
+}
+
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -159,7 +182,7 @@ export async function GET(
   }
   if (news.authorId) {
     const author = await UserModel.findById(news.authorId).select({ _id: 1, full_name: 1 }).lean()
-    if (author?.full_name) news.author = author.full_name
+    if (author?.full_name) news.author = pickUserLocaleText(author.full_name, 'uz')
   }
 
   return Response.json(news)
@@ -238,7 +261,10 @@ export async function PUT(
     return Response.json({ error: 'Yangilik topilmadi' }, { status: 404 })
   }
 
-  await syncTelegramForNews(updated, req.nextUrl.origin)
+  await syncTelegramForNews(updated, req.nextUrl.origin, {
+    pushedToTelegram: existing.pushedToTelegram,
+    telegramMessageId: existing.telegramMessageId,
+  })
 
   logAdminAction({
     action: 'UPDATE_NEWS',
@@ -258,6 +284,7 @@ export async function PATCH(
 
   await dbConnect()
   const json = await req.json()
+  const rawJson = (json && typeof json === 'object' ? json : {}) as Record<string, unknown>
 
   const parsed = createNewsSchema.partial().safeParse(json)
   if (!parsed.success) {
@@ -273,7 +300,7 @@ export async function PATCH(
     return Response.json({ error: 'Yangilik topilmadi' }, { status: 404 })
   }
 
-  const safeData = { ...parsed.data }
+  const safeData = pickSubmittedUpdate(parsed.data as Record<string, unknown>, rawJson)
   delete (safeData as { views?: number }).views
   let update: Record<string, unknown> = { ...safeData }
   if (
@@ -322,7 +349,10 @@ export async function PATCH(
     return Response.json({ error: 'Yangilik topilmadi' }, { status: 404 })
   }
 
-  await syncTelegramForNews(updated, req.nextUrl.origin)
+  await syncTelegramForNews(updated, req.nextUrl.origin, {
+    pushedToTelegram: existing.pushedToTelegram,
+    telegramMessageId: existing.telegramMessageId,
+  })
 
   logAdminAction({
     action: 'UPDATE_NEWS',

@@ -39,7 +39,7 @@ export function NewsListingPageContent({
   showAuthorsChoice = true,
   forceVideoOnly = false,
   forceBreakingOnly = false,
-  pageSize = 4,
+  pageSize = 10,
 }: {
   variant?: NewsListingVariant
   initial: { items: NewsItem[]; page: number; totalPages: number }
@@ -85,6 +85,7 @@ export function NewsListingPageContent({
       params.set("status", "published")
       params.set("page", String(nextPage))
       params.set("limit", String(pageSize))
+      params.set("locale", locale)
       params.set("sortBy", sortByForFilter(filter))
       const flags = flagsForFilter(filter)
       if (flags.top) params.set("top", "1")
@@ -99,21 +100,29 @@ export function NewsListingPageContent({
       }
       return `/api/news?${params.toString()}`
     },
-    [pageSize, forceVideoOnly, forceBreakingOnly]
+    [pageSize, forceVideoOnly, forceBreakingOnly, locale]
   )
 
   const fetchFirstPage = React.useCallback(
     async (filter: FilterType, slugs: string[], themeSlugs: string[]) => {
       setLoading(true)
       try {
-        const res = await fetch(buildQuery(1, filter, slugs, themeSlugs))
-        if (!res.ok) return
-        const json = (await res.json()) as NewsListResponse
-        const raw = Array.isArray(json.data) ? json.data.map(normalizeRaw) : []
+        const firstQuery = buildQuery(1, filter, slugs, themeSlugs)
+        const secondQuery = buildQuery(2, filter, slugs, themeSlugs)
+        const [res1, res2] = await Promise.all([fetch(firstQuery), fetch(secondQuery)])
+        if (!res1.ok) return
+        const json1 = (await res1.json()) as NewsListResponse
+        const json2 = res2.ok ? ((await res2.json()) as NewsListResponse) : null
+        const raw1 = Array.isArray(json1.data) ? json1.data.map(normalizeRaw) : []
+        const raw2 = Array.isArray(json2?.data) ? json2.data.map(normalizeRaw) : []
+        const raw = [...raw1, ...raw2].filter(
+          (item, idx, arr) => arr.findIndex((x) => x.slug === item.slug) === idx
+        )
         const nextItems = getNewsListForLocale(raw, locale)
         setItems(nextItems)
-        setPage(Number(json.meta?.page ?? 1))
-        setTotalPages(Math.max(1, Number(json.meta?.totalPages ?? 1)))
+        const nextTotalPages = Math.max(1, Number(json1.meta?.totalPages ?? 1))
+        setPage(nextTotalPages >= 2 ? 2 : 1)
+        setTotalPages(nextTotalPages)
       } finally {
         setLoading(false)
       }

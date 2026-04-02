@@ -9,19 +9,22 @@ import type { NewsStatus } from '@/features/news/model'
 
 type NewsListFilterPanelProps = {
   statusFilter: '' | NewsStatus
+  authorFilter: string
   isTopFilter: '' | 'yes' | 'no'
   adFilter: '' | 'yes' | 'no'
+  statsFilter: '' | 'yes' | 'no'
   typeFilter: '' | 'video' | 'image' | 'text' | 'audio'
   dateFrom: string
   dateTo: string
   onStatusChange: (value: '' | NewsStatus) => void
+  onAuthorChange: (value: string) => void
   onTopChange: (value: '' | 'yes' | 'no') => void
   onAdChange: (value: '' | 'yes' | 'no') => void
   onTypeChange: (value: '' | 'video' | 'image' | 'text' | 'audio') => void
   onDateFromChange: (value: string) => void
   onDateToChange: (value: string) => void
   onClear: () => void
-  renderSelect: (input: { kind: 'status' | 'top' | 'ad' | 'type' }) => ReactNode
+  renderSelect: (input: { kind: 'status' | 'author' | 'top' | 'ad' | 'stats' | 'type' }) => ReactNode
 }
 
 export function NewsListFilterPanel({
@@ -36,13 +39,15 @@ export function NewsListFilterPanel({
     <Card className="gap-3 py-0 md:gap-6 md:py-6">
       <CardHeader className="hidden px-3 md:block md:px-6">
         <CardTitle className="text-base">Filterlar</CardTitle>
-        <CardDescription>Status, Top, reklama, tur va sana bo'yicha filtrlash</CardDescription>
+        <CardDescription>Status, Top, reklama, maqola, tur va sana bo'yicha filtrlash</CardDescription>
       </CardHeader>
       <CardContent className="px-3 pb-4 pt-2 md:px-6 md:pb-6 md:pt-0">
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-2 md:gap-6 lg:grid-cols-3 xl:grid-cols-7">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-2 md:gap-6 lg:grid-cols-3 xl:grid-cols-9">
           {renderSelect({ kind: 'status' })}
+          {renderSelect({ kind: 'author' })}
           {renderSelect({ kind: 'top' })}
           {renderSelect({ kind: 'ad' })}
+          {renderSelect({ kind: 'stats' })}
           {renderSelect({ kind: 'type' })}
           <div className="space-y-2">
             <Label htmlFor="date-from" className="text-sm font-medium">Sana (dan)</Label>

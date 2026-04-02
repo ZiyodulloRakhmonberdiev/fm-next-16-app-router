@@ -16,11 +16,17 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function StatsNewsPage() {
   await dbConnect()
-  const rows = await NewsModel.find({ status: "published", stats: true })
+  const filter = { status: "published", stats: true }
+  const [rows, total] = await Promise.all([
+    NewsModel.find(filter)
     .sort({ publishedAt: -1 })
-    .limit(120)
-    .lean()
+      .limit(20)
+      .lean(),
+    NewsModel.countDocuments(filter),
+  ])
   const list = JSON.parse(JSON.stringify(rows))
+  const totalPages = Math.max(1, Math.ceil(total / 10))
+  const initialPage = totalPages >= 2 ? 2 : 1
 
   return (
     <ClientSiteNothingGate>
@@ -33,7 +39,14 @@ export default async function StatsNewsPage() {
           <ClientServerOffGate model="news">
             <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 lg:grid-cols-4">
               <div className="min-w-0 px-4 md:px-6 lg:col-span-3">
-                <SpecialNewsPageContent title="Maqolalar" initialNews={list} />
+                <SpecialNewsPageContent
+                  title="Maqolalar"
+                  initialNews={list}
+                  initialPage={initialPage}
+                  initialTotalPages={totalPages}
+                  enableLoadMore
+                  loadMoreQuery={{ stats: true }}
+                />
               </div>
               <aside className="hidden md:flex flex-col gap-6 px-4 md:px-6 lg:col-span-1">
                 <LatestNews initialNews={await getCachedPublicNews()} />

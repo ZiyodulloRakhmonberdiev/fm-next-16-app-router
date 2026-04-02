@@ -31,6 +31,7 @@ import { usePublicSiteSettingsQuery } from "@/shared/server/public-site-settings
 import { useCategoryLabel } from "@/features/category/model/use-category-label"
 import type { LocaleMap } from "@/shared/common/lib/locale-types"
 import { AdSlot } from "@/features/ads/ui/ad-slot"
+import { usePublicAdsQuery } from "@/features/ads/model/public-ads-query"
 import { useThemeLabel } from "@/features/theme/model/use-theme-label"
 import { usePublicThemesQuery } from "@/features/theme/model/public-themes-query"
 import { IoEyeSharp } from "react-icons/io5"
@@ -52,7 +53,10 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
   const parsedRichFromString =
     typeof news.content === "string" ? parseRichContentString(news.content) : null
   const { data: settings } = usePublicSiteSettingsQuery()
+  const { data: articleBottomAds = [] } = usePublicAdsQuery("article_bottom_full")
   const tagsEnabled = settings?.clientDelivery.models.tags ?? true
+  const hasArticleBottomAd =
+    settings?.clientDelivery?.models?.ads !== false && articleBottomAds.length > 0
 
   const getSafeImageSrc = (raw?: string) => {
     if (!raw?.trim()) return ""
@@ -253,16 +257,18 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
     <div className="">
       <div className="relative">
         {/* Mobil: ad fon sifatida turadi, scroll paytida "window/reveal" bo'limida ko'rinadi. */}
-          <div className="md:hidden">
-            <AdSlot placement='sidebar_widget' />
+        <div className="md:hidden">
+          <AdSlot placement='sidebar_widget' />
         </div>
-        <div className="pointer-events-none fixed inset-0 z-0 flex items-center justify-center px-0 md:hidden">
+        {hasArticleBottomAd ? (
+          <div className="pointer-events-none fixed inset-0 z-0 flex items-center justify-center px-0 md:hidden">
             <AdSlot placement='article_bottom_full' />
-        </div>
+          </div>
+        ) : null}
         <article className="overflow-x-hidden">
           <div className="relative z-10 bg-transparent">
             <div className="px-4 md:px-6 bg-background pt-4 pb-2">
-            {/* <div className="my-2 flex flex-wrap items-center justify-between gap-x-2 gap-y-2 text-sm text-muted-foreground rounded-sm shadow-sm md:shadow-none border-b pb-2">
+              {/* <div className="my-2 flex flex-wrap items-center justify-between gap-x-2 gap-y-2 text-sm text-muted-foreground rounded-sm shadow-sm md:shadow-none border-b pb-2">
               <Button
                 type="button"
                 variant="ghost"
@@ -297,17 +303,17 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
               </div>
             </div> */}
               <h1 className="text-2xl font-bold leading-tight md:text-3xl ">
-              {news.title}
-            </h1>
-            <div className="flex flex-wrap items-center my-3 bg-background justify-between md:justify-start gap-x-3 gap-y-1">
-              <div className="flex items-center gap-2">
-                <Link
-                  href={`/category/${categorySlug}`}
-                  className="font-medium hover:underline hidden md:block"
-                >
-                  {categoryLabel}
-                </Link>
-                {/* {themeId && themeSlug ? (
+                {news.title}
+              </h1>
+              <div className="flex flex-wrap items-center my-3 bg-background justify-between md:justify-start gap-x-3 gap-y-1">
+                <div className="flex items-center gap-2">
+                  <Link
+                    href={`/category/${categorySlug}`}
+                    className="font-medium hover:underline hidden md:block"
+                  >
+                    {categoryLabel}
+                  </Link>
+                  {/* {themeId && themeSlug ? (
                   <>
                     <span className="text-muted-foreground">•</span>
                     <Link
@@ -318,26 +324,26 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
                     </Link>
                   </>
                 ) : null} */}
-                <span aria-hidden className="select-none px-1 text-muted-foreground hidden md:block md:px-2">|</span>
-                <div className="flex items-center gap-3 text-muted-foreground text-xs">
-                  <time dateTime={formatDateTimeDotSlash(news.publishedAt)} className="text-xs text-muted-foreground flex items-center gap-2">
-                    <Calendar className="h-4 w-4 shrink-0 md:hidden" />
-                    <span> {formatDateTimeDotSlash(news.publishedAt)}</span>
-                  </time>
-                  {/* <span aria-hidden className="select-none px-1 md:px-2">·</span> */}
-                  {/* <span aria-hidden className="select-none px-1 md:px-2">·</span> */}
-                  <div className="inline-flex items-center gap-1 md:px-1">
-                    <IoEyeSharp className="h-4 w-4" />
-                    {news.views}
-                    {/* <span className="hidden md:inline-block">{t("views")}</span> */}
-                  </div>
-                  <div className="hidden md:inline-flex items-center gap-1 md:px-1">
-                    <MdTimer className="h-4 w-4" />
-                    <span>{news.minutes}</span>
-                    <span className="hidden md:inline-block">{t("min_read")}</span>
-                  </div>
+                  <span aria-hidden className="select-none px-1 text-muted-foreground hidden md:block md:px-2">|</span>
+                  <div className="flex items-center gap-3 text-muted-foreground text-xs">
+                    <time dateTime={formatDateTimeDotSlash(news.publishedAt)} className="text-xs text-muted-foreground flex items-center gap-2">
+                      <Calendar className="h-4 w-4 shrink-0 md:hidden" />
+                      <span> {formatDateTimeDotSlash(news.publishedAt)}</span>
+                    </time>
+                    {/* <span aria-hidden className="select-none px-1 md:px-2">·</span> */}
+                    {/* <span aria-hidden className="select-none px-1 md:px-2">·</span> */}
+                    <div className="inline-flex items-center gap-1 md:px-1">
+                      <IoEyeSharp className="h-4 w-4" />
+                      {news.views}
+                      {/* <span className="hidden md:inline-block">{t("views")}</span> */}
+                    </div>
+                    <div className="hidden md:inline-flex items-center gap-1 md:px-1">
+                      <MdTimer className="h-4 w-4" />
+                      <span>{news.minutes}</span>
+                      <span className="hidden md:inline-block">{t("min_read")}</span>
+                    </div>
 
-                  {/* <div className="inline-flex items-center gap-2 md:px-1">
+                    {/* <div className="inline-flex items-center gap-2 md:px-1">
             <MessageSquare className="h-4 w-4" />
             {commentTotal} <span className="hidden md:inline-block">{t("comments")}</span>
             <span aria-hidden className="select-none px-1 md:px-2">·</span>
@@ -346,164 +352,113 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
               {reactionTotal} <span className="hidden md:inline-block">{t("reactions")}</span>
             </div>
           </div> */}
-                </div>
+                  </div>
 
-              </div>
-              {/* <time dateTime={formatDateTime(news.publishedAt)} className="text-sm text-muted-foreground items-center gap-2 hidden">
+                </div>
+                {/* <time dateTime={formatDateTime(news.publishedAt)} className="text-sm text-muted-foreground items-center gap-2 hidden">
                 <Calendar className="h-4 w-4 hidden md:block shrink-0" /> 
                 <span>{formatDateTimeDotSlash(news.publishedAt)}</span>
               </time> */}
-              <div>
-                {news.ad ? (
-                  <div className="">
-                    <span className="inline-flex rounded-full bg-brand/5 px-2 py-0.5 text-xs font-semibold text-brand dark:text-white dark:bg-brand/30">
-                      {adBadgeLabel}
-                    </span>
-                  </div>
-                ) : null}
-              </div>
-            </div>
-            {/* <h1 className="md:hidden text-2xl font-bold leading-tight md:text-3xl">
-              {news.title}
-            </h1> */}
-            {news.description != null && news.description !== "" && (
-              <p className="leading-relaxed my-3 text-lg font-semibold">
-                {news.description}
-              </p>
-            )}
-
-
-
-            {hasVideo && (() => {
-              const youtubeEmbed = getYoutubeEmbedUrl(news.videoUrl ?? "")
-              return (
-                <div className="mb-6">
-                  <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-muted">
-                    {youtubeEmbed ? (
-                      <iframe
-                        src={youtubeEmbed}
-                        title={news.title}
-                        className="absolute inset-0 h-full w-full"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                      />
-                    ) : (
-                      <video
-                        key={news.videoUrl ?? "video"}
-                        src={getVideoSrc(news.videoUrl)}
-                        controls
-                        controlsList="nodownload"
-                        disablePictureInPicture
-                        onContextMenu={(e) => e.preventDefault()}
-                        className="h-full w-full object-cover"
-                        poster={videoPoster}
-                      >
-                        {t("your_browser_does_not_support_the_video_tag")}
-                      </video>
-                    )}
-                    {/* <div className="absolute right-3 top-3 z-10">
-                <SavedNewsActions slug={news.slug} newsId={newsId} overlay />
-              </div> */}
-                  </div>
-                  {videoCaption ? (
-                    <p className="px-2 py-1 text-xs mt-1">
-                      {videoCaption}
-                    </p>
+                <div>
+                  {news.ad ? (
+                    <div className="">
+                      <span className="inline-flex rounded-full bg-brand/5 px-2 py-0.5 text-xs font-semibold text-brand dark:text-white dark:bg-brand/30">
+                        {adBadgeLabel}
+                      </span>
+                    </div>
                   ) : null}
                 </div>
-              )
-            })()}
+              </div>
+              {/* <h1 className="md:hidden text-2xl font-bold leading-tight md:text-3xl">
+              {news.title}
+            </h1> */}
+              {news.description != null && news.description !== "" && (
+                <p className="leading-relaxed my-3 text-lg font-semibold">
+                  {news.description}
+                </p>
+              )}
 
-            {!hasVideo && displayImages.length === 1 && (
-              <div className="relative mb-6 w-full">
-                {getSafeImageSrc(displayImages[0]) ? (
-                  <>
-                    <img
-                      src={getSafeImageSrc(displayImages[0])}
-                      alt={news.title}
-                      className="block w-full h-auto rounded-lg"
-                    />
-                    {/* <div className="absolute right-3 top-3 z-10">
+
+
+              {hasVideo && (() => {
+                const youtubeEmbed = getYoutubeEmbedUrl(news.videoUrl ?? "")
+                return (
+                  <div className="mb-6">
+                    <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-muted">
+                      {youtubeEmbed ? (
+                        <iframe
+                          src={youtubeEmbed}
+                          title={news.title}
+                          className="absolute inset-0 h-full w-full"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      ) : (
+                        <video
+                          key={news.videoUrl ?? "video"}
+                          src={getVideoSrc(news.videoUrl)}
+                          controls
+                          controlsList="nodownload"
+                          disablePictureInPicture
+                          onContextMenu={(e) => e.preventDefault()}
+                          className="h-full w-full object-cover"
+                          poster={videoPoster}
+                        >
+                          {t("your_browser_does_not_support_the_video_tag")}
+                        </video>
+                      )}
+                      {/* <div className="absolute right-3 top-3 z-10">
+                <SavedNewsActions slug={news.slug} newsId={newsId} overlay />
+              </div> */}
+                    </div>
+                    {videoCaption ? (
+                      <p className="px-2 py-1 text-xs mt-1">
+                        {videoCaption}
+                      </p>
+                    ) : null}
+                  </div>
+                )
+              })()}
+
+              {!hasVideo && displayImages.length === 1 && (
+                <div className="relative mb-6 w-full">
+                  {getSafeImageSrc(displayImages[0]) ? (
+                    <>
+                      <img
+                        src={getSafeImageSrc(displayImages[0])}
+                        alt={news.title}
+                        className="block w-full h-auto rounded-lg"
+                      />
+                      {/* <div className="absolute right-3 top-3 z-10">
                   <SavedNewsActions slug={news.slug} newsId={newsId} overlay />
                 </div> */}
-                  </>
-                ) : (
-                  <div className="flex min-h-[200px] w-full items-center justify-center rounded-lg bg-muted px-2 text-sm text-muted-foreground text-center">
-                    Rasmni yuklab bo&apos;lmadi
-                  </div>
-                )}
-                {imageCaption ? (
-                  <p className="px-2 py-1 text-xs mt-1">
-                    {imageCaption}
-                  </p>
-                ) : null}
-              </div>
-            )}
-            {!hasVideo && hasManyImages && (
-              <div className="relative mb-6 w-full">
-                <Carousel opts={{ align: "start", loop: true }} className="w-full">
-                  <CarouselContent className="ml-0">
-                    {displayImages.map((src, i) => (
-                      <CarouselItem key={`${src}-${i}`} className="pl-0">
-                        <div className="relative aspect-video w-full overflow-hidden rounded-lg">
-                          {getSafeImageSrc(src) ? (
-                            <Image
-                              src={getSafeImageSrc(src)}
-                              alt={`${news.title} — ${i + 1}`}
-                              fill
-                              className="object-cover"
-                              priority={i === 0}
-                            />
-                          ) : (
-                            <div className="flex h-full w-full items-center justify-center px-2 text-xs text-muted-foreground text-center">
-                              Rasmni yuklab bo&apos;lmadi
-                            </div>
-                          )}
-                        </div>
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-                  <div className="absolute right-2 top-2 z-10 flex translate-y-0 gap-2">
-                    <CarouselPrevious className="static size-10 translate-x-0 translate-y-0 rounded-sm border-none bg-background/90 hover:bg-background" />
-                    <CarouselNext className="static size-10 translate-x-0 translate-y-0 rounded-sm border-none bg-background/90 hover:bg-background" />
-                  </div>
-                </Carousel>
-                {imageCaption ? (
-                  <p className="px-2 py-1 text-xs">
-                    {imageCaption}
-                  </p>
-                ) : null}
-              </div>
-            )}
-
-
-            {hasVideo && displayImages.length > 0 && (
-              <div className="mb-6 w-full">
-                <p className="mb-3 text-sm font-medium text-muted-foreground">{t("images")}</p>
-                {displayImages.length === 1 ? (
-                  getSafeImageSrc(displayImages[0]) ? (
-                    <img
-                      src={getSafeImageSrc(displayImages[0])}
-                      alt={`${news.title} — 1`}
-                      className="block w-full h-auto rounded-lg"
-                    />
+                    </>
                   ) : (
                     <div className="flex min-h-[200px] w-full items-center justify-center rounded-lg bg-muted px-2 text-sm text-muted-foreground text-center">
                       Rasmni yuklab bo&apos;lmadi
                     </div>
-                  )
-                ) : (
+                  )}
+                  {imageCaption ? (
+                    <p className="px-2 py-1 text-xs mt-1">
+                      {imageCaption}
+                    </p>
+                  ) : null}
+                </div>
+              )}
+              {!hasVideo && hasManyImages && (
+                <div className="relative mb-6 w-full">
                   <Carousel opts={{ align: "start", loop: true }} className="w-full">
                     <CarouselContent className="ml-0">
                       {displayImages.map((src, i) => (
                         <CarouselItem key={`${src}-${i}`} className="pl-0">
-                          <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-muted">
+                          <div className="relative aspect-video w-full overflow-hidden rounded-lg">
                             {getSafeImageSrc(src) ? (
                               <Image
                                 src={getSafeImageSrc(src)}
                                 alt={`${news.title} — ${i + 1}`}
                                 fill
                                 className="object-cover"
+                                priority={i === 0}
                               />
                             ) : (
                               <div className="flex h-full w-full items-center justify-center px-2 text-xs text-muted-foreground text-center">
@@ -519,33 +474,86 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
                       <CarouselNext className="static size-10 translate-x-0 translate-y-0 rounded-sm border-none bg-background/90 hover:bg-background" />
                     </div>
                   </Carousel>
-                )}
-              </div>
-            )}
-            {news.audioUrl && (
-              <div className="mb-6 rounded-xl border bg-foreground/10 p-4 shadow-sm">
-                <div className="mb-2 flex items-center gap-2 text-sm font-medium">
-                  <Volume1 className="size-4 fill-current" />
-                  <span>Audio xabarni tinglang</span>
+                  {imageCaption ? (
+                    <p className="px-2 py-1 text-xs">
+                      {imageCaption}
+                    </p>
+                  ) : null}
                 </div>
-                <audio
-                  src={news.audioUrl}
-                  controls
-                  className="w-full"
-                >
-                  Brauzeringiz audio qo'llab-quvvatlamaydi.
-                </audio>
-              </div>
-            )}
-            {audioCaption ? (
-              <p className="px-2 -mt-4 text-xs">
-                {audioCaption}
-              </p>
-            ) : null}
+              )}
 
-            {/* Mobil: media va content orasida ad fonini ochib beradigan bo'lim. */}
-          </div>
-          <div className="relative z-0 -mx-4 min-h-screen md:min-h-0 bg-transparent   md:hidden" aria-hidden />
+
+              {hasVideo && displayImages.length > 0 && (
+                <div className="mb-6 w-full">
+                  <p className="mb-3 text-sm font-medium text-muted-foreground">{t("images")}</p>
+                  {displayImages.length === 1 ? (
+                    getSafeImageSrc(displayImages[0]) ? (
+                      <img
+                        src={getSafeImageSrc(displayImages[0])}
+                        alt={`${news.title} — 1`}
+                        className="block w-full h-auto rounded-lg"
+                      />
+                    ) : (
+                      <div className="flex min-h-[200px] w-full items-center justify-center rounded-lg bg-muted px-2 text-sm text-muted-foreground text-center">
+                        Rasmni yuklab bo&apos;lmadi
+                      </div>
+                    )
+                  ) : (
+                    <Carousel opts={{ align: "start", loop: true }} className="w-full">
+                      <CarouselContent className="ml-0">
+                        {displayImages.map((src, i) => (
+                          <CarouselItem key={`${src}-${i}`} className="pl-0">
+                            <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-muted">
+                              {getSafeImageSrc(src) ? (
+                                <Image
+                                  src={getSafeImageSrc(src)}
+                                  alt={`${news.title} — ${i + 1}`}
+                                  fill
+                                  className="object-cover"
+                                />
+                              ) : (
+                                <div className="flex h-full w-full items-center justify-center px-2 text-xs text-muted-foreground text-center">
+                                  Rasmni yuklab bo&apos;lmadi
+                                </div>
+                              )}
+                            </div>
+                          </CarouselItem>
+                        ))}
+                      </CarouselContent>
+                      <div className="absolute right-2 top-2 z-10 flex translate-y-0 gap-2">
+                        <CarouselPrevious className="static size-10 translate-x-0 translate-y-0 rounded-sm border-none bg-background/90 hover:bg-background" />
+                        <CarouselNext className="static size-10 translate-x-0 translate-y-0 rounded-sm border-none bg-background/90 hover:bg-background" />
+                      </div>
+                    </Carousel>
+                  )}
+                </div>
+              )}
+              {news.audioUrl && (
+                <div className="mb-6 rounded-xl border bg-foreground/10 p-4 shadow-sm">
+                  <div className="mb-2 flex items-center gap-2 text-sm font-medium">
+                    <Volume1 className="size-4 fill-current" />
+                    <span>Audio xabarni tinglang</span>
+                  </div>
+                  <audio
+                    src={news.audioUrl}
+                    controls
+                    className="w-full"
+                  >
+                    Brauzeringiz audio qo'llab-quvvatlamaydi.
+                  </audio>
+                </div>
+              )}
+              {audioCaption ? (
+                <p className="px-2 -mt-4 text-xs">
+                  {audioCaption}
+                </p>
+              ) : null}
+
+              {/* Mobil: media va content orasida ad fonini ochib beradigan bo'lim. */}
+            </div>
+            {hasArticleBottomAd ? (
+              <div className="relative z-0 -mx-4 min-h-screen md:min-h-0 bg-transparent md:hidden" aria-hidden />
+            ) : null}
           </div>
 
           {/* <div
@@ -555,9 +563,11 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
 
           <div className="relative z-10 bg-background px-4 md:px-6 py-4">
             {/* Desktop: ad oddiy relative blok sifatida chiqadi. */}
-            <div className="mb-6 hidden md:block">
-              <AdSlot placement="article_bottom_full" />
-            </div>
+            {hasArticleBottomAd ? (
+              <div className="mb-6 hidden md:block">
+                <AdSlot placement="article_bottom_full" />
+              </div>
+            ) : null}
             {news.content != null && news.content !== "" && (
               isRichContent(news.content) ? (
                 <RichContentBlocks blocks={news.content} />
@@ -568,7 +578,7 @@ export function NewsPageContent({ news, newsId }: NewsPageContentProps) {
               )
             )}
             <div className="my-6 w-full flex md:flex-row flex-col gap-2">
-              <CreatedBy author={news.author} />
+              <CreatedBy author={news.author} authorId={news.authorId} authorImage={news.authorImage} />
             </div>
             <div className="flex flex-wrap gap-2 mt-4 bg-foreground/5 p-2 w-full">
               {tagsEnabled && localizedTags.length > 0 && localizedTags.map((tag) => (

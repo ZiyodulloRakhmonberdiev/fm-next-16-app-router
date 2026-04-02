@@ -33,45 +33,65 @@ export async function PUT(
   const unauthorized = await requireAdminSession(['ceo', 'administrator'])
   if (unauthorized) return unauthorized
 
-  await dbConnect()
-  const json = await req.json()
+  try {
+    await dbConnect()
+    const json = await req.json()
 
-  const parsed = createUserSchema.safeParse(json)
-  if (!parsed.success) {
+    const parsed = createUserSchema.safeParse(json)
+    if (!parsed.success) {
+      return Response.json(
+        { error: 'Validation error', issues: parsed.error.flatten() },
+        { status: 400 }
+      )
+    }
+
+    const session = await getServerSession(authOptions)
+    if (normalizeRole(session?.user?.role) === 'administrator' && parsed.data.role === 'ceo') {
+      return Response.json(
+        { error: 'Administrator foydalanuvchini CEO qilib tayinlay olmaydi' },
+        { status: 403 }
+      )
+    }
+
+    const updated = await UserModel.findByIdAndUpdate(
+      (await params).id,
+      {
+        ...parsed.data,
+        password: await hash(parsed.data.password, 10),
+      },
+      { new: true, runValidators: true }
+    ).lean()
+
+    if (!updated) {
+      return Response.json({ error: 'Foydalanuvchi topilmadi' }, { status: 404 })
+    }
+
+    logAdminAction({
+      action: 'UPDATE_USER',
+      targetId: updated._id.toString(),
+      targetName: updated.login,
+    })
+
+    return Response.json(updated)
+  } catch (err) {
+    const anyErr = err as any
+    if (anyErr && (anyErr.code === 11000 || anyErr.code === 'E11000')) {
+      const field = Object.keys(anyErr.keyPattern ?? anyErr.keyValue ?? {})[0] ?? 'login'
+      const fieldLabel = field === 'login' ? 'Login' : field
+      return Response.json(
+        {
+          error: 'Unique constraint',
+          message: `${fieldLabel} allaqachon mavjud. Iltimos, boshqasini tanlang.`,
+        },
+        { status: 409 }
+      )
+    }
+    const message = err instanceof Error ? err.message : 'DB xatosi'
     return Response.json(
-      { error: 'Validation error', issues: parsed.error.flatten() },
-      { status: 400 }
+      { error: 'Foydalanuvchini yangilab bo‘lmadi', details: message },
+      { status: 500 }
     )
   }
-
-  const session = await getServerSession(authOptions)
-  if (normalizeRole(session?.user?.role) === 'administrator' && parsed.data.role === 'ceo') {
-    return Response.json(
-      { error: 'Administrator foydalanuvchini CEO qilib tayinlay olmaydi' },
-      { status: 403 }
-    )
-  }
-
-  const updated = await UserModel.findByIdAndUpdate(
-    (await params).id,
-    {
-      ...parsed.data,
-      password: await hash(parsed.data.password, 10),
-    },
-    { new: true, runValidators: true }
-  ).lean()
-
-  if (!updated) {
-    return Response.json({ error: 'Foydalanuvchi topilmadi' }, { status: 404 })
-  }
-
-  logAdminAction({
-    action: 'UPDATE_USER',
-    targetId: updated._id.toString(),
-    targetName: updated.login,
-  })
-
-  return Response.json(updated)
 }
 
 export async function PATCH(
@@ -81,51 +101,71 @@ export async function PATCH(
   const unauthorized = await requireAdminSession(['ceo', 'administrator'])
   if (unauthorized) return unauthorized
 
-  await dbConnect()
-  const json = await req.json()
+  try {
+    await dbConnect()
+    const json = await req.json()
 
-  const partialSchema = createUserSchema.partial()
-  const parsed = partialSchema.safeParse(json)
-  if (!parsed.success) {
+    const partialSchema = createUserSchema.partial()
+    const parsed = partialSchema.safeParse(json)
+    if (!parsed.success) {
+      return Response.json(
+        { error: 'Validation error', issues: parsed.error.flatten() },
+        { status: 400 }
+      )
+    }
+
+    const session = await getServerSession(authOptions)
+    if (
+      normalizeRole(session?.user?.role) === 'administrator' &&
+      parsed.data.role === 'ceo'
+    ) {
+      return Response.json(
+        { error: 'Administrator foydalanuvchini CEO qilib tayinlay olmaydi' },
+        { status: 403 }
+      )
+    }
+
+    const updated = await UserModel.findByIdAndUpdate(
+      (await params).id,
+      {
+        ...parsed.data,
+        ...(parsed.data.password
+          ? { password: await hash(parsed.data.password, 10) }
+          : {}),
+      },
+      { new: true, runValidators: true }
+    ).lean()
+
+    if (!updated) {
+      return Response.json({ error: 'Foydalanuvchi topilmadi' }, { status: 404 })
+    }
+
+    logAdminAction({
+      action: 'UPDATE_USER',
+      targetId: updated._id.toString(),
+      targetName: updated.login,
+    })
+
+    return Response.json(updated)
+  } catch (err) {
+    const anyErr = err as any
+    if (anyErr && (anyErr.code === 11000 || anyErr.code === 'E11000')) {
+      const field = Object.keys(anyErr.keyPattern ?? anyErr.keyValue ?? {})[0] ?? 'login'
+      const fieldLabel = field === 'login' ? 'Login' : field
+      return Response.json(
+        {
+          error: 'Unique constraint',
+          message: `${fieldLabel} allaqachon mavjud. Iltimos, boshqasini tanlang.`,
+        },
+        { status: 409 }
+      )
+    }
+    const message = err instanceof Error ? err.message : 'DB xatosi'
     return Response.json(
-      { error: 'Validation error', issues: parsed.error.flatten() },
-      { status: 400 }
+      { error: 'Foydalanuvchini yangilab bo‘lmadi', details: message },
+      { status: 500 }
     )
   }
-
-  const session = await getServerSession(authOptions)
-  if (
-    normalizeRole(session?.user?.role) === 'administrator' &&
-    parsed.data.role === 'ceo'
-  ) {
-    return Response.json(
-      { error: 'Administrator foydalanuvchini CEO qilib tayinlay olmaydi' },
-      { status: 403 }
-    )
-  }
-
-  const updated = await UserModel.findByIdAndUpdate(
-    (await params).id,
-    {
-      ...parsed.data,
-      ...(parsed.data.password
-        ? { password: await hash(parsed.data.password, 10) }
-        : {}),
-    },
-    { new: true, runValidators: true }
-  ).lean()
-
-  if (!updated) {
-    return Response.json({ error: 'Foydalanuvchi topilmadi' }, { status: 404 })
-  }
-
-  logAdminAction({
-    action: 'UPDATE_USER',
-    targetId: updated._id.toString(),
-    targetName: updated.login,
-  })
-
-  return Response.json(updated)
 }
 
 export async function DELETE(

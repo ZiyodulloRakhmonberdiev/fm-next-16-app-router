@@ -98,11 +98,11 @@ export async function uploadFileViaPresignedUrl(
   return data1.publicUrl
 }
 
-/** Theme logo/avatar uchun: 300x300 center-crop qilib upload qiladi. */
-export async function uploadThemeImage300(file: File): Promise<string> {
+/** Theme logo/avatar uchun: 500x500 center-crop qilib upload qiladi. */
+export async function uploadThemeImage500(file: File): Promise<string> {
   let optimized = file
   try {
-    optimized = await optimizeImageToSquare(file, { size: 300, quality: 0.85 })
+    optimized = await optimizeImageToSquare(file, { size: 500, quality: 0.85 })
   } catch (err) {
     console.warn("Theme image optimize xato:", err)
   }

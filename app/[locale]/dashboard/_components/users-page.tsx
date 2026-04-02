@@ -12,6 +12,7 @@ import {
   CardTitle,
 } from '@/shared/common/components/ui/card'
 import { Input } from '@/shared/common/components/ui/input'
+import { Textarea } from '@/shared/common/components/ui/textarea'
 import { Label } from '@/shared/common/components/ui/label'
 import { Button } from '@/shared/common/components/ui/button'
 import {
@@ -43,6 +44,10 @@ import { useUserMutations, useUsersQuery } from '@/features/dashboard/model/admi
 import { useUsersUiStore } from '@/features/dashboard/model/admin-ui-store'
 import { useSession } from 'next-auth/react'
 import { normalizeRole } from '@/shared/common/lib/rbac'
+import { useLocale } from 'next-intl'
+import { getLocaleValue, type LocaleMap } from '@/shared/common/lib/locale-types'
+import type { AppLocale } from '@/shared/common/lib/locale-api'
+import { uploadFileViaPresignedUrl } from '@/shared/infra/cloudinary-client-upload'
 
 export const USER_ROLES = [
   { value: 'ceo', label: 'CEO' },
@@ -56,7 +61,8 @@ export type UserRole = (typeof USER_ROLES)[number]['value']
 
 export type UserRow = {
   id: string
-  full_name: string
+  full_name: string | LocaleMap
+  description?: LocaleMap
   image: string | null
   role: UserRole
   position: string
@@ -70,9 +76,33 @@ type UsersPageProps = {
 
 export function UsersPage({ users: initialUsers }: UsersPageProps) {
   const { data: session } = useSession()
+  const locale = useLocale()
   const actorRole = normalizeRole(session?.user?.role)
   const canAssignCeo = actorRole === 'ceo'
   const assignableRoles = USER_ROLES.filter((r) => canAssignCeo || r.value !== 'ceo')
+
+  const displayName = (value: UserRow['full_name']) => {
+    if (typeof value === 'string') return value
+    return (getLocaleValue(value, locale as AppLocale) ?? value.uz ?? '').toString()
+  }
+
+  const buildLocaleMap = (form: HTMLFormElement, prefix: string): LocaleMap => ({
+    uz: ((form.querySelector(`[name="${prefix}_uz"]`) as HTMLInputElement | HTMLTextAreaElement | null)?.value ?? '').trim(),
+    uzb: ((form.querySelector(`[name="${prefix}_uzb"]`) as HTMLInputElement | HTMLTextAreaElement | null)?.value ?? '').trim(),
+    ru: ((form.querySelector(`[name="${prefix}_ru"]`) as HTMLInputElement | HTMLTextAreaElement | null)?.value ?? '').trim(),
+    en: ((form.querySelector(`[name="${prefix}_en"]`) as HTMLInputElement | HTMLTextAreaElement | null)?.value ?? '').trim(),
+  })
+
+  const cleanLocaleMap = (value: LocaleMap): LocaleMap | undefined => {
+    const cleaned: LocaleMap = {
+      uz: value.uz.trim(),
+      uzb: value.uzb.trim(),
+      ru: value.ru.trim(),
+      en: value.en.trim(),
+    }
+    if (!cleaned.uz && !cleaned.uzb && !cleaned.ru && !cleaned.en) return undefined
+    return cleaned
+  }
 
   const { data, isLoading, error } = useUsersQuery()
   const { create, update, remove } = useUserMutations()
@@ -82,6 +112,7 @@ export function UsersPage({ users: initialUsers }: UsersPageProps) {
       (data ?? initialUsers ?? []).map((u) => ({
         id: 'id' in u ? u.id : u._id,
         full_name: u.full_name,
+        description: 'description' in u ? u.description : undefined,
         image: u.image,
         role: u.role,
         position: u.position ?? '',
@@ -106,12 +137,12 @@ export function UsersPage({ users: initialUsers }: UsersPageProps) {
       if (!query) return true
 
       return (
-        row.full_name.toLowerCase().includes(query) ||
+        displayName(row.full_name).toLowerCase().includes(query) ||
         row.login.toLowerCase().includes(query) ||
         row.position.toLowerCase().includes(query)
       )
     })
-  }, [users, roleFilter, searchQuery])
+  }, [users, roleFilter, searchQuery, displayName])
 
   const editRoleOptions = useMemo(() => {
     if (canAssignCeo) return USER_ROLES
@@ -119,10 +150,12 @@ export function UsersPage({ users: initialUsers }: UsersPageProps) {
     return assignableRoles
   }, [canAssignCeo, editUser?.role, assignableRoles])
 
-  const handleCreateSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleCreateSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const form = e.currentTarget
-    const full_name = (form.querySelector('[name="full_name"]') as HTMLInputElement)?.value?.trim() ?? ''
+    const fullNameMap = buildLocaleMap(form, 'full_name')
+    const descriptionMap = cleanLocaleMap(buildLocaleMap(form, 'description'))
+    const full_name = cleanLocaleMap(fullNameMap)
     const role = createRole
     const position = (form.querySelector('[name="position"]') as HTMLInputElement)?.value?.trim() ?? ''
     const login = (form.querySelector('[name="login"]') as HTMLInputElement)?.value?.trim() ?? ''
@@ -131,7 +164,15 @@ export function UsersPage({ users: initialUsers }: UsersPageProps) {
     const imageUrlInput = form.querySelector('[name="image"]') as HTMLInputElement
     const imageFileInput = form.querySelector('[name="image_file"]') as HTMLInputElement
     const file = imageFileInput?.files?.[0]
-    const image = file ? URL.createObjectURL(file) : imageUrlInput?.value?.trim() || null
+    let image = imageUrlInput?.value?.trim() || null
+    if (file) {
+      try {
+        image = await uploadFileViaPresignedUrl(file, 'image')
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Rasmni yuklab bo'lmadi")
+        return
+      }
+    }
 
     if (!role || !assignableRoles.some((r) => r.value === role)) {
       toast.error('Rolni tanlang')
@@ -139,7 +180,8 @@ export function UsersPage({ users: initialUsers }: UsersPageProps) {
     }
 
     const candidate: CreateUserInput = {
-      full_name,
+      full_name: full_name ?? fullNameMap,
+      description: descriptionMap,
       image: image ?? null,
       role,
       position: position || null,
@@ -161,7 +203,8 @@ export function UsersPage({ users: initialUsers }: UsersPageProps) {
     }
     create.mutate(
       {
-        full_name,
+        full_name: full_name ?? fullNameMap,
+        description: descriptionMap,
         image,
         role: role as UserRole,
         position: position || null,
@@ -179,11 +222,13 @@ export function UsersPage({ users: initialUsers }: UsersPageProps) {
     )
   }
 
-  const handleUpdateSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleUpdateSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (!editUser) return
     const form = e.currentTarget
-    const full_name = (form.querySelector('[name="full_name"]') as HTMLInputElement)?.value?.trim() ?? ''
+    const fullNameMap = buildLocaleMap(form, 'full_name')
+    const descriptionMap = cleanLocaleMap(buildLocaleMap(form, 'description'))
+    const full_name = cleanLocaleMap(fullNameMap)
     const role = editRole
     const position = (form.querySelector('[name="position"]') as HTMLInputElement)?.value?.trim() ?? ''
     const login = (form.querySelector('[name="login"]') as HTMLInputElement)?.value?.trim() ?? ''
@@ -193,7 +238,15 @@ export function UsersPage({ users: initialUsers }: UsersPageProps) {
     const imageUrlInput = form.querySelector('[name="image"]') as HTMLInputElement
     const imageFileInput = form.querySelector('[name="image_file"]') as HTMLInputElement
     const file = imageFileInput?.files?.[0]
-    const image = file ? URL.createObjectURL(file) : imageUrlInput?.value?.trim() || null
+    let image = imageUrlInput?.value?.trim() || null
+    if (file) {
+      try {
+        image = await uploadFileViaPresignedUrl(file, 'image')
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Rasmni yuklab bo'lmadi")
+        return
+      }
+    }
 
     if (!full_name || !login) {
       toast.error('To\'liq ism va login kiritilishi shart')
@@ -213,6 +266,7 @@ export function UsersPage({ users: initialUsers }: UsersPageProps) {
         id: editUser.id,
         payload: {
           full_name,
+          description: descriptionMap,
           image,
           role: role as UserRole,
           position: position || null,
@@ -320,7 +374,7 @@ export function UsersPage({ users: initialUsers }: UsersPageProps) {
                         {row.image ? (
                           <Image
                             src={row.image}
-                            alt={row.full_name}
+                            alt={displayName(row.full_name)}
                             width={40}
                             height={40}
                             className="rounded-full size-10 object-cover"
@@ -332,7 +386,7 @@ export function UsersPage({ users: initialUsers }: UsersPageProps) {
                           </span>
                         )}
                       </TableCell>
-                      <TableCell className="font-medium">{row.full_name}</TableCell>
+                      <TableCell className="font-medium">{displayName(row.full_name)}</TableCell>
                       <TableCell>
                         {USER_ROLES.find((r) => r.value === row.role)?.label ?? row.role}
                       </TableCell>
@@ -366,7 +420,7 @@ export function UsersPage({ users: initialUsers }: UsersPageProps) {
       </Card>
 
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Yangi foydalanuvchi</DialogTitle>
             <DialogDescription>
@@ -375,8 +429,23 @@ export function UsersPage({ users: initialUsers }: UsersPageProps) {
           </DialogHeader>
           <form id="create-user-form" onSubmit={handleCreateSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="create-full_name">To'liq ism</Label>
-              <Input id="create-full_name" name="full_name" placeholder="Ism Familiya" required />
+              <Label>To'liq ism (4 tilda)</Label>
+              <div className="grid gap-2 sm:grid-cols-2">
+                <Input id="create-full_name_uz" name="full_name_uz" placeholder="Uzbek (Lotin)" required />
+                <Input id="create-full_name_uzb" name="full_name_uzb" placeholder="Uzbek (Kiril)" />
+                <Input id="create-full_name_ru" name="full_name_ru" placeholder="Russian" />
+                <Input id="create-full_name_en" name="full_name_en" placeholder="English" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Tavsif / Bio (4 tilda)</Label>
+              <div className="grid gap-2 sm:grid-cols-2">
+                <Textarea name="description_uz" placeholder="Uzbek (Lotin)" maxLength={512} rows={3} />
+                <Textarea name="description_uzb" placeholder="Uzbek (Kiril)" maxLength={512} rows={3} />
+                <Textarea name="description_ru" placeholder="Russian" maxLength={512} rows={3} />
+                <Textarea name="description_en" placeholder="English" maxLength={512} rows={3} />
+              </div>
+              <p className="text-xs text-muted-foreground">Har bir tilda maksimal 512 belgi.</p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="create-image">Rasm (URL)</Label>
@@ -420,16 +489,76 @@ export function UsersPage({ users: initialUsers }: UsersPageProps) {
       </Dialog>
 
       <Dialog open={!!editUser} onOpenChange={(open) => !open && setEditId(null)}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Tahrirlash: {editUser?.full_name}</DialogTitle>
+            <DialogTitle>Tahrirlash: {editUser ? displayName(editUser.full_name) : ''}</DialogTitle>
             <DialogDescription>Foydalanuvchi ma'lumotlarini o'zgartiring.</DialogDescription>
           </DialogHeader>
           {editUser && (
             <form key={editUser.id} id="edit-user-form" onSubmit={handleUpdateSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="edit-full_name">To'liq ism</Label>
-                <Input id="edit-full_name" name="full_name" defaultValue={editUser.full_name} required />
+                <Label>To'liq ism (4 tilda)</Label>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <Input
+                    id="edit-full_name_uz"
+                    name="full_name_uz"
+                    defaultValue={typeof editUser.full_name === 'string' ? editUser.full_name : (editUser.full_name.uz ?? '')}
+                    placeholder="Uzbek (Lotin)"
+                    required
+                  />
+                  <Input
+                    id="edit-full_name_uzb"
+                    name="full_name_uzb"
+                    defaultValue={typeof editUser.full_name === 'string' ? '' : (editUser.full_name.uzb ?? '')}
+                    placeholder="Uzbek (Kiril)"
+                  />
+                  <Input
+                    id="edit-full_name_ru"
+                    name="full_name_ru"
+                    defaultValue={typeof editUser.full_name === 'string' ? '' : (editUser.full_name.ru ?? '')}
+                    placeholder="Russian"
+                  />
+                  <Input
+                    id="edit-full_name_en"
+                    name="full_name_en"
+                    defaultValue={typeof editUser.full_name === 'string' ? '' : (editUser.full_name.en ?? '')}
+                    placeholder="English"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Tavsif / Bio (4 tilda)</Label>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <Textarea
+                    name="description_uz"
+                    defaultValue={editUser.description?.uz ?? ''}
+                    placeholder="Uzbek (Lotin)"
+                    maxLength={512}
+                    rows={3}
+                  />
+                  <Textarea
+                    name="description_uzb"
+                    defaultValue={editUser.description?.uzb ?? ''}
+                    placeholder="Uzbek (Kiril)"
+                    maxLength={512}
+                    rows={3}
+                  />
+                  <Textarea
+                    name="description_ru"
+                    defaultValue={editUser.description?.ru ?? ''}
+                    placeholder="Russian"
+                    maxLength={512}
+                    rows={3}
+                  />
+                  <Textarea
+                    name="description_en"
+                    defaultValue={editUser.description?.en ?? ''}
+                    placeholder="English"
+                    maxLength={512}
+                    rows={3}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">Har bir tilda maksimal 512 belgi.</p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-image">Rasm (URL)</Label>
@@ -478,7 +607,7 @@ export function UsersPage({ users: initialUsers }: UsersPageProps) {
           <DialogHeader>
             <DialogTitle>Foydalanuvchini o'chirish</DialogTitle>
             <DialogDescription>
-              Haqiqatan ham &quot;{deleteUser?.full_name}&quot; (login: {deleteUser?.login}) foydalanuvchisini o'chirishni xohlaysizmi?
+              Haqiqatan ham &quot;{deleteUser ? displayName(deleteUser.full_name) : ''}&quot; (login: {deleteUser?.login}) foydalanuvchisini o'chirishni xohlaysizmi?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

@@ -91,6 +91,22 @@ export default async function HomeMainContent() {
     Boolean(theme.showInHomeList ?? theme.showInHomePage),
   );
 
+  let themeCursor = 0;
+  const renderNextTheme = () => {
+    const theme = featuredThemes[themeCursor];
+    if (!theme) return null;
+    themeCursor += 1;
+    return (
+      <ThemeSection
+        key={`theme-slot-${theme._id}`}
+        theme={theme}
+        locale={locale}
+        allNews={publicNews}
+        limit={8}
+      />
+    );
+  };
+
   return (
     <>
       <ThemesTopScroller themes={themes} locale={locale} />
@@ -107,6 +123,7 @@ export default async function HomeMainContent() {
         initialNews={publicNews}
         initialCategories={categories}
       />
+      {renderNextTheme()}
       <BreakingSection
         initialNews={publicNews}
         initialCategories={categories}
@@ -117,6 +134,7 @@ export default async function HomeMainContent() {
         initialNews={publicNews}
         initialCategories={categories}
       />
+      {renderNextTheme()}
       <TextNewsSection
         initialNews={publicNews}
         initialCategories={categories}
@@ -125,6 +143,7 @@ export default async function HomeMainContent() {
         initialNews={statsNews}
         initialCategories={categories}
       />
+      {renderNextTheme()}
       <VideoNewsSection2
         initialNews={publicNews}
         initialCategories={categories}
@@ -139,6 +158,7 @@ export default async function HomeMainContent() {
         initialNews={publicNews}
         initialCategories={categories}
       />
+      {renderNextTheme()}
       <ColumnSection
         categorySlug={sixthCategorySlug}
         initialNews={publicNews}
@@ -149,7 +169,32 @@ export default async function HomeMainContent() {
         initialNews={publicNews}
         initialCategories={categories}
       />
-      {featuredThemes.map((theme: any) => (
+      {renderNextTheme()}
+      <RowSection
+        categorySlug={thirdCategorySlug}
+        initialNews={publicNews}
+        initialCategories={categories}
+      />
+      {renderNextTheme()}
+      <BannerSection
+        categorySlug={eighthCategorySlug}
+        featuredPosition="right"
+        initialNews={publicNews}
+        initialCategories={categories}
+      />
+      {renderNextTheme()}
+      <SlideNewsSection
+        categorySlug={ninthCategorySlug}
+        initialNews={publicNews}
+        initialCategories={categories}
+      />
+      {renderNextTheme()}
+      <ColumnSection
+        categorySlug={tenthCategorySlug}
+        initialNews={publicNews}
+        initialCategories={categories}
+      />
+      {featuredThemes.slice(themeCursor).map((theme: any) => (
         <ThemeSection
           key={theme._id}
           theme={theme}
@@ -158,27 +203,6 @@ export default async function HomeMainContent() {
           limit={8}
         />
       ))}
-      <RowSection
-        categorySlug={thirdCategorySlug}
-        initialNews={publicNews}
-        initialCategories={categories}
-      />
-      <BannerSection
-        categorySlug={eighthCategorySlug}
-        featuredPosition="right"
-        initialNews={publicNews}
-        initialCategories={categories}
-      />
-      <SlideNewsSection
-        categorySlug={ninthCategorySlug}
-        initialNews={publicNews}
-        initialCategories={categories}
-      />
-      <ColumnSection
-        categorySlug={tenthCategorySlug}
-        initialNews={publicNews}
-        initialCategories={categories}
-      />
     </>
   );
 }

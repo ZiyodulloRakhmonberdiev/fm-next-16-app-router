@@ -62,7 +62,7 @@ export default function VideoNewsSection() {
   }, [locale, publicNews])
 
   const handleOpenVideo = (item: NewsItem) => {
-    if (!item.videoSource || !item.videoUrl) return
+    if (!item.videoUrl) return
     setSelected(item)
     setIsOpen(true)
   }

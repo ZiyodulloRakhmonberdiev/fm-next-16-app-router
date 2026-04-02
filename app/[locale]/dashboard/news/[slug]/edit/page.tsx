@@ -8,11 +8,12 @@ import type { RawNewsItem } from '@/features/news/model'
 import type { LocaleMap } from '@/shared/common/lib/locale-types'
 import { EditNewsPageClient } from './_components/edit-news-page-client'
 import { normalizeRole } from '@/shared/common/lib/rbac'
+import { pickUserLocaleText } from '@/features/users/lib/user-locale'
 
 type Props = {
   params: Promise<{ slug: string }>
 }
-type UserRow = { _id: string; full_name: string; role: string }
+type UserRow = { _id: string; full_name: string | LocaleMap; role: string }
 
 function getFetchOptions(cookie: string | null): RequestInit {
   return {
@@ -65,7 +66,8 @@ export default async function EditNewsPage({ params }: Props) {
       .map((t) => t._id)
   }
   if (!initialData.authorId && initialData.author) {
-    initialData.authorId = usersData.find((u) => u.full_name === initialData.author)?._id ?? ''
+    initialData.authorId =
+      usersData.find((u) => pickUserLocaleText(u.full_name, locale) === initialData.author)?._id ?? ''
   }
 
   const categories = categoriesData.map((c) => ({
@@ -90,8 +92,8 @@ export default async function EditNewsPage({ params }: Props) {
       const role = normalizeRole(u.role)
       return role === 'ceo' || role === 'administrator' || role === 'moderator'
     })
-    .filter((u) => u.full_name?.trim())
-    .map((u) => ({ id: u._id, name: u.full_name }))
+    .map((u) => ({ id: u._id, name: pickUserLocaleText(u.full_name, locale) }))
+    .filter((u) => u.name.trim())
     .sort((a, b) => a.name.localeCompare(b.name))
   const existingSlugs = newsData.data.map((n) => n.slug).filter((s) => s !== slug)
 

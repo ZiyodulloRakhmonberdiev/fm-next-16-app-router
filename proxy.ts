@@ -8,7 +8,7 @@ const intlMiddleware = createMiddleware(routing);
 
 // In-memory rate limiter (Note: resets on server restart/cold start)
 const rateLimitMap = new Map<string, { count: number; lastReset: number }>();
-const LIMIT = 100; // requests
+const LIMIT = 2000; // requests
 const WINDOW = 60 * 1000; // 1 minute in ms
 
 export const config = {

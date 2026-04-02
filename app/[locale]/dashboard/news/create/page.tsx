@@ -6,9 +6,10 @@ import { getServerApiUrl } from '@/shared/common/lib/server-api-url'
 import type { RawNewsItem } from '@/features/news/model'
 import type { LocaleMap } from '@/shared/common/lib/locale-types'
 import { normalizeRole } from '@/shared/common/lib/rbac'
+import { pickUserLocaleText } from '@/features/users/lib/user-locale'
 
 type NamedSlug = { _id: string; slug: string; name: LocaleMap }
-type UserRow = { _id: string; full_name: string; role: string }
+type UserRow = { _id: string; full_name: string | LocaleMap; role: string }
 
 function getFetchOptions(cookie: string | null): RequestInit {
   return {
@@ -69,8 +70,8 @@ export default async function CreateNewsPage() {
       const role = normalizeRole(u.role)
       return role === "ceo" || role === "administrator" || role === "moderator"
     })
-    .filter((u) => u.full_name?.trim())
-    .map((u) => ({ id: u._id, name: u.full_name }))
+    .map((u) => ({ id: u._id, name: pickUserLocaleText(u.full_name, locale) }))
+    .filter((u) => u.name.trim())
     .sort((a, b) => a.name.localeCompare(b.name))
 
   return (

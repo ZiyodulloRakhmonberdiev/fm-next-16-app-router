@@ -89,7 +89,9 @@ export function TextContentRenderer({ content }: TextContentRendererProps) {
   const rendered = React.useMemo(() => {
     const lines = content.split(/\r?\n/)
     const elements: React.ReactNode[] = []
+    const skippedQuoteLines = new Set<number>()
     lines.forEach((line, i) => {
+      if (skippedQuoteLines.has(i)) return
       const keyBase = `line-${i}`
       const trimmed = line.trim()
 
@@ -123,6 +125,15 @@ export function TextContentRenderer({ content }: TextContentRendererProps) {
         return
       }
       if (trimmed.startsWith(">")) {
+        const quoteLines: string[] = [trimmed.replace(/^>\s?/, "")]
+        let j = i + 1
+        while (j < lines.length) {
+          const nextTrimmed = lines[j].trim()
+          if (!nextTrimmed.startsWith(">")) break
+          quoteLines.push(nextTrimmed.replace(/^>\s?/, ""))
+          skippedQuoteLines.add(j)
+          j += 1
+        }
         elements.push(
           <div key={keyBase} className="my-3 rounded-md bg-brand/10 dark:bg-card p-4">
             <div className="relative">
@@ -130,7 +141,11 @@ export function TextContentRenderer({ content }: TextContentRendererProps) {
                 <BiSolidQuoteAltLeft className="size-7 text-brand/10 dark:text-muted-foreground/20" />
               </span>
               <blockquote className="italic text-foreground/90 pt-2">
-                {renderInline(trimmed.replace(/^>\s?/, ""), keyBase)}
+                {quoteLines.map((qLine, qIdx) => (
+                  <p key={`${keyBase}-q-${qIdx}`} className={qIdx === 0 ? "m-0" : "m-0 mt-1"}>
+                    {renderInline(qLine, `${keyBase}-q-${qIdx}`)}
+                  </p>
+                ))}
               </blockquote>
             </div>
           </div>

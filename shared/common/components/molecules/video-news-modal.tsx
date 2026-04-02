@@ -49,7 +49,7 @@ export default function VideoNewsModal({ item, open, onOpenChange }: VideoNewsMo
     locale,
     item?.category
   )
-  const hasVideo = !!(item && item.videoSource && item.videoUrl)
+  const hasVideo = !!(item && item.videoUrl)
 
   return (
     <Dialog

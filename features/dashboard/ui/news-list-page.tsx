@@ -1,7 +1,7 @@
 'use client'
 /* eslint-disable react/no-unescaped-entities */
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Link } from '@/i18n/navigation'
 import Image from 'next/image'
@@ -41,6 +41,14 @@ import {
   TableRow,
 } from '@/shared/common/components/ui/table'
 import { PaginationControl } from '@/shared/common/components/ui/pagination-control'
+import { Switch } from '@/shared/common/components/ui/switch'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/shared/common/components/ui/select'
 import { formatDateTimeLocale } from '@/shared/common/lib/formatter'
 import { cn } from '@/shared/common/lib/utils'
 import type { AppLocale } from '@/shared/common/lib/locale-api'
@@ -53,14 +61,12 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useSession } from 'next-auth/react'
 import { normalizeRole } from '@/shared/common/lib/rbac'
 import {
-  Newspaper, PlusCircle, Eye, Search, ChevronDown,
+  Newspaper, PlusCircle, Eye, Search, ChevronDown, SlidersHorizontal,
   ExternalLink, Pencil, Columns3, Languages,
   Check, CircleOff, Clock, Send, Ban, Trash2, Archive,
 } from 'lucide-react'
 import { NewsListSummaryCards } from './_components/news-list-summary-cards'
 import { NewsListFilterPanel } from './_components/news-list-filter-panel'
-
-const PER_PAGE = 50
 
 const STATUS_OPTIONS: { value: '' | NewsStatus; label: string }[] = [
   { value: '', label: 'Barcha statuslar' },
@@ -95,12 +101,19 @@ const AD_OPTIONS: { value: '' | 'yes' | 'no'; label: string }[] = [
   { value: 'no', label: "Reklama emas (Yo'q)" },
 ]
 
+const STATS_OPTIONS: { value: '' | 'yes' | 'no'; label: string }[] = [
+  { value: '', label: 'Barchasi' },
+  { value: 'yes', label: 'Maqola (Ha)' },
+  { value: 'no', label: "Maqola emas (Yo'q)" },
+]
+
 const COLUMN_KEYS = [
-  'rasm', 'sarlavha', 'kategoriya', 'status', 'tur', 'top',
+  'tezkorAmallar', 'rasm', 'sarlavha', 'kategoriya', 'status', 'tur', 'top',
   'createdBy', 'publishedAt', 'views', 'telegram', 'tarjimalar', 'amallar',
 ] as const
 
 const COLUMN_LABELS: Record<(typeof COLUMN_KEYS)[number], string> = {
+  tezkorAmallar: "Tezkor amallar",
   rasm: 'Rasm', sarlavha: 'Sarlavha', kategoriya: 'Kategoriya',
   status: 'Status', tur: 'Tur', top: 'Top', createdBy: 'Yaratgan',
   publishedAt: 'publishedAt',
@@ -238,12 +251,46 @@ export function DashboardNewsListPage({
     }
     return out
   }, [rawNews])
+  const searchIndexBySlug = useMemo<Record<string, string>>(() => {
+    const out: Record<string, string> = {}
+    for (const raw of rawNews as RawNewsItem[]) {
+      const titleParts = LOCALES.map((loc) => raw.title?.[loc] ?? '')
+      const descParts = LOCALES.map((loc) => raw.description?.[loc] ?? '')
+      out[raw.slug] = [
+        raw.slug,
+        raw.categorySlug ?? '',
+        raw.author ?? '',
+        raw.createdBy?.name ?? '',
+        ...titleParts,
+        ...descParts,
+      ]
+        .join(' ')
+        .toLowerCase()
+    }
+    return out
+  }, [rawNews])
+  const authorOptions = useMemo(() => {
+    const seen = new Map<string, string>()
+    for (const raw of rawNews as RawNewsItem[]) {
+      const id = raw.authorId?.trim() || ''
+      const name = (raw.author ?? '').trim()
+      if (!name) continue
+      const key = id || `author:${name.toLowerCase()}`
+      if (!seen.has(key)) seen.set(key, name)
+    }
+    return Array.from(seen.entries())
+      .map(([value, label]) => ({ value, label }))
+      .sort((a, b) => a.label.localeCompare(b.label))
+  }, [rawNews])
 
   const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(50)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<'' | NewsStatus>(initialStatus)
+  const [authorFilter, setAuthorFilter] = useState('')
   const [isTopFilter, setIsTopFilter] = useState<'' | 'yes' | 'no'>('')
   const [adFilter, setAdFilter] = useState<'' | 'yes' | 'no'>('')
+  const [statsFilter, setStatsFilter] = useState<'' | 'yes' | 'no'>('')
   const [typeFilter, setTypeFilter] = useState<'' | 'video' | 'image' | 'text' | 'audio'>('')
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
@@ -253,6 +300,17 @@ export function DashboardNewsListPage({
   const [translationsModalSlug, setTranslationsModalSlug] = useState<string | null>(null)
   const [permanentDeleteSlug, setPermanentDeleteSlug] = useState<string | null>(null)
   const [permanentDeleting, setPermanentDeleting] = useState(false)
+  const [quickEditSlug, setQuickEditSlug] = useState<string | null>(null)
+  const [quickEditStatus, setQuickEditStatus] = useState<NewsStatus>('pending')
+  const [quickEditFlags, setQuickEditFlags] = useState({
+    isTop: false,
+    authorsChoice: false,
+    isBreaking: false,
+    ad: false,
+    stats: false,
+    pushedToTelegram: false,
+  })
+  const [quickEditSaving, setQuickEditSaving] = useState(false)
 
   const countsByStatus = useMemo(() => {
     const base: Record<NewsStatus, number> = {
@@ -270,18 +328,24 @@ export function DashboardNewsListPage({
     const q = search.trim().toLowerCase()
     if (q) {
       list = list.filter(
-        (item) =>
-          item.title.toLowerCase().includes(q) ||
-          item.category.toLowerCase().includes(q) ||
-          item.author.toLowerCase().includes(q) ||
-          (item.createdBy?.name?.toLowerCase().includes(q) ?? false)
+        (item) => (searchIndexBySlug[item.slug] ?? '').includes(q)
       )
     }
     if (statusFilter) list = list.filter((item) => (item.status ?? 'published') === statusFilter)
+    if (authorFilter) {
+      list = list.filter((item) => {
+        const raw = (rawNews as RawNewsItem[]).find((x) => x.slug === item.slug)
+        if (!raw) return false
+        const key = raw.authorId?.trim() || `author:${(raw.author ?? '').trim().toLowerCase()}`
+        return key === authorFilter
+      })
+    }
     if (isTopFilter === 'yes') list = list.filter((item) => item.isTop === true)
     if (isTopFilter === 'no') list = list.filter((item) => item.isTop !== true)
     if (adFilter === 'yes') list = list.filter((item) => item.ad === true)
     if (adFilter === 'no') list = list.filter((item) => item.ad !== true)
+    if (statsFilter === 'yes') list = list.filter((item) => item.stats === true)
+    if (statsFilter === 'no') list = list.filter((item) => item.stats !== true)
     if (typeFilter) list = list.filter((item) => (item.type ?? '') === typeFilter)
     if (dateFrom) {
       const from = new Date(dateFrom)
@@ -294,11 +358,11 @@ export function DashboardNewsListPage({
       list = list.filter((item) => new Date(item.publishedAt) <= to)
     }
     return list
-  }, [news, search, statusFilter, isTopFilter, adFilter, typeFilter, dateFrom, dateTo])
+  }, [news, search, searchIndexBySlug, statusFilter, authorFilter, isTopFilter, adFilter, statsFilter, typeFilter, dateFrom, dateTo, rawNews])
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE))
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize))
   const currentPage = Math.min(page, totalPages)
-  const slice = filtered.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE)
+  const slice = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize)
 
   const getImageSrc = (raw?: string) => {
     if (!raw) return ''
@@ -317,13 +381,19 @@ export function DashboardNewsListPage({
   const clearFilters = () => {
     setSearch('')
     setStatusFilter('')
+    setAuthorFilter('')
     setIsTopFilter('')
     setAdFilter('')
+    setStatsFilter('')
     setTypeFilter('')
     setDateFrom('')
     setDateTo('')
     setPage(1)
   }
+
+  useEffect(() => {
+    setPage(1)
+  }, [pageSize, search, statusFilter, authorFilter, isTopFilter, adFilter, statsFilter, typeFilter, dateFrom, dateTo])
 
   const itemPendingPermanentDelete = permanentDeleteSlug
     ? news.find((n) => n.slug === permanentDeleteSlug)
@@ -349,6 +419,52 @@ export function DashboardNewsListPage({
       await queryClient.invalidateQueries({ queryKey: ['admin', 'news'] })
     } finally {
       setPermanentDeleting(false)
+    }
+  }
+
+  const openQuickEdit = (slug: string) => {
+    const raw = (rawNews as RawNewsItem[]).find((x) => x.slug === slug)
+    if (!raw) return
+    setQuickEditSlug(slug)
+    setQuickEditStatus((raw.status ?? 'published') as NewsStatus)
+    setQuickEditFlags({
+      isTop: Boolean(raw.isTop),
+      authorsChoice: Boolean(raw.authorsChoice),
+      isBreaking: Boolean(raw.isBreaking),
+      ad: Boolean(raw.ad),
+      stats: Boolean(raw.stats),
+      pushedToTelegram: Boolean(raw.pushedToTelegram),
+    })
+  }
+
+  const handleSaveQuickEdit = async () => {
+    if (!quickEditSlug) return
+    const id = idBySlug.get(quickEditSlug)
+    if (!id) {
+      toast.error("Yangilik ID topilmadi — sahifani yangilang")
+      return
+    }
+    setQuickEditSaving(true)
+    try {
+      const res = await fetch(`/api/news/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          status: quickEditStatus,
+          ...quickEditFlags,
+        }),
+      })
+      const j = (await res.json().catch(() => ({}))) as { error?: string }
+      if (!res.ok) {
+        toast.error(j.error ?? 'Saqlashda xatolik')
+        return
+      }
+      toast.success("Tezkor amallar saqlandi")
+      setQuickEditSlug(null)
+      await queryClient.invalidateQueries({ queryKey: ['admin', 'news'] })
+    } finally {
+      setQuickEditSaving(false)
     }
   }
 
@@ -394,12 +510,15 @@ export function DashboardNewsListPage({
 
           <NewsListFilterPanel
             statusFilter={statusFilter}
+            authorFilter={authorFilter}
             isTopFilter={isTopFilter}
             adFilter={adFilter}
+            statsFilter={statsFilter}
             typeFilter={typeFilter}
             dateFrom={dateFrom}
             dateTo={dateTo}
             onStatusChange={setStatusFilter}
+            onAuthorChange={setAuthorFilter}
             onTopChange={setIsTopFilter}
             onAdChange={setAdFilter}
             onTypeChange={setTypeFilter}
@@ -409,10 +528,19 @@ export function DashboardNewsListPage({
             renderSelect={({ kind }) =>
               kind === 'status' ? (
                 <FilterSelect label="Status" value={statusFilter} options={STATUS_OPTIONS} onSelect={setStatusFilter} />
+              ) : kind === 'author' ? (
+                <FilterSelect
+                  label="Muallif"
+                  value={authorFilter}
+                  options={[{ value: '', label: 'Barcha mualliflar' }, ...authorOptions]}
+                  onSelect={setAuthorFilter}
+                />
               ) : kind === 'top' ? (
                 <FilterSelect label="Top" value={isTopFilter} options={TOP_OPTIONS} onSelect={setIsTopFilter} />
               ) : kind === 'ad' ? (
                 <FilterSelect label="Reklama" value={adFilter} options={AD_OPTIONS} onSelect={setAdFilter} />
+              ) : kind === 'stats' ? (
+                <FilterSelect label="Maqola" value={statsFilter} options={STATS_OPTIONS} onSelect={setStatsFilter} />
               ) : (
                 <FilterSelect label="Turi" value={typeFilter} options={TYPE_OPTIONS_FULL} onSelect={setTypeFilter} />
               )
@@ -427,7 +555,20 @@ export function DashboardNewsListPage({
             <CardTitle className="text-base">Barcha yangiliklar ({filtered.length})</CardTitle>
             <div className="relative w-full sm:w-auto sm:min-w-[400px]">
               <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input type="search" placeholder="Sarlavha, tavsif..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+              <Input type="search" placeholder="Sarlavha/tavsif (barcha tillarda)..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+            </div>
+            <div className="w-full sm:w-auto sm:min-w-[130px]">
+              <Select value={String(pageSize)} onValueChange={(v) => setPageSize(Number(v))}>
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="Sahifada soni" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10">10 ta</SelectItem>
+                  <SelectItem value="25">25 ta</SelectItem>
+                  <SelectItem value="50">50 ta</SelectItem>
+                  <SelectItem value="100">100 ta</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -467,6 +608,7 @@ export function DashboardNewsListPage({
                 <Table className="min-w-max">
                   <TableHeader>
                     <TableRow>
+                      {columnVisibility.tezkorAmallar !== false && <TableHead className="w-[92px]">{COLUMN_LABELS.tezkorAmallar}</TableHead>}
                       {columnVisibility.rasm !== false && <TableHead>{COLUMN_LABELS.rasm}</TableHead>}
                       {columnVisibility.sarlavha !== false && <TableHead className="min-w-[200px]">{COLUMN_LABELS.sarlavha}</TableHead>}
                       {columnVisibility.kategoriya !== false && <TableHead>{COLUMN_LABELS.kategoriya}</TableHead>}
@@ -487,6 +629,19 @@ export function DashboardNewsListPage({
                       const thumbSrc = getImageSrc(firstImage)
                       return (
                     <TableRow key={item.slug}>
+                        {columnVisibility.tezkorAmallar !== false && (
+                          <TableCell>
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              size="sm"
+                              onClick={() => openQuickEdit(item.slug)}
+                              title="Tezkor amallar"
+                            >
+                              <SlidersHorizontal className="size-4" />
+                            </Button>
+                          </TableCell>
+                        )}
                         {columnVisibility.rasm !== false && (
                           <TableCell>
                             <div className="relative h-12 w-16 overflow-hidden rounded bg-muted">
@@ -635,6 +790,68 @@ export function DashboardNewsListPage({
               onClick={() => void handlePermanentDelete()}
             >
               Butunlay o‘chirish
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!quickEditSlug} onOpenChange={(open) => !open && setQuickEditSlug(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Tezkor amallar</DialogTitle>
+            <DialogDescription>
+              Boolean maydonlar va statusni sahifaga kirmasdan yangilang.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 pt-1">
+            <div className="space-y-2">
+              <Label>Status</Label>
+              <Select value={quickEditStatus} onValueChange={(v) => setQuickEditStatus(v as NewsStatus)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pending">Kutilmoqda</SelectItem>
+                  <SelectItem value="published">Nashr qilingan</SelectItem>
+                  <SelectItem value="cancelled">Bekor qilingan</SelectItem>
+                  <SelectItem value="archived">Arxivlangan</SelectItem>
+                  <SelectItem value="deleted">O'chirilgan</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between rounded-md border p-3">
+                <Label htmlFor="quick-isTop">Top ro'yxatda</Label>
+                <Switch id="quick-isTop" checked={quickEditFlags.isTop} onCheckedChange={(checked) => setQuickEditFlags((prev) => ({ ...prev, isTop: checked }))} />
+              </div>
+              <div className="flex items-center justify-between rounded-md border p-3">
+                <Label htmlFor="quick-authorsChoice">Muallif tanlovi</Label>
+                <Switch id="quick-authorsChoice" checked={quickEditFlags.authorsChoice} onCheckedChange={(checked) => setQuickEditFlags((prev) => ({ ...prev, authorsChoice: checked }))} />
+              </div>
+              <div className="flex items-center justify-between rounded-md border p-3">
+                <Label htmlFor="quick-isBreaking">Dolzarb (breaking)</Label>
+                <Switch id="quick-isBreaking" checked={quickEditFlags.isBreaking} onCheckedChange={(checked) => setQuickEditFlags((prev) => ({ ...prev, isBreaking: checked }))} />
+              </div>
+              <div className="flex items-center justify-between rounded-md border p-3">
+                <Label htmlFor="quick-ad">Reklama</Label>
+                <Switch id="quick-ad" checked={quickEditFlags.ad} onCheckedChange={(checked) => setQuickEditFlags((prev) => ({ ...prev, ad: checked }))} />
+              </div>
+              <div className="flex items-center justify-between rounded-md border p-3">
+                <Label htmlFor="quick-stats">Maqolalar bo'limi (stats)</Label>
+                <Switch id="quick-stats" checked={quickEditFlags.stats} onCheckedChange={(checked) => setQuickEditFlags((prev) => ({ ...prev, stats: checked }))} />
+              </div>
+              <div className="flex items-center justify-between rounded-md border p-3">
+                <Label htmlFor="quick-pushedToTelegram">Telegramga yuborish</Label>
+                <Switch id="quick-pushedToTelegram" checked={quickEditFlags.pushedToTelegram} onCheckedChange={(checked) => setQuickEditFlags((prev) => ({ ...prev, pushedToTelegram: checked }))} />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setQuickEditSlug(null)}>
+              Bekor qilish
+            </Button>
+            <Button type="button" onClick={() => void handleSaveQuickEdit()} disabled={quickEditSaving}>
+              Saqlash
             </Button>
           </DialogFooter>
         </DialogContent>

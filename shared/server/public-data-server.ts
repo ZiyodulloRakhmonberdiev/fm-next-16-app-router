@@ -6,6 +6,7 @@ import { ThemeModel } from "@/features/theme/model/theme.model"
 import { TagModel } from "@/features/tags/model/tag.model"
 import { AdModel } from "@/features/ads/model/ads.model"
 import { UserModel } from "@/features/users/model/user.model"
+import { pickUserLocaleText } from "@/features/users/lib/user-locale"
 
 /**
  * Bu funksiyalar faqat SERVER COMPONENTLAR ichida chaqiriladi.
@@ -29,7 +30,7 @@ export const getCachedPublicNews = unstable_cache(
       const users = await UserModel.find({ _id: { $in: authorIds } })
         .select({ _id: 1, full_name: 1 })
         .lean()
-      for (const user of users) authorNameById.set(user._id, user.full_name)
+      for (const user of users) authorNameById.set(user._id, pickUserLocaleText(user.full_name, "uz"))
     }
     const normalizedNews = news.map((item) => ({
       ...item,
@@ -59,7 +60,7 @@ export const getCachedPublicAdNews = unstable_cache(
       const users = await UserModel.find({ _id: { $in: authorIds } })
         .select({ _id: 1, full_name: 1 })
         .lean()
-      for (const user of users) authorNameById.set(user._id, user.full_name)
+      for (const user of users) authorNameById.set(user._id, pickUserLocaleText(user.full_name, "uz"))
     }
     const normalizedNews = news.map((item) => ({
       ...item,
@@ -88,7 +89,7 @@ export const getCachedPublicStatsNews = unstable_cache(
       const users = await UserModel.find({ _id: { $in: authorIds } })
         .select({ _id: 1, full_name: 1 })
         .lean()
-      for (const user of users) authorNameById.set(user._id, user.full_name)
+      for (const user of users) authorNameById.set(user._id, pickUserLocaleText(user.full_name, "uz"))
     }
     const normalizedNews = news.map((item) => ({
       ...item,

@@ -5,6 +5,7 @@ import { compare } from "bcryptjs"
 import { dbConnect } from "@/shared/common/lib/db"
 import { UserModel } from "@/features/users/model/user.model"
 import { normalizeRole } from "@/shared/common/lib/rbac"
+import { pickUserLocaleText } from "@/features/users/lib/user-locale"
 
 export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
@@ -42,7 +43,7 @@ export const authOptions: NextAuthOptions = {
 
         return {
           id: user._id,
-          name: user.full_name,
+          name: pickUserLocaleText(user.full_name, "uz"),
           login: user.login,
           role: user.role,
         }

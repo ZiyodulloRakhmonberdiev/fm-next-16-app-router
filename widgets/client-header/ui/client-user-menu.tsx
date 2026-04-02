@@ -30,14 +30,19 @@ import {
 } from "@/features/auth/ui/auth-modal"
 import { cn } from "@/shared/common/lib/utils"
 import { useTranslations } from "next-intl"
+import { useLocale } from "next-intl"
 import { resizeImageToSquareJpeg } from "@/features/user/lib/resize-profile-avatar"
 import { getDefaultDashboardPath, normalizeRole } from "@/shared/common/lib/rbac"
 import { LayoutGrid } from "lucide-react"
+import type { LocaleMap } from "@/shared/common/lib/locale-types"
+import type { AppLocale } from "@/shared/common/lib/locale-api"
+import { pickUserLocaleText } from "@/features/users/lib/user-locale"
 
 const AVATAR_SIZE = 100
 
 export function ClientUserMenu() {
   const { data: session } = useSession()
+  const locale = useLocale() as AppLocale
   const t = useTranslations("auth")
   const tc = useTranslations("common")
   const role = normalizeRole(session?.user?.role)
@@ -63,8 +68,8 @@ export function ClientUserMenu() {
     void (async () => {
       const res = await fetch("/api/me", { cache: "no-store" })
       if (res.ok) {
-        const me = (await res.json()) as { full_name?: string; image?: string | null }
-        setFullName(me.full_name ?? "")
+        const me = (await res.json()) as { full_name?: string | LocaleMap; image?: string | null }
+        setFullName(pickUserLocaleText(me.full_name, locale))
         setImage(typeof me.image === "string" ? me.image : "")
       }
       setProfileLoading(false)

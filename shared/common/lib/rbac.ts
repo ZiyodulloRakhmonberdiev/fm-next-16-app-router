@@ -47,7 +47,9 @@ export function canAccessDashboardPath(role: string | null | undefined, path: st
       path === "/dashboard/comments" ||
       path.startsWith("/dashboard/comments/") ||
       path === "/dashboard/reactions" ||
-      path.startsWith("/dashboard/reactions/")
+      path.startsWith("/dashboard/reactions/") ||
+      path === "/dashboard/authors" ||
+      path.startsWith("/dashboard/authors/")
     )
   }
 

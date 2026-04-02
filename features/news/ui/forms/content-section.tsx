@@ -29,6 +29,7 @@ import {
 import type { AppLocale } from "@/shared/common/lib/locale-api"
 import { toast } from "sonner"
 import { uploadFileViaPresignedUrl } from "@/shared/infra/cloudinary-client-upload"
+import { BiSolidQuoteAltLeft } from "react-icons/bi"
 
 type LocalMedia = {
   id: string
@@ -152,6 +153,17 @@ export function ContentForm({
 
     const start = textarea.selectionStart ?? 0
     const end = textarea.selectionEnd ?? 0
+    if (start === end) {
+      const lineStart = content.lastIndexOf("\n", Math.max(0, start - 1)) + 1
+      const next = content.slice(0, lineStart) + prefixFactory(0) + content.slice(lineStart)
+      onChange(next)
+      requestAnimationFrame(() => {
+        const pos = start + prefixFactory(0).length
+        textarea.focus()
+        textarea.setSelectionRange(pos, pos)
+      })
+      return
+    }
     const beforeSelection = content.slice(0, start)
     const selected = content.slice(start, end)
     const afterSelection = content.slice(end)
@@ -165,6 +177,35 @@ export function ContentForm({
 
     const next = `${beforeSelection}${nextSelected}${afterSelection}`
     onChange(next)
+    requestAnimationFrame(() => {
+      textarea.focus()
+      textarea.setSelectionRange(start, start + nextSelected.length)
+    })
+  }
+
+  const applyHeadingAtCursor = (prefix: string) => {
+    const textarea = textareaRef.current
+    if (!textarea) return
+    const start = textarea.selectionStart ?? 0
+    const end = textarea.selectionEnd ?? 0
+    const lineStart = content.lastIndexOf("\n", Math.max(0, start - 1)) + 1
+
+    if (start !== end) {
+      applyPrefixToSelectionLines(() => prefix)
+      return
+    }
+
+    const next = content.slice(0, lineStart) + prefix + content.slice(lineStart)
+    onChange(next)
+    requestAnimationFrame(() => {
+      const pos = start + prefix.length
+      textarea.focus()
+      textarea.setSelectionRange(pos, pos)
+    })
+  }
+
+  const applyQuoteAtCursor = () => {
+    applyPrefixToSelectionLines(() => "> ")
   }
 
   const handleAddImageUrl = () => {
@@ -289,6 +330,7 @@ export function ContentForm({
 
   const renderedPreview = useMemo(() => {
     const lines = content.split(/\r?\n/)
+    const skippedQuoteLines = new Set<number>()
 
     const renderInline = (text: string, keyBase: string) => {
       const partsWithLinks: React.ReactNode[] = []
@@ -377,6 +419,7 @@ export function ContentForm({
     const elements: React.ReactNode[] = []
 
     lines.forEach((line, i) => {
+      if (skippedQuoteLines.has(i)) return
       const keyBase = `line-${i}`
       const trimmed = line.trim()
 
@@ -413,14 +456,27 @@ export function ContentForm({
       }
 
       if (trimmed.startsWith(">")) {
+        const quoteLines: string[] = [trimmed.replace(/^>\s?/, "")]
+        let j = i + 1
+        while (j < lines.length) {
+          const nextTrimmed = lines[j].trim()
+          if (!nextTrimmed.startsWith(">")) break
+          quoteLines.push(nextTrimmed.replace(/^>\s?/, ""))
+          skippedQuoteLines.add(j)
+          j += 1
+        }
         elements.push(
-          <div key={keyBase} className="my-3 rounded-md bg-rose-50 p-4">
+          <div key={keyBase} className="my-3 rounded-md bg-brand/20 text-brand p-4">
             <div className="relative">
-              <span className="absolute -left-1 -top-5 text-4xl leading-none text-rose-300">
-                &ldquo;
+              <span className="absolute -left-3 -top-4 text-4xl leading-none text-  e-300">
+                <BiSolidQuoteAltLeft className="size-7 text-brand/10 dark:text-muted-foreground/20" />
               </span>
-              <blockquote className="pl-5 italic text-foreground/90">
-                {renderInline(trimmed.replace(/^>\s?/, ""), keyBase)}
+              <blockquote className="italic text-foreground/90 pt-2">
+                {quoteLines.map((qLine, qIdx) => (
+                  <p key={`${keyBase}-q-${qIdx}`} className={qIdx === 0 ? "m-0" : "m-0 mt-1"}>
+                    {renderInline(qLine, `${keyBase}-q-${qIdx}`)}
+                  </p>
+                ))}
               </blockquote>
             </div>
           </div>
@@ -676,7 +732,7 @@ export function ContentForm({
 
   return (
     <div className="space-y-4 bg-background w-full overflow-hidden rounded-lg border p-4">
-      <div className="flex flex-wrap items-center gap-2 border-b pb-2 text-sm">
+      <div className="sticky top-14 z-20 -mx-4 flex flex-wrap items-center gap-2 border-b bg-background px-4 pb-2 pt-1 text-sm">
         <span className="font-medium text-muted-foreground">Matn tahrirlash</span>
         <div className="ml-auto flex flex-wrap gap-1">
           <button
@@ -685,7 +741,7 @@ export function ContentForm({
             className="inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted"
           >
             <BoldIcon className="size-3.5" />
-            Bold
+            Qalin
           </button>
           <button
             type="button"
@@ -693,7 +749,7 @@ export function ContentForm({
             className="inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted"
           >
             <ItalicIcon className="size-3.5" />
-            Italik
+            Kursiv
           </button>
           <button
             type="button"
@@ -701,25 +757,25 @@ export function ContentForm({
             className="inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted"
           >
             <span className="text-xs font-semibold underline">U</span>
-            Underline
+            Pastki chiziq
           </button>
           <button
             type="button"
-            onClick={() => updateContent((prev) => `# ${prev}`)}
+            onClick={() => applyHeadingAtCursor("# ")}
             className="inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted"
           >
             <span className="text-xs font-semibold">H1</span>
           </button>
           <button
             type="button"
-            onClick={() => updateContent((prev) => `## ${prev}`)}
+            onClick={() => applyHeadingAtCursor("## ")}
             className="inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted"
           >
             <span className="text-xs font-semibold">H2</span>
           </button>
           <button
             type="button"
-            onClick={() => updateContent((prev) => `### ${prev}`)}
+            onClick={() => applyHeadingAtCursor("### ")}
             className="inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted"
           >
             <span className="text-xs font-semibold">H3</span>
@@ -730,15 +786,15 @@ export function ContentForm({
             className="inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted"
           >
             <LinkIcon className="size-3.5" />
-            Link
+            Havola
           </button>
           <button
             type="button"
-            onClick={() => updateContent((prev) => `${prev}\n> Quote matn...\n`)}
+            onClick={applyQuoteAtCursor}
             className="inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted"
           >
             <QuoteIcon className="size-3.5" />
-            Quote
+            Qo'shtirnoq
           </button>
           <button
             type="button"
@@ -746,7 +802,7 @@ export function ContentForm({
             className="inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted"
           >
             <ListIcon className="size-3.5" />
-            Bullet
+            Nuqta
           </button>
           <button
             type="button"
@@ -754,7 +810,7 @@ export function ContentForm({
             className="inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted"
           >
             <ListOrderedIcon className="size-3.5" />
-            Number
+            Raqam
           </button>
           <button
             type="button"
@@ -1084,13 +1140,55 @@ export function ContentForm({
             ref={textareaRef}
             value={content}
             onChange={(e) => onChange(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key !== "Enter" || e.shiftKey || e.ctrlKey || e.metaKey || e.altKey) return
+              const textarea = e.currentTarget
+              const start = textarea.selectionStart ?? 0
+              const end = textarea.selectionEnd ?? 0
+              if (start !== end) return
+
+              const lineStart = content.lastIndexOf("\n", Math.max(0, start - 1)) + 1
+              const rawLineEnd = content.indexOf("\n", start)
+              const lineEnd = rawLineEnd === -1 ? content.length : rawLineEnd
+              const currentLine = content.slice(lineStart, lineEnd)
+              const quotePrefixMatch = currentLine.match(/^(\s*>\s?)/)
+              if (!quotePrefixMatch) return
+
+              e.preventDefault()
+              const isEmptyQuoteLine = /^\s*>\s*$/.test(currentLine)
+              if (isEmptyQuoteLine) {
+                const lineEndWithBreak = rawLineEnd === -1 ? lineEnd : rawLineEnd + 1
+                const replacement = lineStart === 0 ? "" : "\n"
+                const next =
+                  content.slice(0, lineStart) +
+                  replacement +
+                  content.slice(lineEndWithBreak)
+                onChange(next)
+                requestAnimationFrame(() => {
+                  const pos = lineStart + replacement.length
+                  textarea.focus()
+                  textarea.setSelectionRange(pos, pos)
+                })
+                return
+              }
+
+              const prefix = quotePrefixMatch[1]
+              const insert = `\n${prefix}`
+              const next = content.slice(0, start) + insert + content.slice(end)
+              onChange(next)
+              requestAnimationFrame(() => {
+                const pos = start + insert.length
+                textarea.focus()
+                textarea.setSelectionRange(pos, pos)
+              })
+            }}
             onPaste={(e) => {
               e.preventDefault()
               const pastedText = e.clipboardData.getData("text")
               insertAtCursor(normalizeBlankLines(pastedText))
             }}
             placeholder={placeholder}
-            className="min-h-64 w-full resize-vertical rounded-md border bg-background px-3 py-2 text-sm  outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40"
+            className="min-h-64 h-full w-full resize-vertical rounded-md border bg-background px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40 text-[16px]"
           />
           <Button
             type="button"

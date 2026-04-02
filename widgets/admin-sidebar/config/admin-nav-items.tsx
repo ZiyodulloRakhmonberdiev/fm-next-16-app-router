@@ -30,6 +30,7 @@ const NAV_ICONS: Record<AdminNavIconKey, LucideIcon> = {
   Tag,
   Users,
   UserSquare,
+  UserCircle,
   MessageSquare,
   Heart,
   Megaphone,

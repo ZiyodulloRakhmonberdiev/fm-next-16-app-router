@@ -7,6 +7,7 @@ export type AdminNavIconKey =
   | 'Tag'
   | 'Users'
   | 'UserSquare'
+  | 'UserCircle'
   | 'MessageSquare'
   | 'Heart'
   | 'Megaphone'
@@ -86,6 +87,12 @@ export const adminMainNavMeta: AdminMainNavMeta[] = [
     label: 'Foydalanuvchilar',
     roles: ['ceo', 'administrator'],
     iconKey: 'Users',
+  },
+  {
+    href: '/dashboard/authors',
+    label: 'Mualliflar',
+    roles: ['ceo', 'administrator', 'moderator'],
+    iconKey: 'UserCircle',
   },
   {
     href: '/dashboard/team',

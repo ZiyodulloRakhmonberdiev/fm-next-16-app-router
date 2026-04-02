@@ -19,6 +19,7 @@ export type RawNewsItem = {
   images: string[]
   authorId?: string
   author: string
+  authorImage?: string | null
   minutes: number
   views: number
   publishedAt: Date
@@ -74,6 +75,7 @@ export type NewsItem = {
   views: number
   authorId?: string
   author: string
+  authorImage?: string | null
   status?: NewsStatus
   isTop?: boolean
   type?: string
@@ -103,6 +105,28 @@ export type NewsItem = {
   reactionCount?: number
 }
 
+function isNewsContentValue(value: unknown): value is NewsContent {
+  return typeof value === "string" || Array.isArray(value)
+}
+
+function resolveLocalizedContent(
+  content: RawNewsItem["content"] | NewsContent | undefined,
+  locale: AppLocale
+): NewsContent | undefined {
+  // Backward compatibility: old documents may store content as plain string/array
+  if (isNewsContentValue(content)) return content
+  if (!content || typeof content !== "object") return undefined
+
+  const localized = (content as Record<string, unknown>)[locale]
+  if (isNewsContentValue(localized)) return localized
+
+  for (const loc of LOCALES) {
+    const next = (content as Record<string, unknown>)[loc]
+    if (isNewsContentValue(next)) return next
+  }
+  return undefined
+}
+
 export function pickNewsForLocale(
   raw: RawNewsItem,
   locale: AppLocale
@@ -121,7 +145,7 @@ export function pickNewsForLocale(
       ? localizedDescription
       : fallbackDescription
 
-  const content = raw.content?.[locale]
+  const content = resolveLocalizedContent(raw.content, locale)
 
   return {
     slug: raw.slug,
@@ -142,6 +166,7 @@ export function pickNewsForLocale(
     views: raw.views,
     authorId: raw.authorId,
     author: raw.author,
+    authorImage: raw.authorImage,
     status: raw.status ?? "published",
     isTop: raw.isTop ?? false,
     type: raw.type,

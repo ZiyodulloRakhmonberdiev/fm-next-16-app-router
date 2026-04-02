@@ -30,6 +30,8 @@ import { toast } from 'sonner'
 import { normalizeRole } from '@/shared/common/lib/rbac'
 import { ThemeSwitcherForHeader } from '@/widgets/theme-switcher'
 import { resizeImageToSquareJpeg } from '@/features/user/lib/resize-profile-avatar'
+import { getLocaleValue, type LocaleMap } from '@/shared/common/lib/locale-types'
+import type { AppLocale } from '@/shared/common/lib/locale-api'
 
 function canOpenDashboardMenuHub(role: ReturnType<typeof normalizeRole>): boolean {
   return role === 'ceo' || role === 'administrator'
@@ -39,7 +41,7 @@ const DEBOUNCE_MS = 200
 const AVATAR_SIZE = 100
 
 type MePayload = {
-  full_name?: string
+  full_name?: string | LocaleMap
   position?: string
   image?: string | null
   login?: string
@@ -155,7 +157,13 @@ export default function AdminHeader() {
     const res = await fetch('/api/me', { cache: 'no-store' })
     if (res.ok) {
       const data = (await res.json()) as MePayload
-      setFullName(data.full_name ?? '')
+      const localizedFullName =
+        typeof data.full_name === 'string'
+          ? data.full_name
+          : data.full_name
+            ? getLocaleValue(data.full_name, locale as AppLocale) ?? ''
+            : ''
+      setFullName(localizedFullName)
       setPosition(data.position ?? '')
       setImage(typeof data.image === 'string' ? data.image : '')
     }
@@ -213,8 +221,15 @@ export default function AdminHeader() {
     if (refresh.ok) setMe((await refresh.json()) as MePayload)
   }
 
+  const meDisplayNameRaw =
+    typeof me?.full_name === 'string'
+      ? me.full_name
+      : me?.full_name
+        ? getLocaleValue(me.full_name, locale as AppLocale) ?? ''
+        : ''
+
   const displayName =
-    me?.full_name?.trim() ||
+    meDisplayNameRaw.trim() ||
     session?.user?.name?.trim() ||
     (session?.user as { login?: string } | undefined)?.login ||
     session?.user?.email ||

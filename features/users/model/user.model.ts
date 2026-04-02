@@ -1,11 +1,13 @@
 import { Schema, models, model } from 'mongoose'
 import { v4 as uuidv4 } from 'uuid'
+import type { LocaleMap } from '@/shared/common/lib/locale-types'
 
 export type UserRole = 'ceo' | 'administrator' | 'moderator' | 'ads_manager' | 'user'
 
 export interface IUser {
   _id: string
-  full_name: string
+  full_name: string | LocaleMap
+  description?: LocaleMap
   image?: string | null
   role: UserRole
   position?: string
@@ -18,7 +20,8 @@ export interface IUser {
 const UserSchema = new Schema<IUser>(
   {
     _id: { type: String, required: true, default: () => uuidv4() },
-    full_name: { type: String, required: true },
+    full_name: { type: Schema.Types.Mixed, required: true },
+    description: { type: Schema.Types.Mixed },
     image: String,
     role: { type: String, required: true },
     position: String,

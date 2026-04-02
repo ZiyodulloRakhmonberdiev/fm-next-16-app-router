@@ -10,7 +10,7 @@ export interface ITheme {
   name: LocaleMap
   subtitle: LocaleMap
   description: LocaleMap
-  /** 300x300 logo/avatar (public URL) */
+  /** 500x500 logo/avatar (public URL) */
   imageUrl?: string
   showInHomePage?: boolean
   /** Home sahifasidagi yuqori themes scroller’da ko‘rsatish */

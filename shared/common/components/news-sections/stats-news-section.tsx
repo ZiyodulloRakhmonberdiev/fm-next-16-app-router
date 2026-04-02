@@ -22,6 +22,7 @@ import {
   formatDateTimeDotSlash,
 } from "@/shared/common/lib/formatter";
 import { VideoCardMediaPreview } from "@/features/news/ui/news-listing/video-card-media-preview";
+import { FaMicrophone } from "react-icons/fa6";
 
 type StatsNewsSectionProps = {
   initialNews?: RawNewsItem[];
@@ -68,7 +69,7 @@ export default function StatsNewsSection({
   if (items.length === 0) return null;
 
   return (
-    <section className="w-full space-y-5 px-4 pt-4 md:px-6">
+    <section className="w-full space-y-5 px-4 py-4 md:px-6">
       <NewsSectionHeader
         title="Maqolalar"
         viewAllHref="/articles"
@@ -99,7 +100,7 @@ export default function StatsNewsSection({
                     </span>
                   ) : hasAudio ? (
                     <span className="pointer-events-none absolute bottom-2 left-2 z-10 inline-flex size-8 items-center justify-center rounded-full bg-brand text-white shadow-md ring-1 ring-black/5">
-                      <Volume2 className="size-4" />
+                      <FaMicrophone className="size-4 fill-current text-white" />
                     </span>
                   ) : null}
                 </div>

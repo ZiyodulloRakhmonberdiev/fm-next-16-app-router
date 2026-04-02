@@ -16,7 +16,13 @@ type ThemeLike = {
 };
 
 function line(map: LocaleMap | undefined, locale: AppLocale): string {
-  return (map?.[locale] ?? map?.uz ?? "").trim();
+  if (!map) return "";
+  const order: AppLocale[] = [locale, "uz", "uzb", "ru", "en"];
+  for (const loc of order) {
+    const value = (map[loc] ?? "").trim();
+    if (value) return value;
+  }
+  return "";
 }
 
 export function ThemeSection({

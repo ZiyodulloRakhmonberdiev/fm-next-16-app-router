@@ -7,6 +7,7 @@ import { cn } from '@/shared/common/lib/utils'
 import type { NewsItem } from '@/features/news/model'
 import Image from 'next/image'
 import { getSafeImageSrc } from '@/features/news/ui/news-listing/news-listing-utils'
+import { FaMicrophone } from 'react-icons/fa6'
 
 type AudioPlayerBarProps = {
   activeNews: NewsItem | null
@@ -257,7 +258,7 @@ export function AudioPlayerBar({
               </div>
               <div className="min-w-0 w-96">
                 <div className="mt-0.5 inline-flex items-center gap-1 text-[10px] uppercase tracking-wide text-muted-foreground">
-                  <EqualizerIcon playing={isPlaying} />
+                  <FaMicrophone className="size-3 fill-current text-brand" />
                   Audio
                 </div>
                 <p className="text-sm font-semibold">{activeNews.title}</p>

@@ -147,7 +147,7 @@ export function NewsSectionHeader({
 
   const inner = (
     <div className={cn(rowClass(variant), className)}>
-      <h2 className={cn(defaultTitleClass(variant), titleClassName)}>{title}</h2>
+      <Link href={viewAllHref} className={cn(defaultTitleClass(variant), titleClassName)}>{title}</Link>
       {link}
     </div>
   );
