@@ -178,12 +178,21 @@ export default function Header({
             className="flex h-8 items-center md:hidden"
           >
             <Image
-              src={mounted ? logoSrc : '/images/fm-logo-dark.svg'}
+              // src={mounted ? logoSrc : '/images/fm-logo-dark.svg'}
+              src={'/images/fm-logo-dark.svg'}
               alt="Logo"
               width={130}
               height={40}
-              className="h-6 w-auto max-h-6 object-contain md:h-8 md:max-h-8"
+              className="dark:hidden h-4.5 w-auto max-h-6 object-contain md:h-8 md:max-h-8"
               sizes="(max-width: 768px) 100px, 130px"
+              priority
+            />
+            <Image
+              src={'/images/fm-logo.svg'}
+              alt="Logo"
+              width={90}
+              height={30}
+              className="hidden dark:block h-4.5 w-auto max-h-6 object-contain md:h-8 md:max-h-8"
               priority
             />
           </Link>

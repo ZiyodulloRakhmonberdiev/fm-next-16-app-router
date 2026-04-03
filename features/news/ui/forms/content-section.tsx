@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useMemo, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import {
   LinkIcon,
   BoldIcon,
@@ -12,6 +12,13 @@ import {
   ListIcon,
   ListOrderedIcon,
   AudioLinesIcon,
+  Undo2Icon,
+  Redo2Icon,
+  StrikethroughIcon,
+  Code2Icon,
+  AlignLeftIcon,
+  AlignCenterIcon,
+  AlignRightIcon,
 } from "lucide-react"
 import { Button } from "@/shared/common/components/ui/button"
 import {
@@ -29,7 +36,7 @@ import {
 import type { AppLocale } from "@/shared/common/lib/locale-api"
 import { toast } from "sonner"
 import { uploadFileViaPresignedUrl } from "@/shared/infra/cloudinary-client-upload"
-import { BiSolidQuoteAltLeft } from "react-icons/bi"
+import { RichTextContent } from "@/features/news/lib/rich-text-renderer"
 
 type LocalMedia = {
   id: string
@@ -42,15 +49,103 @@ type ContentFormProps = {
   value: string
   allContents: Record<AppLocale, string>
   onChange: (next: string) => void
+  enabledTools?: EditorToolId[]
 }
 
 const placeholder = "Matn kiriting..."
+
+export type EditorToolId =
+  | "undo"
+  | "redo"
+  | "bold"
+  | "italic"
+  | "underline"
+  | "strike"
+  | "sub"
+  | "sup"
+  | "code"
+  | "h1"
+  | "h2"
+  | "h3"
+  | "link"
+  | "quote"
+  | "bullet"
+  | "numbered"
+  | "alignLeft"
+  | "alignCenter"
+  | "alignRight"
+  | "color"
+  | "bg"
+  | "font"
+  | "image"
+  | "video"
+  | "audio"
+
+function getCaretPositionInTextarea(
+  textarea: HTMLTextAreaElement,
+  caretIndex: number
+): { top: number; left: number } {
+  const div = document.createElement("div")
+  const style = window.getComputedStyle(textarea)
+  const properties = [
+    "boxSizing",
+    "width",
+    "height",
+    "overflowX",
+    "overflowY",
+    "borderTopWidth",
+    "borderRightWidth",
+    "borderBottomWidth",
+    "borderLeftWidth",
+    "paddingTop",
+    "paddingRight",
+    "paddingBottom",
+    "paddingLeft",
+    "fontStyle",
+    "fontVariant",
+    "fontWeight",
+    "fontStretch",
+    "fontSize",
+    "fontSizeAdjust",
+    "lineHeight",
+    "fontFamily",
+    "textAlign",
+    "textTransform",
+    "textIndent",
+    "textDecoration",
+    "letterSpacing",
+    "wordSpacing",
+    "tabSize",
+  ] as const
+
+  div.style.position = "absolute"
+  div.style.visibility = "hidden"
+  div.style.whiteSpace = "pre-wrap"
+  div.style.wordWrap = "break-word"
+
+  properties.forEach((prop) => {
+    const value = style.getPropertyValue(prop)
+    div.style.setProperty(prop, value)
+  })
+
+  div.textContent = textarea.value.slice(0, caretIndex)
+  const marker = document.createElement("span")
+  marker.textContent = textarea.value.slice(caretIndex) || "."
+  div.appendChild(marker)
+  document.body.appendChild(div)
+
+  const top = marker.offsetTop - textarea.scrollTop
+  const left = marker.offsetLeft - textarea.scrollLeft
+  document.body.removeChild(div)
+  return { top, left }
+}
 
 export function ContentForm({
   locale,
   value,
   allContents,
   onChange,
+  enabledTools,
 }: ContentFormProps) {
   const [imageUrl, setImageUrl] = useState("")
   const [videoUrl, setVideoUrl] = useState("")
@@ -64,13 +159,82 @@ export function ContentForm({
   const [videoModalOpen, setVideoModalOpen] = useState(false)
   const [audioModalOpen, setAudioModalOpen] = useState(false)
   const [mediaSource, setMediaSource] = useState<"url" | "local">("url")
+  const [mobileViewMode, setMobileViewMode] = useState<"edit" | "preview" | "split">("edit")
+  const [debouncedContent, setDebouncedContent] = useState(value)
+  const [slashMenuOpen, setSlashMenuOpen] = useState(false)
+  const [slashQuery, setSlashQuery] = useState("")
+  const [slashActiveIndex, setSlashActiveIndex] = useState(0)
+  const [slashPosition, setSlashPosition] = useState({ top: 0, left: 0 })
+  const [activeColor, setActiveColor] = useState<"red" | "blue" | "green" | "orange" | "purple" | "gray" | "">("")
+  const [activeBg, setActiveBg] = useState<"yellow" | "cyan" | "green" | "pink" | "gray" | "none" | "">("")
+  const [activeFont, setActiveFont] = useState<"sans" | "serif" | "mono" | "inter" | "georgia" | "display" | "">("")
 
   const content = value
+  const isToolEnabled = (tool: EditorToolId) =>
+    !enabledTools || enabledTools.includes(tool)
 
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
+  const editorRootRef = useRef<HTMLDivElement | null>(null)
+  const undoStackRef = useRef<string[]>([])
+  const redoStackRef = useRef<string[]>([])
+
+  const applyContent = (next: string, trackHistory = true) => {
+    if (next === content) return
+    if (trackHistory) {
+      undoStackRef.current.push(content)
+      if (undoStackRef.current.length > 200) {
+        undoStackRef.current = undoStackRef.current.slice(-200)
+      }
+      redoStackRef.current = []
+    }
+    onChange(next)
+  }
+
+  const canUndo = undoStackRef.current.length > 0
+  const canRedo = redoStackRef.current.length > 0
+
+  const handleUndo = () => {
+    const prev = undoStackRef.current.pop()
+    if (prev === undefined) return
+    redoStackRef.current.push(content)
+    onChange(prev)
+  }
+
+  const handleRedo = () => {
+    const next = redoStackRef.current.pop()
+    if (next === undefined) return
+    undoStackRef.current.push(content)
+    onChange(next)
+  }
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebouncedContent(content), 150)
+    return () => window.clearTimeout(timer)
+  }, [content])
+
+  useEffect(() => {
+    if (mobileViewMode !== "preview" && mobileViewMode !== "split") return
+    setSlashMenuOpen(false)
+    setSlashQuery("")
+    setSlashActiveIndex(0)
+  }, [mobileViewMode])
+
+  useEffect(() => {
+    if (!slashMenuOpen) return
+    const onPointerDown = (event: MouseEvent) => {
+      const root = editorRootRef.current
+      if (!root) return
+      if (root.contains(event.target as Node)) return
+      setSlashMenuOpen(false)
+      setSlashQuery("")
+      setSlashActiveIndex(0)
+    }
+    document.addEventListener("mousedown", onPointerDown)
+    return () => document.removeEventListener("mousedown", onPointerDown)
+  }, [slashMenuOpen])
 
   const updateContent = (updater: (prev: string) => string) => {
-    onChange(updater(content))
+    applyContent(updater(content))
   }
 
   const uploadMedia = async (
@@ -93,7 +257,7 @@ export function ContentForm({
 
     const next = content.slice(0, start) + textToInsert + content.slice(end)
 
-    onChange(next)
+    applyContent(next)
 
     requestAnimationFrame(() => {
       const pos = start + textToInsert.length
@@ -132,10 +296,13 @@ export function ContentForm({
     const next =
       content.slice(0, start) + before + selected + after + content.slice(end)
 
-    onChange(next)
+    applyContent(next)
 
     requestAnimationFrame(() => {
-      const pos = start + before.length + selected.length + after.length
+      const hasSelection = selected.length > 0
+      const pos = hasSelection
+        ? start + before.length + selected.length + after.length
+        : start + before.length
       textarea.focus()
       textarea.setSelectionRange(pos, pos)
     })
@@ -156,7 +323,7 @@ export function ContentForm({
     if (start === end) {
       const lineStart = content.lastIndexOf("\n", Math.max(0, start - 1)) + 1
       const next = content.slice(0, lineStart) + prefixFactory(0) + content.slice(lineStart)
-      onChange(next)
+      applyContent(next)
       requestAnimationFrame(() => {
         const pos = start + prefixFactory(0).length
         textarea.focus()
@@ -176,7 +343,7 @@ export function ContentForm({
       .join("\n")
 
     const next = `${beforeSelection}${nextSelected}${afterSelection}`
-    onChange(next)
+    applyContent(next)
     requestAnimationFrame(() => {
       textarea.focus()
       textarea.setSelectionRange(start, start + nextSelected.length)
@@ -196,7 +363,7 @@ export function ContentForm({
     }
 
     const next = content.slice(0, lineStart) + prefix + content.slice(lineStart)
-    onChange(next)
+    applyContent(next)
     requestAnimationFrame(() => {
       const pos = start + prefix.length
       textarea.focus()
@@ -206,6 +373,53 @@ export function ContentForm({
 
   const applyQuoteAtCursor = () => {
     applyPrefixToSelectionLines(() => "> ")
+  }
+
+  const wrapBlock = (startMarker: string, endMarker: string) => {
+    const textarea = textareaRef.current
+    if (!textarea) return
+    const start = textarea.selectionStart ?? 0
+    const end = textarea.selectionEnd ?? 0
+    const selected = content.slice(start, end).trim()
+    const inner = selected || "Matn..."
+    const insert = `${startMarker}\n${inner}\n${endMarker}`
+    const next = content.slice(0, start) + insert + content.slice(end)
+    applyContent(next)
+    requestAnimationFrame(() => {
+      const pos = start + startMarker.length + 1
+      textarea.focus()
+      textarea.setSelectionRange(pos, pos + inner.length)
+    })
+  }
+
+  const applyInlineToken = (kind: "color" | "bg" | "font", valueToken: string) => {
+    const textarea = textareaRef.current
+    if (!textarea) return
+    const start = textarea.selectionStart ?? 0
+    const end = textarea.selectionEnd ?? 0
+
+    if (start !== end) {
+      applyAroundSelection(`[${kind}:${valueToken}]`, `[/${kind}]`)
+      return
+    }
+
+    const lineStart = content.lastIndexOf("\n", Math.max(0, start - 1)) + 1
+    const rawLineEnd = content.indexOf("\n", start)
+    const lineEnd = rawLineEnd === -1 ? content.length : rawLineEnd
+    const lineText = content.slice(lineStart, lineEnd)
+
+    if (!lineText.trim()) {
+      applyAroundSelection(`[${kind}:${valueToken}]`, `[/${kind}]`)
+      return
+    }
+
+    const wrapped = `[${kind}:${valueToken}]${lineText}[/${kind}]`
+    const next = content.slice(0, lineStart) + wrapped + content.slice(lineEnd)
+    applyContent(next)
+    requestAnimationFrame(() => {
+      textarea.focus()
+      textarea.setSelectionRange(lineStart + wrapped.length, lineStart + wrapped.length)
+    })
   }
 
   const handleAddImageUrl = () => {
@@ -328,311 +542,14 @@ export function ContentForm({
     e.target.value = ""
   }
 
-  const renderedPreview = useMemo(() => {
-    const lines = content.split(/\r?\n/)
-    const skippedQuoteLines = new Set<number>()
-
-    const renderInline = (text: string, keyBase: string) => {
-      const partsWithLinks: React.ReactNode[] = []
-      let remaining = text
-      let idx = 0
-      const linkRegex = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/
-
-      while (remaining.length > 0) {
-        const match = remaining.match(linkRegex)
-        if (!match || match.index === undefined) {
-          partsWithLinks.push(remaining)
-          break
-        }
-        if (match.index > 0) {
-          partsWithLinks.push(remaining.slice(0, match.index))
-        }
-        partsWithLinks.push(
-          <a
-            key={`${keyBase}-link-${idx}`}
-            href={match[2]}
-            target="_blank"
-            rel="noreferrer"
-            className="text-blue-500 no-underline hover:underline"
-          >
-            {match[1]}
-          </a>
-        )
-        idx += 1
-        remaining = remaining.slice(match.index + match[0].length)
-      }
-
-      const formatRegex = /(__([^_]+)__|\*\*([^*]+)\*\*|\*([^*]+)\*)/
-      const finalParts: React.ReactNode[] = []
-
-      partsWithLinks.forEach((segment, segIndex) => {
-        if (typeof segment !== "string") {
-          finalParts.push(segment)
-          return
-        }
-        let rest = segment
-        let subIdx = 0
-        while (rest.length > 0) {
-          const m = rest.match(formatRegex)
-          if (!m || m.index === undefined) {
-            finalParts.push(rest)
-            break
-          }
-          if (m.index > 0) {
-            finalParts.push(rest.slice(0, m.index))
-          }
-          const full = m[1]
-          const underline = m[2]
-          const bold = m[3]
-          const italic = m[4]
-
-          if (underline) {
-            finalParts.push(
-              <span
-                key={`${keyBase}-u-${segIndex}-${subIdx}`}
-                className="underline"
-              >
-                {underline}
-              </span>
-            )
-          } else if (bold) {
-            finalParts.push(
-              <strong key={`${keyBase}-b-${segIndex}-${subIdx}`}>
-                {bold}
-              </strong>
-            )
-          } else if (italic) {
-            finalParts.push(
-              <em key={`${keyBase}-i-${segIndex}-${subIdx}`}>{italic}</em>
-            )
-          } else {
-            finalParts.push(full)
-          }
-          subIdx += 1
-          rest = rest.slice(m.index + full.length)
-        }
-      })
-
-      return finalParts
-    }
-
-    const elements: React.ReactNode[] = []
-
-    lines.forEach((line, i) => {
-      if (skippedQuoteLines.has(i)) return
-      const keyBase = `line-${i}`
-      const trimmed = line.trim()
-
-      if (!trimmed) {
-        elements.push(<br key={keyBase} />)
-        return
-      }
-
-      if (trimmed.startsWith("# ")) {
-        elements.push(
-          <h2 key={keyBase} className="text-lg font-semibold">
-            {renderInline(trimmed.replace(/^#\s+/, ""), keyBase)}
-          </h2>
-        )
-        return
-      }
-
-      if (trimmed.startsWith("## ")) {
-        elements.push(
-          <h3 key={keyBase} className="text-base font-semibold">
-            {renderInline(trimmed.replace(/^##\s+/, ""), keyBase)}
-          </h3>
-        )
-        return
-      }
-
-      if (trimmed.startsWith("### ")) {
-        elements.push(
-          <h4 key={keyBase} className="text-sm font-semibold">
-            {renderInline(trimmed.replace(/^###\s+/, ""), keyBase)}
-          </h4>
-        )
-        return
-      }
-
-      if (trimmed.startsWith(">")) {
-        const quoteLines: string[] = [trimmed.replace(/^>\s?/, "")]
-        let j = i + 1
-        while (j < lines.length) {
-          const nextTrimmed = lines[j].trim()
-          if (!nextTrimmed.startsWith(">")) break
-          quoteLines.push(nextTrimmed.replace(/^>\s?/, ""))
-          skippedQuoteLines.add(j)
-          j += 1
-        }
-        elements.push(
-          <div key={keyBase} className="my-3 rounded-md bg-brand/20 text-brand p-4">
-            <div className="relative">
-              <span className="absolute -left-3 -top-4 text-4xl leading-none text-  e-300">
-                <BiSolidQuoteAltLeft className="size-7 text-brand/10 dark:text-muted-foreground/20" />
-              </span>
-              <blockquote className="italic text-foreground/90 pt-2">
-                {quoteLines.map((qLine, qIdx) => (
-                  <p key={`${keyBase}-q-${qIdx}`} className={qIdx === 0 ? "m-0" : "m-0 mt-1"}>
-                    {renderInline(qLine, `${keyBase}-q-${qIdx}`)}
-                  </p>
-                ))}
-              </blockquote>
-            </div>
-          </div>
-        )
-        return
-      }
-
-      if (/^[-*•]\s+/.test(trimmed)) {
-        elements.push(
-          <div key={keyBase} className="my-1 flex items-start gap-2">
-            <span className="mt-1.5 size-2 rounded-full border border-muted-foreground/50 bg-background" />
-            <p className="m-0">{renderInline(trimmed.replace(/^[-*•]\s+/, ""), keyBase)}</p>
-          </div>
-        )
-        return
-      }
-
-      if (/^\d+[.)]\s+/.test(trimmed)) {
-        const num = trimmed.match(/^(\d+)[.)]\s+/)?.[1] ?? "1"
-        elements.push(
-          <div key={keyBase} className="my-1 flex items-start gap-2">
-            <span className="mt-0.5 min-w-6 text-sm font-semibold text-muted-foreground">
-              {num}.
-            </span>
-            <p className="m-0">{renderInline(trimmed.replace(/^\d+[.)]\s+/, ""), keyBase)}</p>
-          </div>
-        )
-        return
-      }
-
-      const captionMatch = trimmed.match(/^@@caption\((.+)\)$/)
-      if (captionMatch) {
-        elements.push(
-          <p key={keyBase} className="mt-1 bg-white px-2 py-1 text-xs text-muted-foreground">
-            {renderInline(captionMatch[1], keyBase)}
-          </p>
-        )
-        return
-      }
-
-      const imgMatch = trimmed.match(/^!\[([^\]]*)\]\(((?:https?:\/\/|\/)[^\s)]+)\)$/)
-      if (imgMatch) {
-        elements.push(
-          <div key={keyBase} className="my-2">
-            <img
-              src={imgMatch[2]}
-              alt={imgMatch[1] || "image"}
-              className="w-full rounded-md border object-cover"
-            />
-          </div>
-        )
-        return
-      }
-
-      const videoMatch = trimmed.match(/^@@video\((.+)\)$/)
-      if (videoMatch) {
-        const url = videoMatch[1]
-        const youtubeMatch = url.match(
-          /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
-        )
-        const youtubeId =
-          youtubeMatch && youtubeMatch[2]?.length === 11
-            ? youtubeMatch[2]
-            : null
-
-        if (youtubeId) {
-          elements.push(
-            <div key={keyBase} className="my-3 aspect-video w-full">
-              <iframe
-                src={`https://www.youtube.com/embed/${youtubeId}`}
-                className="h-full w-full rounded-md border"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                title="YouTube video"
-              />
-            </div>
-          )
-        } else {
-          elements.push(
-            <video
-              key={keyBase}
-              src={url}
-              controls
-              controlsList="nodownload"
-              disablePictureInPicture
-              onContextMenu={(e) => e.preventDefault()}
-              className="my-3 aspect-video w-full rounded-md border object-cover"
-            />
-          )
-        }
-        return
-      }
-
-      const audioMatch = trimmed.match(/^@@audio\((.+)\)$/)
-      if (audioMatch) {
-        const url = audioMatch[1]
-        elements.push(
-          <audio
-            key={keyBase}
-            src={url}
-            controls
-            controlsList="nodownload"
-            onContextMenu={(e) => e.preventDefault()}
-            className="my-3 w-full rounded-md border bg-background p-2"
-          />
-        )
-        return
-      }
-
-      const localImgMatch = trimmed.match(/^@@local-image\((\d+)\)$/)
-      if (localImgMatch) {
-        const idx = parseInt(localImgMatch[1], 10)
-        const item = localImages[idx]
-        if (item) {
-          elements.push(
-            <div key={keyBase} className="my-2">
-              <img
-                src={item.url}
-                alt={item.file.name}
-                className="w-full rounded-md border object-cover"
-              />
-            </div>
-          )
-        }
-        return
-      }
-
-      const localVidMatch = trimmed.match(/^@@local-video\((\d+)\)$/)
-      if (localVidMatch) {
-        const idx = parseInt(localVidMatch[1], 10)
-        const item = localVideos[idx]
-        if (item) {
-          elements.push(
-            <video
-              key={keyBase}
-              src={item.url}
-              controls
-              controlsList="nodownload"
-              disablePictureInPicture
-              onContextMenu={(e) => e.preventDefault()}
-              className="my-3 aspect-video w-full rounded-md border object-cover"
-            />
-          )
-        }
-        return
-      }
-
-      elements.push(
-        <p key={keyBase} className="whitespace-pre-wrap">
-          {renderInline(line, keyBase)}
-        </p>
-      )
-    })
-
-    return elements
-  }, [content, localImages, localVideos])
+  const renderedPreview = (
+    <RichTextContent
+      content={debouncedContent}
+      localImages={localImages}
+      localVideos={localVideos}
+      className="prose prose-sm max-w-none dark:prose-invert"
+    />
+  )
 
   // Generate: uz <-> uzb (translit) yoki boshqa tillar uchun nusxa
   type GenerateMode = "copy" | "uzToUzb" | "uzbToUz" | null
@@ -727,101 +644,312 @@ export function ContentForm({
       generateMode === "copy"
         ? generateSource
         : convertContentPreserveMarkup(generateSource, generateMode)
-    onChange(next)
+    applyContent(next)
+  }
+
+  const slashCommands: Array<{ id: string; tool: EditorToolId; label: string; action: () => void }> = [
+    { id: "h1", tool: "h1", label: "H1 sarlavha", action: () => applyHeadingAtCursor("# ") },
+    { id: "h2", tool: "h2", label: "H2 sarlavha", action: () => applyHeadingAtCursor("## ") },
+    { id: "h3", tool: "h3", label: "H3 sarlavha", action: () => applyHeadingAtCursor("### ") },
+    { id: "quote", tool: "quote", label: "Quote", action: applyQuoteAtCursor },
+    { id: "bullet", tool: "bullet", label: "Nuqtali ro'yxat", action: () => applyPrefixToSelectionLines(() => "- ") },
+    { id: "numbered", tool: "numbered", label: "Raqamli ro'yxat", action: () => applyPrefixToSelectionLines((idx) => `${idx + 1}. `) },
+    { id: "strike", tool: "strike", label: "Strikethrough", action: () => applyAroundSelection("~~") },
+    { id: "sub", tool: "sub", label: "Subscript", action: () => applyAroundSelection("<sub>", "</sub>") },
+    { id: "sup", tool: "sup", label: "Superscript", action: () => applyAroundSelection("<sup>", "</sup>") },
+    { id: "code", tool: "code", label: "Code block", action: () => wrapBlock("```", "```") },
+    { id: "left", tool: "alignLeft", label: "Align left", action: () => wrapBlock("@@align(left)", "@@/align") },
+    { id: "center", tool: "alignCenter", label: "Align center", action: () => wrapBlock("@@align(center)", "@@/align") },
+    { id: "right", tool: "alignRight", label: "Align end", action: () => wrapBlock("@@align(right)", "@@/align") },
+  ]
+
+  const filteredSlashCommands = slashCommands
+    .filter((cmd) => isToolEnabled(cmd.tool))
+    .filter((cmd) => cmd.label.toLowerCase().includes(slashQuery.toLowerCase()))
+
+  const executeSlashCommand = (idx: number) => {
+    const cmd = filteredSlashCommands[idx]
+    if (!cmd) return
+    cmd.action()
+    setSlashMenuOpen(false)
+    setSlashQuery("")
+    setSlashActiveIndex(0)
+    requestAnimationFrame(() => textareaRef.current?.focus())
+  }
+
+  const openSlashMenuAtCursor = (textarea: HTMLTextAreaElement, cursor: number) => {
+    const coords = getCaretPositionInTextarea(textarea, cursor)
+    setSlashPosition({
+      top: coords.top + 28,
+      left: Math.max(8, Math.min(coords.left, textarea.clientWidth - 280)),
+    })
+    setSlashMenuOpen(true)
+    setSlashQuery("")
+    setSlashActiveIndex(0)
   }
 
   return (
-    <div className="relative space-y-4 bg-background w-full overflow-hidden rounded-lg border p-4">
+    <div ref={editorRootRef} className="relative space-y-4 bg-background w-full overflow-hidden rounded-lg border p-4">
       <div className="sticky inset-x-0 top-0 z-20 -mx-4 align-start  flex flex-wrap items-center gap-2 border-b bg-background px-4 pb-2 pt-1 text-sm">
         <span className="font-medium text-muted-foreground">Matn tahrirlash</span>
+        <div className="md:hidden flex items-center gap-1 rounded-md border p-1">
+          <button
+            type="button"
+            onClick={() => setMobileViewMode("edit")}
+            className={cn("rounded px-2 py-1 text-xs", mobileViewMode === "edit" ? "bg-primary text-primary-foreground" : "hover:bg-muted")}
+          >
+            Edit
+          </button>
+          <button
+            type="button"
+            onClick={() => setMobileViewMode("preview")}
+            className={cn("rounded px-2 py-1 text-xs", mobileViewMode === "preview" ? "bg-primary text-primary-foreground" : "hover:bg-muted")}
+          >
+            Preview
+          </button>
+          <button
+            type="button"
+            onClick={() => setMobileViewMode("split")}
+            className={cn("rounded px-2 py-1 text-xs", mobileViewMode === "split" ? "bg-primary text-primary-foreground" : "hover:bg-muted")}
+          >
+            Split
+          </button>
+        </div>
         <div className="ml-auto flex flex-wrap gap-1">
           <button
             type="button"
+            onClick={handleUndo}
+            disabled={!canUndo}
+            title="Undo"
+            className={cn("inline-flex items-center rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted disabled:opacity-50", !isToolEnabled("undo") && "hidden")}
+          >
+            <Undo2Icon className="size-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={handleRedo}
+            disabled={!canRedo}
+            title="Redo"
+            className={cn("inline-flex items-center rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted disabled:opacity-50", !isToolEnabled("redo") && "hidden")}
+          >
+            <Redo2Icon className="size-3.5" />
+          </button>
+          <button
+            type="button"
             onClick={() => applyAroundSelection("**")}
-            className="inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted"
+            title="Qalin"
+            className={cn("inline-flex items-center rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted", !isToolEnabled("bold") && "hidden")}
           >
             <BoldIcon className="size-3.5" />
-            Qalin
           </button>
           <button
             type="button"
             onClick={() => applyAroundSelection("*")}
-            className="inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted"
+            title="Kursiv"
+            className={cn("inline-flex items-center rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted", !isToolEnabled("italic") && "hidden")}
           >
             <ItalicIcon className="size-3.5" />
-            Kursiv
           </button>
           <button
             type="button"
             onClick={() => applyAroundSelection("__")}
-            className="inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted"
+            title="Pastki chiziq"
+            className={cn("inline-flex items-center rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted", !isToolEnabled("underline") && "hidden")}
           >
             <span className="text-xs font-semibold underline">U</span>
-            Pastki chiziq
+          </button>
+          <button
+            type="button"
+            onClick={() => applyAroundSelection("~~")}
+            title="Strikethrough"
+            className={cn("inline-flex items-center rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted", !isToolEnabled("strike") && "hidden")}
+          >
+            <StrikethroughIcon className="size-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => applyAroundSelection("<sub>", "</sub>")}
+            title="Subscript"
+            className={cn("inline-flex items-center rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted", !isToolEnabled("sub") && "hidden")}
+          >
+            x₂
+          </button>
+          <button
+            type="button"
+            onClick={() => applyAroundSelection("<sup>", "</sup>")}
+            title="Superscript"
+            className={cn("inline-flex items-center rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted", !isToolEnabled("sup") && "hidden")}
+          >
+            x²
+          </button>
+          <button
+            type="button"
+            onClick={() => wrapBlock("```", "```")}
+            title="Code block"
+            className={cn("inline-flex items-center rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted", !isToolEnabled("code") && "hidden")}
+          >
+            <Code2Icon className="size-3.5" />
           </button>
           <button
             type="button"
             onClick={() => applyHeadingAtCursor("# ")}
-            className="inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted"
+            title="H1"
+            className={cn("inline-flex items-center rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted", !isToolEnabled("h1") && "hidden")}
           >
             <span className="text-xs font-semibold">H1</span>
           </button>
           <button
             type="button"
             onClick={() => applyHeadingAtCursor("## ")}
-            className="inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted"
+            title="H2"
+            className={cn("inline-flex items-center rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted", !isToolEnabled("h2") && "hidden")}
           >
             <span className="text-xs font-semibold">H2</span>
           </button>
           <button
             type="button"
             onClick={() => applyHeadingAtCursor("### ")}
-            className="inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted"
+            title="H3"
+            className={cn("inline-flex items-center rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted", !isToolEnabled("h3") && "hidden")}
           >
             <span className="text-xs font-semibold">H3</span>
           </button>
           <button
             type="button"
             onClick={handleInsertLink}
-            className="inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted"
+            title="Havola"
+            className={cn("inline-flex items-center rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted", !isToolEnabled("link") && "hidden")}
           >
             <LinkIcon className="size-3.5" />
-            Havola
           </button>
           <button
             type="button"
             onClick={applyQuoteAtCursor}
-            className="inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted"
+            title="Qo'shtirnoq"
+            className={cn("inline-flex items-center rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted", !isToolEnabled("quote") && "hidden")}
           >
             <QuoteIcon className="size-3.5" />
-            Qo'shtirnoq
           </button>
           <button
             type="button"
             onClick={() => applyPrefixToSelectionLines(() => "- ")}
-            className="inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted"
+            title="Nuqtali ro'yxat"
+            className={cn("inline-flex items-center rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted", !isToolEnabled("bullet") && "hidden")}
           >
             <ListIcon className="size-3.5" />
-            Nuqta
           </button>
           <button
             type="button"
+
             onClick={() => applyPrefixToSelectionLines((idx) => `${idx + 1}. `)}
-            className="inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted"
+            title="Raqamli ro'yxat"
+            className={cn("inline-flex items-center rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted", !isToolEnabled("numbered") && "hidden")}
           >
             <ListOrderedIcon className="size-3.5" />
-            Raqam
           </button>
+          <button
+            type="button"
+            onClick={() => wrapBlock("@@align(left)", "@@/align")}
+            className={cn("inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted", !isToolEnabled("alignLeft") && "hidden")}
+          >
+            <AlignLeftIcon className="size-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => wrapBlock("@@align(center)", "@@/align")}
+            className={cn("inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted", !isToolEnabled("alignCenter") && "hidden")}
+          >
+            <AlignCenterIcon className="size-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => wrapBlock("@@align(right)", "@@/align")}
+            className={cn("inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted", !isToolEnabled("alignRight") && "hidden")}
+          >
+            <AlignRightIcon className="size-3.5" />
+          </button>
+          <select
+            onChange={(e) => {
+              if (!e.target.value) return
+              applyInlineToken("color", e.target.value)
+              setActiveColor(e.target.value as typeof activeColor)
+              e.currentTarget.value = ""
+            }}
+            defaultValue=""
+            style={activeColor ? { color: { red: "#ef4444", blue: "#3b82f6", green: "#22c55e", orange: "#f97316", purple: "#a855f7", gray: "#6b7280" }[activeColor] } : undefined}
+            className={cn("rounded-md border bg-background px-2 py-1 text-xs", !isToolEnabled("color") && "hidden")}
+          >
+            <option value="">Matn rangi</option>
+            <option value="red" style={{ color: "#ef4444" }}>Aa</option>
+            <option value="blue" style={{ color: "#3b82f6" }}>Aa</option>
+            <option value="green" style={{ color: "#22c55e" }}>Aa</option>
+            <option value="orange" style={{ color: "#f97316" }}>Aa</option>
+            <option value="purple" style={{ color: "#a855f7" }}>Aa</option>
+            <option value="gray" style={{ color: "#6b7280" }}>Aa</option>
+          </select>
+          <select
+            onChange={(e) => {
+              if (!e.target.value) return
+              applyInlineToken("bg", e.target.value)
+              setActiveBg(e.target.value as typeof activeBg)
+              e.currentTarget.value = ""
+            }}
+            defaultValue=""
+            style={activeBg ? { backgroundColor: { yellow: "#fef08a", cyan: "#a5f3fc", green: "#bbf7d0", pink: "#fbcfe8", gray: "#e5e7eb", none: "transparent" }[activeBg] } : undefined}
+            className={cn("rounded-md border bg-background px-2 py-1 text-xs", !isToolEnabled("bg") && "hidden")}
+          >
+            <option value="">Bo'yash</option>
+            <option value="yellow" style={{ backgroundColor: "#fef08a" }}>Aa</option>
+            <option value="cyan" style={{ backgroundColor: "#a5f3fc" }}>Aa</option>
+            <option value="green" style={{ backgroundColor: "#bbf7d0" }}>Aa</option>
+            <option value="pink" style={{ backgroundColor: "#fbcfe8" }}>Aa</option>
+            <option value="gray" style={{ backgroundColor: "#e5e7eb" }}>Aa</option>
+            <option value="none">Aa</option>
+          </select>
+          <select
+            onChange={(e) => {
+              if (!e.target.value) return
+              applyInlineToken("font", e.target.value)
+              setActiveFont(e.target.value as typeof activeFont)
+              e.currentTarget.value = ""
+            }}
+            defaultValue=""
+            title="Shrift"
+            style={
+              activeFont
+                ? activeFont === "serif"
+                  ? { fontFamily: "serif" }
+                  : activeFont === "mono"
+                    ? { fontFamily: "monospace" }
+                    : activeFont === "inter"
+                      ? { fontFamily: "Inter, sans-serif" }
+                      : activeFont === "georgia"
+                        ? { fontFamily: "Georgia, serif" }
+                        : activeFont === "display"
+                          ? { fontFamily: "ui-rounded, system-ui, sans-serif" }
+                          : { fontFamily: "system-ui, sans-serif" }
+                : undefined
+            }
+            className={cn("rounded-md border bg-background px-2 py-1 text-xs", !isToolEnabled("font") && "hidden")}
+          >
+            <option value="">Shrift</option>
+            <option value="sans" style={{ fontFamily: "system-ui, sans-serif" }}>Sans</option>
+            <option value="serif" style={{ fontFamily: "serif" }}>Serif</option>
+            <option value="mono" style={{ fontFamily: "monospace" }}>Mono</option>
+            <option value="inter" style={{ fontFamily: "Inter, sans-serif" }}>Inter</option>
+            <option value="georgia" style={{ fontFamily: "Georgia, serif" }}>Georgia</option>
+            <option value="display" style={{ fontFamily: "ui-rounded, system-ui, sans-serif" }}>Display</option>
+          </select>
           <button
             type="button"
             onClick={() => {
               setMediaSource("url")
               setImageModalOpen(true)
             }}
-            className="inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted"
+            title="Rasm"
+            className={cn("inline-flex items-center rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted", !isToolEnabled("image") && "hidden")}
           >
             <ImageIcon className="size-3.5" />
-            Rasm
           </button>
           <button
             type="button"
@@ -829,10 +957,10 @@ export function ContentForm({
               setMediaSource("url")
               setVideoModalOpen(true)
             }}
-            className="inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted"
+            title="Video"
+            className={cn("inline-flex items-center rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted", !isToolEnabled("video") && "hidden")}
           >
             <PlaySquareIcon className="size-3.5" />
-            Video
           </button>
           <button
             type="button"
@@ -840,14 +968,53 @@ export function ContentForm({
               setMediaSource("url")
               setAudioModalOpen(true)
             }}
-            className="inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted"
+            title="Audio"
+            className={cn("inline-flex items-center rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted", !isToolEnabled("audio") && "hidden")}
           >
             <AudioLinesIcon className="size-3.5" />
-            Audio
           </button>
 
         </div>
       </div>
+      {slashMenuOpen ? (
+        <div
+          className="absolute z-30 w-[280px] rounded-md border bg-background p-2 shadow-lg"
+          style={{ top: slashPosition.top, left: slashPosition.left }}
+        >
+          <div className="mb-1 px-1 text-xs text-muted-foreground">/ Buyruqlar</div>
+          <input
+            value={slashQuery}
+            onChange={(e) => {
+              setSlashQuery(e.target.value)
+              setSlashActiveIndex(0)
+            }}
+            placeholder="Qidirish..."
+            className="mb-2 w-full rounded-md border bg-background px-2 py-1 text-xs outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          />
+          <div className="max-h-60 space-y-1 overflow-y-auto">
+            {filteredSlashCommands.length === 0 ? (
+              <div className="rounded-md border px-2 py-1 text-xs text-muted-foreground">
+                Topilmadi
+              </div>
+            ) : (
+              filteredSlashCommands.map((cmd, idx) => (
+                <button
+                  key={cmd.id}
+                  type="button"
+                  className={cn(
+                    "w-full rounded-md border px-2 py-1 text-left text-xs hover:bg-muted",
+                    idx === slashActiveIndex && "bg-muted"
+                  )}
+                  onMouseEnter={() => setSlashActiveIndex(idx)}
+                  onClick={() => executeSlashCommand(idx)}
+                >
+                  {cmd.label}
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+      ) : null}
 
       <Dialog open={imageModalOpen} onOpenChange={setImageModalOpen}>
         <DialogContent className="sm:max-w-md">
@@ -1135,12 +1302,72 @@ export function ContentForm({
       </Dialog>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <div className="space-y-3">
+        <div className={cn("space-y-3", mobileViewMode === "preview" ? "hidden md:block" : "block")}>
           <textarea
             ref={textareaRef}
             value={content}
-            onChange={(e) => onChange(e.target.value)}
+            onChange={(e) => applyContent(e.target.value)}
             onKeyDown={(e) => {
+              if (e.key === "Escape") {
+                setSlashMenuOpen(false)
+                setSlashQuery("")
+                setSlashActiveIndex(0)
+                return
+              }
+              if (slashMenuOpen) {
+                if (e.key === "ArrowDown") {
+                  e.preventDefault()
+                  if (filteredSlashCommands.length === 0) return
+                  setSlashActiveIndex((idx) =>
+                    Math.min(filteredSlashCommands.length - 1, idx + 1)
+                  )
+                  return
+                }
+                if (e.key === "ArrowUp") {
+                  e.preventDefault()
+                  if (filteredSlashCommands.length === 0) return
+                  setSlashActiveIndex((idx) => Math.max(0, idx - 1))
+                  return
+                }
+                if (e.key === "Enter") {
+                  e.preventDefault()
+                  executeSlashCommand(slashActiveIndex)
+                  return
+                }
+                if (e.key === "Backspace") {
+                  e.preventDefault()
+                  setSlashQuery((q) => {
+                    const next = q.slice(0, -1)
+                    if (!next) {
+                      setSlashMenuOpen(false)
+                      setSlashActiveIndex(0)
+                    }
+                    return next
+                  })
+                  return
+                }
+                if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                  e.preventDefault()
+                  setSlashQuery((q) => q + e.key)
+                  return
+                }
+              }
+              if (
+                e.key === "/" &&
+                !e.shiftKey &&
+                !e.ctrlKey &&
+                !e.metaKey &&
+                !e.altKey
+              ) {
+                const textarea = e.currentTarget
+                const cursor = textarea.selectionStart ?? 0
+                const prevChar = cursor > 0 ? content[cursor - 1] : "\n"
+                if (cursor === 0 || /\s/.test(prevChar)) {
+                  e.preventDefault()
+                  openSlashMenuAtCursor(textarea, cursor)
+                  return
+                }
+              }
               if (e.key !== "Enter" || e.shiftKey || e.ctrlKey || e.metaKey || e.altKey) return
               const textarea = e.currentTarget
               const start = textarea.selectionStart ?? 0
@@ -1163,7 +1390,7 @@ export function ContentForm({
                   content.slice(0, lineStart) +
                   replacement +
                   content.slice(lineEndWithBreak)
-                onChange(next)
+                applyContent(next)
                 requestAnimationFrame(() => {
                   const pos = lineStart + replacement.length
                   textarea.focus()
@@ -1175,7 +1402,7 @@ export function ContentForm({
               const prefix = quotePrefixMatch[1]
               const insert = `\n${prefix}`
               const next = content.slice(0, start) + insert + content.slice(end)
-              onChange(next)
+              applyContent(next)
               requestAnimationFrame(() => {
                 const pos = start + insert.length
                 textarea.focus()
@@ -1188,7 +1415,7 @@ export function ContentForm({
               insertAtCursor(normalizeBlankLines(pastedText))
             }}
             placeholder={placeholder}
-            className="min-h-1/3 w-full resize-vertical rounded-md border bg-background px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40 text-[16px]"
+            className="min-h-1/3 w-full resize-vertical rounded-md border bg-background px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40 text-[16px] md:min-h-52"
           />
           <Button
             type="button"
@@ -1200,9 +1427,9 @@ export function ContentForm({
           </Button>
         </div>
 
-        <div className="space-y-3 rounded-md border bg-muted/30 p-3">
+        <div className={cn("space-y-3 rounded-md border bg-muted/30 p-3", mobileViewMode === "edit" ? "hidden md:block" : "block")}>
           <div className="mb-1 text-xs font-semibold text-muted-foreground">
-            Preview
+            Preview (150ms)
           </div>
           <div className="prose prose-sm max-w-none dark:prose-invert">
             {renderedPreview}
