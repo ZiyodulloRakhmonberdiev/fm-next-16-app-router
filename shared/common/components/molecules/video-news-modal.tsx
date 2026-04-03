@@ -129,7 +129,7 @@ export default function VideoNewsModal({ item, open, onOpenChange }: VideoNewsMo
                     <Button variant="secondary" className="h-auto w-full rounded-full bg-foreground/10 py-3 md:w-auto">
                       <Link href={`/news/${item.slug}`} className="flex w-full items-center justify-between px-2 md:px-1">
                         <div className="flex items-center gap-4">
-                          <FaCirclePlay className="size-6 text-muted-foreground" />
+                          <FaCirclePlay className="size-6 text-muted-foreground hidden md:block" />
                           <span>{t("read_article")}</span>
                         </div>
                         <FaCirclePlay className="size-6 text-muted-foreground md:hidden" />
