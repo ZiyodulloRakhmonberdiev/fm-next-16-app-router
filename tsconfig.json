@@ -19,7 +19,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@fm/rich-editor": ["./packages/rich-editor/src/index.ts"]
     }
   },
   "include": [

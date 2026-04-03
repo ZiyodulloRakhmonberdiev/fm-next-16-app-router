@@ -55,7 +55,7 @@ export function VideoCategoryPageContent() {
   }
 
   const handleOpenVideo = (item: NewsItem) => {
-    if (!item.videoSource || !item.videoUrl) return
+    if (!item.videoUrl) return
     setSelected(item)
     setIsOpen(true)
   }
@@ -101,8 +101,8 @@ export function VideoCategoryPageContent() {
                 <h2 className="text-base font-semibold leading-tight">
                   <span className="line-clamp-2 md:line-clamp-3">{item.title ?? ""}</span>
                 </h2>
-                <p className="line-clamp-3 text-sm text-muted-foreground">
-                  <span className="line-clamp-2 md:line-clamp-3">{item.description ?? ""}</span>
+                <p className="line-clamp-8 text-xs text-muted-foreground">
+                  {item.description ?? ""}
                 </p>
               </div>
             </Card>

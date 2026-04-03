@@ -19,7 +19,7 @@ export function NewsListingVideoCard({
   onOpenVideo,
 }: NewsListingVideoCardProps) {
   const metaLine = formatVideoCardMetaLine(item.publishedAt)
-  const canOpenVideo = Boolean(item.videoSource && item.videoUrl && onOpenVideo)
+  const canOpenVideo = Boolean(item.videoUrl && onOpenVideo)
 
   const body = (
     <>

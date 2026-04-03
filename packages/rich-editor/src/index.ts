@@ -2,5 +2,5 @@ export {
   RichTextContent,
   renderRichText,
   type RichTextRenderOptions,
-} from "@fm/rich-editor"
+} from "./rich-text-renderer"
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { RichTextContent } from "@/features/news/lib/rich-text-renderer"
+import { RichTextContent } from "@fm/rich-editor"
 
 type TextContentRendererProps = {
   content: string
