@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { getTranslations } from "next-intl/server"
 import ClientSiteNothingGate from "../_components/client-site-nothing-gate"
 import ClientServerOffGate from "../_components/client-server-off-gate"
 import { Footer } from "@/widgets/client-footer"
@@ -7,14 +8,16 @@ import { Header } from "@/widgets/client-header"
 import { dbConnect } from "@/shared/common/lib/db"
 import { NewsModel } from "@/features/news/model/news.model"
 import { SpecialNewsPageContent } from "@/features/news/ui/special-news-page-content"
-import { LatestNews } from "@/shared/common/components/news-sections"
+import LatestNews from "@/entities/news/lists/latest-news"
 import { getCachedPublicNews } from "@/shared/server/public-data-server"
 
 export async function generateMetadata(): Promise<Metadata> {
-  return { title: "Maqolalar" }
+  const t = await getTranslations("common")
+  return { title: t("articles") }
 }
 
 export default async function StatsNewsPage() {
+  const t = await getTranslations("common")
   await dbConnect()
   const filter = { status: "published", stats: true }
   const [rows, total] = await Promise.all([
@@ -37,10 +40,10 @@ export default async function StatsNewsPage() {
         <Header />
         <main className="flex-1 py-4">
           <ClientServerOffGate model="news">
-            <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 lg:grid-cols-4">
-              <div className="min-w-0 px-4 md:px-6 lg:col-span-3">
+            <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 lg:grid-cols-3">
+              <div className="min-w-0 px-4 md:px-6 lg:col-span-2">
                 <SpecialNewsPageContent
-                  title="Maqolalar"
+                  title={t("articles")}
                   initialNews={list}
                   initialPage={initialPage}
                   initialTotalPages={totalPages}

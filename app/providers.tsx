@@ -9,6 +9,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SessionProvider } from "next-auth/react";
 import { TooltipProvider } from "@/shared/common/components/ui/tooltip";
 import { SidebarProvider } from "@/shared/common/components/ui/sidebar";
+import { ScrollToTop } from "@/shared/common/components/scroll-to-top";
 
 export function Providers({ children }: PropsWithChildren<unknown>) {
   const [queryClient] = useState(
@@ -38,6 +39,7 @@ export function Providers({ children }: PropsWithChildren<unknown>) {
           <QueryClientProvider client={queryClient}>
             <Toaster position="bottom-right" duration={6000} />
             <TooltipProvider>
+              <ScrollToTop />
               {children}
             </TooltipProvider>
           </QueryClientProvider>

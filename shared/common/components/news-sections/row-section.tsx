@@ -7,8 +7,8 @@ import { NewsSectionHeader } from "@/shared/common/components/news-sections/news
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
 import { getNewsListForLocale, isImageTypeRawNews, type NewsItem } from "@/features/news/model"
 import { getCategoryNameFromApi, usePublicCategoriesQuery, type PublicCategory } from "@/features/category/model/public-categories-query"
-import { MiniNewsCard } from "@/features/news/ui/mini-news-card"
 import type { RawNewsItem } from "@/features/news/model"
+import SimpleNewsCard from "@/entities/news/cards/simple-news-card"
 
 type RowSectionProps = {
   categorySlug: string
@@ -54,11 +54,13 @@ export default function RowSection({
 
         <div className="grid grid-cols-1 gap-x-8 gap-y-4 p-4 md:grid-cols-2">
           {items.map((item: NewsItem) => (
-            <MiniNewsCard
+            <SimpleNewsCard
               key={item.slug}
               item={item}
               locale={locale}
               variant="row"
+              description={false}
+              categoryName={false}
             />
           ))}
         </div>

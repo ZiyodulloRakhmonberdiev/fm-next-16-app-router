@@ -1,3 +1,4 @@
+import { headers } from "next/headers"
 import { Footer } from "@/widgets/client-footer"
 import { Header } from "@/widgets/client-header"
 import { ClientSidebar } from "@/widgets/client-sidebar"
@@ -6,7 +7,6 @@ import ClientServerOffGate from "../../_components/client-server-off-gate"
 import { NewsListingPageContent } from "@/features/news/ui/news-listing-page-content"
 import type { AppLocale } from "@/shared/common/lib/formatter"
 import { getNewsListForLocale, type RawNewsItem } from "@/features/news/model"
-import { headers } from "next/headers"
 
 type NewsListResponse = {
   data: Array<

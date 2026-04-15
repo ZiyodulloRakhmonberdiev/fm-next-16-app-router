@@ -2,10 +2,10 @@
 
 
 import { AuthorsChoice } from "../news-sections";
-import { LatestNews } from "../news-sections";
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query";
 import { isImageTypeRawNews } from "@/features/news/model";
 import TopNewsCarousel from "../molecules/top-news-carousel";
+import LatestNews from "@/entities/news/lists/latest-news";
 
 export default function TopBanner() {
   const { data: publicNews = [] } = usePublicNewsQuery()
@@ -18,7 +18,7 @@ export default function TopBanner() {
         <TopNewsCarousel />
         <AuthorsChoice />
       </div>
-      <LatestNews />
+      <LatestNews initialNews={publicNews} />
     </div>
   )
 }

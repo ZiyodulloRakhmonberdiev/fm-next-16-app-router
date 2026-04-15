@@ -37,6 +37,8 @@ import { LayoutGrid } from "lucide-react"
 import type { LocaleMap } from "@/shared/common/lib/locale-types"
 import type { AppLocale } from "@/shared/common/lib/locale-api"
 import { pickUserLocaleText } from "@/features/users/lib/user-locale"
+import { FaComment, FaLock, FaSignOutAlt, FaThumbsUp, FaTools, FaUser, FaUserEdit } from "react-icons/fa"
+
 
 const AVATAR_SIZE = 100
 
@@ -130,12 +132,12 @@ export function ClientUserMenu() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button size="icon" variant="ghost" aria-label={t("user_menu_aria")}>
-                <User className="size-4" />
+                <FaUser className="size-4 text-black/90 dark:text-white" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={openProfileDialog}>
-                <LiaUserEditSolid className="size-4" />
+                <FaUserEdit className="size-4" />
                 {t("edit_profile")}
               </DropdownMenuItem>
               {/* <span className="my-1 block h-[0.5px] w-full bg-foreground/10"></span> */}
@@ -148,16 +150,16 @@ export function ClientUserMenu() {
               <span className="my-1 block h-[0.5px] w-full bg-foreground/10"></span>
               <DropdownMenuItem asChild>
                 <Link href="/user/comments" className="flex items-center gap-2">
-                  <MessageCircle className="size-4" />
+                  <FaComment className="size-4" />
                   {t("my_comments")}
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
+              {/* <DropdownMenuItem asChild>
                 <Link href="/user/reactions" className="flex items-center gap-2">
-                  <Smile className="size-4" />
+                  <FaThumbsUp className="size-4" />
                   {t("my_reactions")}
                 </Link>
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
               <span className="my-1 block h-[0.5px] w-full bg-foreground/10"></span>
               {adminDashboardPath ? (
                 <DropdownMenuItem asChild>
@@ -165,14 +167,14 @@ export function ClientUserMenu() {
                     href={adminDashboardPath}
                     className="flex cursor-pointer items-center gap-2"
                   >
-                    <LayoutGrid className="size-4" />
+                    <FaTools className="size-4" />
                     Admin panelga o‘tish
                   </Link>
                 </DropdownMenuItem>
               ) : null}
               <span className="my-1 block h-[0.5px] w-full bg-foreground/10"></span>
               <DropdownMenuItem onClick={() => void signOut({ callbackUrl: "/" })}>
-                <LogOut className="size-4" />
+                <FaSignOutAlt className="size-4" />
                 {t("logout")}
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -240,7 +242,7 @@ export function ClientUserMenu() {
                 <div className="space-y-1.5">
                   <Label htmlFor="profile-fullname">{t("full_name")}</Label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                    <FaUser className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
                       id="profile-fullname"
                       value={fullName}
@@ -310,7 +312,7 @@ export function ClientUserMenu() {
                 <div className="space-y-1.5">
                   <Label htmlFor="profile-current-password">{t("current_password")}</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                    <FaLock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
                       id="profile-current-password"
                       type="password"
@@ -323,7 +325,7 @@ export function ClientUserMenu() {
                 <div className="space-y-1.5">
                   <Label htmlFor="profile-new-password">{t("new_password")}</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                    <FaLock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
                       id="profile-new-password"
                       type="password"

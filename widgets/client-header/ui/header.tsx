@@ -16,6 +16,8 @@ import { LanguageSwitcher } from '@/widgets/language-switcher'
 import { cn } from '@/shared/common/lib/utils'
 import { ThemeSwitcher, ThemeSwitcherForHeader } from '@/widgets/theme-switcher'
 import { useRouter } from 'next/navigation'
+import { BsSearch } from "react-icons/bs";
+
 
 export type HeaderVariant = 'default' | 'news-page-header'
 
@@ -178,7 +180,6 @@ export default function Header({
             className="flex h-8 items-center md:hidden"
           >
             <Image
-              // src={mounted ? logoSrc : '/images/fm-logo-dark.svg'}
               src={'/images/fm-logo-dark.svg'}
               alt="Logo"
               width={130}
@@ -199,7 +200,7 @@ export default function Header({
           <div className="flex shrink-0 items-center gap-2">
             <div className="flex items-center gap-2">
               <Button variant="ghost" size="icon" className="" onClick={() => setSearchOpen(true)} aria-label="Qidiruv">
-                <Search size="4" />
+                <BsSearch size="4" />
               </Button>
               <span className="block w-[0.5px] h-5 bg-foreground/10"></span>
               <ClientUserMenu />

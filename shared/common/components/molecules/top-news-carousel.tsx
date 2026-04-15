@@ -19,7 +19,8 @@ import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
 import { usePublicCategoriesQuery } from "@/features/category/model/public-categories-query"
 import { getCategoryLabelForNewsItem } from "@/features/category/model/use-category-label"
 import { cn } from "@/shared/common/lib/utils"
-import { AppLocale, formatDateISO, formatDateTimeDotSlash, formatDateTimeLocale } from "../../lib/formatter"
+import { AppLocale } from "../../lib/formatter"
+import { PublishedAt } from "@/entities/news/_components/atoms/published-at"
 
 function CarouselDots({
   count,
@@ -112,23 +113,17 @@ export default function TopNewsCarousel() {
               <CarouselItem key={item.slug} className="pl-0 h-full">
                 <Card className="overflow-hidden mx-1 p-0 rounded-sm h-full min-h-[420px] md:min-h-[480px] lg:min-h-[520px]">
                   <div className="grid grid-cols-1 md:grid-cols-5 h-full min-h-[420px] md:min-h-[480px] lg:min-h-[520px]">
-                    <div className="flex flex-col justify-between order-1 md:order-0 gap-2 p-4 md:gap-3 md:p-8 bg-background border-none md:col-span-2 min-h-0">
+                    <div className="flex flex-col justify-between order-1 md:order-0 gap-2 p-4 md:gap-3 md:p-8 border-none md:col-span-2 min-h-0">
                       <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                         {getCategoryLabelForNewsItem(categories, categoriesPending, item, locale)}
                       </span>
                       <div className="flex flex-col gap-2">
-                        <h3 className="text-lg font-semibold leading-tight md:text-xl">
-                          <Link href={`/news/${item.slug}`} className="hover:underline">
-                            <span className="line-clamp-3 md:line-clamp-5">{item.title ?? ""} </span>
-                          </Link>
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          <span className="line-clamp-4 md:line-clamp-5">{item.description ?? ""}</span>
-                        </p>
+                        <Link href={`/news/${item.slug}`} className="text-lg font-bold leading-relax tracking-wide md:text-xl hover:underline line-clamp-3 md:line-clamp-5 select-none">
+                          {item.title ?? ""}
+                        </Link>
+                        <p className="text-sm text-muted-foreground line-clamp-4 md:line-clamp-5 select-none">{item.description ?? ""}</p>
                       </div>
-                      <time className="text-xs" dateTime={formatDateISO(item.publishedAt)}>
-                        {formatDateTimeDotSlash(item.publishedAt)}
-                      </time>
+                      <PublishedAt publishedAt={item.publishedAt} />
                     </div>
                     <Link
                       href={`/news/${item.slug}`}
@@ -146,9 +141,6 @@ export default function TopNewsCarousel() {
                         <div className="absolute inset-0 bg-muted" aria-hidden />
                       )}
                       <div className="absolute inset-0 bg-black/30" aria-hidden />
-                      {/* <span className="absolute left-3 top-3 z-10 bg-primary rounded-xs px-1.5 py-0.5 text-xs font-semibold text-primary-foreground">
-                        Top
-                      </span> */}
                     </Link>
                   </div>
                 </Card>

@@ -6,7 +6,7 @@ import { LoadMoreButton } from "@/shared/common/components/molecules"
 import type { AppLocale } from "@/shared/common/lib/formatter"
 import { useLocale, useTranslations } from "next-intl"
 import { cn } from "@/shared/common/lib/utils"
-import { NewsListingListCard } from "@/features/news/ui/news-listing/news-listing-list-card"
+import SimpleNewsCard from "../cards/simple-news-card"
 
 type RelatedNewsProps =
   | { categorySlug: string; excludeSlug: string; latestLimit?: never; sidebar?: boolean }
@@ -120,15 +120,12 @@ export default function RelatedNews(props: RelatedNewsProps) {
       </h2>
       <div className="grid grid-cols-1 gap-4">
         {items.map((item: NewsItem) => (
-          <NewsListingListCard
+          <SimpleNewsCard
             key={item.slug}
             item={item}
             locale={locale}
-            stats={{
-              comments: item.commentCount ?? 0,
-              reactions: item.reactionCount ?? 0,
-            }}
-            imagesLabel={t("images")}
+            variant="row"
+            description={false}
           />
         ))}
       </div>

@@ -11,26 +11,26 @@ export default function CategoryList() {
   const t = useTranslations("common");
   const { data: categories = [] } = usePublicCategoriesQuery();
   return (
-    <div className="hidden md:flex items-center gap-4 text-[16px] flex-wrap p-2 md:p-4">
-      <Link href="/news" className="">
+    <div className="hidden md:flex items-center gap-4 text-[16px] flex-wrap p-2 md:p-4 font-bold">
+      {/* <Link href="/news" className="">
         <span>{t("news")}</span>
-      </Link>
-      <Link href="/articles" className="">
-        <span>{t("articles")}</span>
-      </Link>
+      </Link> */}
       {categories.map((category) => (
         <Link
           key={category.slug}
           href={category.href || `/category/${category.slug}`}
-          className=""
+          className="hover:text-brand transition-colors"
         >
           <span>{category.name[locale] ?? category.name.uz ?? category.slug}</span>
         </Link>
       ))}
-      <Link href="/news/video" className="">
+      {/* <Link href="/articles" className="">
+        <span>{t("articles")}</span>
+      </Link> */}
+      <Link href="/news/video" className="hover:text-brand transition-colors">
         <span>{t("video")}</span>
       </Link>
-      <Link href="/news/audio" className="">
+      <Link href="/news/audio" className="hover:text-brand transition-colors">
         <span>{t("audio")}</span>
       </Link>
     </div>
@@ -38,9 +38,9 @@ export default function CategoryList() {
 }
 
 export function CategoryListForSidebar() {
-  const locale = useLocale() as AppLocale;
+  // const locale = useLocale() as AppLocale;
   const t = useTranslations("common");
-  const { data: categories = [] } = usePublicCategoriesQuery();
+  // const { data: categories = [] } = usePublicCategoriesQuery();
   return (
     <div className="flex flex-col items-center py-4 justify-center gap-4 px-4">
       <Link href="/news" className="text-sm">
@@ -55,7 +55,7 @@ export function CategoryListForSidebar() {
           <span className="text-xl font-medium">{category.name[locale] ?? category.name.uz ?? category.slug}</span>
         </Link>
       ))} */}
-      <Link href="/news/articles" className="text-sm">
+      <Link href="/articles" className="text-sm">
         <span className="text-xl font-medium">{t("articles")}</span>
       </Link>
       <Link href="/news/video" className="text-sm">
@@ -98,7 +98,7 @@ export function CategoryListForNewsPage() {
   const t = useTranslations("common");
   const { data: categories = [] } = usePublicCategoriesQuery();
   return (
-    <div className="flex flex-col items-start py-4 justify-start gap-4 px-4">
+    <div className="flex flex-col items-start py-4 justify-start gap-4 px-4 font-semibold">
       <Link href="/news" className="text-sm">
         <span className="text-lg font-medium">{t("news")}</span>
       </Link>

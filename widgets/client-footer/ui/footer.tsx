@@ -32,14 +32,23 @@ export default function Footer() {
   return (
     <div className="py-4 md:border-t bg-card shadow-sm mt-4">
       <div className="max-w-7xl mx-auto px-4 md:px-6">
-        <Link href="/" className="flex h-8 shrink-0 items-center md:h-10 mb-2">
+        <Link href="/" className="flex h-8 shrink-0 items-center md:h-10 md:mb-2">
           <Image
-            src={mounted ? logoSrc : '/images/fm-logo-dark.svg'}
+            src={'/images/fm-logo-dark.svg'}
             alt="Logo"
             width={130}
             height={40}
-            className="h-6 w-auto max-h-6 object-contain object-left md:h-8 md:max-h-8"
+            className="dark:hidden h-4.5 w-auto max-h-6 object-contain md:h-8 md:max-h-8"
             sizes="(max-width: 768px) 100px, 130px"
+            priority
+          />
+          <Image
+            src={'/images/fm-logo.svg'}
+            alt="Logo"
+            width={90}
+            height={40}
+            className="hidden dark:block h-4.5 w-auto max-h-6 object-contain md:h-8 md:max-h-8"
+            priority
           />
         </Link>
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0 md:gap-4 lg:gap-6 items-start justify-between'>
@@ -63,7 +72,8 @@ export default function Footer() {
           </div>
           {/* Social and links */}
           <div className="hidden md:flex items-center gap-x-4 gap-y-1 text-sm py-4 md:pt-0 md:py-0 text-foreground/70 border-b md:border-none border-border flex-wrap">
-            <span className='font-bold'>{t("quick_links")}: </span>{seed.links.map((item) => {
+            <span className='font-bold'>{t("quick_links")}: </span>
+            {seed.links.map((item) => {
               const isExternal = /^https?:\/\//i.test(item.href)
               return (
                 <Link key={item.href} href={item.href} target={isExternal ? '_blank' : undefined}>
@@ -76,7 +86,7 @@ export default function Footer() {
             </div>
           </div>
           <div className="flex items-start pt-2 md:pt-0 flex-col gap-2">
-            <span className="hidden md:block font-bold text-sm text-foreground/70">{t("follow_us")}:</span>
+            {/* <span className="hidden md:block font-bold text-sm text-foreground/70">{t("follow_us")}:</span> */}
             <div className='flex items-center my-2 justify-between gap-2 w-full'>
               <SocialMediaButtons
                 variant="icon-only"

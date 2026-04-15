@@ -1,10 +1,9 @@
-import { Link } from "@/i18n/navigation";
 import { getNewsListForLocale, type RawNewsItem } from "@/features/news/model";
 import type { AppLocale } from "@/shared/common/lib/locale-api";
 import type { LocaleMap } from "@/shared/common/lib/locale-types";
 import { NewsSectionHeader } from "@/shared/common/components/news-sections/news-section-header";
-import { MiniNewsCard } from "@/features/news/ui/mini-news-card";
 import Image from "next/image";
+import SimpleNewsCard from "@/entities/news/cards/simple-news-card";
 
 type ThemeLike = {
   _id: string;
@@ -84,18 +83,14 @@ export function ThemeSection({
           viewAllHref={`/theme/${theme.slug}`}
           linkWrap="onlyDesktop"
         />
-
-        {/* <Link href={`/theme/${theme.slug}`} className="hover:underline">
-          {title}
-        </Link> */}
-
         <div className="grid grid-cols-1 md:gap-x-8 gap-y-4 mt-4 md:p-4 md:grid-cols-2">
           {items.map((item) => (
-            <MiniNewsCard
+            <SimpleNewsCard
               key={item.slug}
               item={item}
               locale={locale}
               variant="row"
+              description={false}
             />
           ))}
         </div>

@@ -3,7 +3,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/common/components/ui/card'
 import { Input } from '@/shared/common/components/ui/input'
 import { Label } from '@/shared/common/components/ui/label'
-import { Button } from '@/shared/common/components/ui/button'
 import { X } from 'lucide-react'
 
 type VideoFormProps = {

@@ -153,15 +153,15 @@ export function AudioPlayerBar({
 
   return (
     <div
-      className="sticky inset-x-0 z-10 bg-white dark:bg-accent/80 shadow-md backdrop-blur"
+      className="sticky inset-x-0 z-10"
       style={{ top: 'var(--header-bar-height, 57px)' }}
     >
-      <div className='md:pt-4 md:p-4 bg-white dark:bg-accent/80'>
+      <div className='md:pt-4 md:p-4'>
         <div className="backdrop-blur md:px-0 md:pr-4">
           <div className="mx-auto max-w-7xl">
             {/* Mobile: controls + share, progress + time */}
             <div className="md:hidden py-2">
-              <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center justify-between gap-2 px-2">
                 <div className="ml-2 flex items-center gap-1">
                   <button
                     type="button"
@@ -213,7 +213,7 @@ export function AudioPlayerBar({
                   <button
                     type="button"
                     onClick={togglePlay}
-                    className="inline-flex size-11 items-center justify-center rounded-full p-2 bg-brand/10 hover:bg-brand/90 dark:bg-foreground/10"
+                    className="inline-flex size-11 items-center justify-center rounded-full p-2 bg-brand/10 dark:bg-foreground/10"
                     aria-label={isPlaying ? 'Pause' : 'Play'}
                   >
                     {isPlaying ? (
@@ -233,7 +233,7 @@ export function AudioPlayerBar({
                   </button>
                 </div>
               </div>
-              <div className="mt-2 flex items-center gap-2 px-2">
+              <div className="mt-2 flex items-center gap-2">
                 <div className="h-0.5 flex-1 cursor-pointer rounded-full bg-brand/10 dark:bg-foreground/10" onClick={handleSeek}>
                   <div
                     className="relative h-full rounded-full bg-brand/70 transition-[width] duration-100"
@@ -243,9 +243,9 @@ export function AudioPlayerBar({
                     <span className="absolute -right-1 -top-1 size-3 rounded-full bg-brand shadow-sm" />
                   </div>
                 </div>
-                <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground">
+                {/* <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground">
                   {formatTime(currentTime)} / {formatTime(duration)}
-                </span>
+                </span> */}
               </div>
             </div>
 

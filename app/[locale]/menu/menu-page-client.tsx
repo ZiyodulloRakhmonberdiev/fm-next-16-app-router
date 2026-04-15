@@ -5,12 +5,12 @@ import { Link } from "@/i18n/navigation"
 import { useLocale } from "next-intl"
 import { usePublicCategoriesQuery } from "@/features/category/model/public-categories-query"
 import type { AppLocale } from "@/shared/common/lib/locale-api"
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/common/components/ui/card"
-import { LanguageSwitcher, LanguageSwitcherForSidebar } from "@/widgets/language-switcher"
-import { ThemeSwitcherForHeader } from "@/widgets/theme-switcher"
+// import { Card, CardContent, CardHeader, CardTitle } from "@/shared/common/components/ui/card"
+// import { LanguageSwitcher, LanguageSwitcherForSidebar } from "@/widgets/language-switcher"
+// import { ThemeSwitcherForHeader } from "@/widgets/theme-switcher"
 import { Bell, ChevronRight, FileText, Flag, Globe, Info, Languages, LockOpen, Mail, Moon, Phone, PhoneCall, User, UsersRound } from "lucide-react"
-import { Switch } from "@/shared/common/components/ui/switch"
-import { cn } from "@/shared/common/lib/utils"
+// import { Switch } from "@/shared/common/components/ui/switch"
+// import { cn } from "@/shared/common/lib/utils"
 import { usePathname, useRouter } from "@/i18n/navigation"
 import { useTheme } from "next-themes"
 
@@ -56,7 +56,7 @@ const copyByLocale: Record<AppLocale, MenuCopy> = {
       { title: "Maqolalar", href: "/articles" },
       { title: "Audio", href: "/news/audio" },
       { title: "Video", href: "/news/video" },
-      { title: "Dolzarb yangiliklar", href: "/news/breaking" },
+      { title: "Dolzarb", href: "/news/breaking" },
       { title: "Muallif tanlovi", href: "/news" },
     ],
   },
@@ -77,7 +77,7 @@ const copyByLocale: Record<AppLocale, MenuCopy> = {
       { title: "Мақолалар", href: "/articles" },
       { title: "Видео", href: "/news/video" },
       { title: "Аудио", href: "/news/audio" },
-      { title: "Долзарб янгиликлар", href: "/news/breaking" },
+      { title: "Долзарб", href: "/news/breaking" },
       { title: "Муаллиф танлови", href: "/news" }
     ],
   },
@@ -129,58 +129,58 @@ export default function MenuPageClient() {
   const locale = useLocale() as AppLocale
   const pathname = usePathname()
   const router = useRouter()
-  const { resolvedTheme } = useTheme()
+  // const { resolvedTheme } = useTheme()
   const copy = copyByLocale[locale] ?? copyByLocale.uz
   const { data: categories = [] } = usePublicCategoriesQuery()
   const [selectedLocale, setSelectedLocale] = React.useState(locale)
-  const [showLocaleOptions, setShowLocaleOptions] = React.useState(false)
-  const [notificationsEnabled, setNotificationsEnabled] = React.useState(true)
+  // const [showLocaleOptions, setShowLocaleOptions] = React.useState(false)
+  // const [notificationsEnabled, setNotificationsEnabled] = React.useState(true)
 
   React.useEffect(() => {
     setSelectedLocale(locale)
   }, [locale])
 
-  const handleSetLocale = (nextLocale: AppLocale) => {
-    setSelectedLocale(nextLocale)
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem(LOCALE_STORAGE_KEY, nextLocale)
-    }
-    router.replace(pathname, { locale: nextLocale as any })
-  }
+  // const handleSetLocale = (nextLocale: AppLocale) => {
+  //   setSelectedLocale(nextLocale)
+  //   if (typeof window !== "undefined") {
+  //     window.localStorage.setItem(LOCALE_STORAGE_KEY, nextLocale)
+  //   }
+  //   router.replace(pathname, { locale: nextLocale as any })
+  // }
 
-  const locales = ["uz", "uzb", "ru", "en"] as const
-  const currentLocaleMeta = localeMeta[selectedLocale] ?? localeMeta[locale] ?? localeMeta.uz
+  // const locales = ["uz", "uzb", "ru", "en"] as const
+  // const currentLocaleMeta = localeMeta[selectedLocale] ?? localeMeta[locale] ?? localeMeta.uz
 
   return (
-    <div className="mx-auto w-full max-w-7xl space-y-6 px-4 py-6 md:px-6">
+    <div className="mx-auto w-full max-w-7xl space-y-6 px-4 py-2 md:px-6">
       {/* <section className="space-y-3">
         <h1 className="text-2xl font-bold md:text-3xl">{copy.title}</h1>
       </section> */}
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold">{copy.categoryTitle}</h2>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        <h2 className="text-lg font-bold">{copy.categoryTitle}</h2>
+        <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-3 lg:grid-cols-4">
           {categories.map((category) => (
             <Link
               key={category.slug}
               href={category.href || `/category/${category.slug}`}
-              className="flex justify-between items-center rounded-xl border border-border bg-card px-3 py-3 text-sm font-medium transition-colors hover:border-brand/50 hover:text-brand"
+              className="flex justify-between items-center rounded-md  bg-card px-4 py-2.5 text-sm font-medium transition-colors hover:border-brand/50 hover:text-brand"
             >
               <span>{category.name[locale] ?? category.name.uz ?? category.slug}</span>
-              <ChevronRight className="size-4" />
+              <ChevronRight className="size-5 text-muted-foreground" />
             </Link>
           ))}
         </div>
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold">{copy.sectionsTitle}</h2>
-        <div className="grid gap-3 grid-cols-2 sm:grid-cols-2 lg:grid-cols-3">
+        <h2 className="text-lg font-bold">{copy.sectionsTitle}</h2>
+        <div className="grid gap-1.5 grid-cols-2 lg:grid-cols-3">
           {copy.sections.map((section) => (
             <Link
               key={`${section.href}-${section.title}`}
               href={section.href}
-              className="flex justify-between items-center rounded-xl border border-border bg-card px-3 py-3 text-sm font-medium transition-colors hover:border-brand/50 hover:text-brand"
+              className="flex justify-center items-center rounded-md bg-card px-4 py-2.5 text-sm font-medium transition-colors hover:border-brand/50 hover:text-brand"
             >
               <span>{section.title}</span>
             </Link>
@@ -188,56 +188,56 @@ export default function MenuPageClient() {
         </div>
       </section>
       <section className="space-y-2">
-        <h2 className="text-lg font-semibold">{copy.settingsTitle}</h2>
-        <div className="flex justify-between items-center">
+        <h2 className="text-lg font-bold mb-3">{copy.settingsTitle}</h2>
+        <div className="flex justify-between items-center border-b pb-2">
             <Link
               href="/contact"
-              className="flex items-center gap-3 rounded-xl py-2 text-sm font-medium transition-colors"
+              className="flex items-center gap-3 rounded-xl py-1 text-sm font-medium transition-colors"
             >
               <PhoneCall className="text-muted-foreground" />
               <span>Murojaat yo'llash</span>
             </Link>
-            <ChevronRight className="size-5" />
+            <ChevronRight className="size-5 text-muted-foreground" />
         </div>
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center border-b pb-2">
             <Link
               href="/partners"
-              className="flex items-center gap-3 rounded-xl py-2 text-sm font-medium transition-colors"
+              className="flex items-center gap-3 rounded-xl py-1 text-sm font-medium transition-colors"
             >
               <Flag className="text-muted-foreground" />
               <span>Reklama</span>
             </Link>
-            <ChevronRight className="size-5" />
+            <ChevronRight className="size-5 text-muted-foreground" />
         </div>
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center border-b pb-2">
             <Link
               href="/team"
-              className="flex items-center gap-3 rounded-xl py-2 text-sm font-medium transition-colors"
+              className="flex items-center gap-3 rounded-xl py-1 text-sm font-medium transition-colors"
             >
               <UsersRound className="text-muted-foreground" />
               <span>Bizning jamoa</span>
             </Link>
-            <ChevronRight className="size-5" />
+            <ChevronRight className="size-5 text-muted-foreground" />
         </div>
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center border-b pb-2">
             <Link
               href="/terms"
-              className="flex items-center gap-3 rounded-xl py-2 text-sm font-medium transition-colors"
+              className="flex items-center gap-3 rounded-xl py-1 text-sm font-medium transition-colors"
             >
               <FileText className="text-muted-foreground" />
               <span>Foydalanish shartlari</span>
             </Link>
-            <ChevronRight className="size-5" />
+            <ChevronRight className="size-5 text-muted-foreground" />
         </div>
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center border-b pb-2">
             <Link
               href="/privacy"
-              className="flex items-center gap-3 rounded-xl py-2 text-sm font-medium transition-colors"
+              className="flex items-center gap-3 rounded-xl py-1 text-sm font-medium transition-colors"
             >
               <LockOpen className="text-muted-foreground" />
               <span>Maxfiylik siyosati</span>
             </Link>
-            <ChevronRight className="size-5" />
+            <ChevronRight className="size-5 text-muted-foreground" />
         </div>
         <div className="flex justify-between items-center">
             <Link
@@ -247,7 +247,7 @@ export default function MenuPageClient() {
               <Info className="text-muted-foreground" />
               <span>Sayt haqida</span>
             </Link>
-            <ChevronRight className="size-5" />
+            <ChevronRight className="size-5 text-muted-foreground" />
         </div>
       </section>
 

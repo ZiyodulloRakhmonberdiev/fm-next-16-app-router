@@ -134,13 +134,13 @@ export default async function HomeMainContent() {
         initialNews={publicNews}
         initialCategories={categories}
       />
+      <StatsNewsSection
+        initialNews={statsNews}
+        initialCategories={categories}
+      />
       {renderNextTheme()}
       <TextNewsSection
         initialNews={publicNews}
-        initialCategories={categories}
-      />
-      <StatsNewsSection
-        initialNews={statsNews}
         initialCategories={categories}
       />
       {renderNextTheme()}

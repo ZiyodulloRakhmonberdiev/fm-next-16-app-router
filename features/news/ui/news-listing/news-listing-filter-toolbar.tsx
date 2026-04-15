@@ -1,16 +1,16 @@
 "use client"
 
 import type { ReactNode } from "react"
-import { ChevronDown } from "lucide-react"
+// import { ChevronDown } from "lucide-react"
 import { Button } from "@/shared/common/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/shared/common/components/ui/dropdown-menu"
+// import {
+//   DropdownMenu,
+//   DropdownMenuCheckboxItem,
+//   DropdownMenuContent,
+//   DropdownMenuLabel,
+//   DropdownMenuSeparator,
+//   DropdownMenuTrigger,
+// } from "@/shared/common/components/ui/dropdown-menu"
 import type { PublicCategory } from "@/features/category/model/public-categories-query"
 import type { AppLocale } from "@/shared/common/lib/formatter"
 import type { FilterType } from "./news-listing-types"
@@ -41,15 +41,15 @@ function getCategoryLabel(c: PublicCategory, locale: AppLocale) {
 
 export function NewsListingFilterToolbar({
   pageHeading,
-  locale,
-  categories,
+  // locale,
+  // categories,
   activeFilter,
-  selectedCategorySlugs,
-  selectedCount,
+  // selectedCategorySlugs,
+  // selectedCount,
   onFilterChange,
-  onCategoryToggle,
-  onApplyCategories,
-  onClearCategories,
+  // onCategoryToggle,
+  // onApplyCategories,
+  // onClearCategories,
   labels,
 }: NewsListingFilterToolbarProps) {
   const filterButtons: { key: FilterType; label: string }[] = [
@@ -58,11 +58,11 @@ export function NewsListingFilterToolbar({
   ]
 
   return (
-    <div className="mb-4 hidden md:flex flex-col gap-1 bg-background py-2 sm:flex-row sm:items-center sm:justify-between md:top-17 md:gap-3 z-20 border-b">
-      <h1 className="text-xl md:text-3xl mt-4 mb-2 font-bold">{pageHeading}</h1>
+    <div className="mb-2 md:mb-4 md:pt-4 flex flex-col gap-1 bg-background py-2 sm:flex-row sm:items-center sm:justify-between md:top-17 md:gap-3 z-20 border-b">
+      <h1 className="text-xl md:text-3xl md:mb-2 font-bold">{pageHeading}</h1>
       <div className="flex items-center gap-2">
         <div className="w-full flex-wrap">
-          <div className="hidden flex-wrap items-center gap-4 rounded-md bg-background py-1">
+          <div className="flex-wrap items-center gap-4 rounded-md bg-background py-1">
             {filterButtons.map((btn) => (
               <Button
                 key={btn.key}
@@ -83,7 +83,7 @@ export function NewsListingFilterToolbar({
           </div>
         </div>
 
-        <div className="hidden">
+        {/* <div className="hidden">
           <DropdownMenu >
             <DropdownMenuTrigger asChild>
               <Button type="button" size="sm" variant="ghost" className="h-8 gap-2">
@@ -94,7 +94,7 @@ export function NewsListingFilterToolbar({
                 <ChevronDown className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="rounded-xs">
               <DropdownMenuLabel>{labels.categories}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               {categories.map((c) => {
@@ -116,7 +116,7 @@ export function NewsListingFilterToolbar({
                   type="button"
                   size="sm"
                   variant="ghost"
-                  className="h-8 justify-start gap-2 bg-foreground text-background"
+                  className="h-8 justify-start gap-2 bg-foreground text-background rounded-xs"
                   onClick={onApplyCategories}
                 >
                   {labels.apply}
@@ -125,7 +125,7 @@ export function NewsListingFilterToolbar({
                   type="button"
                   size="sm"
                   variant="outline"
-                  className="h-8 justify-start gap-2"
+                  className="h-8 justify-start gap-2 rounded-xs"
                   onClick={onClearCategories}
                 >
                   {labels.clear}
@@ -133,7 +133,7 @@ export function NewsListingFilterToolbar({
               </div>
             </DropdownMenuContent>
           </DropdownMenu>
-        </div>
+        </div> */}
       </div>
     </div>
   )

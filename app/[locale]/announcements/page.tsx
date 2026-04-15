@@ -8,7 +8,7 @@ import { Header } from "@/widgets/client-header"
 import { dbConnect } from "@/shared/common/lib/db"
 import { NewsModel } from "@/features/news/model/news.model"
 import { SpecialNewsPageContent } from "@/features/news/ui/special-news-page-content"
-import { LatestNews } from "@/shared/common/components/news-sections"
+import LatestNews from "@/entities/news/lists/latest-news"
 import { getCachedPublicNews } from "@/shared/server/public-data-server"
 
 export async function generateMetadata(): Promise<Metadata> {

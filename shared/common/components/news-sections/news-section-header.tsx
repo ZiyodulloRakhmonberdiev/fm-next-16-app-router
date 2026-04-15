@@ -71,7 +71,7 @@ function defaultViewAllClass(
     case "subtle":
       return "flex shrink-0 items-center gap-1 text-xs font-medium transition-colors hover:text-foreground hover:underline md:text-sm";
     case "brandThin":
-      return "text-xs md:text-sm flex items-center gap-1";
+      return "text-xs md:text-sm flex items-center gap-1 hover:underline";
     default:
       return "flex items-center gap-1 text-xs font-medium hover:underline md:text-sm";
   }

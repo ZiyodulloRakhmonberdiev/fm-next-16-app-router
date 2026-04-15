@@ -3,13 +3,16 @@
 import type { ReactNode } from "react"
 import Image from "next/image"
 import { Link } from "@/i18n/navigation"
-import { Clock, Eye, Heart, MessageSquare, Play } from "lucide-react"
+import { Play } from "lucide-react"
 import type { AppLocale } from "@/shared/common/lib/formatter"
-import { formatDate, formatDateISO, formatDateTimeDotSlash, formatDateTimeLocale } from "@/shared/common/lib/formatter"
 import { Card } from "@/shared/common/components/ui/card"
 import type { NewsItem } from "@/features/news/model"
 import { useCategoryLabel } from "@/features/category/model/use-category-label"
 import { getSafeImageSrc, getVideoPoster } from "./news-listing-utils"
+import { PublishedAt } from "@/entities/news/_components/atoms"
+import { CategoryName } from "@/entities/news/_components/atoms/category-name"
+import { IoEyeSharp } from "react-icons/io5"
+import { MdTimer } from "react-icons/md"
 
 type NewsListingListCardProps = {
   item: NewsItem
@@ -55,43 +58,36 @@ export function NewsListingListCard({ item, locale, stats, imagesLabel, imageOve
         </div>
 
         <div className="min-w-0 flex flex-1 flex-col justify-start space-y-2 p-2 sm:basis-2/3 md:p-4">
-          <div className="flex flex-wrap items-center text-[11px] text-muted-foreground gap-2 justify-between border-b border-border pb-2">
-            <Link href={`/category/${item.categorySlug}`} className=" hover:underline capitalize inline-flex items-center gap-1">
-              <span className="block w-2 h-2 bg-brand rounded-full"></span>
-              {categoryLabel}
-            </Link>
-            <div className="inline-flex items-center gap-1">
-              <time dateTime={formatDateISO(item.publishedAt)} className="inline-flex items-center gap-1">
-                {formatDateTimeDotSlash(item.publishedAt)}
-              </time>
-            </div>
+          <div className="flex flex-wrap items-center text-[11px] text-muted-foreground gap-2 justify-between">
+            <CategoryName categorySlug={item.categorySlug} categoryLabel={categoryLabel} />
+            <PublishedAt publishedAt={item.publishedAt} />
           </div>
 
-          <Link href={`/news/${item.slug}`} className="text-sm font-semibold leading-snug hover:underline">
+          <Link href={`/news/${item.slug}`} className="md:text-lg text-sm font-semibold leading-snug hover:underline">
             <span className="line-clamp-2">{item.title ?? ""}</span>
           </Link>
 
           {item.description ? (
             <div className="min-w-0">
-              <p className="line-clamp-3 wrap-break-word text-sm text-muted-foreground">
+              <p className="line-clamp-2 wrap-break-word text-sm text-muted-foreground">
                 {item.description}
               </p>
             </div>
           ) : null}
 
-          <div className="flex items-center justify-start gap-2 text-xs text-muted-foreground pt-2 border-t border-border mt-auto">
+          <div className="flex items-center justify-start gap-2 text-xs text-muted-foreground mt-auto">
 
             <div className="inline-flex items-center gap-3 pl-1">
               <span className="inline-flex items-center gap-1">
-                <Clock className="h-3.5 w-3.5" />
-                {item.minutes}
-              </span>
-              <span aria-hidden className="select-none text-xs text-border">|</span>
-              <span className="inline-flex items-center gap-1">
-                <Eye className="h-3.5 w-3.5" />
+                <IoEyeSharp className="size-3.5" />
                 {item.views}
               </span>
-              <span aria-hidden className="select-none text-xs text-border">
+              <span aria-hidden className="select-none text-xs text-muted-foreground/40">|</span>
+              <span className="inline-flex items-center gap-1">
+                <MdTimer className="size-3.5" />
+                {item.minutes}
+              </span>
+              {/* <span aria-hidden className="select-none text-xs text-border">
                 |
               </span>
               <span className="inline-flex items-center gap-1">
@@ -104,7 +100,7 @@ export function NewsListingListCard({ item, locale, stats, imagesLabel, imageOve
               <span className="inline-flex items-center gap-1">
                 <Heart className="h-3.5 w-3.5" />
                 {stats?.reactions ?? 0}
-              </span>
+              </span> */}
 
             </div>
           </div>

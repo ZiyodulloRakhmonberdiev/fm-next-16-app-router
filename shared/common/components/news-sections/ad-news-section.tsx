@@ -1,14 +1,14 @@
 "use client"
 
 import * as React from "react"
-import Image from "next/image"
 import Autoplay from "embla-carousel-autoplay"
 import { useLocale } from "next-intl"
 import { Link } from "@/i18n/navigation"
-import { ChevronRight, ExternalLink, Play } from "lucide-react"
+import { ChevronRight, ExternalLink } from "lucide-react"
 import { getNewsListForLocale, type RawNewsItem } from "@/features/news/model"
 import type { AppLocale } from "@/shared/common/lib/locale-api"
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
+import AdNewsCard from "@/entities/news/cards/ad-news-card"
 import {
   Carousel,
   CarouselContent,
@@ -27,26 +27,6 @@ function hasRenderableMedia(item: RawNewsItem): boolean {
   const hasImage = Array.isArray(item.images) && item.images.some((src) => typeof src === "string" && src.trim() !== "")
   const hasVideo = typeof item.videoUrl === "string" && item.videoUrl.trim() !== ""
   return hasImage || hasVideo
-}
-
-function getSafeSrc(raw?: string): string {
-  if (!raw?.trim()) return ""
-  const candidate =
-    raw.startsWith("http://") || raw.startsWith("https://") || raw.startsWith("/")
-      ? raw
-      : `/uploads/images/${raw}`
-  try {
-    new URL(candidate, "http://localhost")
-    return candidate
-  } catch {
-    return ""
-  }
-}
-
-function getVideoSrc(raw?: string): string {
-  if (!raw?.trim()) return ""
-  if (raw.startsWith("http://") || raw.startsWith("https://") || raw.startsWith("/")) return raw
-  return `/${raw}`
 }
 
 export default function AdNewsSection({ initialNews }: AdNewsSectionProps) {
@@ -213,50 +193,11 @@ export default function AdNewsSection({ initialNews }: AdNewsSectionProps) {
             className="w-full"
           >
             <CarouselContent className="-ml-4">
-              {items.map((item) => {
-                const imageSrc = getSafeSrc(item.images?.[0])
-                const videoSrc = getVideoSrc(item.videoUrl)
-                const hasImage = Boolean(imageSrc)
-                const hasVideo = Boolean(videoSrc)
-                const hasAudio = Boolean(item.audioUrl && item.audioUrl.trim())
-                return (
-                  <CarouselItem key={item.slug} className="pl-4 basis-full">
-                    <article className="overflow-hidden">
-                      <Link href={`/news/${item.slug}`} className="flex flex-col h-full justify-between">
-                        <div className="pb-4 md:hidden items-stretch">
-                          <h3 className="line-clamp-4 text-lg font-semibold leading-snug">
-                            {item.title}
-                          </h3>
-                        </div>
-                        <div className="relative aspect-video w-full rounded-md">
-                          {hasImage ? (
-                            <Image src={imageSrc} alt={item.title} fill className="object-cover rounded-md" />
-                          ) : hasVideo ? (
-                            <video
-                              src={videoSrc}
-                              className="h-full w-full object-cover rounded-md"
-                              muted
-                              autoPlay
-                              loop
-                              playsInline
-                            />
-                          ) : null}
-                          {hasVideo || hasAudio ? (
-                            <span className="pointer-events-none absolute bottom-3 left-3 z-10 inline-flex size-10 items-center justify-center rounded-full bg-white/15 text-white shadow-md ring-1 ring-white/20 backdrop-blur">
-                              <Play className="size-5 fill-current" />
-                            </span>
-                          ) : null}
-                        </div>
-                        <div className="py-4 hidden md:block">
-                          <h3 className="line-clamp-3 text-lg font-semibold leading-snug">
-                            {item.title}
-                          </h3>
-                        </div>
-                      </Link>
-                    </article>
-                  </CarouselItem>
-                )
-              })}
+              {items.map((item) => (
+                <CarouselItem key={item.slug} className="basis-full pl-4">
+                  <AdNewsCard as="div" item={item} className="h-full border-none" />
+                </CarouselItem>
+              ))}
             </CarouselContent>
           </Carousel>
         </div>
@@ -291,48 +232,18 @@ export default function AdNewsSection({ initialNews }: AdNewsSectionProps) {
             </div>
           </div>
           <CarouselContent className="-ml-3">
-            {items.map((item) => {
-              const imageSrc = getSafeSrc(item.images?.[0])
-              const videoSrc = getVideoSrc(item.videoUrl)
-              const hasImage = Boolean(imageSrc)
-              const hasVideo = Boolean(videoSrc)
-              const hasAudio = Boolean(item.audioUrl && item.audioUrl.trim())
-              return (
-                <CarouselItem
-                  key={item.slug}
-                  className="pl-3 basis-full sm:basis-1/2 lg:basis-1/4"
-                >
-                  <article className="group overflow-hidden rounded-sm border bg-background">
-                    <Link href={`/news/${item.slug}`} className="block">
-                      <div className="relative aspect-video w-full bg-muted">
-                        {hasImage ? (
-                          <Image src={imageSrc} alt={item.title} fill className="object-cover" />
-                        ) : hasVideo ? (
-                          <video
-                            src={videoSrc}
-                            className="h-full w-full object-cover"
-                            muted
-                            autoPlay
-                            loop
-                            playsInline
-                          />
-                        ) : null}
-                        {hasVideo || hasAudio ? (
-                          <span className="pointer-events-none absolute bottom-2 left-2 z-10 inline-flex size-8 items-center justify-center rounded-full bg-brand text-white shadow-md ring-1 ring-black/5">
-                            <Play className="size-4 fill-current" />
-                          </span>
-                        ) : null}
-                      </div>
-                      <div className="bg-brand dark:bg-brand/40 text-white p-3 transition-colors duration-200 group-hover:bg-brand/80 dark:group-hover:bg-brand/70 min-h-[130px]">
-                        <h3 className="line-clamp-4 font-bold leading-snug md:text-base">
-                          {item.title}
-                        </h3>
-                      </div>
-                    </Link>
-                  </article>
-                </CarouselItem>
-              )
-            })}
+            {items.map((item) => (
+              <CarouselItem
+                key={item.slug}
+                className="basis-full pl-3 sm:basis-1/2 lg:basis-1/4"
+              >
+                <AdNewsCard
+                  as="div"
+                  item={item}
+                  className="h-full min-h-[200px] border-0 shadow-sm"
+                />
+              </CarouselItem>
+            ))}
           </CarouselContent>
         </Carousel>
       </div>

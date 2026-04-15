@@ -3,24 +3,13 @@
 import { useMemo, useState } from "react"
 import { useLocale, useTranslations } from "next-intl"
 import { toast } from "sonner"
-import { BadgeCheck, Clock3, Headphones, Loader2, Mail, MessageCircle } from "lucide-react"
+import { Headphones, Loader2, Mail } from "lucide-react"
 import { Button } from "@/shared/common/components/ui/button"
 import { Input } from "@/shared/common/components/ui/input"
 import { Label } from "@/shared/common/components/ui/label"
 import { Textarea } from "@/shared/common/components/ui/textarea"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/common/components/ui/select"
 import { usePublicSiteSettingsQuery } from "@/shared/server/public-site-settings-query"
 import { seed } from "@/scripts/seed"
-import { getSocialStyle } from "@/shared/common/components/ui/social-platform-styles"
-import { Link } from "@/i18n/navigation"
-
-const DIAL_CODES = ["+998", "+7", "+971", "+1", "+44", "+90", "+49"] as const
 
 export function ContactPageClient() {
   const t = useTranslations("contactPage")
@@ -93,10 +82,10 @@ export function ContactPageClient() {
   }
 
   return (
-    <div className="min-h-screen bg-background py-8 md:py-24">
+    <div className="min-h-screen bg-background py-8 md:py-12">
       <div className="mx-auto max-w-7xl px-4 md:px-6">
-        <div className="mb-4 md:mb-20">
-          <h1 className="text-4xl font-light tracking-tight text-foreground md:text-6xl mb-6">
+        <div className="mb-4 md:mb-10">
+          <h1 className="text-xl font-medium tracking-tight text-foreground md:text-4xl mb-6">
             {t("form_title")}
           </h1>
           <p className="max-w-2xl text-lg text-muted-foreground font-light leading-relaxed">

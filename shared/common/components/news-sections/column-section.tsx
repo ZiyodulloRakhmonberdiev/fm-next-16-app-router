@@ -10,10 +10,10 @@ import { formatDateISO, formatDateTimeLocale } from "@/shared/common/lib/formatt
 import type { AppLocale } from "@/shared/common/lib/formatter"
 import { Link } from "@/i18n/navigation"
 import { useLocale, useTranslations } from "next-intl"
-import { FeaturedNewsCard } from "@/features/news/ui/featured-news-card"
 import { ChevronRight } from "lucide-react"
 import type { PublicCategory } from "@/features/category/model/public-categories-query"
 import type { RawNewsItem } from "@/features/news/model"
+import SimpleNewsCard from "@/entities/news/cards/simple-news-card"
 
 type ColumnSectionProps = {
   categorySlug?: string
@@ -98,7 +98,7 @@ export default function ColumnSection({
               className={`h-full md:col-span-1 ${featuredPosition === "left" ? "md:order-1" : ""
                 }`}
             >
-              <FeaturedNewsCard item={featured} locale={locale} variant="column" />
+              <SimpleNewsCard item={featured} locale={locale} variant="featured" />
             </div>
           ) : null}
         </div>

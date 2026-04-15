@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl"
 import { User } from "lucide-react"
 import { cn } from "@/shared/common/lib/utils"
 import { Link } from "@/i18n/navigation"
+import { FaUser } from "react-icons/fa6"
 
 type CreatedByProps = {
   author: string
@@ -14,12 +15,12 @@ type CreatedByProps = {
 }
 
 function getInitials(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean)
-  if (parts.length >= 2) {
+  const parts = name?.trim().split(/\s+/).filter(Boolean)
+  if (parts?.length >= 2) {
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
   }
-  if (name.length >= 2) return name.slice(0, 2).toUpperCase()
-  return name.slice(0, 1).toUpperCase() || "?"
+  if (name?.length >= 2) return name.slice(0, 2).toUpperCase()
+  return name?.slice(0, 1).toUpperCase() || "?"
 }
 
 export default function CreatedBy({ author, authorId, authorImage }: CreatedByProps) {
@@ -34,9 +35,9 @@ export default function CreatedBy({ author, authorId, authorImage }: CreatedByPr
         : ""
 
   return (
-    <Card className="w-full overflow-hidden rounded-xl border p-0 bg-[#eee] dark:bg-card shadow-sm">
+    <Card className="w-full overflow-hidden rounded-xl border p-0 bg-[#eee] shadow-sm">
       <div className="flex items-center gap-4 p-4 rounded-md">
-        <div className="relative flex h-12 w-12 shrink-0 overflow-hidden rounded-full bg-primary/10 md:h-14 md:w-14 ring-2 ring-white dark:ring-foreground/50">
+        <div className="relative flex h-12 w-12 shrink-0 overflow-hidden rounded-full bg-primary/10 md:h-14 md:w-14 ring-2 ring-white">
           {hasImage && imageSrc ? (
             <Image
               src={imageSrc}
@@ -53,23 +54,23 @@ export default function CreatedBy({ author, authorId, authorImage }: CreatedByPr
               )}
               aria-hidden
             >
-              {author.trim() ? initials : <User className="h-6 w-6 text-primary/70 md:h-7 md:w-7" />}
+              {author?.trim() ? initials : <FaUser className="h-6 w-6  md:h-7 md:w-7 fill-current text-muted-foreground" />}
             </span>
           )}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          <p className="text-xs font-medium uppercase tracking-wide text-black/70">
             {t("createdBy")}
           </p>
           {authorId ? (
             <Link
               href={`/author/${authorId}`}
-              className="mt-0.5 inline-block truncate font-semibold text-foreground hover:underline"
+              className="mt-0.5 inline-block truncate font-bold text-black hover:underline"
             >
               {author}
             </Link>
           ) : (
-            <p className="mt-0.5 truncate font-semibold text-foreground">{author}</p>
+            <p className="mt-0.5 truncate font-bold text-black">{author}</p>
           )}
         </div>
       </div>

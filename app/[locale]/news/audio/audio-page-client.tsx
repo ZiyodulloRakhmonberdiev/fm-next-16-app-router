@@ -128,7 +128,7 @@ export function AudioNewsPageClient({ initial }: Props) {
   }, [])
 
   return (
-    <div className="relative px-4 md:px-6">
+    <div className="relative">
       <AudioPlayerBar
         activeNews={activeAudio}
         isPlaying={isPlaying}
@@ -143,22 +143,22 @@ export function AudioNewsPageClient({ initial }: Props) {
       {/* Top padding when player is active so content doesn't hide behind it (~64px player height) */}
       {/* <div className={cn("transition-all duration-300", activeAudio ? "pt-16" : "pt-0")} /> */}
 
-      <section className="w-full pt-6">
+      <section className="w-full pt-2 md:pt-6 px-4 md:px-6">
         {/* Page heading */}
 
         {/* Two-column layout: news list + authors choice sidebar */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-start">
           <div className="lg:col-span-2 space-y-4">
-          <div className="pb-6">
-          <div className="inline-flex items-center gap-3">
-            <div>
-              <h1 className="text-2xl font-bold md:text-3xl tracking-tight">Audio</h1>
-              <p className="text-sm text-muted-foreground mt-0.5">
-                {/* Oxirgi audio xabarlar va tahlillar */}
-              </p>
-            </div>
-          </div>
-        </div>
+            {/* <div className="pb-6">
+              <div className="inline-flex items-center gap-3">
+                <div>
+                  <h1 className="text-2xl font-bold md:text-3xl tracking-tight">Audio</h1>
+                  <p className="text-sm text-muted-foreground mt-0.5">
+                    Oxirgi audio xabarlar va tahlillar
+                  </p>
+                </div>
+              </div>
+            </div> */}
 
             {items.length === 0 && !loading ? (
               <div className="rounded-xl border bg-background p-8 text-center text-sm text-muted-foreground">

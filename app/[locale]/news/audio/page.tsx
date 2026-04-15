@@ -68,7 +68,9 @@ export default async function AudioNewsPage({
         <ClientSidebar />
       </div>
       <div className="flex w-full flex-1 flex-col">
-        <Header />
+        <div className="hidden md:block">
+          <Header />
+        </div>
         <main className="flex-1">
           <ClientServerOffGate model="news">
             <div className="mx-auto max-w-7xl">

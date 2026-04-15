@@ -164,40 +164,40 @@ export function NewsListingPageContent({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, fetchFirstPage, initialCategorySlug, initialThemeId])
 
-  React.useEffect(() => {
-    const slugs = items.map((i) => i.slug)
-    const missing = slugs.filter((s) => statsBySlug[s] == null)
-    if (missing.length === 0) return
-    const ac = new AbortController()
-    void (async () => {
-      const pairs = await Promise.all(
-        missing.map(async (slug) => {
-          const [reactionsRes, commentsRes] = await Promise.all([
-            fetch(`/api/news/${encodeURIComponent(slug)}/reactions`, { signal: ac.signal }).catch(
-              () => null
-            ),
-            fetch(`/api/news/${encodeURIComponent(slug)}/comments?limit=1&offset=0`, {
-              signal: ac.signal,
-            }).catch(() => null),
-          ])
-          const reactionsJson =
-            reactionsRes && reactionsRes.ok ? await reactionsRes.json().catch(() => null) : null
-          const commentsJson =
-            commentsRes && commentsRes.ok ? await commentsRes.json().catch(() => null) : null
-          const counts = (reactionsJson?.counts ?? {}) as Record<string, number>
-          const reactionsTotal = Object.values(counts).reduce((a, b) => a + Number(b), 0)
-          const commentsTotal = Number(commentsJson?.totalPublic ?? 0)
-          return [slug, { comments: commentsTotal, reactions: reactionsTotal }] as const
-        })
-      )
-      setStatsBySlug((prev) => {
-        const next = { ...prev }
-        for (const [slug, stats] of pairs) next[slug] = stats
-        return next
-      })
-    })()
-    return () => ac.abort()
-  }, [items, statsBySlug])
+  // React.useEffect(() => {
+  //   const slugs = items.map((i) => i.slug)
+  //   const missing = slugs.filter((s) => statsBySlug[s] == null)
+  //   if (missing.length === 0) return
+  //   const ac = new AbortController()
+  //   void (async () => {
+  //     const pairs = await Promise.all(
+  //       missing.map(async (slug) => {
+  //         const [reactionsRes, commentsRes] = await Promise.all([
+  //           fetch(`/api/news/${encodeURIComponent(slug)}/reactions`, { signal: ac.signal }).catch(
+  //             () => null
+  //           ),
+  //           fetch(`/api/news/${encodeURIComponent(slug)}/comments?limit=1&offset=0`, {
+  //             signal: ac.signal,
+  //           }).catch(() => null),
+  //         ])
+  //         const reactionsJson =
+  //           reactionsRes && reactionsRes.ok ? await reactionsRes.json().catch(() => null) : null
+  //         const commentsJson =
+  //           commentsRes && commentsRes.ok ? await commentsRes.json().catch(() => null) : null
+  //         const counts = (reactionsJson?.counts ?? {}) as Record<string, number>
+  //         const reactionsTotal = Object.values(counts).reduce((a, b) => a + Number(b), 0)
+  //         const commentsTotal = Number(commentsJson?.totalPublic ?? 0)
+  //         return [slug, { comments: commentsTotal, reactions: reactionsTotal }] as const
+  //       })
+  //     )
+  //     setStatsBySlug((prev) => {
+  //       const next = { ...prev }
+  //       for (const [slug, stats] of pairs) next[slug] = stats
+  //       return next
+  //     })
+  //   })()
+  //   return () => ac.abort()
+  // }, [items, statsBySlug])
 
   const loadMore = React.useCallback(async () => {
     if (loading || !hasMore) return

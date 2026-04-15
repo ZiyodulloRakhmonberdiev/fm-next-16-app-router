@@ -10,7 +10,7 @@ import { dbConnect } from "@/shared/common/lib/db"
 import { UserModel } from "@/features/users/model/user.model"
 import { NewsModel } from "@/features/news/model/news.model"
 import { SpecialNewsPageContent } from "@/features/news/ui/special-news-page-content"
-import { LatestNews } from "@/shared/common/components/news-sections"
+import LatestNews from "@/entities/news/lists/latest-news"
 import { getCachedPublicNews } from "@/shared/server/public-data-server"
 import { isAppLocale, type AppLocale } from "@/shared/common/lib/locale-api"
 import { pickUserLocaleText } from "@/features/users/lib/user-locale"
@@ -62,8 +62,8 @@ export default async function AuthorPage({ params }: Props) {
         <Header />
         <main className="flex-1 py-4">
           <ClientServerOffGate model="news">
-            <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 lg:grid-cols-4">
-              <div className="min-w-0 px-4 md:px-6 lg:col-span-3">
+            <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 lg:grid-cols-3">
+              <div className="min-w-0 px-4 md:px-6 lg:col-span-2">
                 <SpecialNewsPageContent
                   title={authorName}
                   headerImageUrl={authorImage}

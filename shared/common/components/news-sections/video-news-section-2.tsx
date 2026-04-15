@@ -9,18 +9,15 @@ import {
 } from "@/features/news/model";
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query";
 import {
-  formatDateISO,
-  formatDateTimeDotSlash,
   type AppLocale,
 } from "@/shared/common/lib/formatter";
 import { useLocale, useTranslations } from "next-intl";
-import { Play } from "lucide-react";
 import { VideoNewsModal } from "@/shared/common/components/molecules";
 import { NewsSectionHeader } from "@/shared/common/components/news-sections/news-section-header";
 import { usePublicCategoriesQuery } from "@/features/category/model/public-categories-query";
 import { getCategoryLabelForNewsItem } from "@/features/category/model/use-category-label";
-import { VideoCardMediaPreview } from "@/features/news/ui/news-listing/video-card-media-preview";
 import type { PublicCategory } from "@/features/category/model/public-categories-query";
+import VideoNewsCard from "@/entities/news/cards/video-news-card";
 
 type VideoNewsSection2Props = {
   initialNews?: RawNewsItem[];
@@ -36,7 +33,7 @@ export default function VideoNewsSection2({
   const locale = useLocale() as AppLocale;
   const t = useTranslations("common");
   const { data: qNews = [] } = usePublicNewsQuery();
-  const { data: qCats = [] } = usePublicCategoriesQuery();
+  const { data: qCats = [], isPending: categoriesPending } = usePublicCategoriesQuery();
 
   const publicNews = initialNews ?? qNews;
   const categories = initialCategories ?? qCats;
@@ -76,47 +73,19 @@ export default function VideoNewsSection2({
         {items.map((item) => {
           const categoryLabel = getCategoryLabelForNewsItem(
             categories,
-            false, // isPending not relevant with initial data or already fetched query data
+            categoriesPending,
             item,
             locale,
           );
-          const metaLine = formatDateTimeDotSlash(item.publishedAt);
           return (
-            <li key={item.slug} className="flex h-full min-w-0">
-              <button
-                type="button"
-                className="group flex h-full w-full min-w-0 flex-col overflow-hidden rounded-md bg-muted/50 text-left ring-1 ring-border/60 transition-[box-shadow,transform] duration-200 hover:bg-muted/40 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 dark:bg-muted/25"
-                onClick={() => handleOpenVideo(item)}
-              >
-                <div className="relative aspect-video w-full shrink-0 overflow-hidden bg-muted">
-                  <VideoCardMediaPreview title={item.title} item={item} />
-                  <span
-                    className="pointer-events-none absolute bottom-2 left-2 z-10 inline-flex size-8 items-center justify-center rounded-full bg-brand text-foreground shadow-md ring-1 ring-black/5"
-                    aria-hidden
-                  >
-                    <Play className="size-4 fill-current text-white" />
-                  </span>
-                </div>
-
-                <div className="flex min-h-0 flex-1 flex-col gap-3 p-4 bg-brand/5 dark:bg-card">
-                  <h3 className="line-clamp-4 text-[15px] font-bold leading-snug tracking-tight text-foreground md:text-base">
-                    {item.title}
-                  </h3>
-                  <div className="mt-auto text-[11px] leading-relaxed text-muted-foreground md:text-xs flex items-center gap-1">
-                    <span className="line-clamp-1">{categoryLabel}</span>
-                    <span
-                      className="mx-1.5 text-muted-foreground/40"
-                      aria-hidden
-                    >
-                      |
-                    </span>
-                    <time dateTime={formatDateISO(item.publishedAt)}>
-                      {metaLine}
-                    </time>
-                  </div>
-                </div>
-              </button>
-            </li>
+            <VideoNewsCard
+              key={item.slug}
+              item={item}
+              showCategory
+              showPublishedAt
+              categoryLabel={categoryLabel}
+              onOpenVideo={handleOpenVideo}
+            />
           );
         })}
       </ul>

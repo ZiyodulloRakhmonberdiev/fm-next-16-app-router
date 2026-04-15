@@ -4,7 +4,7 @@ import * as React from "react"
 import { getNewsListForLocale, isImageTypeRawNews, type NewsItem } from "@/features/news/model"
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
 import { getCategoryNameFromApi, usePublicCategoriesQuery, type PublicCategory } from "@/features/category/model/public-categories-query"
-import { getCategoryLabelForNewsItem, useCategoryLabel } from "@/features/category/model/use-category-label"
+import { useCategoryLabel } from "@/features/category/model/use-category-label"
 import type { RawNewsItem } from "@/features/news/model"
 import { Card } from "@/shared/common/components/ui/card"
 import {
@@ -15,15 +15,15 @@ import {
   CarouselPrevious,
 } from "@/shared/common/components/ui/carousel"
 import type { CarouselApi } from "@/shared/common/components/ui/carousel"
-import { formatDate, formatDateISO } from "@/shared/common/lib/formatter"
 import type { AppLocale } from "@/shared/common/lib/formatter"
 import { Link } from "@/i18n/navigation"
 import Image from "next/image"
 import { useLocale, useTranslations } from "next-intl"
 import Autoplay from "embla-carousel-autoplay"
-import { ArrowRight, ChevronRight, ExternalLink } from "lucide-react"
+import { ChevronRight, ExternalLink } from "lucide-react"
 import { cn } from "@/shared/common/lib/utils"
-import { NewsCardContent } from "./news-card-content"
+import { PublishedAt } from "@/entities/news/_components/atoms"
+import { CategoryName } from "@/entities/news/_components/atoms/category-name"
 
 type SlideNewsSectionProps = {
   categorySlug?: string
@@ -57,7 +57,7 @@ export default function SlideNewsSection({
   const t = useTranslations("common")
   const { data: qNews = [] } = usePublicNewsQuery()
   const { data: qCats = [] } = usePublicCategoriesQuery()
-  
+
   const publicNews = initialNews ?? qNews
   const categories = initialCategories ?? qCats
 
@@ -175,7 +175,7 @@ export default function SlideNewsSection({
             </div>
           </div>
 
-          <div className="min-w-0 w-full [--slide-w:calc((100%-1rem)/1.08)] md:[--slide-w:calc((100%-1rem)/3.2)]">
+          <div className="min-w-0 w-full [--slide-w:calc((100%-1rem)/0.99)] md:[--slide-w:calc((100%-1rem)/3.2)]">
             <CarouselContent className="ml-0">
               {items.map((item: NewsItem, index: number) => {
                 const fx = slideVisual[index] ?? { opacity: 1, blurPx: 0 }
@@ -194,19 +194,30 @@ export default function SlideNewsSection({
                             : undefined,
                       }}
                     >
-                      <Card className="h-full group gap-0 overflow-hidden rounded-sm border bg-background p-0 shadow-none transition-shadow hover:shadow-md">
-                        <Link href={`/news/${item.slug}`} className="relative aspect-video w-full group-hover:scale-105 transition-transform duration-300">
+                      <Link href={`/news/${item.slug}`} className="block h-full group gap-0 overflow-hidden rounded-sm border bg-background p-0 shadow-none transition-shadow hover:shadow-md group">
+                        <div className="relative aspect-video w-full group-hover:scale-105 transition-transform duration-300">
                           <Image
                             src={item.images[0]}
                             alt={item.title}
                             fill
                             className="object-cover"
                           />
-                        </Link>
-                        <div className="flex flex-col gap-2 p-4">
-                          <NewsCardContent item={item} locale={locale} categoryLabel={useCategoryLabel(item.categorySlug, locale, item.category)} variant="inline" dateVariant="dateTimeSlash" descriptionClassName="" titleClassName="line-clamp-2" />
                         </div>
-                      </Card>
+                        <div className="flex flex-col gap-2 p-4">
+                          <div className="flex items-center gap-2">
+                            <CategoryName categorySlug={item.categorySlug} categoryLabel={useCategoryLabel(item.categorySlug, locale, item.category)} />
+                            <span aria-hidden className="text-xs text-muted-foreground">|</span>
+                            <PublishedAt publishedAt={item.publishedAt} hasCalendar={false} />
+                          </div>
+                          <h3 className="font-bold leading-tight group-hover:text-brand line-clamp-3 text-lg">
+                            {item.title}
+                          </h3>
+
+                          <p className="text-sm text-muted-foreground line-clamp-3">
+                            {item.description ?? ""}
+                          </p>
+                        </div>
+                      </Link>
                     </div>
                   </CarouselItem>
                 )

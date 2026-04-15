@@ -3,14 +3,12 @@
 import * as React from "react"
 import { getNewsListForLocale, isImageTypeRawNews, type NewsItem, type RawNewsItem } from "@/features/news/model"
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
-import { useCategoryLabel } from "@/features/category/model/use-category-label"
-import { Card } from "@/shared/common/components/ui/card"
 import type { AppLocale } from "@/shared/common/lib/formatter"
 import { useLocale, useTranslations } from "next-intl"
 import { NewsSectionHeader } from "@/shared/common/components/news-sections/news-section-header"
-import { FeaturedNewsCard } from "@/features/news/ui/featured-news-card"
-import { NewsCardContent } from "@/shared/common/components/news-sections/news-card-content"
 import type { PublicCategory } from "@/features/category/model/public-categories-query"
+import TextNewsCard from "@/entities/news/cards/text-news-card"
+import SimpleNewsCard from "@/entities/news/cards/simple-news-card"
 
 type BreakingSectionProps = {
   initialNews?: RawNewsItem[]
@@ -18,22 +16,7 @@ type BreakingSectionProps = {
 }
 
 function BreakingListCard({ item, locale }: { item: NewsItem; locale: AppLocale }) {
-  const categoryLabel = useCategoryLabel(item.categorySlug, locale, item.category)
-  return (
-    <Card className="flex flex-col gap-2 rounded-sm border-none p-3 shadow-none bg-card">
-      <NewsCardContent
-        item={item}
-        locale={locale}
-        categoryLabel={categoryLabel}
-        titleClassName="text-sm"
-        categoryClassName="font-mono"
-        titleLineClampClassName="line-clamp-2 md:line-clamp-3"
-        descriptionLineClampClassName="line-clamp-2 md:line-clamp-3"
-        variant="inline"
-        dateVariant="dateTimeSlash"
-      />
-    </Card>
-  )
+  return <TextNewsCard item={item} locale={locale} variant="breaking" />
 }
 
 function isBreakingRawNews(n: RawNewsItem) {
@@ -82,7 +65,7 @@ export default function BreakingSection({
           </div>
           {featured ? (
             <div className="h-full hidden md:flex md:col-span-1">
-              <FeaturedNewsCard item={featured} locale={locale} variant="column" />
+              <SimpleNewsCard item={featured} locale={locale} variant="featured" />
             </div>
           ) : null}
         </div>

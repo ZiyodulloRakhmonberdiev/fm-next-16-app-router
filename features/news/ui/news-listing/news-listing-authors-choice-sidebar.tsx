@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl"
 import type { AppLocale } from "@/shared/common/lib/formatter"
 import type { NewsItem } from "@/features/news/model"
-import { MiniNewsCard } from "@/features/news/ui/mini-news-card"
+import SimpleNewsCard from "@/entities/news/cards/simple-news-card"
 
 type NewsListingAuthorsChoiceSidebarProps = {
   items: NewsItem[]
@@ -32,7 +32,7 @@ export function NewsListingAuthorsChoiceSidebar({
         <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1">
           {items.map((n) => (
             <li key={n.slug}>
-              <MiniNewsCard item={n} locale={locale} variant="authors-choice" />
+              <SimpleNewsCard item={n} locale={locale} variant="row" description={false} />
             </li>
           ))}
         </ul>

@@ -271,18 +271,18 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
     return map
   }, [visibleComments])
 
-  const totalReactions = (counts.like ?? 0) + (counts.love ?? 0) + (counts.laugh ?? 0) + (counts.sad ?? 0) + (counts.angry ?? 0)
+  // const totalReactions = (counts.like ?? 0) + (counts.love ?? 0) + (counts.laugh ?? 0) + (counts.sad ?? 0) + (counts.angry ?? 0)
   const rulesLocale = (["uz", "uzb", "ru", "en"].includes(locale) ? locale : "uz") as "uz" | "uzb" | "ru" | "en"
   const rulesText = COMMENT_RULES_TEXT[rulesLocale]
 
   return (
     <section className="mt-8 space-y-8">
-      <div className="space-y-3">
+      {/* <div className="space-y-3">
         <h3 className="flex items-center gap-2 text-lg font-semibold">
           {t("reactions")}
-          {/* {totalReactions > 0 && (
+          {totalReactions > 0 && (
             <span className="text-muted-foreground font-normal">({totalReactions})</span>
-          )} */}
+          )}
         </h3>
         <div className="flex flex-wrap gap-2">
           {reactionButtons.map((r) => (
@@ -297,7 +297,7 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
             </Button>
           ))}
         </div>
-      </div>
+      </div> */}
       <div className="space-y-4">
         <div className="flex items-center justify-start gap-1.5">
           <Button type="button" variant="secondary" size="sm" className="rounded-full" onClick={() => setRulesOpen(true)}>
@@ -410,11 +410,8 @@ export function NewsEngagement({ slug, newsId }: { slug: string; newsId?: string
             </div>
           </div>
         ))}
-        {rootComments.length === 0 ? <p className="text-sm text-muted-foreground">{t("comments_empty")}</p> : null}
+        {rootComments.length === 0 ? <p className="text-sm text-muted-foreground pl-2">{t("comments_empty")}</p> : null}
         {hasMore ? (
-          // <Button variant="outline" size="sm" onClick={() => void loadComments(commentOffset + 5, true)}>
-          //   {t("load_more")}
-          // </Button>
           <LoadMoreButton label={t("load_more")} onClick={() => void loadComments(commentOffset + 5, true)} />
         ) : null}
       </div>

@@ -111,9 +111,9 @@ export function SpecialNewsPageContent({
   }, [hasMore, loading, loadMoreQuery?.authorId, loadMoreQuery?.stats, loadMoreQuery?.themeId, locale, page, totalPages])
 
   return (
-    <section className="space-y-4 mx-auto pt-4">
-      <div className="border-b flex justify-start">
-        <h1 className="text-2xl font-bold md:text-3xl text-center bg-brand text-white inline-block px-3 py-2 rounded-xs">
+    <section className="space-y-4 mx-auto md:pt-4">
+      <div className="border-b flex justify-center">
+        <h1 className="text-xl font-bold md:text-3xl text-center bg-brand text-white inline-block px-3 py-2 rounded-xs">
           {title}
         </h1>
       </div>
@@ -147,7 +147,7 @@ export function SpecialNewsPageContent({
               href={`/news/${item.slug}`}
               className="group grid grid-cols-3 overflow-hidden bg-background md:grid-cols-3"
             >
-              <div className="flex md:min-h-[150px]  md:flex-col items-start md:items-start justify-center md:gap-3 md:p-4 col-span-2 font-semibold">
+              <div className="flex md:min-h-[150px]  md:flex-col items-start md:items-start justify-between md:justify-start md:gap-3 md:p-4 col-span-2 font-semibold">
                 <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground">
                   <span className="line-clamp-1">{categoryLabel}</span>
                   <span>|</span>

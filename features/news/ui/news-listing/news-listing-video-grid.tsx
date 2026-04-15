@@ -6,7 +6,7 @@ import type { AppLocale } from "@/shared/common/lib/formatter"
 import { usePublicCategoriesQuery } from "@/features/category/model/public-categories-query"
 import { getCategoryLabelForNewsItem } from "@/features/category/model/use-category-label"
 import { VideoNewsModal } from "@/shared/common/components/molecules"
-import { NewsListingVideoCard } from "./news-listing-video-card"
+import VideoNewsCard from "@/entities/news/cards/video-news-card"
 
 type NewsListingVideoGridProps = {
   items: NewsItem[]
@@ -31,9 +31,11 @@ export function NewsListingVideoGrid({ items, locale, emptyMessage }: NewsListin
     <>
       <ul className="grid list-none grid-cols-1 gap-3 p-0 sm:grid-cols-2 sm:gap-4 md:grid-cols-2">
         {items.map((item) => (
-          <NewsListingVideoCard
+          <VideoNewsCard
             key={item.slug}
             item={item}
+            showCategory
+            showPublishedAt
             categoryLabel={getCategoryLabelForNewsItem(categories, categoriesPending, item, locale)}
             onOpenVideo={(i) => {
               setSelected(i)
