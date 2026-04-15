@@ -19,7 +19,7 @@ export type PartnersAnalyticsData = {
 
 const GA_READONLY_SCOPE = "https://www.googleapis.com/auth/analytics.readonly"
 
-function toNumber(value?: string): number {
+function toNumber(value?: string | null): number {
   const n = Number(value ?? 0)
   return Number.isFinite(n) ? n : 0
 }
@@ -72,7 +72,7 @@ export async function getPartnersAnalytics(days = 30, maxPages = 8): Promise<Par
         dimensions: [{ name: "pagePath" }],
         metrics: [{ name: "screenPageViews" }, { name: "sessions" }],
         orderBys: [{ metric: { metricName: "screenPageViews" }, desc: true }],
-        limit: maxPages,
+        limit: String(maxPages),
       },
     }),
   ])
