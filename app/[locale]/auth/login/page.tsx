@@ -7,12 +7,12 @@ export default function LoginPage() {
   return (
     <div className="flex flex-col gap-4">
       <LoginForm />
-      <p className="text-center text-sm text-muted-foreground">
+      {/* <p className="text-center text-sm text-muted-foreground">
         {t("if_no_account")}{" "}
         <Link href="/auth/register" className="font-medium text-primary underline hover:no-underline">
           {t("register")}
         </Link>
-      </p>
+      </p> */}
       {/* <p className="text-center text-sm text-muted-foreground">
         {t("by_signing_in_you_agree_to_our")}{" "}
         <Link href="/terms" className="font-medium text-primary underline hover:no-underline">

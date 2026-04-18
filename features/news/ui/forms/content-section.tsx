@@ -498,13 +498,13 @@ export function ContentForm({
     { id: "quote", tool: "quote", label: "Quote", action: applyQuoteAtCursor },
     { id: "bullet", tool: "bullet", label: "Nuqtali ro'yxat", action: () => applyPrefixToSelectionLines(() => "- ") },
     { id: "numbered", tool: "numbered", label: "Raqamli ro'yxat", action: () => applyPrefixToSelectionLines((idx) => `${idx + 1}. `) },
-    { id: "strike", tool: "strike", label: "Strikethrough", action: () => applyAroundSelection("~~") },
-    { id: "sub", tool: "sub", label: "Subscript", action: () => applyAroundSelection("<sub>", "</sub>") },
-    { id: "sup", tool: "sup", label: "Superscript", action: () => applyAroundSelection("<sup>", "</sup>") },
-    { id: "code", tool: "code", label: "Code block", action: () => wrapBlock("```", "```") },
-    { id: "left", tool: "alignLeft", label: "Align left", action: () => wrapBlock("@@align(left)", "@@/align") },
-    { id: "center", tool: "alignCenter", label: "Align center", action: () => wrapBlock("@@align(center)", "@@/align") },
-    { id: "right", tool: "alignRight", label: "Align end", action: () => wrapBlock("@@align(right)", "@@/align") },
+    // { id: "strike", tool: "strike", label: "Strikethrough", action: () => applyAroundSelection("~~") },
+    // { id: "sub", tool: "sub", label: "Subscript", action: () => applyAroundSelection("<sub>", "</sub>") },
+    // { id: "sup", tool: "sup", label: "Superscript", action: () => applyAroundSelection("<sup>", "</sup>") },
+    // { id: "code", tool: "code", label: "Code block", action: () => wrapBlock("```", "```") },
+    // { id: "left", tool: "alignLeft", label: "Align left", action: () => wrapBlock("@@align(left)", "@@/align") },
+    // { id: "center", tool: "alignCenter", label: "Align center", action: () => wrapBlock("@@align(center)", "@@/align") },
+    // { id: "right", tool: "alignRight", label: "Align end", action: () => wrapBlock("@@align(right)", "@@/align") },
     { id: "caption", tool: "caption", label: "Caption", action: insertCaptionMarker },
   ]
 
@@ -786,7 +786,7 @@ export function ContentForm({
 
         <div className={cn("space-y-3 rounded-md border bg-transparent p-3", mobileViewMode === "edit" ? "hidden md:block" : "block")}>
           <div className="mb-1 text-xs font-semibold text-muted-foreground">
-            Preview (150ms)
+            Natija
           </div>
           <div className="prose prose-sm max-w-none dark:prose-invert">
             {renderedPreview}

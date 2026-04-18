@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { signIn } from "next-auth/react"
 import { useTranslations } from "next-intl"
+import { Link } from "@/i18n/navigation"
 import { Eye, EyeOff, Lock, Mail, User } from "lucide-react"
 import {
   Dialog,

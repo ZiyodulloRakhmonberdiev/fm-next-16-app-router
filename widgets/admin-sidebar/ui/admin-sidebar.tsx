@@ -33,7 +33,6 @@ export default function AdminSidebar() {
       filterAdminNavByRole(adminMainNavItems, role)
         .filter((item) => !item.hideFromSidebar)
         .filter((item) => {
-          // Settings sahifasida mobile’da pastdagi/oxirgi "Sozlamalar" linkni ko‘rsatmaymiz.
           if (!isMobile) return true
           if (!pathname.startsWith('/dashboard/settings')) return true
           return item.href !== '/dashboard/settings'

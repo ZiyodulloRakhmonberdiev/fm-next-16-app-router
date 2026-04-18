@@ -81,7 +81,7 @@ export function getMobileBottomNavItems(role: NormalizedRole): MobileBottomNavIt
       { href: '/dashboard/news', label: 'Yangiliklar', icon: Newspaper },
       { href: '/dashboard/news/create', label: 'Yangi', icon: PlusCircle },
       { href: '/dashboard/comments', label: 'Izohlar', icon: MessageSquare },
-      { href: '/dashboard/contact-messages', label: 'Contact', icon: Send },
+      // { href: '/dashboard/contact-messages', label: 'Contact', icon: Send },
       { href: '/dashboard/settings', label: 'Kabinet', icon: UserCircle },
     ]
   }

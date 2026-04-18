@@ -63,18 +63,18 @@ export function BasicTools({
       <ToolbarActionButton title="Pastki chiziq" onClick={onUnderline} hidden={!isToolEnabled("underline")}>
         <span className="text-xs font-semibold underline">U</span>
       </ToolbarActionButton>
-      <ToolbarActionButton title="Strikethrough" onClick={onStrike} hidden={!isToolEnabled("strike")}>
+      {/* <ToolbarActionButton title="Strikethrough" onClick={onStrike} hidden={!isToolEnabled("strike")}>
         <StrikethroughIcon className="size-3.5" />
-      </ToolbarActionButton>
-      <ToolbarActionButton title="Subscript" onClick={onSub} hidden={!isToolEnabled("sub")}>
+      </ToolbarActionButton> */}
+      {/* <ToolbarActionButton title="Subscript" onClick={onSub} hidden={!isToolEnabled("sub")}>
         x₂
-      </ToolbarActionButton>
-      <ToolbarActionButton title="Superscript" onClick={onSup} hidden={!isToolEnabled("sup")}>
+      </ToolbarActionButton> */}
+      {/* <ToolbarActionButton title="Superscript" onClick={onSup} hidden={!isToolEnabled("sup")}>
         x²
-      </ToolbarActionButton>
-      <ToolbarActionButton title="Code block" onClick={onCode} hidden={!isToolEnabled("code")}>
+      </ToolbarActionButton> */}
+      {/* <ToolbarActionButton title="Code block" onClick={onCode} hidden={!isToolEnabled("code")}>
         <Code2Icon className="size-3.5" />
-      </ToolbarActionButton>
+      </ToolbarActionButton> */}
       <ToolbarActionButton title="H1" onClick={onH1} hidden={!isToolEnabled("h1")}>
         <span className="text-xs font-semibold">H1</span>
       </ToolbarActionButton>

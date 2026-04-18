@@ -109,25 +109,25 @@ export function SettingsForm({
   const [showTelegramPost, setShowTelegramPost] = useState(false)
   return (
     <Card className="p-0 border-none shadow-none bg-transparent">
-      <CardContent className="space-y-6 px-0">
+      <CardContent className="space-y-2 px-0">
         <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border p-4">
           <Label htmlFor="authorsChoice" className="cursor-pointer">
             Muallif tanlovi
           </Label>
           <Switch id="authorsChoice" checked={authorsChoice} onCheckedChange={onChangeAuthorsChoice} />
         </div>
-        <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border p-4">
+        {/* <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border p-4">
           <Label htmlFor="isTrending" className="cursor-pointer">
             Trending
           </Label>
           <Switch id="isTrending" checked={isTrending} onCheckedChange={onChangeIsTrending} />
-        </div>
-        <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border p-4">
+        </div> */}
+        {/* <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border p-4">
           <Label htmlFor="isPopular" className="cursor-pointer">
-            Popular
+            Mashhur
           </Label>
           <Switch id="isPopular" checked={isPopular} onCheckedChange={onChangeIsPopular} />
-        </div>
+        </div> */}
         <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border p-4">
           <Label htmlFor="isTop" className="cursor-pointer">
             Top
@@ -142,19 +142,19 @@ export function SettingsForm({
         </div>
         <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border p-4">
           <Label htmlFor="adNews" className="cursor-pointer">
-            Reklama yangilik (faqat home reklama slayderi)
+            Bu yangilik reklama uchunmi?
           </Label>
           <Switch id="adNews" checked={ad} onCheckedChange={onChangeAd} />
         </div>
         <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border p-4">
           <Label htmlFor="statsNews" className="cursor-pointer">
-            Maqola (stats) yangilik
+            Bu yangilik maqola uchunmi?
           </Label>
           <Switch id="statsNews" checked={stats} onCheckedChange={onChangeStats} />
         </div>
         <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border p-4">
           <Label htmlFor="pushedToTelegram" className="cursor-pointer">
-            Telegramga yuborish
+            Telegramga yuborilsinmi?
           </Label>
           <Switch
             id="pushedToTelegram"
@@ -164,12 +164,11 @@ export function SettingsForm({
           />
         </div>
         <div className="rounded-lg border p-4 space-y-2">
-          <p className="text-sm font-medium">Telegram holati</p>
-          <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-            <span>Yuborish:</span>
+          <div className="flex flex-wrap items-center gap-2 text-xs">
+            <p className="text-sm font-medium">Telegramga yuborilish holati</p>
             {telegramPushStatus ? (
               <Badge variant={telegramPushStatus === 'sent' ? 'default' : 'destructive'}>
-                {telegramPushStatus}
+                {telegramPushStatus === 'sent' ? 'Yuborilgan' : 'Yuborilmadi'}
               </Badge>
             ) : (
               <span>{pushedToTelegram ? "kutilmoqda (published bo'lganda)" : 'yo‘q'}</span>
@@ -226,15 +225,15 @@ export function SettingsForm({
           </div>
         ) : null}
         <div className="space-y-2 rounded-lg border p-4">
-          <p className="text-sm font-medium">News status</p>
+          <p className="text-sm font-medium">Yangilik statusi</p>
           <p className="text-xs text-muted-foreground">
             Joriy holat: <span className="font-semibold">{statusLabel}</span>
           </p>
-          {mode === 'create' ? (
+          {/* {mode === 'create' ? (
             <p className="text-xs text-muted-foreground">
               Create rejimida status "Chop etish" bosilganda `published` ga o‘tadi.
             </p>
-          ) : null}
+          ) : null} */}
         </div>
         {mode === 'edit' && onStatusChange && (
           <div className="space-y-3 rounded-lg border p-4">

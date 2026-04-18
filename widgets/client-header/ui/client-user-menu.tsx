@@ -3,8 +3,7 @@
 import { useRef, useState } from "react"
 import { signOut, useSession } from "next-auth/react"
 import { Link } from "@/i18n/navigation"
-import { LiaUserEditSolid } from "react-icons/lia"
-import { Bookmark, ImageIcon, Loader2, Lock, LogIn, LogOut, MessageCircle, Smile, Upload, User, UserPlus } from "lucide-react"
+import { User } from "lucide-react"
 
 import { Button } from "@/shared/common/components/ui/button"
 import {
@@ -168,11 +167,10 @@ export function ClientUserMenu() {
                     className="flex cursor-pointer items-center gap-2"
                   >
                     <FaTools className="size-4" />
-                    Admin panelga o‘tish
+                    Admin panel
                   </Link>
                 </DropdownMenuItem>
               ) : null}
-              <span className="my-1 block h-[0.5px] w-full bg-foreground/10"></span>
               <DropdownMenuItem onClick={() => void signOut({ callbackUrl: "/" })}>
                 <FaSignOutAlt className="size-4" />
                 {t("logout")}
@@ -184,7 +182,7 @@ export function ClientUserMenu() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button size="icon" variant="ghost" aria-label={t("auth_menu_aria")}>
-              <User className="size-4" />
+              <FaUser className="size-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -194,8 +192,8 @@ export function ClientUserMenu() {
                 setAuthOpen(true)
               }}
             >
-                {/* <LogIn className="size-4" /> */}
-                {t("login")} / {t("register")}
+              {/* <LogIn className="size-4" /> */}
+              {t("login")} / {t("register")}
             </DropdownMenuItem>
             {/* <DropdownMenuItem
               onClick={() => {

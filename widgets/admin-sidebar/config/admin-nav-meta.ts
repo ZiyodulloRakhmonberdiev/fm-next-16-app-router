@@ -76,12 +76,12 @@ export const adminMainNavMeta: AdminMainNavMeta[] = [
     roles: ['ceo', 'administrator', 'moderator'],
     iconKey: 'Send',
   },
-  {
-    href: '/dashboard/reactions',
-    label: 'Reaksiyalar',
-    roles: ['ceo', 'administrator', 'moderator'],
-    iconKey: 'Heart',
-  },
+  // {
+  //   href: '/dashboard/reactions',
+  //   label: 'Reaksiyalar',
+  //   roles: ['ceo', 'administrator', 'moderator'],
+  //   iconKey: 'Heart',
+  // },
   {
     href: '/dashboard/users',
     label: 'Foydalanuvchilar',

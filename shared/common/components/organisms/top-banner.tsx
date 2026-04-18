@@ -4,7 +4,7 @@
 import { AuthorsChoice } from "../news-sections";
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query";
 import { isImageTypeRawNews } from "@/features/news/model";
-import TopNewsCarousel from "../molecules/top-news-carousel";
+import TopNewsCarousel from "../news-sections/top-news-carousel";
 import LatestNews from "@/entities/news/lists/latest-news";
 
 export default function TopBanner() {

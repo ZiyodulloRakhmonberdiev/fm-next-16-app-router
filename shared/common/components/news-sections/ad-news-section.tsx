@@ -29,6 +29,8 @@ function hasRenderableMedia(item: RawNewsItem): boolean {
   return hasImage || hasVideo
 }
 
+const MOBILE_PROGRESS_DELAY_MS = 4500
+
 export default function AdNewsSection({ initialNews }: AdNewsSectionProps) {
   const locale = useLocale() as AppLocale
   const { data: qNews = [] } = usePublicNewsQuery()
@@ -59,11 +61,10 @@ export default function AdNewsSection({ initialNews }: AdNewsSectionProps) {
     return byLocale[locale]
   }, [locale])
 
-  if (items.length === 0) return null
-
-  const MOBILE_DELAY_MS = 4500
-
   const [api, setApi] = React.useState<CarouselApi | null>(null)
+  const onCarouselApi = React.useCallback((carouselApi: CarouselApi) => {
+    setApi(carouselApi)
+  }, [])
   const [selected, setSelected] = React.useState(0)
   const snaps = React.useMemo(() => api?.scrollSnapList() ?? [], [api])
   const [progressPct, setProgressPct] = React.useState(0)
@@ -99,7 +100,7 @@ export default function AdNewsSection({ initialNews }: AdNewsSectionProps) {
 
     intervalRef.current = window.setInterval(() => {
       const elapsed = Date.now() - startRef.current
-      const pct = Math.min(100, (elapsed / MOBILE_DELAY_MS) * 100)
+      const pct = Math.min(100, (elapsed / MOBILE_PROGRESS_DELAY_MS) * 100)
       setProgressPct(pct)
       if (pct >= 100) {
         stop()
@@ -123,7 +124,7 @@ export default function AdNewsSection({ initialNews }: AdNewsSectionProps) {
       stop()
       intervalRef.current = window.setInterval(() => {
         const elapsed = Date.now() - startRef.current
-        const pct = Math.min(100, (elapsed / MOBILE_DELAY_MS) * 100)
+        const pct = Math.min(100, (elapsed / MOBILE_PROGRESS_DELAY_MS) * 100)
         setProgressPct(pct)
         if (pct >= 100) {
           stop()
@@ -139,6 +140,8 @@ export default function AdNewsSection({ initialNews }: AdNewsSectionProps) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [api, selected, snaps.length])
+
+  if (items.length === 0) return null
 
   return (
     <section className="px-4 py-4 md:px-6">
@@ -188,7 +191,7 @@ export default function AdNewsSection({ initialNews }: AdNewsSectionProps) {
 
         <div className="px-4 pb-5 pt-4">
           <Carousel
-            setApi={(a) => setApi(a)}
+            setApi={onCarouselApi}
             opts={{ align: "start", loop: true }}
             className="w-full"
           >

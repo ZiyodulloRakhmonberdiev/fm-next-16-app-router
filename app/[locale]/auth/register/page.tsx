@@ -7,12 +7,12 @@ export default function RegisterPage() {
   return (
     <div className="flex flex-col gap-4">
       <RegisterForm />
-      <p className="text-center text-sm text-muted-foreground">
+      {/* <p className="text-center text-sm text-muted-foreground">
         Hisobingiz bormi?{" "}
         <Link href="/auth/login" className="font-medium text-primary underline hover:no-underline">
           {t("login")}
         </Link>
-      </p>
+      </p> */}
     </div>
   );
 }

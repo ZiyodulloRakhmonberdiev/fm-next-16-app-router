@@ -3,7 +3,7 @@
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/shared/common/components/ui/button";
 import { Input } from "@/shared/common/components/ui/input";
-import { Label } from "@/shared/common/components/ui/label";
+// import { Label } from "@/shared/common/components/ui/label";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Eye, EyeOff, Lock, Mail, User } from "lucide-react";
@@ -77,25 +77,26 @@ export const RegisterForm = () => {
     }
   }
 
-  const title = t("register_title");
-  const subtitle = t("register_subtitle");
+  // const title = t("register_title");
+  // const subtitle = t("register_subtitle");
 
   return (
     <div className="flex flex-col gap-4">
       <div className="space-y-1 text-center">
-        <h1 className="text-xl font-semibold">{title}</h1>
-        <p className="text-sm text-muted-foreground">{subtitle}</p>
+        {/* <h1 className="text-xl font-semibold">{title}</h1> */}
+        {/* <p className="text-sm text-muted-foreground">{subtitle}</p> */}
       </div>
 
       <form className="space-y-4" onSubmit={handleSubmit}>
         <div className="space-y-2">
-          <Label htmlFor="reg-fullname">{t("full_name")}</Label>
+          {/* <Label htmlFor="reg-fullname">{t("full_name")}</Label> */}
           <div className="relative">
             <User className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               id="reg-fullname"
               type="text"
-              placeholder={t("full_name")}
+              // placeholder={t("full_name")}
+              placeholder="F.I.O"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               className="pl-9"
@@ -106,13 +107,14 @@ export const RegisterForm = () => {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="reg-login">Login</Label>
+          {/* <Label htmlFor="reg-login">Login</Label> */}
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               id="reg-login"
               type="text"
-              placeholder={t("email_placeholder")}
+              // placeholder={t("email_placeholder")}
+              placeholder="Login"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="pl-9"
@@ -124,13 +126,14 @@ export const RegisterForm = () => {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="reg-password">{t("password")}</Label>
+          {/* <Label htmlFor="reg-password">{t("password")}</Label> */}
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               id="reg-password"
               type={showPassword ? "text" : "password"}
-              placeholder={t("password")}
+              // placeholder={t("password")}
+              placeholder="Parol"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="pl-9 pr-9"
@@ -150,13 +153,14 @@ export const RegisterForm = () => {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="reg-confirm">{t("confirm_password")}</Label>
+          {/* <Label htmlFor="reg-confirm">{t("confirm_password")}</Label> */}
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               id="reg-confirm"
               type={showConfirmPassword ? "text" : "password"}
-              placeholder={t("confirm_password")}
+              // placeholder={t("confirm_password")}
+              placeholder="Parolni tasdiqlang"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               className="pl-9 pr-9"
@@ -179,7 +183,8 @@ export const RegisterForm = () => {
           className="w-full rounded-lg bg-neutral-800 hover:bg-neutral-900 dark:bg-neutral-200 dark:hover:bg-neutral-100 dark:text-neutral-900"
           disabled={loading}
         >
-          {t("get_started")}
+          {/* {t("get_started")} */}
+          Ro'yxatdan o'tish
         </Button>
       </form>
     </div>

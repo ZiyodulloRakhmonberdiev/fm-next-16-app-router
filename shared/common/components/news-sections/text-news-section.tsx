@@ -40,7 +40,7 @@ export default function TextNewsSection({
   return (
     <section className="w-full space-y-4 px-4 md:px-6 pt-4">
       <div className="py-4 border-t-2 mt-4 border-border">
-        <h2 className="mb-4 text-lg font-semibold">Matnli Yangiliklar</h2>
+        {/* <h2 className="mb-4 text-lg font-semibold"></h2> */}
         <ul className="grid grid-cols-1 justify-items-start gap-3 md:grid-cols-2 xl:grid-cols-3">
           {items.map((item: NewsItem) => (
             <li key={item.slug} className="w-full max-w-xl">

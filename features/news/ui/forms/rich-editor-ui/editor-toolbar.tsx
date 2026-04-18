@@ -117,19 +117,19 @@ export function EditorToolbar({
           onBullet={onBullet}
           onNumbered={onNumbered}
         />
-        <AlignTools
+        {/* <AlignTools
           isToolEnabled={isToolEnabled}
           onLeft={onAlignLeft}
           onCenter={onAlignCenter}
           onRight={onAlignRight}
-        />
-        <ColorBgTools
+        /> */}
+        {/* <ColorBgTools
           isToolEnabled={isToolEnabled}
           activeColor={activeColor}
           activeBg={activeBg}
           onColor={onColor}
           onBg={onBg}
-        />
+        /> */}
         {/* <FontFamilyTool
           isToolEnabled={isToolEnabled}
           activeFont={activeFont}

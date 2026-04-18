@@ -8,7 +8,7 @@ import type { AppLocale } from "@/shared/common/lib/locale-api"
 // import { Card, CardContent, CardHeader, CardTitle } from "@/shared/common/components/ui/card"
 // import { LanguageSwitcher, LanguageSwitcherForSidebar } from "@/widgets/language-switcher"
 // import { ThemeSwitcherForHeader } from "@/widgets/theme-switcher"
-import { Bell, ChevronRight, FileText, Flag, Globe, Info, Languages, LockOpen, Mail, Moon, Phone, PhoneCall, User, UsersRound } from "lucide-react"
+import { ChevronRight, FileText, Flag, Info, LockOpen, PhoneCall, UsersRound } from "lucide-react"
 // import { Switch } from "@/shared/common/components/ui/switch"
 // import { cn } from "@/shared/common/lib/utils"
 import { usePathname, useRouter } from "@/i18n/navigation"
@@ -29,7 +29,7 @@ type MenuCopy = {
   sections: Array<{ title: string; href: string }>
 }
 
-const LOCALE_STORAGE_KEY = "preferred-locale"
+// const LOCALE_STORAGE_KEY = "preferred-locale"
 
 const localeMeta: Record<string, { short: string; label: string; flag: string }> = {
   uz: { short: "Uz", label: "O'zbek", flag: "🇺🇿" },
@@ -219,7 +219,7 @@ export default function MenuPageClient() {
             </Link>
             <ChevronRight className="size-5 text-muted-foreground" />
         </div>
-        <div className="flex justify-between items-center border-b pb-2">
+        {/* <div className="flex justify-between items-center border-b pb-2">
             <Link
               href="/terms"
               className="flex items-center gap-3 rounded-xl py-1 text-sm font-medium transition-colors"
@@ -228,8 +228,8 @@ export default function MenuPageClient() {
               <span>Foydalanish shartlari</span>
             </Link>
             <ChevronRight className="size-5 text-muted-foreground" />
-        </div>
-        <div className="flex justify-between items-center border-b pb-2">
+        </div> */}
+        {/* <div className="flex justify-between items-center border-b pb-2">
             <Link
               href="/privacy"
               className="flex items-center gap-3 rounded-xl py-1 text-sm font-medium transition-colors"
@@ -238,7 +238,7 @@ export default function MenuPageClient() {
               <span>Maxfiylik siyosati</span>
             </Link>
             <ChevronRight className="size-5 text-muted-foreground" />
-        </div>
+        </div> */}
         <div className="flex justify-between items-center">
             <Link
               href="/about"

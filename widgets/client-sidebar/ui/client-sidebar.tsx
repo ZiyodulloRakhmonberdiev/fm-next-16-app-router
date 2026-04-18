@@ -68,12 +68,12 @@ export default function ClientSidebar() {
           <Link href="/contact">
             <span className="">{t("contact_us")}</span>
           </Link>
-          <Link href="/privacy">
+          {/* <Link href="/privacy">
             <span className="">{t("privacy_policy")}</span>
           </Link>
           <Link href="/terms">
             <span className="">{t("terms_of_service")}</span>
-          </Link>
+          </Link> */}
         </div>
 
 

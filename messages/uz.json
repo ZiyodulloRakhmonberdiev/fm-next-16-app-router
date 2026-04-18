@@ -41,6 +41,7 @@
     "login_success_desc": "Muvaffaqiyatli kirdingiz. Endi hisobingizga kirishingiz mumkin.",
     "by_signing_in_you_agree_to_our": "Kirish orqali siz quyidagilarga rozisiz",
     "by_signing_up_you_agree_to_our": "Ro'yxatdan o'tish orqali siz quyidagilarga rozisiz",
+    "modal_legal_consent": "Saytga kirish yoki ro'yxatdan o'tish orqali siz <terms>Foydalanish shartlari</terms> va <privacy>maxfiylik siyosati</privacy>ga rozilik bildirasiz.",
     "sign_in_with_email": "Email orqali kirish",
     "get_started": "Boshlash",
     "or_sign_in_with": "Yoki quyidagilar bilan kirish",

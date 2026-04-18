@@ -142,14 +142,14 @@ export const seed = {
       href: "/contact",
       name: { uz: "Bog'lanish", uzb: "Боғланиш", ru: "Контакты", en: "Contact us" } satisfies LocaleMap,
     },
-    {
-      href: "/terms",
-      name: { uz: "Foydalanish shartlari", uzb: "Фойдаланиш шартлари", ru: "Условия использования", en: "Terms of service" } satisfies LocaleMap,
-    },
-    {
-      href: "/privacy",
-      name: { uz: "Maxfiylik siyosati", uzb: "Махфийлик сиёсати", ru: "Политика конфиденциальности", en: "Privacy policy" } satisfies LocaleMap,
-    },
+    // {
+    //   href: "/terms",
+    //   name: { uz: "Foydalanish shartlari", uzb: "Фойдаланиш шартлари", ru: "Условия использования", en: "Terms of service" } satisfies LocaleMap,
+    // },
+    // {
+    //   href: "/privacy",
+    //   name: { uz: "Maxfiylik siyosati", uzb: "Махфийлик сиёсати", ru: "Политика конфиденциальности", en: "Privacy policy" } satisfies LocaleMap,
+    // },
     {
       href: "https://president.uz/uz",
       name: { uz: "Prezident portali", uzb: "Президент портали", ru: "Портал Президента", en: "President's portal" } satisfies LocaleMap,

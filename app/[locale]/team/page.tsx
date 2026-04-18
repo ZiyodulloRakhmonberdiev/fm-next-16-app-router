@@ -1,6 +1,6 @@
-import { Card, CardContent } from "@/shared/common/components/ui/card"
+
 import { getServerApiUrl } from "@/shared/common/lib/server-api-url"
-import { BadgeCheck, Users } from "lucide-react"
+import { BadgeCheck } from "lucide-react"
 import ClientServerOffGate from "../_components/client-server-off-gate"
 import { Footer } from "@/widgets/client-footer"
 import ClientSiteNothingGate from "../_components/client-site-nothing-gate"
@@ -20,11 +20,11 @@ type TeamRow = {
 
 export default async function TeamPage() {
   const t = await getTranslations("common")
-  const teamT = await getTranslations("teamPage")
+  // const teamT = await getTranslations("teamPage")
   const url = await getServerApiUrl("/api/team?public=1")
   const res = await fetch(url, { next: { revalidate: 300 } })
   if (!res.ok) {
-    throw new Error("Team ma'lumotlarini yuklab bo'lmadi")
+    throw new Error("Jamoa ma'lumotlarini yuklab bo'lmadi")
   }
   const items = (await res.json()) as TeamRow[]
 
@@ -38,12 +38,17 @@ export default async function TeamPage() {
         <main className="flex-1 py-4 md:py-16 px-4 md:px-6">
           <ClientServerOffGate model="categories">
             <div className="max-w-7xl mx-auto space-y-6 md:space-y-20">
-              
+
               {/* Minimalist Header */}
               <section className="space-y-6">
-                <h1 className="text-4xl font-light tracking-tight text-foreground md:text-6xl">
-                  {t("team_title")}
-                </h1>
+                {/* <h1 className="text-4xl font-light tracking-tight text-foreground md:text-6xl">
+                </h1> */}
+                <div className="border-b flex justify-center">
+                  <h1 className="text-xl font-bold md:text-3xl text-center bg-brand text-white inline-block px-3 py-2 rounded-xs">
+                    {/* {title} */}
+                    {t("team_title")}
+                  </h1>
+                </div>
                 {/* <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-border">
                   <p className="max-w-2xl text-lg font-light leading-relaxed text-muted-foreground md:text-xl">
                     {items.length > 0
@@ -72,14 +77,14 @@ export default async function TeamPage() {
                           {m.fullName.slice(0, 1)}
                         </div>
                       )}
-                      
-                      <div className="absolute top-4 right-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+
+                      {/* <div className="absolute top-4 right-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                          <div className="bg-background/80 backdrop-blur-sm p-1.5 rounded-full border border-border">
                             <BadgeCheck className="size-4 text-foreground" />
                          </div>
-                      </div>
+                      </div> */}
                     </div>
-                    
+
                     {/* <div className="space-y-1 px-1">
                       <h3 className="text-lg font-medium tracking-tight text-foreground">
                         {m.fullName}

@@ -5,28 +5,18 @@ import { SocialMediaButtons } from '@/shared/common/components/ui/social-media-b
 import Image from 'next/image'
 import { useTranslations, useLocale } from 'next-intl'
 import { Mail, MapPin, Phone } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { useTheme } from 'next-themes'
 import type { AppLocale } from '@/shared/common/lib/locale-api'
 import { usePublicSiteSettingsQuery } from '@/shared/server/public-site-settings-query'
 import { Button } from '@/shared/common/components/ui/button'
 import { ClientBottomNav } from '@/widgets/client-bottom-nav'
 
 export default function Footer() {
-  const { resolvedTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => setMounted(true), [])
   const locale = useLocale() as AppLocale
   const { data: settings } = usePublicSiteSettingsQuery()
   const description = settings?.description?.[locale] ?? seed.description[locale]
   const email = settings?.siteConfig.email ?? seed.siteConfig.email
   const phone = settings?.siteConfig.phone ?? seed.siteConfig.phone
   const address = settings?.siteConfig.address?.[locale] ?? seed.siteConfig.address[locale]
-
-  const logoSrc =
-    mounted && resolvedTheme === 'light'
-      ? '/images/fm-logo-dark.svg'
-      : '/images/fm-logo.svg'
 
   const t = useTranslations("common")
   return (

@@ -41,6 +41,7 @@
     "login_success_desc": "Вы успешно вошли. Теперь вам доступен ваш аккаунт.",
     "by_signing_in_you_agree_to_our": "Входя в аккаунт, вы соглашаетесь с нашими",
     "by_signing_up_you_agree_to_our": "Регистрируясь, вы соглашаетесь с нашими",
+    "modal_legal_consent": "Входя в аккаунт или регистрируясь на сайте, вы соглашаетесь с <terms>Условиями использования</terms> и <privacy>Политикой конфиденциальности</privacy>.",
     "sign_in_with_email": "Войти по email",
     "get_started": "Начать",
     "or_sign_in_with": "Или войти с помощью",

@@ -319,7 +319,7 @@ export function renderRichText(content: string, options: RichTextRenderOptions =
     if (/^[-*•]\s+/.test(trimmed)) {
       elements.push(
         <div key={keyBase} className="my-1 flex items-start gap-2">
-          <span className="mt-1.5 size-2 rounded-full border border-muted-foreground/50 bg-background" />
+          <span className="mt-2.5 size-2 rounded-full border border-muted-foreground/50 bg-foreground" />
           <p className="m-0">{parseInline(trimmed.replace(/^[-*•]\s+/, ""), keyBase)}</p>
         </div>
       )
@@ -340,7 +340,7 @@ export function renderRichText(content: string, options: RichTextRenderOptions =
     const captionMatch = trimmed.match(/^@@caption\((.+)\)$/)
     if (captionMatch) {
       elements.push(
-        <p key={keyBase} className="mt-1 bg-white px-2 py-1 text-xs text-muted-foreground">
+        <p key={keyBase} className="mt-1 px-2 py-1 text-xs text-muted-foreground">
           {parseInline(captionMatch[1], keyBase)}
         </p>
       )
@@ -458,4 +458,3 @@ export function RichTextContent({ content, ...options }: { content: string } & R
     </div>
   )
 }
-

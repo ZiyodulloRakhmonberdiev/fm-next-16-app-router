@@ -41,6 +41,7 @@
     "login_success_desc": "You have successfully logged in. You can now access your account.",
     "by_signing_in_you_agree_to_our": "By signing in, you agree to our",
     "by_signing_up_you_agree_to_our": "By signing up, you agree to our",
+    "modal_legal_consent": "By signing in or registering on the site, you agree to the <terms>Terms of Use</terms> and <privacy>Privacy Policy</privacy>.",
     "sign_in_with_email": "Sign in with email",
     "get_started": "Get Started",
     "or_sign_in_with": "Or sign in with",

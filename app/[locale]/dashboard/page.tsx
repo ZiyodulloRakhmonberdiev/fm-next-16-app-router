@@ -125,12 +125,12 @@ export default async function DashboardPage(props: { searchParams?: Promise<{ ra
       icon: Send,
       href: '/dashboard/contact-messages',
     },
-    {
-      label: 'Reaksiyalar',
-      value: sData.reactionsCount ?? 0,
-      icon: Heart,
-      href: '/dashboard/reactions',
-    },
+    // {
+    //   label: 'Reaksiyalar',
+    //   value: sData.reactionsCount ?? 0,
+    //   icon: Heart,
+    //   href: '/dashboard/reactions',
+    // },
     {
       label: 'Reklama',
       value: sData.adsCount ?? 0,
