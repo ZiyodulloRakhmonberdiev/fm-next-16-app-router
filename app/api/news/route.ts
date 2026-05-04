@@ -132,7 +132,6 @@ export async function GET(req: NextRequest) {
       filter.publishedAt = { $gte: from }
     }
 
-    /** `views` bo‘lsa faqat ko‘rishlar bo‘yicha (publishedAt ikkinchi tartibda); aks holda nashr sanasi. */
     const sort: Record<string, SortOrder> =
       sortBy === 'views'
         ? { views: -1, publishedAt: -1 }

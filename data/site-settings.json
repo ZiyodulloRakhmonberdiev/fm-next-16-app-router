@@ -48,8 +48,8 @@
   },
   "telegram": {
     "enabled": true,
-    "botToken": "8611748516:AAFfzXXeZcOw7rY3aabhFU-1fP2WEkT4F9g",
-    "chatId": "-1001529545143"
+    "botToken": "7642056152:AAEConMgXhx0mMjTtAgE3AjRWn0-AFxM-14",
+    "chatId": "-1001212989674"
   },
   "clientDelivery": {
     "mode": "normal",
