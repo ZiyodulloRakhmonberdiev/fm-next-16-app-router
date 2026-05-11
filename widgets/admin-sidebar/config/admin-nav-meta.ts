@@ -7,30 +7,28 @@ export type AdminNavIconKey =
   | 'Tag'
   | 'Users'
   | 'UserSquare'
-  | 'UserCircle'
-  | 'MessageSquare'
+  | 'UserRoundPen'
+  | 'MessageCircle'
   | 'Heart'
   | 'Megaphone'
-  | 'ClipboardList'
-  | 'Sparkles'
+  | 'ChartPie'
+  | 'BookOpen'
   | 'Building2'
   | 'Share2'
-  | 'Send'
-  | 'CloudCog'
-  | 'LayoutGrid'
+  | 'Mail'
+  | 'WifiCog'
+  | 'Ellipsis'
   | 'PlusCircle'
-
+  | 'MonitorCog'
 export type AdminMainNavMeta = {
   href: string
   label: string
   roles: NormalizedRole[]
   description?: string
   iconKey: AdminNavIconKey
-  /** Desktop sidebar da ko‘rinmasin (masalan Menu — header orqali). */
   hideFromSidebar?: boolean
 }
 
-/** Sidebar, Menu sahifasi — tartib saqlanadi. */
 export const adminMainNavMeta: AdminMainNavMeta[] = [
   {
     href: '/dashboard',
@@ -54,9 +52,9 @@ export const adminMainNavMeta: AdminMainNavMeta[] = [
   },
   {
     href: '/dashboard/themes',
-    label: 'Temalar',
+    label: 'Mavzular',
     roles: ['ceo', 'administrator', 'moderator'],
-    iconKey: 'Sparkles',
+    iconKey: 'BookOpen',
   },
   {
     href: '/dashboard/tags',
@@ -68,13 +66,13 @@ export const adminMainNavMeta: AdminMainNavMeta[] = [
     href: '/dashboard/comments',
     label: 'Izohlar',
     roles: ['ceo', 'administrator', 'moderator'],
-    iconKey: 'MessageSquare',
+    iconKey: 'MessageCircle',
   },
   {
     href: '/dashboard/contact-messages',
     label: 'Xabarlar',
     roles: ['ceo', 'administrator', 'moderator'],
-    iconKey: 'Send',
+    iconKey: 'Mail',
   },
   // {
   //   href: '/dashboard/reactions',
@@ -92,7 +90,7 @@ export const adminMainNavMeta: AdminMainNavMeta[] = [
     href: '/dashboard/authors',
     label: 'Mualliflar',
     roles: ['ceo', 'administrator', 'moderator'],
-    iconKey: 'UserCircle',
+    iconKey: 'UserRoundPen',
   },
   {
     href: '/dashboard/team',
@@ -110,28 +108,28 @@ export const adminMainNavMeta: AdminMainNavMeta[] = [
     href: '/dashboard/ads/feedback',
     label: 'Reklama statistikasi',
     roles: ['ceo', 'administrator', 'ads_manager'],
-    iconKey: 'ClipboardList',
+    iconKey: 'ChartPie',
   },
   {
     href: '/dashboard/configs/site',
     label: 'Sayt sozlamalari',
     roles: ['ceo', 'administrator'],
     // description: 'Headline, sayt haqida, ijtimoiy tarmoqlar',
-    iconKey: 'Building2',
+    iconKey: 'MonitorCog',
   },
   {
     href: '/dashboard/configs/delivery',
     label: "Ma'lumot uzatish",
     roles: ['ceo'],
     // description: 'Telegram va client uzatish — faqat CEO',
-    iconKey: 'CloudCog',
+    iconKey: 'WifiCog',
   },
   {
     href: '/dashboard/settings',
-    label: 'Sozlamalar',
+    label: 'Boshqalar',
     roles: ['ceo', 'administrator'],
     // description: 'Boshqaruv ro‘yxati',
-    iconKey: 'LayoutGrid',
+    iconKey: 'Ellipsis',
   },
 ]
 

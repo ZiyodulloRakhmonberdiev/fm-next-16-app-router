@@ -53,7 +53,7 @@ const PAGE_TEXT: Record<
     desktopPreviewLabel: "Desktop ko'rinishi",
     mobileBannerTitle: "Mobil banner",
     mobileBannerDescription:
-      "Mobil sayt va ilova uchun moslashtirilgan banner formati kichik ekranlarda ham ravshan ko'rinadi. Yengil va interaktiv ko'rinish tufayli yo'lda bo'lgan foydalanuvchilar bilan samarali aloqa o'rnatishga yordam beradi.",
+      "Mobil veb-sayt va ilova formati kichik ekranlar va foydalanuvchilar uchun qulay muloqot uchun optimallashtirilgan. Bu sizga mobil auditoriyangiz bilan samarali muloqot qilish va ularning e'tiborini taklifingizga qaratish imkonini beradi.",
     mobilePreviewLabel: "Mobil ko'rinishi",
     projectsTitle: "Maxsus loyihalar",
     mediaKitTitle: "Media kit va prays",
@@ -79,7 +79,7 @@ const PAGE_TEXT: Record<
     desktopPreviewLabel: "Desktop кўриниши",
     mobileBannerTitle: "Мобил баннер",
     mobileBannerDescription:
-      "Мобил сайт ва илова учун тайёрланган баннер формати кичик экранларда ҳам қулай кўринади. Содда ва интерактив тузилма сабабли ҳаракатдаги аудитория билан натижали мулоқот қилиш имконини беради.",
+      "Мобил веб-сайт ва илова формати кичик екранлар ва фойдаланувчилар учун қулай мулоқот учун оптималлаштирилган. Бу сизга мобил аудиториянгиз билан самарали мулоқот қилиш ва уларнинг е'тиборини таклифингизга қаратиш имконини беради.",
     mobilePreviewLabel: "Мобил кўриниши",
     projectsTitle: "Махсус лойиҳалар",
     mediaKitTitle: "Media kit ва прейс",
@@ -318,12 +318,11 @@ export default async function HamkorlikPage() {
                           <span>Desktop</span>
                         </div>
                         <div className="space-y-3 p-3">
-                          <div className="h-10 rounded-sm bg-primary/15 ring-1 ring-primary/20" />
-                          <div className="h-20 rounded-sm bg-muted/70" />
+                          <div className="h-10 rounded-sm bg-brand/80" />
+                          <div className="h-20 rounded-sm bg-foreground/10" />
                           <div className="grid grid-cols-3 gap-2">
-                            <div className="h-12 rounded-sm bg-muted/70" />
-                            <div className="h-12 rounded-sm bg-muted/70" />
-                            <div className="h-12 rounded-sm bg-muted/70" />
+                            <div className="h-12 rounded-sm bg-foreground/10" />
+                            <div className="h-12 rounded-sm bg-foreground/10" />
                           </div>
                         </div>
                       </div>
@@ -340,12 +339,12 @@ export default async function HamkorlikPage() {
                       <div className="mx-auto w-[190px] overflow-hidden rounded-[18px] border bg-card p-2">
                         <div className="mb-2 h-1.5 w-12 mx-auto rounded-full bg-muted-foreground/30" />
                         <div className="space-y-2 rounded-[12px] border bg-background p-2">
-                          <div className="h-8 rounded-sm bg-primary/15 ring-1 ring-primary/20" />
-                          <div className="h-14 rounded-sm bg-muted/70" />
-                          <div className="h-14 rounded-sm bg-muted/70" />
+                          <div className="h-8 rounded-sm bg-brand/80" />
+                          <div className="h-14 rounded-sm bg-foreground/10" />
+                          <div className="h-14 rounded-sm bg-foreground/10" />
                           <div className="grid grid-cols-2 gap-2">
-                            <div className="h-10 rounded-sm bg-muted/70" />
-                            <div className="h-10 rounded-sm bg-muted/70" />
+                            <div className="h-10 rounded-sm bg-foreground/10" />
+                            <div className="h-10 rounded-sm bg-foreground/10" />
                           </div>
                         </div>
                       </div>

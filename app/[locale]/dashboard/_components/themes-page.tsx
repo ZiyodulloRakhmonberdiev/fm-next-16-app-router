@@ -42,7 +42,7 @@ import {
 } from '@/shared/common/components/ui/select'
 import type { AppLocale } from '@/shared/common/lib/locale-api'
 import { LOCALES, LOCALE_LABELS } from '@/shared/common/lib/locale-constants'
-import { Pencil, PlusCircle, Sparkles, Trash2, ExternalLink } from 'lucide-react'
+import { Pencil, PlusCircle, BookOpen, Trash2, ExternalLink } from 'lucide-react'
 import { cyrillicToLatinForSlug, slugify } from '@/shared/common/lib/slug'
 import { useThemesQuery, useThemeMutations } from '@/features/dashboard/model/admin-hooks'
 import { useThemesUiStore } from '@/features/dashboard/model/admin-ui-store'
@@ -254,14 +254,14 @@ export function ThemesPage({ locale }: ThemesPageProps) {
         <CardHeader className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
             <CardTitle className="text-xl flex items-center gap-2">
-              <Sparkles className="size-6" />
-              Temalar
+              <BookOpen className="size-6" />
+              Mavzular
             </CardTitle>
-            <CardDescription>Yangiliklarni mavzu bo'yicha birlashtirish uchun temalar ro'yxati.</CardDescription>
+            <CardDescription>Yangiliklarni mavzu bo'yicha birlashtirish uchun mavzular ro'yxati.</CardDescription>
           </div>
           <Button onClick={() => { setCreateShowInHomePage(false); setCreateOpen(true) }} size="lg" className="shrink-0 w-full md:w-auto">
             <PlusCircle className="size-4 mr-2" />
-            Yangi tema
+            Yangi mavzu
           </Button>
         </CardHeader>
       </Card>
@@ -269,13 +269,13 @@ export function ThemesPage({ locale }: ThemesPageProps) {
       <Card className="py-4 md:py-6">
         <CardHeader className="px-4 md:px-6">
           <CardTitle className="text-base">Ro'yxat</CardTitle>
-          <CardDescription>Jami: {themes.length} ta tema</CardDescription>
+          <CardDescription>Jami: {themes.length} ta mavzu</CardDescription>
         </CardHeader>
         <CardContent className="px-4 md:px-6">
           {isLoading ? (
             <p className="text-sm text-muted-foreground">Yuklanmoqda...</p>
           ) : error ? (
-            <p className="text-sm text-destructive">Temalarni yuklab bo'lmadi.</p>
+            <p className="text-sm text-destructive">Mavzularni yuklab bo'lmadi.</p>
           ) : null}
           <div className="rounded-md border overflow-x-auto">
             <Table>
@@ -283,13 +283,13 @@ export function ThemesPage({ locale }: ThemesPageProps) {
                 <TableRow>
                   <TableHead>Slug</TableHead>
                   <TableHead>Nom (uz)</TableHead>
-                  <TableHead>Nom (uzb)</TableHead>
+                  <TableHead>Nom (kirill)</TableHead>
                   <TableHead>Nom (ru)</TableHead>
                   <TableHead>Nom (en)</TableHead>
-                  <TableHead>Subtitle (uz)</TableHead>
-                  <TableHead>Description (uz)</TableHead>
-                  <TableHead>Home</TableHead>
-                  <TableHead>Home list</TableHead>
+                  <TableHead>Sarlavha (uz)</TableHead>
+                  <TableHead>Izoh (uz)</TableHead>
+                  <TableHead>Bosh sahifa</TableHead>
+                  <TableHead>Bosh sahifada list</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="w-[170px]">Amallar</TableHead>
                 </TableRow>
@@ -298,7 +298,7 @@ export function ThemesPage({ locale }: ThemesPageProps) {
                 {themes.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={10} className="text-center text-muted-foreground py-8">
-                      Tema topilmadi
+                      Mavzu topilmadi
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -315,16 +315,16 @@ export function ThemesPage({ locale }: ThemesPageProps) {
                       </TableCell>
                       <TableCell>
                         {row.showInHomePage ? (
-                          <span className="rounded-full bg-emerald-500/15 text-emerald-600 px-2 py-1 text-xs font-medium">true</span>
+                          <span className="rounded-full bg-emerald-500/15 text-emerald-600 px-2 py-1 text-xs font-medium">Faol</span>
                         ) : (
-                          <span className="rounded-full bg-muted text-muted-foreground px-2 py-1 text-xs font-medium">false</span>
+                          <span className="rounded-full bg-muted text-muted-foreground px-2 py-1 text-xs font-medium">Nofaol</span>
                         )}
                       </TableCell>
                       <TableCell>
                         {row.showInHomeList ? (
-                          <span className="rounded-full bg-emerald-500/15 text-emerald-600 px-2 py-1 text-xs font-medium">true</span>
+                          <span className="rounded-full bg-emerald-500/15 text-emerald-600 px-2 py-1 text-xs font-medium">Faol</span>
                         ) : (
-                          <span className="rounded-full bg-muted text-muted-foreground px-2 py-1 text-xs font-medium">false</span>
+                          <span className="rounded-full bg-muted text-muted-foreground px-2 py-1 text-xs font-medium">Nofaol</span>
                         )}
                       </TableCell>
                       <TableCell>
@@ -335,7 +335,7 @@ export function ThemesPage({ locale }: ThemesPageProps) {
                               : 'rounded-full bg-muted text-muted-foreground px-2 py-1 text-xs font-medium'
                           }
                         >
-                          {row.status}
+                          {row.status === 'active' ? 'Faol' : 'Nofaol'}
                         </span>
                       </TableCell>
                       <TableCell>
@@ -371,17 +371,16 @@ export function ThemesPage({ locale }: ThemesPageProps) {
         <DialogContent className="flex max-h-[min(90vh,760px)] w-full max-w-[calc(100%-2rem)] flex-col gap-0 overflow-hidden p-0 sm:max-w-2xl">
           <div className="shrink-0 border-b px-6 pt-6 pb-4 pr-14">
             <DialogHeader className="text-left">
-              <DialogTitle>Yangi tema</DialogTitle>
+              <DialogTitle>Yangi mavzu</DialogTitle>
               <DialogDescription>
-                Barcha tillarda sarlavha (nom) majburiy. Subtitle va description ixtiyoriy. Slug inglizcha nomdan
-                avtomatik olinadi.
+                Barcha tillarda nom majburiy. Sarlavha va izoh ixtiyoriy.
               </DialogDescription>
             </DialogHeader>
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 py-4 [scrollbar-width:thin]">
             <form id="create-theme-form" onSubmit={handleCreateSubmit} className="space-y-4">
               <div className="rounded-lg border border-border/60 bg-muted/20 p-4">
-                <p className="text-sm font-medium text-foreground mb-3">Tema rasmi (500×500)</p>
+                <p className="text-sm font-medium text-foreground mb-3">Mavzu rasmi (500×500)</p>
                 <div className="flex items-center gap-4">
                   <div className="relative size-14 overflow-hidden rounded-full bg-muted ring-1 ring-border">
                     {createImageUrl ? (
@@ -395,9 +394,6 @@ export function ThemesPage({ locale }: ThemesPageProps) {
                       disabled={imageBusy || create.isPending}
                       onChange={(e) => handleThemeImagePick(e.currentTarget.files?.[0] ?? null, 'create')}
                     />
-                    <p className="mt-2 text-xs text-muted-foreground">
-                      Rasm saqlanishidan oldin avtomatik center-crop qilinadi va 500×500 JPEG bo‘ladi.
-                    </p>
                   </div>
                   {createImageUrl ? (
                     <Button
@@ -419,11 +415,11 @@ export function ThemesPage({ locale }: ThemesPageProps) {
                     <Input id={`create-name_${loc}`} name={`name_${loc}`} className="min-w-0" required />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor={`create-subtitle_${loc}`}>Subtitle (ixtiyoriy)</Label>
+                    <Label htmlFor={`create-subtitle_${loc}`}>Sarlavha (ixtiyoriy)</Label>
                     <Input id={`create-subtitle_${loc}`} name={`subtitle_${loc}`} className="min-w-0" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor={`create-description_${loc}`}>Description (ixtiyoriy)</Label>
+                    <Label htmlFor={`create-description_${loc}`}>Izoh (ixtiyoriy)</Label>
                     <Textarea
                       id={`create-description_${loc}`}
                       name={`description_${loc}`}
@@ -455,8 +451,8 @@ export function ThemesPage({ locale }: ThemesPageProps) {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="active">active</SelectItem>
-                    <SelectItem value="inactive">inactive</SelectItem>
+                    <SelectItem value="active">Faol</SelectItem>
+                    <SelectItem value="inactive">Nofaol</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -481,7 +477,7 @@ export function ThemesPage({ locale }: ThemesPageProps) {
             <DialogHeader className="text-left">
               <DialogTitle>Tahrirlash: {editTheme?.slug}</DialogTitle>
               <DialogDescription>
-                Barcha tillarda sarlavha majburiy. Subtitle va description ixtiyoriy.
+                Barcha tillarda nom majburiy. Sarlavha va izoh ixtiyoriy.
               </DialogDescription>
             </DialogHeader>
           </div>
@@ -553,7 +549,7 @@ export function ThemesPage({ locale }: ThemesPageProps) {
                   </div>
                 ))}
                 <div className="flex items-center justify-between rounded-md border p-3">
-                  <Label htmlFor="edit-show-in-home-page">Home page da ko'rsatilsin</Label>
+                  <Label htmlFor="edit-show-in-home-page">Bosh sahifada mavzu ko'rsatilsin</Label>
                   <Switch
                     id="edit-show-in-home-page"
                     checked={editShowInHomePage}
@@ -561,7 +557,7 @@ export function ThemesPage({ locale }: ThemesPageProps) {
                   />
                 </div>
                 <div className="flex items-center justify-between rounded-md border p-3">
-                  <Label htmlFor="edit-show-in-home-list">Home tepadagi listda ko'rsatilsin</Label>
+                  <Label htmlFor="edit-show-in-home-list">Bosh sahifada yuqoridagi listda mavzu ko'rsatilsin</Label>
                   <Switch
                     id="edit-show-in-home-list"
                     checked={editShowInHomeList}
@@ -575,8 +571,8 @@ export function ThemesPage({ locale }: ThemesPageProps) {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="active">active</SelectItem>
-                      <SelectItem value="inactive">inactive</SelectItem>
+                      <SelectItem value="active">Faol</SelectItem>
+                      <SelectItem value="inactive">Nofaol</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

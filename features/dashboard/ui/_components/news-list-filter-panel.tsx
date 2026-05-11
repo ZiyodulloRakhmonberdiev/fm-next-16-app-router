@@ -37,12 +37,12 @@ export function NewsListFilterPanel({
 }: NewsListFilterPanelProps) {
   return (
     <Card className="gap-3 py-0 md:gap-6 md:py-6">
-      <CardHeader className="hidden px-3 md:block md:px-6">
+      {/* <CardHeader className="hidden px-3 md:block md:px-6">
         <CardTitle className="text-base">Filterlar</CardTitle>
         <CardDescription>Status, Top, reklama, maqola, tur va sana bo'yicha filtrlash</CardDescription>
-      </CardHeader>
+      </CardHeader> */}
       <CardContent className="px-3 pb-4 pt-2 md:px-6 md:pb-6 md:pt-0">
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-2 md:gap-6 lg:grid-cols-3 xl:grid-cols-9">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-9">
           {renderSelect({ kind: 'status' })}
           {renderSelect({ kind: 'author' })}
           {renderSelect({ kind: 'top' })}
@@ -59,7 +59,7 @@ export function NewsListFilterPanel({
           </div>
           <div className="flex flex-col justify-end gap-2">
             <p className="hidden md:block text-xs text-muted-foreground opacity-0 pointer-events-none">.</p>
-            <Button variant="outline" size="sm" className="mt-2 md:mt-0" onClick={onClear}>Filterlarni tozalash</Button>
+            <Button variant="outline" size="sm" className="mt-2 md:mt-0" onClick={onClear}>Tozalash</Button>
           </div>
         </div>
       </CardContent>

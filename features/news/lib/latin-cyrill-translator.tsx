@@ -252,7 +252,7 @@ export function UzUzbTranslateControls({
   return (
     <>
       {activeTab === 'uz' && sourceUzb.trim() !== '' && (
-        <div className="flex justify-end">
+        <div className="flex justify-start">
           <Button
             type="button"
             variant="default"
@@ -263,7 +263,7 @@ export function UzUzbTranslateControls({
         </div>
       )}
       {activeTab === 'uzb' && sourceUz.trim() !== '' && (
-        <div className="flex justify-end">
+        <div className="flex justify-start">
           <Button
             type="button"
             variant="default"

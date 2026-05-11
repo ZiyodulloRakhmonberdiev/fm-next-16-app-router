@@ -1,21 +1,22 @@
 import type { LucideIcon } from 'lucide-react'
 import {
+  MonitorCog,
   Building2,
-  ClipboardList,
-  CloudCog,
+  ChartPie,
+  WifiCog,
   FolderTree,
   Heart,
   LayoutDashboard,
-  LayoutGrid,
+  Ellipsis,
   Megaphone,
-  MessageSquare,
+  MessageCircle,
   Newspaper,
   PlusCircle,
-  Send,
+  Mail,
   Share2,
-  Sparkles,
+  BookOpen,
   Tag,
-  UserCircle,
+  UserRoundPen,
   UserSquare,
   Users,
 } from 'lucide-react'
@@ -30,18 +31,19 @@ const NAV_ICONS: Record<AdminNavIconKey, LucideIcon> = {
   Tag,
   Users,
   UserSquare,
-  UserCircle,
-  MessageSquare,
+  UserRoundPen,
+  MessageCircle,
   Heart,
   Megaphone,
-  ClipboardList,
-  Sparkles,
+  ChartPie,
+  BookOpen,
   Building2,
   Share2,
-  Send,
-  CloudCog,
-  LayoutGrid,
+  Mail,
+  WifiCog,
+  Ellipsis,
   PlusCircle,
+  MonitorCog,
 }
 
 export const adminNavIcons: Record<AdminNavIconKey, LucideIcon> = NAV_ICONS
@@ -80,9 +82,9 @@ export function getMobileBottomNavItems(role: NormalizedRole): MobileBottomNavIt
       { href: '/dashboard', label: 'Bosh sahifa', icon: LayoutDashboard },
       { href: '/dashboard/news', label: 'Yangiliklar', icon: Newspaper },
       { href: '/dashboard/news/create', label: 'Yangi', icon: PlusCircle },
-      { href: '/dashboard/comments', label: 'Izohlar', icon: MessageSquare },
+      { href: '/dashboard/comments', label: 'Izohlar', icon: MessageCircle },
       // { href: '/dashboard/contact-messages', label: 'Contact', icon: Send },
-      { href: '/dashboard/settings', label: 'Kabinet', icon: UserCircle },
+      { href: '/dashboard/settings', label: 'Kabinet', icon: UserRoundPen },
     ]
   }
 
@@ -91,8 +93,8 @@ export function getMobileBottomNavItems(role: NormalizedRole): MobileBottomNavIt
       { href: '/dashboard/categories', label: 'Kategoriya', icon: FolderTree },
       { href: '/dashboard/tags', label: 'Teglar', icon: Tag },
       { href: '/dashboard/news', label: 'Yangiliklar', icon: Newspaper },
-      { href: '/dashboard/comments', label: 'Izohlar', icon: MessageSquare },
-      { href: '/dashboard/contact-messages', label: 'Contact', icon: Send },
+      { href: '/dashboard/comments', label: 'Izohlar', icon: MessageCircle },
+      { href: '/dashboard/contact-messages', label: 'Contact', icon: Mail },
       { href: '/dashboard/reactions', label: 'Reaksiya', icon: Heart },
     ]
   }
@@ -100,7 +102,7 @@ export function getMobileBottomNavItems(role: NormalizedRole): MobileBottomNavIt
   if (role === 'ads_manager') {
     return [
       { href: '/dashboard/ads', label: 'Reklama', icon: Megaphone },
-      { href: '/dashboard/ads/feedback', label: 'Fikrlar', icon: ClipboardList },
+      { href: '/dashboard/ads/feedback', label: 'Fikrlar', icon: ChartPie },
     ]
   }
 

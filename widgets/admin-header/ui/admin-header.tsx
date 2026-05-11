@@ -298,7 +298,7 @@ export default function AdminHeader() {
               priority
             />
           </Link>
-          <div className="relative z-1 mx-auto hidden w-full max-w-md flex-1 md:block" ref={wrapperRef}>
+          {/* <div className="relative z-1 mx-auto hidden w-full max-w-md flex-1 md:block" ref={wrapperRef}>
             <div className="relative">
               <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <input
@@ -336,7 +336,7 @@ export default function AdminHeader() {
                 )}
               </div>
             )}
-          </div>
+          </div> */}
         </div>
         <div className="relative z-1 flex shrink-0 items-center gap-2">
           <DropdownMenu>

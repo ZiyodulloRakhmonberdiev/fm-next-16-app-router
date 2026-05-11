@@ -64,18 +64,56 @@ import {
   Newspaper, PlusCircle, Eye, Search, ChevronDown, SlidersHorizontal,
   ExternalLink, Pencil, Columns3, Languages,
   Check, CircleOff, Clock, Send, Ban, Trash2, Archive,
+  Columns2,
 } from 'lucide-react'
 import { NewsListSummaryCards } from './_components/news-list-summary-cards'
 import { NewsListFilterPanel } from './_components/news-list-filter-panel'
 
+/** Jadval va filtrlarda bir xil o‘zbekcha status matnlari */
+const STATUS_LABEL_UZ: Record<NewsStatus, string> = {
+  pending: 'Kutilmoqda',
+  published: 'Nashr etilgan',
+  cancelled: 'Bekor qilingan',
+  deleted: "O'chirilgan",
+  archived: 'Arxivlangan',
+}
+
 const STATUS_OPTIONS: { value: '' | NewsStatus; label: string }[] = [
   { value: '', label: 'Barcha statuslar' },
-  { value: 'pending', label: 'Kutilmoqda' },
-  { value: 'published', label: 'Nashr qilingan' },
-  { value: 'cancelled', label: 'Bekor qilingan' },
-  { value: 'deleted', label: "O'chirilgan" },
-  { value: 'archived', label: 'Arxivlangan' },
+  { value: 'pending', label: STATUS_LABEL_UZ.pending },
+  { value: 'published', label: STATUS_LABEL_UZ.published },
+  { value: 'cancelled', label: STATUS_LABEL_UZ.cancelled },
+  { value: 'deleted', label: STATUS_LABEL_UZ.deleted },
+  { value: 'archived', label: STATUS_LABEL_UZ.archived },
 ]
+
+const TELEGRAM_PUSH_LABEL_UZ: Record<'sent' | 'failed', string> = {
+  sent: 'Yuborilgan',
+  failed: 'Yuborilmadi',
+}
+
+const NEWS_TYPE_LABEL_UZ: Record<'video' | 'image' | 'text' | 'audio', string> = {
+  video: 'Video',
+  image: 'Rasm',
+  text: 'Matn',
+  audio: 'Audio',
+}
+
+function formatNewsTypeUz(type: string | undefined): string {
+  if (!type?.trim()) return '—'
+  const key = type.toLowerCase() as keyof typeof NEWS_TYPE_LABEL_UZ
+  return NEWS_TYPE_LABEL_UZ[key] ?? type
+}
+
+function isTranslationsComplete(t: TranslationsForSlug | undefined): boolean {
+  if (!t) return false
+  return LOCALES.every((loc) => {
+    const hasTitle = !!t.title[loc]?.trim()
+    const hasDesc = !!t.description[loc]?.trim()
+    const hasContent = !!t.content[loc]
+    return hasTitle && hasDesc && hasContent
+  })
+}
 
 const STATUS_ICONS: Record<NewsStatus, React.ComponentType<{ className?: string }>> = {
   pending: Clock, published: Send, cancelled: Ban, deleted: Trash2, archived: Archive,
@@ -89,10 +127,10 @@ const TOP_OPTIONS: { value: '' | 'yes' | 'no'; label: string }[] = [
 
 const TYPE_OPTIONS_FULL: { value: '' | 'video' | 'image' | 'text' | 'audio'; label: string }[] = [
   { value: '', label: 'Barcha turlar' },
-  { value: 'video', label: 'Video' },
-  { value: 'image', label: 'Rasm' },
-  { value: 'text', label: 'Matn' },
-  { value: 'audio', label: 'Audio' },
+  { value: 'video', label: NEWS_TYPE_LABEL_UZ.video },
+  { value: 'image', label: NEWS_TYPE_LABEL_UZ.image },
+  { value: 'text', label: NEWS_TYPE_LABEL_UZ.text },
+  { value: 'audio', label: NEWS_TYPE_LABEL_UZ.audio },
 ]
 
 const AD_OPTIONS: { value: '' | 'yes' | 'no'; label: string }[] = [
@@ -113,10 +151,10 @@ const COLUMN_KEYS = [
 ] as const
 
 const COLUMN_LABELS: Record<(typeof COLUMN_KEYS)[number], string> = {
-  tezkorAmallar: "Tezkor amallar",
+  tezkorAmallar: "Tezkor",
   rasm: 'Rasm', sarlavha: 'Sarlavha', kategoriya: 'Kategoriya',
-  status: 'Status', tur: 'Tur', top: 'Top', createdBy: 'Yaratgan',
-  publishedAt: 'publishedAt',
+  status: 'Holat', tur: 'Tur', top: 'Top', createdBy: 'Hosil qildi',
+  publishedAt: 'Nashr etildi',
   views: "Ko'rishlar", telegram: 'Telegram', tarjimalar: 'Tarjimalar', amallar: 'Amallar',
 }
 
@@ -527,7 +565,7 @@ export function DashboardNewsListPage({
             onClear={clearFilters}
             renderSelect={({ kind }) =>
               kind === 'status' ? (
-                <FilterSelect label="Status" value={statusFilter} options={STATUS_OPTIONS} onSelect={setStatusFilter} />
+                <FilterSelect label="Holat" value={statusFilter} options={STATUS_OPTIONS} onSelect={setStatusFilter} />
               ) : kind === 'author' ? (
                 <FilterSelect
                   label="Muallif"
@@ -573,7 +611,7 @@ export function DashboardNewsListPage({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" className="gap-1">
-                  <Columns3 className="size-4" />
+                  <Columns2 className="size-4" />
                   Ustunlar
                 </Button>
               </DropdownMenuTrigger>
@@ -616,7 +654,7 @@ export function DashboardNewsListPage({
                       {columnVisibility.tur !== false && <TableHead>{COLUMN_LABELS.tur}</TableHead>}
                       {columnVisibility.top !== false && <TableHead className="text-center">{COLUMN_LABELS.top}</TableHead>}
                       {columnVisibility.createdBy !== false && <TableHead>{COLUMN_LABELS.createdBy}</TableHead>}
-                      {columnVisibility.publishedAt !== false && <TableHead>{COLUMN_LABELS.publishedAt}</TableHead>}
+                      {columnVisibility.publishedAt !== false && <TableHead>{COLUMN_LABELS.publishedAt} </TableHead>}
                       {columnVisibility.views !== false && <TableHead className="text-right">{COLUMN_LABELS.views}</TableHead>}
                       {columnVisibility.telegram !== false && <TableHead>{COLUMN_LABELS.telegram}</TableHead>}
                       {columnVisibility.tarjimalar !== false && <TableHead className="text-center w-20">{COLUMN_LABELS.tarjimalar}</TableHead>}
@@ -669,12 +707,14 @@ export function DashboardNewsListPage({
                         )}
                         {columnVisibility.status !== false && (
                           <TableCell>
-                            <span className="inline-flex rounded-md bg-muted px-2 py-0.5 text-xs font-medium capitalize">
-                              {item.status ?? 'published'}
+                            <span className="inline-flex rounded-md bg-muted px-2 py-0.5 text-xs font-medium">
+                              {STATUS_LABEL_UZ[(item.status ?? 'published') as NewsStatus]}
                             </span>
                           </TableCell>
                         )}
-                        {columnVisibility.tur !== false && <TableCell className="text-muted-foreground capitalize">{item.type ?? '—'}</TableCell>}
+                        {columnVisibility.tur !== false && (
+                          <TableCell className="text-muted-foreground">{formatNewsTypeUz(item.type)}</TableCell>
+                        )}
                         {columnVisibility.top !== false && (
                           <TableCell className="text-center">
                             {item.isTop ? <span className="text-primary font-medium">Ha</span> : <span className="text-muted-foreground">Yo'q</span>}
@@ -712,7 +752,9 @@ export function DashboardNewsListPage({
                                       : 'bg-destructive/10 text-destructive'
                                   )}
                                 >
-                                  {item.telegramPushStatus}
+                                  {item.telegramPushStatus === 'sent' || item.telegramPushStatus === 'failed'
+                                    ? TELEGRAM_PUSH_LABEL_UZ[item.telegramPushStatus]
+                                    : item.telegramPushStatus}
                                 </span>
                               </div>
                             ) : (
@@ -722,8 +764,13 @@ export function DashboardNewsListPage({
                         )}
                         {columnVisibility.tarjimalar !== false && (
                           <TableCell className="text-center">
-                            <Button variant="secondary" size="sm"  onClick={() => setTranslationsModalSlug(item.slug)}>
-                              <Languages />
+                            <Button variant="secondary" size="sm" onClick={() => setTranslationsModalSlug(item.slug)}>
+                              <Languages
+                                className={cn(
+                                  isTranslationsComplete(translationsBySlug[item.slug]) &&
+                                    'text-green-600 dark:text-green-400'
+                                )}
+                              />
                             </Button>
                           </TableCell>
                         )}
@@ -805,17 +852,17 @@ export function DashboardNewsListPage({
           </DialogHeader>
           <div className="space-y-4 pt-1">
             <div className="space-y-2">
-              <Label>Status</Label>
+              <Label>Holat</Label>
               <Select value={quickEditStatus} onValueChange={(v) => setQuickEditStatus(v as NewsStatus)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Status" />
+                  <SelectValue placeholder="Holat" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="pending">Kutilmoqda</SelectItem>
-                  <SelectItem value="published">Nashr qilingan</SelectItem>
-                  <SelectItem value="cancelled">Bekor qilingan</SelectItem>
-                  <SelectItem value="archived">Arxivlangan</SelectItem>
-                  <SelectItem value="deleted">O'chirilgan</SelectItem>
+                  <SelectItem value="pending">{STATUS_LABEL_UZ.pending}</SelectItem>
+                  <SelectItem value="published">{STATUS_LABEL_UZ.published}</SelectItem>
+                  <SelectItem value="cancelled">{STATUS_LABEL_UZ.cancelled}</SelectItem>
+                  <SelectItem value="archived">{STATUS_LABEL_UZ.archived}</SelectItem>
+                  <SelectItem value="deleted">{STATUS_LABEL_UZ.deleted}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -833,11 +880,11 @@ export function DashboardNewsListPage({
                 <Switch id="quick-isBreaking" checked={quickEditFlags.isBreaking} onCheckedChange={(checked) => setQuickEditFlags((prev) => ({ ...prev, isBreaking: checked }))} />
               </div>
               <div className="flex items-center justify-between rounded-md border p-3">
-                <Label htmlFor="quick-ad">Reklama</Label>
+                <Label htmlFor="quick-ad">Reklama sifatida</Label>
                 <Switch id="quick-ad" checked={quickEditFlags.ad} onCheckedChange={(checked) => setQuickEditFlags((prev) => ({ ...prev, ad: checked }))} />
               </div>
               <div className="flex items-center justify-between rounded-md border p-3">
-                <Label htmlFor="quick-stats">Maqolalar bo'limi (stats)</Label>
+                <Label htmlFor="quick-stats">Maqolalar sifatida</Label>
                 <Switch id="quick-stats" checked={quickEditFlags.stats} onCheckedChange={(checked) => setQuickEditFlags((prev) => ({ ...prev, stats: checked }))} />
               </div>
               <div className="flex items-center justify-between rounded-md border p-3">

@@ -136,7 +136,7 @@ export function SettingsForm({
         </div>
         <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border p-4">
           <Label htmlFor="isBreaking" className="cursor-pointer">
-            Shoshilinch yangilik (Breaking)
+            Dolzarb yangilik
           </Label>
           <Switch id="isBreaking" checked={isBreaking} onCheckedChange={onChangeIsBreaking} />
         </div>

@@ -170,8 +170,8 @@ export default function DashboardCommentsPage() {
             <TableHeader>
               <TableRow className="hover:bg-transparent">
                 <TableHead className="w-[200px] font-medium">Yangilik</TableHead>
-                <TableHead className="font-medium">Muallif</TableHead>
-                <TableHead className="min-w-[200px] font-medium">Matn</TableHead>
+                <TableHead className="font-medium">Izoh egasi</TableHead>
+                <TableHead className="min-w-[200px] font-medium">Izoh matni</TableHead>
                 <TableHead className="whitespace-nowrap font-medium">Tasdiqlovchi</TableHead>
                 <TableHead className="whitespace-nowrap font-medium">Sana</TableHead>
                 <TableHead className="text-right font-medium">Amallar</TableHead>

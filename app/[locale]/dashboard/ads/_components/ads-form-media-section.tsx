@@ -28,9 +28,9 @@ export function AdsFormMediaSection({
     <div className="space-y-2 md:col-span-2">
       <Label>Reklama media (1 ta) *</Label>
       <p className="text-xs text-muted-foreground">
-        Hozircha bitta media ishlatiladi.
+        {/* Hozircha bitta media ishlatiladi. */}
       </p>
-      <p className="text-xs text-muted-foreground">Tavsiya: 470×210 px yoki 16:9 nisbat</p>
+      <p className="text-xs text-muted-foreground">(470×210: Rasm va Matn format / 1300x200: Web format / 375x185: Mobile format)</p>
       <div className="space-y-3">
         <div className="space-y-1.5">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -74,7 +74,7 @@ export function AdsFormMediaSection({
             </div>
           </div>
           {mediaUrl.trim() ? (
-            <div className="h-20 w-full max-w-full overflow-hidden rounded-md border bg-muted sm:max-w-[320px]">
+            <div className="w-full max-w-full overflow-hidden rounded-md border bg-muted">
               {/\.(mp4|webm|ogg|mov|m4v)(\?|#|$)/i.test(mediaUrl.trim()) ? (
                 <video src={mediaUrl.trim()} className="h-full w-full object-cover" muted playsInline />
               ) : (

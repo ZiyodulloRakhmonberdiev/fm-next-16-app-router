@@ -139,6 +139,10 @@ export const seed = {
       name: { uz: "Jamoa", uzb: "Жамоа", ru: "Команда", en: "Team" } satisfies LocaleMap,
     },
     {
+      href: "/partners",
+      name: { uz: "Hamkorlik", uzb: "Ҳамкорлик", ru: "Партнерство", en: "Partnership" } satisfies LocaleMap,
+    },
+    {
       href: "/contact",
       name: { uz: "Bog'lanish", uzb: "Боғланиш", ru: "Контакты", en: "Contact us" } satisfies LocaleMap,
     },

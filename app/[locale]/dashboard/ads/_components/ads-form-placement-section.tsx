@@ -62,7 +62,7 @@ export function AdsFormPlacementSection({ form, setForm }: AdsFormPlacementSecti
       </div>
 
       <div className="space-y-2">
-        <Label>Joylashuvlar (placements) *</Label>
+        <Label>Joylashuvlar *</Label>
         <Popover>
           <PopoverTrigger asChild>
             <Button type="button" variant="outline" className="h-auto min-h-9 w-full justify-between gap-2 py-2">
@@ -74,7 +74,7 @@ export function AdsFormPlacementSection({ form, setForm }: AdsFormPlacementSecti
           </PopoverTrigger>
           <PopoverContent className="w-80 max-w-[calc(100vw-2rem)] p-3" align="start">
             <p className="mb-3 text-xs font-medium text-muted-foreground">
-              Bir yoki bir nechta joyni belgilang
+              Bir joyni belgilang
             </p>
             <ul className="flex flex-col gap-3">
               {AD_PLACEMENTS.map((item) => {

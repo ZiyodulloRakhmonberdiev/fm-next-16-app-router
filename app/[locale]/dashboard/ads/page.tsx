@@ -217,7 +217,7 @@ function DashboardAdsPage() {
   return (
     <div className="w-full min-w-0">
       <div ref={formTopRef} className="" />
-      <Card className="overflow-hidden">
+      <Card className="overflow-hidden mb-4">
         <CardContent className="grid gap-4 px-4 md:grid-cols-2">
           <AdsFormMediaSection
             form={form}

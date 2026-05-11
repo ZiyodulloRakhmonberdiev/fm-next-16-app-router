@@ -68,14 +68,14 @@ export function GeneralsForm({
   onMinutesChange,
 }: GeneralsFormProps) {
   return (
-    <Card className='pt-0 md:pt-4 bg-transparent border-none md:border-border shadow-none'>
-      <CardHeader className='px-0'>
+    <Card className='pt-0 bg-transparent border-none md:border-border shadow-none'>
+      {/* <CardHeader className='px-0'>
         <CardTitle>Umumiy maydonlar</CardTitle>
         <CardDescription>Kategoriya, teglar va boshqalarni tanlang.</CardDescription>
-      </CardHeader>
+      </CardHeader> */}
       <CardContent className="grid gap-4 sm:grid-cols-2 px-0">
         <div className="space-y-2">
-          <Label>Kategoriya</Label>
+          <Label>Kategoriya (Majburiy)</Label>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="w-full justify-between">
@@ -109,7 +109,7 @@ export function GeneralsForm({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-(--radix-dropdown-menu-trigger-width)">
-              <DropdownMenuLabel>Temani tanlang</DropdownMenuLabel>
+              <DropdownMenuLabel>Mavzuni tanlang (Ixtiyoriy)</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem onSelect={() => onThemeChange('')}>
                 <span className="text-muted-foreground italic font-light">Tanlanmagan</span>
@@ -123,13 +123,13 @@ export function GeneralsForm({
           </DropdownMenu>
           {themeId ? (
             <p className="text-xs text-muted-foreground">
-              Tanlangan tema: <span className="font-medium">{themeName}</span>
+              Tanlangan mavzu: <span className="font-medium">{themeName}</span>
             </p>
           ) : null}
         </div>
 
         <div className="space-y-2">
-          <Label>Muallif</Label>
+          <Label>Muallif (Ixtiyoriy)</Label>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="w-full justify-between">
@@ -138,7 +138,7 @@ export function GeneralsForm({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-(--radix-dropdown-menu-trigger-width)">
-              <DropdownMenuLabel>Muallif</DropdownMenuLabel>
+              <DropdownMenuLabel>Muallifni tanlang (Ixtiyoriy)</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem onSelect={() => onAuthorChange("")}>
                 <span className="text-muted-foreground italic font-light">Tanlanmagan</span>
@@ -152,16 +152,16 @@ export function GeneralsForm({
           </DropdownMenu>
         </div>
         <div className="space-y-2 sm:col-span-1">
-          <Label>Teglar</Label>
+          <Label>Teglar (Ixtiyoriy)</Label>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="w-full justify-between">
-                Teg qo&apos;shish
+                Teglar qo&apos;shish
                 <ChevronDown className="size-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="max-h-60 w-(--radix-dropdown-menu-trigger-width) overflow-y-auto">
-              <DropdownMenuLabel>Teglarni tanlang</DropdownMenuLabel>
+              <DropdownMenuLabel>Teglarni tanlang (Ixtiyoriy)</DropdownMenuLabel>
               <DropdownMenuSeparator />
               {tags.map((t) => (
                 <DropdownMenuCheckboxItem

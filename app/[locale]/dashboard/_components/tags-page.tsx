@@ -36,6 +36,7 @@ import { useTagMutations, useTagsQuery } from '@/features/dashboard/model/admin-
 import { useTagsUiStore } from '@/features/dashboard/model/admin-ui-store'
 import { cyrillicToLatinForSlug, slugify } from '@/shared/common/lib/slug'
 import { getApiErrorDescription } from '@/features/dashboard/model/admin-api'
+import { Separator } from '@/shared/common/components/ui/separator'
 
 export type TagRow = {
   _id: string
@@ -260,8 +261,9 @@ export function TagsPage({ locale }: TagsPageProps) {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Yangi teg</DialogTitle>
-            <DialogDescription>Tillar bo‘yicha nomlarni kiriting. Slug inglizcha nomdan avtomatik olinadi.</DialogDescription>
+            <DialogDescription>Tillar bo‘yicha nomlarni kiriting.</DialogDescription>
           </DialogHeader>
+          <Separator />
           <form id="create-tag-form" onSubmit={handleCreateSubmit} className="space-y-4">
             {LOCALES.map((loc) => (
               <div key={loc} className="space-y-2">
@@ -287,6 +289,7 @@ export function TagsPage({ locale }: TagsPageProps) {
             <DialogTitle>Tahrirlash: {editTag?.slug}</DialogTitle>
             <DialogDescription>Teg ma'lumotlarini o'zgartiring. Slug inglizcha nomdan avtomatik yangilanadi.</DialogDescription>
           </DialogHeader>
+          <Separator />
           {editTag && (
             <form key={editTag.slug} id="update-tag-form" onSubmit={handleUpdateSubmit} className="space-y-4">
               {LOCALES.map((loc) => (

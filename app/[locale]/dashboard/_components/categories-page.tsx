@@ -37,6 +37,7 @@ import { cyrillicToLatinForSlug, slugify } from '@/shared/common/lib/slug'
 import { useCategoriesQuery, useCategoryMutations } from '@/features/dashboard/model/admin-hooks'
 import { useCategoriesUiStore } from '@/features/dashboard/model/admin-ui-store'
 import { getApiErrorDescription } from '@/features/dashboard/model/admin-api'
+import { Separator } from '@/shared/common/components/ui/separator'
 
 function generateSlugFromNames(name: Record<AppLocale, string>): string {
   const base = name.en?.trim() || ''
@@ -227,12 +228,12 @@ export function CategoriesPage({ locale }: CategoriesPageProps) {
               <TableHeader>
                 <TableRow>
                   <TableHead>Slug</TableHead>
-                  <TableHead>Nom (uz)</TableHead>
-                  <TableHead>Nom (uzb)</TableHead>
+                  <TableHead>Nom (Lotin)</TableHead>
+                  <TableHead>Nom (Kirill)</TableHead>
                   <TableHead>Nom (ru)</TableHead>
                   <TableHead>Nom (en)</TableHead>
                   <TableHead>Havola</TableHead>
-                  <TableHead>Priority</TableHead>
+                  <TableHead>Tartib raqami</TableHead>
                   <TableHead className="w-[140px]">Amallar</TableHead>
                 </TableRow>
               </TableHeader>
@@ -282,9 +283,10 @@ export function CategoriesPage({ locale }: CategoriesPageProps) {
           <DialogHeader>
             <DialogTitle>Yangi kategoriya</DialogTitle>
             <DialogDescription>
-              Har bir til uchun nomni kiriting. Slug inglizcha nomdan avtomatik olinadi.
+              Har bir til uchun nomni kiriting
             </DialogDescription>
           </DialogHeader>
+          <Separator />
           <form id="create-category-form" onSubmit={handleCreateSubmit} className="space-y-4">
             {LOCALES.map((loc) => (
               <div key={loc} className="space-y-2">
@@ -293,7 +295,7 @@ export function CategoriesPage({ locale }: CategoriesPageProps) {
               </div>
             ))}
             <div className="space-y-2">
-              <Label htmlFor="create-priority">Priority</Label>
+              <Label htmlFor="create-priority">Tartib raqami</Label>
               <Input id="create-priority" name="priority" type="number" defaultValue={0} />
             </div>
           </form>
@@ -328,7 +330,7 @@ export function CategoriesPage({ locale }: CategoriesPageProps) {
                 </div>
               ))}
               <div className="space-y-2">
-                <Label htmlFor="edit-priority">Priority</Label>
+                <Label htmlFor="edit-priority">Tartib raqami</Label>
                 <Input id="edit-priority" name="priority" type="number" defaultValue={editCategory.priority ?? 0} />
               </div>
             </form>
