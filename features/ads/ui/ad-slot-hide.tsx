@@ -80,11 +80,11 @@ export function AdSlotHide({ ad, placement, onClose, onAdSectionClosed }: AdSlot
           {reasons.map((reason) => (
             <Button
               type="button"
-              variant="secondary"
               key={reason}
-              asChild
+              asChild 
+              variant="secondary"
               onClick={() => void sendFeedback(reasonMode, reason)}
-              className="p-2 rounded-xs py-1.5 h-auto text-xs "
+              className="p-2 rounded-xs py-1.5 h-auto text-xs"
             >
               <span>{reason}</span>
             </Button>

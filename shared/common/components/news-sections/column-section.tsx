@@ -44,8 +44,8 @@ function ColumnListCard({ item, locale }: { item: NewsItem; locale: AppLocale })
 }
 
 export default function ColumnSection({
-  categorySlug = "business",
-  featuredPosition = "right",
+  categorySlug = "medicine-moh",
+  featuredPosition = "left",
   initialNews,
   initialCategories,
 }: ColumnSectionProps) {

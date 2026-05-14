@@ -39,7 +39,7 @@ export default function RowSection({
     return getNewsListForLocale(raw, locale)
   }, [publicNews, locale, categorySlug])
 
-  if (items.length === 0) return null
+  if (items.length < 2) return null
 
   return (
     <section className="w-full px-4 pt-4 md:px-6">

@@ -4,7 +4,10 @@ import Image from 'next/image'
 import { Link } from '@/i18n/navigation'
 import { useTheme } from 'next-themes'
 import Headline from './headline'
-import CategoryList from '@/entities/category/ui/category-list'
+import CategoryList, {
+  CategoryMegaMenuDropdown,
+  CategoryMegaMenuTrigger,
+} from '@/entities/category/ui/category-list'
 import { SidebarTrigger } from '@/shared/common/components/ui/sidebar'
 import { CategoryListForMobile } from '@/entities/category'
 import { SearchBar } from '@/widgets/client-searchbar'
@@ -41,6 +44,7 @@ export default function Header({
 }) {
   const router = useRouter()
   const [searchOpen, setSearchOpen] = useState(false)
+  const [megaMenuOpen, setMegaMenuOpen] = useState(false)
   const { resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
   const [isPinned, setIsPinned] = useState(false)
@@ -158,64 +162,76 @@ export default function Header({
           isPinned ? 'fixed inset-x-0 top-0' : 'relative'
         )}
       >
-        <div className="relative mx-auto flex w-full max-w-7xl items-center justify-between border-b border-border py-2 px-4 md:border-none md:px-6">
-          <div className="hidden items-center gap-8 md:flex">
-            <Link href="/" className="flex h-8 shrink-0 items-center md:h-10">
+        <div className="relative w-full">
+          <div className="relative mx-auto flex w-full max-w-7xl items-center justify-between border-b border-border py-2 px-4 md:border-none md:px-6">
+            <div className="hidden items-center gap-8 md:flex">
+              <Link href="/" className="flex h-8 shrink-0 items-center md:h-10">
+                <Image
+                  src={mounted ? logoSrc : '/images/fm-logo-dark.svg'}
+                  alt="Logo"
+                  width={130}
+                  height={40}
+                  className="h-6 w-auto max-h-6 object-contain object-left md:h-8 md:max-h-8"
+                  sizes="(max-width: 768px) 100px, 130px"
+                  priority
+                />
+              </Link>
+              <div className="ml-12 md:ml-16 flex items-center gap-6">
+                <CategoryList />
+              </div>
+            </div>
+            <Link
+              href="/"
+              className="flex h-8 items-center md:hidden"
+            >
               <Image
-                src={mounted ? logoSrc : '/images/fm-logo-dark.svg'}
+                src={'/images/fm-logo-dark.svg'}
                 alt="Logo"
                 width={130}
                 height={40}
-                className="h-6 w-auto max-h-6 object-contain object-left md:h-8 md:max-h-8"
+                className="dark:hidden h-4.5 w-auto max-h-6 object-contain md:h-8 md:max-h-8"
                 sizes="(max-width: 768px) 100px, 130px"
                 priority
               />
+              <Image
+                src={'/images/fm-logo.svg'}
+                alt="Logo"
+                width={90}
+                height={30}
+                className="hidden dark:block h-4.5 w-auto max-h-6 object-contain md:h-8 md:max-h-8"
+                priority
+              />
             </Link>
-            <div className="ml-12 md:ml-16 flex items-center gap-6">
-              <CategoryList />
-            </div>
-          </div>
-          <Link
-            href="/"
-            className="flex h-8 items-center md:hidden"
-          >
-            <Image
-              src={'/images/fm-logo-dark.svg'}
-              alt="Logo"
-              width={130}
-              height={40}
-              className="dark:hidden h-4.5 w-auto max-h-6 object-contain md:h-8 md:max-h-8"
-              sizes="(max-width: 768px) 100px, 130px"
-              priority
-            />
-            <Image
-              src={'/images/fm-logo.svg'}
-              alt="Logo"
-              width={90}
-              height={30}
-              className="hidden dark:block h-4.5 w-auto max-h-6 object-contain md:h-8 md:max-h-8"
-              priority
-            />
-          </Link>
-          <div className="flex shrink-0 items-center gap-2">
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" className="" onClick={() => setSearchOpen(true)} aria-label="Qidiruv">
-                <BsSearch size="4" />
-              </Button>
-              <span className="block w-[0.5px] h-5 bg-foreground/10"></span>
-              <ClientUserMenu />
-              <span className="block w-[0.5px] h-5 bg-foreground/10"></span>
-              <div className="hidden md:block">
-                <LanguageSwitcher />
+            <div className="flex shrink-0 items-center gap-2">
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="icon" className="" onClick={() => setSearchOpen(true)} aria-label="Qidiruv">
+                  <BsSearch size="4" />
+                </Button>
+                <span className="block w-[0.5px] h-5 bg-foreground/10"></span>
+                <ClientUserMenu />
+                <span className="block w-[0.5px] h-5 bg-foreground/10"></span>
+                <div className="hidden md:block">
+                  <LanguageSwitcher />
+                </div>
+                {/* <div className="hidden md:block">
+                  <ThemeSwitcherForHeader />
+                </div> */}
+                <div className="hidden md:block">
+                  <CategoryMegaMenuTrigger
+                    open={megaMenuOpen}
+                    onToggle={() => setMegaMenuOpen((v) => !v)}
+                  />
+                </div>
               </div>
-              <div className="hidden md:block">
-                <ThemeSwitcherForHeader />
+              <div className="block md:hidden">
+                <SidebarTrigger />
               </div>
             </div>
-            <div className="block md:hidden">
-              <SidebarTrigger />
-            </div>
           </div>
+          <CategoryMegaMenuDropdown
+            open={megaMenuOpen}
+            onClose={() => setMegaMenuOpen(false)}
+          />
         </div>
         <div className="max-w-7xl mx-auto px-4 md:px-6 hidden">
           <CategoryListForMobile />

@@ -48,7 +48,7 @@ export default function BannerSection({
   const leftItems = rest.slice(0, 4)
   const rightItems = rest.slice(4, 8)
 
-  if (sorted.length < 1) return null
+  if (sorted.length < 6) return null
 
   return (
     <div className="rounded-md px-4 md:px-6 py-6">

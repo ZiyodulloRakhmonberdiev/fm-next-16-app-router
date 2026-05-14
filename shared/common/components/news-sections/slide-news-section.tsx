@@ -132,7 +132,7 @@ export default function SlideNewsSection({
     }
   }, [api, items.length])
 
-  if (items.length < 1) return null
+  if (items.length < 3) return null
 
   return (
     <section className="my-4 w-full space-y-4 px-4 md:px-6">

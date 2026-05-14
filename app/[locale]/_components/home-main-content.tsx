@@ -1,14 +1,10 @@
-import * as React from "react";
 import { getLocale } from "next-intl/server";
-import { Link } from "@/i18n/navigation";
-import { StayConnected, TopBanner } from "@/shared/common/components/organisms";
+import { TopBanner } from "@/shared/common/components/organisms";
 import { ServerUnavailable } from "@/shared/common/components/molecules";
 import { sortCategoriesByPriority } from "@/features/category/lib/category-utils";
 import {
-  AdsShowcaseSection,
   BannerSection,
   BreakingSection,
-  ColumnSection,
   AdNewsSection,
   HeaderNewsCarousel,
   SlideNewsSection,
@@ -19,7 +15,6 @@ import {
 } from "@/shared/common/components/news-sections";
 import RowSection from "@/shared/common/components/news-sections/row-section";
 import VideoNewsSection2 from "@/shared/common/components/news-sections/video-news-section-2";
-import { AdSlot } from "@/features/ads/ui/ad-slot";
 import {
   getCachedPublicAdNews,
   getCachedPublicNews,
@@ -41,51 +36,9 @@ export default async function HomeMainContent() {
     return <ServerUnavailable />;
   }
 
-  const categoriesByPriority = sortCategoriesByPriority(categories);
-
-  const firstCategorySlug = categoriesByPriority[0]?.slug ?? "politics";
-  const secondCategorySlug =
-    categoriesByPriority[1]?.slug ?? categoriesByPriority[0]?.slug ?? "society";
-  const thirdCategorySlug =
-    categoriesByPriority[2]?.slug ??
-    categoriesByPriority[1]?.slug ??
-    categoriesByPriority[0]?.slug ??
-    "uzbekistan";
-  const fourthCategorySlug =
-    categoriesByPriority[3]?.slug ??
-    categoriesByPriority[2]?.slug ??
-    categoriesByPriority[1]?.slug ??
-    categoriesByPriority[0]?.slug ??
-    "world";
-
-  const fifthCategorySlug = categoriesByPriority[4]?.slug ?? "rights";
-
-  const sixthCategorySlug = categoriesByPriority[5]?.slug ?? "economy";
-  const seventhCategorySlug = categoriesByPriority[6]?.slug ?? "health";
-  const eighthCategorySlug = categoriesByPriority[7]?.slug ?? "science";
-  const ninthCategorySlug = categoriesByPriority[8]?.slug ?? "technology";
-  const tenthCategorySlug = categoriesByPriority[9]?.slug ?? "sports";
-
   if (publicNews.length === 0) {
     return null;
   }
-
-  const getSafeImageSrc = (raw?: string) => {
-    if (!raw?.trim()) return "";
-    const candidate =
-      raw.startsWith("http://") ||
-        raw.startsWith("https://") ||
-        raw.startsWith("/")
-        ? raw
-        : `/uploads/images/${raw}`;
-    try {
-      new URL(candidate, "http://localhost");
-      return candidate;
-    } catch {
-      return "";
-    }
-  };
-
   // Top scroller shows all active themes (themes API is active-only for public).
   const featuredThemes = themes.filter((theme: any) =>
     Boolean(theme.showInHomeList ?? theme.showInHomePage),
@@ -112,89 +65,81 @@ export default async function HomeMainContent() {
       <ThemesTopScroller themes={themes} locale={locale} />
       <HeaderNewsCarousel initialNews={publicNews} />
       <TopBanner />
+      {/* first category */}
       <BannerSection
-        categorySlug={firstCategorySlug}
-        featuredPosition="right"
+        categorySlug="uzbekistan"
         initialNews={publicNews}
         initialCategories={categories}
       />
+      {/* second category */}
       <SlideNewsSection
-        categorySlug={fourthCategorySlug}
+        categorySlug="innovation"
         initialNews={publicNews}
         initialCategories={categories}
       />
-      {renderNextTheme()}
-      <BreakingSection
+      {/* third category */}
+      <RowSection
+        categorySlug="digital-economy"
         initialNews={publicNews}
         initialCategories={categories}
       />
-      <BannerSection
-        categorySlug={secondCategorySlug}
-        featuredPosition="left"
+      {/* fourth category */}
+      <SlideNewsSection
+        categorySlug="corruption-cid"
         initialNews={publicNews}
         initialCategories={categories}
       />
+
       <StatsNewsSection
         initialNews={statsNews}
         initialCategories={categories}
       />
-      {renderNextTheme()}
-      <TextNewsSection
+      {/* <TextNewsSection
         initialNews={publicNews}
         initialCategories={categories}
-      />
-      {renderNextTheme()}
-      <VideoNewsSection2
-        initialNews={publicNews}
-        initialCategories={categories}
-      />
+      /> */}
+      {/* {renderNextTheme()} */}
+
       {/* <div className="px-4 md:px-6 py-4">
         <AdSlot placement="home_bottom_full" />
       </div> */}
 
-      <AdNewsSection initialNews={adNews} />
+      <BreakingSection
+        initialNews={publicNews}
+        initialCategories={categories}
+      />
+      {/* fifth category */}
+      <RowSection
+        categorySlug="medicine-moh"
+        initialNews={publicNews}
+        initialCategories={categories}
+      />
+      {/* sixth category */}
       <SlideNewsSection
-        categorySlug={fifthCategorySlug}
+        categorySlug="world"
         initialNews={publicNews}
         initialCategories={categories}
       />
       {renderNextTheme()}
-      <ColumnSection
-        categorySlug={sixthCategorySlug}
-        initialNews={publicNews}
-        initialCategories={categories}
-      />
-      <RowSection
-        categorySlug={seventhCategorySlug}
-        initialNews={publicNews}
-        initialCategories={categories}
-      />
-      {renderNextTheme()}
-      <RowSection
-        categorySlug={thirdCategorySlug}
-        initialNews={publicNews}
-        initialCategories={categories}
-      />
-      {renderNextTheme()}
+      {/* seventh category */}
       <BannerSection
-        categorySlug={eighthCategorySlug}
-        featuredPosition="right"
+        categorySlug="politics"
+        featuredPosition="left"
         initialNews={publicNews}
         initialCategories={categories}
       />
-      {renderNextTheme()}
-      <SlideNewsSection
-        categorySlug={ninthCategorySlug}
+      <VideoNewsSection2
         initialNews={publicNews}
         initialCategories={categories}
       />
-      {renderNextTheme()}
-      <ColumnSection
-        categorySlug={tenthCategorySlug}
+      {/* eighth category */}
+      <RowSection
+        categorySlug="bankers-diary"
         initialNews={publicNews}
         initialCategories={categories}
       />
-      {featuredThemes.slice(themeCursor).map((theme: any) => (
+
+      {/* {featuredThemes.slice(themeCursor).map((theme: any) => (
         <ThemeSection
           key={theme._id}
           theme={theme}
@@ -202,7 +147,33 @@ export default async function HomeMainContent() {
           allNews={publicNews}
           limit={8}
         />
-      ))}
+      ))} */}
+      {/* ninth category */}
+      <SlideNewsSection
+        categorySlug="education-mpe"
+        initialNews={publicNews}
+        initialCategories={categories}
+      />
+      {/* tenth category */}
+      <BannerSection
+        categorySlug="judiciary"
+        initialNews={publicNews}
+        initialCategories={categories}
+      />
+      <AdNewsSection initialNews={adNews} />
+      {renderNextTheme()}
+      {/* eleventh category */}
+      <RowSection
+        categorySlug="sports"
+        initialNews={publicNews}
+        initialCategories={categories}
+      />
+      {/* twelfth category */}
+      <RowSection
+        categorySlug="society"
+        initialNews={publicNews}
+        initialCategories={categories}
+      />
     </>
   );
 }
