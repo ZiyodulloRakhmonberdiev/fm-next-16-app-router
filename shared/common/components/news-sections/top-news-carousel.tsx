@@ -16,7 +16,9 @@ import {
 import type { CarouselApi } from "@/shared/common/components/ui/carousel"
 import { getNewsListForLocale, isImageTypeRawNews, type NewsItem } from "@/features/news/model"
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
+import { usePublicNewsInitial } from "@/features/news/model/public-news-initial"
 import { usePublicCategoriesQuery } from "@/features/category/model/public-categories-query"
+import { TopNewsCarouselSkeleton } from "@/shared/common/components/home/home-hero-skeletons"
 import { getCategoryLabelForNewsItem } from "@/features/category/model/use-category-label"
 import { cn } from "@/shared/common/lib/utils"
 import { AppLocale } from "../../lib/formatter"
@@ -56,7 +58,9 @@ export default function TopNewsCarousel() {
     Autoplay({ delay: 6000, stopOnInteraction: true })
   )
   const locale = useLocale() as AppLocale
-  const { data: publicNews = [] } = usePublicNewsQuery()
+  const initialNews = usePublicNewsInitial()
+  const { data: qNews = [], isPending, isFetching } = usePublicNewsQuery()
+  const publicNews = initialNews ?? qNews
   const { data: categories = [], isPending: categoriesPending } = usePublicCategoriesQuery()
   const [api, setApi] = React.useState<CarouselApi | null>(null)
   const [selectedIndex, setSelectedIndex] = React.useState(0)
@@ -76,6 +80,17 @@ export default function TopNewsCarousel() {
     )
     .slice(0, 10)
   const news = getNewsListForLocale(rawTop, locale)
+
+  const isResolvingCarousel =
+    news.length === 0 && !initialNews && (isPending || isFetching)
+  if (isResolvingCarousel) {
+    return (
+      <div className="w-full min-h-[420px] md:min-h-[480px] lg:min-h-[520px]" aria-busy="true">
+        <TopNewsCarouselSkeleton />
+      </div>
+    )
+  }
+
   if (news.length === 0) return null
 
   const getSafeImageSrc = (raw?: string) => {

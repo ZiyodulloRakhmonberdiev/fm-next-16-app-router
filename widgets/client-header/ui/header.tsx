@@ -216,6 +216,7 @@ export default function Header({
                 {/* <div className="hidden md:block">
                   <ThemeSwitcherForHeader />
                 </div> */}
+                <span className="block w-[0.5px] h-5 bg-foreground/10"></span>
                 <div className="hidden md:block">
                   <CategoryMegaMenuTrigger
                     open={megaMenuOpen}

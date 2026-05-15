@@ -127,6 +127,7 @@
   "server_unavailable": "Server vaqtincha ishlamayapti",
   "server_unavailable_description": "Hozir bu muamnoni hal qilyapmiz. Iltimos, birozdan keyin qayta urinib ko'ring.",
   "loading": "Yuklanmoqda...",
+  "scroll_to_top": "Yuqoriga",
   "results": "Natijalar",
   "search": "Qidiruv",
   "video_news": "Video yangiliklar",

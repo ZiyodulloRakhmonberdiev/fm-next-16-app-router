@@ -23,6 +23,7 @@ import {
   getCachedPublicThemes,
 } from "@/shared/server/public-data-server";
 import type { AppLocale } from "@/shared/common/lib/locale-api";
+import HomePublicDataProvider from "./home-public-data-provider";
 
 export default async function HomeMainContent() {
   const publicNews = await getCachedPublicNews();
@@ -61,7 +62,7 @@ export default async function HomeMainContent() {
   };
 
   return (
-    <>
+    <HomePublicDataProvider news={publicNews} categories={categories}>
       <ThemesTopScroller themes={themes} locale={locale} />
       <HeaderNewsCarousel initialNews={publicNews} />
       <TopBanner />
@@ -174,6 +175,6 @@ export default async function HomeMainContent() {
         initialNews={publicNews}
         initialCategories={categories}
       />
-    </>
+    </HomePublicDataProvider>
   );
 }

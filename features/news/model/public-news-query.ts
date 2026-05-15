@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query"
 import type { RawNewsItem } from "./types"
 import { usePublicSiteSettingsQuery } from "@/shared/server/public-site-settings-query"
+import { usePublicNewsInitial } from "./public-news-initial"
 
 type NewsListResponse = {
   data: RawNewsItem[]
@@ -72,6 +73,7 @@ async function fetchPublishedNews(): Promise<RawNewsItem[]> {
 export const publicNewsQueryKey = ["public-news"] as const
 
 export function usePublicNewsQuery() {
+  const initialNews = usePublicNewsInitial()
   const { data: settings } = usePublicSiteSettingsQuery()
   const enabled =
     (settings?.clientDelivery.mode ?? "normal") !== "server-off" &&
@@ -83,6 +85,7 @@ export function usePublicNewsQuery() {
     staleTime: 30_000,
     retry: 1,
     enabled,
-    placeholderData: [],
+    initialData: initialNews,
+    placeholderData: initialNews ?? [],
   })
 }

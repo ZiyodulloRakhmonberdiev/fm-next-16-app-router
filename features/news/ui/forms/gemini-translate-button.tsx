@@ -75,7 +75,7 @@ export function GeminiTranslateButton({
         className="gap-2"
       >
         {loading ? <Loader2 className="size-4 animate-spin" /> : null}
-        Tarjima qilish
+        AI tarjima
       </Button>
     </div>
   )

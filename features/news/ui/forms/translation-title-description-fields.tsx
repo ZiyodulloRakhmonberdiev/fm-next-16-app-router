@@ -2,7 +2,7 @@
 
 import type { AppLocale } from '@/shared/common/lib/locale-api'
 import { Label } from '@/shared/common/components/ui/label'
-import type { TranslationsState } from '@/features/news/lib/latin-cyrill-translator'
+import { UzUzbTranslateControls, type TranslationsState } from '@/features/news/lib/latin-cyrill-translator'
 import { applyEmptyLocaleUpdates, TRANSLATION_LOCALES } from '@/features/news/lib/gemini-translate-api'
 import { GeminiTranslateButton } from '@/features/news/ui/forms/gemini-translate-button'
 
@@ -45,33 +45,34 @@ export function TranslationTitleDescriptionFields({
           className="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           rows={6}
         />
-        {/* Lotin ↔ Krill (vaqtincha o‘chirilgan)
-        <UzUzbTranslateControls
-          activeTab={activeTab}
-          translations={translations}
-          field="title"
-          onChangeTranslation={onChangeTranslation}
-        />
-        */}
-        <GeminiTranslateButton
-          fieldType="title"
-          localeValues={titleValues(translations)}
-          preferredLocale={activeTab}
-          onTranslated={(updates) => {
-            const merged = applyEmptyLocaleUpdates(
-              Object.fromEntries(
-                TRANSLATION_LOCALES.map((l) => [l, translations[l]?.title ?? ''])
-              ) as Record<AppLocale, string>,
-              updates
-            )
-            for (const loc of TRANSLATION_LOCALES) {
-              if (merged[loc] !== (translations[loc]?.title ?? '')) {
-                onChangeTranslation(loc, 'title', merged[loc])
+        <div className="flex justify-start gap-2">
+          <UzUzbTranslateControls
+            activeTab={activeTab}
+            translations={translations}
+            field="title"
+            onChangeTranslation={onChangeTranslation}
+          />
+
+          <GeminiTranslateButton
+            fieldType="title"
+            localeValues={titleValues(translations)}
+            preferredLocale={activeTab}
+            onTranslated={(updates) => {
+              const merged = applyEmptyLocaleUpdates(
+                Object.fromEntries(
+                  TRANSLATION_LOCALES.map((l) => [l, translations[l]?.title ?? ''])
+                ) as Record<AppLocale, string>,
+                updates
+              )
+              for (const loc of TRANSLATION_LOCALES) {
+                if (merged[loc] !== (translations[loc]?.title ?? '')) {
+                  onChangeTranslation(loc, 'title', merged[loc])
+                }
               }
-            }
-          }}
-          className="flex justify-start"
-        />
+            }}
+            className="flex justify-start"
+          />
+        </div>
       </div>
       <div className="space-y-2">
         <Label htmlFor={`${prefix}desc-${activeTab}`}>
@@ -87,33 +88,35 @@ export function TranslationTitleDescriptionFields({
           className="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           rows={8}
         />
-        {/* Lotin ↔ Krill (vaqtincha o‘chirilgan)
-        <UzUzbTranslateControls
-          activeTab={activeTab}
-          translations={translations}
-          field="description"
-          onChangeTranslation={onChangeTranslation}
-        />
-        */}
-        <GeminiTranslateButton
-          fieldType="description"
-          localeValues={descriptionValues(translations)}
-          preferredLocale={activeTab}
-          onTranslated={(updates) => {
-            const merged = applyEmptyLocaleUpdates(
-              Object.fromEntries(
-                TRANSLATION_LOCALES.map((l) => [l, translations[l]?.description ?? ''])
-              ) as Record<AppLocale, string>,
-              updates
-            )
-            for (const loc of TRANSLATION_LOCALES) {
-              if (merged[loc] !== (translations[loc]?.description ?? '')) {
-                onChangeTranslation(loc, 'description', merged[loc])
+        <div className="flex justify-start gap-2">
+
+          <UzUzbTranslateControls
+            activeTab={activeTab}
+            translations={translations}
+            field="description"
+            onChangeTranslation={onChangeTranslation}
+          />
+
+          <GeminiTranslateButton
+            fieldType="description"
+            localeValues={descriptionValues(translations)}
+            preferredLocale={activeTab}
+            onTranslated={(updates) => {
+              const merged = applyEmptyLocaleUpdates(
+                Object.fromEntries(
+                  TRANSLATION_LOCALES.map((l) => [l, translations[l]?.description ?? ''])
+                ) as Record<AppLocale, string>,
+                updates
+              )
+              for (const loc of TRANSLATION_LOCALES) {
+                if (merged[loc] !== (translations[loc]?.description ?? '')) {
+                  onChangeTranslation(loc, 'description', merged[loc])
+                }
               }
-            }
-          }}
-          className="flex justify-start"
-        />
+            }}
+            className="flex justify-start"
+          />
+        </div>
       </div>
     </div>
   )

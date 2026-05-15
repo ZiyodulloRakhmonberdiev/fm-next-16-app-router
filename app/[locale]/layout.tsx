@@ -1,5 +1,6 @@
 import { getMessages } from "next-intl/server";
 import { NextIntlClientProvider } from "next-intl";
+import { ScrollToTopButton } from "@/shared/common/components/molecules/scroll-to-top-button";
 
 type Props = {
   children: React.ReactNode;
@@ -12,6 +13,7 @@ export default async function LocaleLayout({ children, params }: Props) {
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
       {children}
+      <ScrollToTopButton />
     </NextIntlClientProvider>
   );
 }

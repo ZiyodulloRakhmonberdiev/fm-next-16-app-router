@@ -258,7 +258,7 @@ export function UzUzbTranslateControls({
             variant="default"
             onClick={handleFromUzb}
           >
-            Tarjima qilish
+            Oddiy tarjima
           </Button>
         </div>
       )}
@@ -269,7 +269,7 @@ export function UzUzbTranslateControls({
             variant="default"
             onClick={handleFromUz}
           >
-            Tarjima qilish
+            Oddiy tarjima
           </Button>
         </div>
       )}

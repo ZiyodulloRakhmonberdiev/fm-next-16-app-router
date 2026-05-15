@@ -7,7 +7,9 @@ import { useLocale, useTranslations } from "next-intl"
 import { cn } from "@/shared/common/lib/utils"
 import type { AppLocale } from "@/shared/common/lib/formatter"
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
+import { usePublicNewsInitial } from "@/features/news/model/public-news-initial"
 import { getNewsListForLocale, isImageTypeRawNews, type NewsItem, type RawNewsItem } from "@/features/news/model"
+import { TopNewsStripSkeleton } from "@/shared/common/components/home/home-hero-skeletons"
 
 type HeaderNewsCarouselProps = {
   initialNews?: RawNewsItem[]
@@ -26,8 +28,9 @@ function LiveIndicator() {
 
 export default function HeaderNewsCarousel({ initialNews }: HeaderNewsCarouselProps) {
   const locale = useLocale() as AppLocale
-  const { data: qNews = [] } = usePublicNewsQuery()
-  const publicNews = initialNews ?? qNews
+  const contextNews = usePublicNewsInitial()
+  const { data: qNews = [], isPending, isFetching } = usePublicNewsQuery()
+  const publicNews = initialNews ?? contextNews ?? qNews
   const t = useTranslations("common")
   const items = React.useMemo(() => {
     const raw = [...publicNews]
@@ -37,6 +40,20 @@ export default function HeaderNewsCarousel({ initialNews }: HeaderNewsCarouselPr
       .slice(0, 10)
     return getNewsListForLocale(raw, locale)
   }, [publicNews, locale])
+
+  const isResolvingStrip =
+    items.length === 0 &&
+    !initialNews &&
+    !contextNews &&
+    (isPending || isFetching)
+
+  if (isResolvingStrip) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 md:px-6 my-0 mb-4" aria-busy="true">
+        <TopNewsStripSkeleton />
+      </div>
+    )
+  }
 
   if (items.length === 0) return null
 

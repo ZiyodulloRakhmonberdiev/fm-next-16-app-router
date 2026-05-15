@@ -785,7 +785,6 @@ export function ContentForm({
                 onContentsChange={onGeminiTranslateContents}
               />
             ) : null}
-            {/* Lotin ↔ Krill (vaqtincha o‘chirilgan)
             {(generateMode === "uzToUzb" || generateMode === "uzbToUz") && (
               <Button
                 type="button"
@@ -793,10 +792,10 @@ export function ContentForm({
                 onClick={handleGenerate}
                 disabled={!canGenerate}
               >
-                {generateMode === "uzToUzb" ? "Krillga o‘tkazish" : "Lotinga o‘tkazish"}
+                Oddiy tarjima
               </Button>
             )}
-            */}
+           
           </div>
         </div>
 

@@ -19,8 +19,10 @@ async function fetchPublicCategories(): Promise<PublicCategory[]> {
 export { getCategoryNameFromApi } from "../lib/category-utils"
 
 import { useQuery } from "@tanstack/react-query"
+import { usePublicCategoriesInitial } from "./public-categories-initial"
 
 export function usePublicCategoriesQuery() {
+  const initialCategories = usePublicCategoriesInitial()
   const { data: settings } = usePublicSiteSettingsQuery()
   const enabled =
     (settings?.clientDelivery.mode ?? "normal") !== "server-off" &&
@@ -31,6 +33,7 @@ export function usePublicCategoriesQuery() {
     queryFn: fetchPublicCategories,
     staleTime: 60_000,
     enabled,
-    placeholderData: [],
+    initialData: initialCategories,
+    placeholderData: initialCategories ?? [],
   })
 }
