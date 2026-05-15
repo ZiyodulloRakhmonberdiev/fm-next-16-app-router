@@ -85,7 +85,7 @@ export default async function HomeMainContent() {
       />
       {/* fourth category */}
       <SlideNewsSection
-        categorySlug="corruption-cid"
+        categorySlug="corruption"
         initialNews={publicNews}
         initialCategories={categories}
       />
@@ -110,7 +110,7 @@ export default async function HomeMainContent() {
       />
       {/* fifth category */}
       <RowSection
-        categorySlug="medicine-moh"
+        categorySlug="medicine"
         initialNews={publicNews}
         initialCategories={categories}
       />
@@ -150,7 +150,7 @@ export default async function HomeMainContent() {
       ))} */}
       {/* ninth category */}
       <SlideNewsSection
-        categorySlug="education-mpe"
+        categorySlug="education"
         initialNews={publicNews}
         initialCategories={categories}
       />

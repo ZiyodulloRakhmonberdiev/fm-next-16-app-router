@@ -174,7 +174,7 @@ export function CategoriesPage({ locale }: CategoriesPageProps) {
       {
         onSuccess: () => {
           setEditId(null)
-          toast.success('Kategoriya muvaffaqiyatli yangilandi')
+          toast.success('Kategoriya yangilandi')
         },
         onError: showMutationError,
       }
@@ -186,7 +186,7 @@ export function CategoriesPage({ locale }: CategoriesPageProps) {
     remove.mutate(deleteCategory._id, {
       onSuccess: () => {
         setDeleteId(null)
-        toast.success('Kategoriya muvaffaqiyatli o\'chirildi')
+        toast.success('Kategoriya o\'chirildi')
       },
       onError: showMutationError,
     })

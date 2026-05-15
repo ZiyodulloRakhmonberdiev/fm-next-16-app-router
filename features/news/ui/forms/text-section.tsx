@@ -11,7 +11,8 @@ import {
 import { Label } from '@/shared/common/components/ui/label'
 import { Input } from '@/shared/common/components/ui/input'
 import { cn } from '@/shared/common/lib/utils'
-import { UzUzbTranslateControls, type TranslationsState } from '@/features/news/lib/latin-cyrill-translator'
+import type { TranslationsState } from '@/features/news/lib/latin-cyrill-translator'
+import { TranslationTitleDescriptionFields } from '@/features/news/ui/forms/translation-title-description-fields'
 
 type TextFormProps = {
   locales: AppLocale[]
@@ -70,42 +71,11 @@ export function TextForm({
           ))}
         </div>
         <div className="space-y-4 pt-2">
-          <div className="space-y-2">
-            <Label htmlFor={`title-${activeTab}`}>
-              Nom{activeTab === 'uz' && <span className="text-destructive">*</span>}{activeTab === 'uzb' && <span className="text-destructive">*</span>}
-            </Label>
-            <textarea
-              id={`title-${activeTab}`}
-              value={translations[activeTab]?.title ?? ''}
-              onChange={(e) => onChangeTranslation(activeTab, 'title', e.target.value)}
-              placeholder={activeTab === 'uz' ? 'Sarlavha (majburiy)' : 'Sarlavha'}
-              className="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              rows={6}
-            />
-            <UzUzbTranslateControls
-              activeTab={activeTab}
-              translations={translations}
-              field="title"
-              onChangeTranslation={onChangeTranslation}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor={`desc-${activeTab}`}>Izoh{activeTab === 'uz' && <span className="text-destructive">*</span>}{activeTab === 'uzb' && <span className="text-destructive">*</span>}</Label>
-            <textarea
-              id={`desc-${activeTab}`}
-              value={translations[activeTab]?.description ?? ''}
-              onChange={(e) => onChangeTranslation(activeTab, 'description', e.target.value)}
-              placeholder="Qisqa izoh"
-              className="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              rows={12}
-            />
-            <UzUzbTranslateControls
-              activeTab={activeTab}
-              translations={translations}
-              field="description"
-              onChangeTranslation={onChangeTranslation}
-            />
-          </div>
+          <TranslationTitleDescriptionFields
+            activeTab={activeTab}
+            translations={translations}
+            onChangeTranslation={onChangeTranslation}
+          />
           <div className="space-y-2">
             <Label htmlFor={`slug-${activeTab}`}>Slug (Avtomatik yaratiladi) </Label>
             <Input

@@ -3,6 +3,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import { Button } from "@/shared/common/components/ui/button"
+import { GeminiTranslateContentButton } from "@/features/news/ui/forms/gemini-translate-button"
 import { cn } from "@/shared/common/lib/utils"
 import type { AppLocale } from "@/shared/common/lib/locale-api"
 import { toast } from "sonner"
@@ -39,6 +40,7 @@ type ContentFormProps = {
   value: string
   allContents: Record<AppLocale, string>
   onChange: (next: string) => void
+  onGeminiTranslateContents?: (next: Record<AppLocale, string>) => void
   enabledTools?: EditorToolId[]
 }
 
@@ -51,6 +53,7 @@ export function ContentForm({
   value,
   allContents,
   onChange,
+  onGeminiTranslateContents,
   enabledTools,
 }: ContentFormProps) {
   const [imageUrl, setImageUrl] = useState("")
@@ -774,14 +777,27 @@ export function ContentForm({
             placeholder={placeholder}
             className="min-h-56 w-full resize-vertical rounded-md border bg-background px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40 text-[16px] md:min-h-72"
           />
-          <Button
-            type="button"
-            variant="default"
-            onClick={handleGenerate}
-            disabled={!canGenerate}
-          >
-            Tarjima qilish
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            {onGeminiTranslateContents ? (
+              <GeminiTranslateContentButton
+                contents={allContents}
+                preferredLocale={locale}
+                onContentsChange={onGeminiTranslateContents}
+              />
+            ) : null}
+            {/* Lotin ↔ Krill (vaqtincha o‘chirilgan)
+            {(generateMode === "uzToUzb" || generateMode === "uzbToUz") && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleGenerate}
+                disabled={!canGenerate}
+              >
+                {generateMode === "uzToUzb" ? "Krillga o‘tkazish" : "Lotinga o‘tkazish"}
+              </Button>
+            )}
+            */}
+          </div>
         </div>
 
         <div className={cn("space-y-3 rounded-md border bg-transparent p-3", mobileViewMode === "edit" ? "hidden md:block" : "block")}>

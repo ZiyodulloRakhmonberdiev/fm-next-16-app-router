@@ -889,6 +889,9 @@ export function CreateNewsForm({
                     [loc]: next,
                   }))
                 }
+                onGeminiTranslateContents={(next) => {
+                  setContents(next)
+                }}
               />
             </div>
           ))}
