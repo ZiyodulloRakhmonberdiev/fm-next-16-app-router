@@ -55,6 +55,7 @@ const copyByLocale: Record<AppLocale, MenuCopy> = {
       { title: "Yangiliklar", href: "/news" },
       { title: "Maqolalar", href: "/articles" },
       { title: "Audio", href: "/news/audio" },
+      // { title: "Radio", href: "/news/radio" },
       { title: "Video", href: "/news/video" },
       { title: "Dolzarb", href: "/news/breaking" },
       { title: "Muallif tanlovi", href: "/news" },
@@ -77,6 +78,7 @@ const copyByLocale: Record<AppLocale, MenuCopy> = {
       { title: "Мақолалар", href: "/articles" },
       { title: "Видео", href: "/news/video" },
       { title: "Аудио", href: "/news/audio" },
+      // { title: "Радио", href: "/news/radio" },
       { title: "Долзарб", href: "/news/breaking" },
       { title: "Муаллиф танлови", href: "/news" }
     ],
@@ -98,6 +100,7 @@ const copyByLocale: Record<AppLocale, MenuCopy> = {
       { title: "Статьи", href: "/articles" },
       { title: "Видео", href: "/news/video" },
       { title: "Аудио", href: "/news/audio" },
+      // { title: "Радио", href: "/news/radio" },
       { title: "Срочные новости", href: "/news/breaking" },
       { title: "Выбор автора", href: "/news" }
     ],
@@ -119,6 +122,7 @@ const copyByLocale: Record<AppLocale, MenuCopy> = {
       { title: "Articles", href: "/articles" },
       { title: "Video", href: "/news/video" },
       { title: "Audio", href: "/news/audio" },
+      // { title: "Radio", href: "/news/radio" },
       { title: "Breaking news", href: "/news/breaking" },
       { title: "Author's choice", href: "/news" }
     ],

@@ -81,7 +81,6 @@ export function GeminiTranslateButton({
   )
 }
 
-/** Kontent uchun: bo‘sh tillarga qo‘yadi. */
 export function GeminiTranslateContentButton({
   contents,
   preferredLocale,

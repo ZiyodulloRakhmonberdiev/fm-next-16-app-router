@@ -94,6 +94,11 @@
   },
   "common": {
   "audio": "Аудио",
+  "radio": "Радио",
+  "radio_stations_empty": "Список радиостанций пока пуст.",
+  "radio_load_error": "Не удалось загрузить список радио. Попробуйте позже.",
+  "radio_live": "Эфир…",
+  "radio_paused": "Пауза",
   "articles": "Статьи",
   "top_news": "Топ новости",
   "team_title": "Наша команда",

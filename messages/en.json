@@ -94,6 +94,11 @@
   },
   "common": {
     "audio": "Audio",
+    "radio": "Radio",
+    "radio_stations_empty": "No radio stations to show right now.",
+    "radio_load_error": "Could not load the radio list. Please try again later.",
+    "radio_live": "Live…",
+    "radio_paused": "Paused",
     "articles": "Articles",
     "top_news": "Top news",
     "team_title": "Our team",

@@ -1,5 +1,5 @@
 import { Link } from "@/i18n/navigation"
-import { HomeIcon, Flame, History, VideoIcon, Volume2 } from "lucide-react"
+import { HomeIcon, Flame, History, VideoIcon, Volume2, Radio } from "lucide-react"
 import { CategoryListForNewsPage } from "@/entities/category"
 import { getTranslations } from "next-intl/server"
 import { leanDocToPayload, SITE_SETTINGS_DOCUMENT_ID, SiteSettingsModel } from "@/features/dashboard/configs/site-settings.model"
@@ -35,8 +35,11 @@ export default async function NewsSlugSidebar() {
             <VideoIcon className="w-5 h-5" /> <span className="text-lg">{t("nav_video")}</span>
           </Link>
           <Link href="/news/audio" className="flex items-center gap-3">
-            <Volume2 className="w-5 h-5" /> <span className="text-lg">Audio</span>
+            <Volume2 className="w-5 h-5" /> <span className="text-lg">{t("audio")}</span>
           </Link>
+          {/* <Link href="/news/radio" className="flex items-center gap-3">
+            <Radio className="w-5 h-5" /> <span className="text-lg">{t("radio")}</span>
+          </Link> */}
         </nav>
       </div>
       <div className="border-t border-b border-border">

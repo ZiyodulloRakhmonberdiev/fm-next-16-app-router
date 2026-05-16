@@ -94,6 +94,11 @@
   },
   "common": {
   "audio": "Audio",
+  "radio": "Radio",
+  "radio_stations_empty": "Hozircha radiostansiyalar ro'yxati bo'sh.",
+  "radio_load_error": "Radiolar ro'yxatini yuklab bo'lmadi. Keyinroq qayta urinib ko'ring.",
+  "radio_live": "Efir…",
+  "radio_paused": "Pauza",
   "articles": "Maqolalar",
   "top_news": "Top yangiliklar",
   "team_title": "Bizning jamoa",
