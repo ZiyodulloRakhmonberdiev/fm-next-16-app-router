@@ -26,6 +26,7 @@ import {
   type ReactionsParams,
 } from './admin-api'
 import type { NewsStatus } from '@/features/news/model'
+import { invalidatePublicClientCaches } from '@/features/news/model/invalidate-public-client-cache'
 
 export const adminQueryKeys = {
   categories: ['admin', 'categories'] as const,
@@ -61,18 +62,27 @@ export function useCategoryMutations() {
 
   const create = useMutation({
     mutationFn: (payload: CreateCategoryPayload) => createCategory(payload),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: adminQueryKeys.categories }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminQueryKeys.categories })
+      invalidatePublicClientCaches(queryClient)
+    },
   })
 
   const update = useMutation({
     mutationFn: ({ id, payload }: { id: string; payload: CreateCategoryPayload }) =>
       updateCategory(id, payload),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: adminQueryKeys.categories }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminQueryKeys.categories })
+      invalidatePublicClientCaches(queryClient)
+    },
   })
 
   const remove = useMutation({
     mutationFn: (id: string) => deleteCategory(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: adminQueryKeys.categories }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminQueryKeys.categories })
+      invalidatePublicClientCaches(queryClient)
+    },
   })
 
   return { create, update, remove }
@@ -99,17 +109,26 @@ export function useThemeMutations() {
 
   const create = useMutation({
     mutationFn: (payload: CreateThemePayload) => createTheme(payload),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: adminQueryKeys.themes }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminQueryKeys.themes })
+      invalidatePublicClientCaches(queryClient)
+    },
   })
 
   const update = useMutation({
     mutationFn: ({ id, payload }: { id: string; payload: CreateThemePayload }) => updateTheme(id, payload),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: adminQueryKeys.themes }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminQueryKeys.themes })
+      invalidatePublicClientCaches(queryClient)
+    },
   })
 
   const remove = useMutation({
     mutationFn: (id: string) => deleteTheme(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: adminQueryKeys.themes }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminQueryKeys.themes })
+      invalidatePublicClientCaches(queryClient)
+    },
   })
 
   return { create, update, remove }
@@ -120,17 +139,26 @@ export function useTagMutations() {
 
   const create = useMutation({
     mutationFn: (payload: CreateTagPayload) => createTag(payload),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: adminQueryKeys.tags }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminQueryKeys.tags })
+      invalidatePublicClientCaches(queryClient)
+    },
   })
 
   const update = useMutation({
     mutationFn: ({ id, payload }: { id: string; payload: CreateTagPayload }) => updateTag(id, payload),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: adminQueryKeys.tags }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminQueryKeys.tags })
+      invalidatePublicClientCaches(queryClient)
+    },
   })
 
   const remove = useMutation({
     mutationFn: (id: string) => deleteTag(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: adminQueryKeys.tags }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminQueryKeys.tags })
+      invalidatePublicClientCaches(queryClient)
+    },
   })
 
   return { create, update, remove }

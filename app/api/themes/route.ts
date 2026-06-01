@@ -6,6 +6,7 @@ import { logAdminAction } from "@/features/admin-logs/lib/log-action"
 import { CACHE_TIMINGS, publicCacheHeaders } from "@/shared/common/lib/http-cache"
 import { ThemeModel } from "@/features/theme/model/theme.model"
 import { createThemeSchema } from "@/features/theme/model/schemas"
+import { revalidateThemesPublicCache } from "@/shared/server/revalidate-public-cache"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/shared/common/lib/auth-options"
 import { normalizeRole } from "@/shared/common/lib/rbac"
@@ -64,6 +65,7 @@ export async function POST(req: NextRequest) {
       targetId: theme._id.toString(),
       targetName: theme.name?.uzb || theme.name?.uz || theme.slug,
     })
+    revalidateThemesPublicCache()
     return Response.json(theme, { status: 201 })
   } catch (err) {
     const anyErr = err as { code?: number | string; keyPattern?: Record<string, unknown>; keyValue?: Record<string, unknown> }

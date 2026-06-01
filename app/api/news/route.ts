@@ -18,6 +18,8 @@ import { CACHE_TIMINGS, noStoreHeaders, publicCacheHeaders } from '@/shared/comm
 import type { SortOrder } from 'mongoose'
 import { isAppLocale, type AppLocale } from '@/shared/common/lib/locale-api'
 import { pickUserLocaleText } from '@/features/users/lib/user-locale'
+import { PUBLIC_NEWS_LIST_SELECT } from '@/features/news/lib/news-list-projection'
+import { revalidateNewsPublicCache } from '@/shared/server/revalidate-public-cache'
 
 export async function GET(req: NextRequest) {
   const isProtected = await protectPublicApi(req)
@@ -111,14 +113,12 @@ export async function GET(req: NextRequest) {
     } else if (uniqueAuthorIds.length > 1) {
       filter.authorId = { $in: uniqueAuthorIds }
     }
-    /** Video filter: endi asosiy mezon `hasVideo` */
     if (video === "1" || video === "true") {
       filter.$or = [
         { hasVideo: true },
         { videoUrl: { $exists: true, $nin: [null, ""] } },
       ]
     }
-    /** Audio filter: endi asosiy mezon `hasAudio` */
     if (audio === "1" || audio === "true") {
       filter.$or = [
         { hasAudio: true },
@@ -137,12 +137,13 @@ export async function GET(req: NextRequest) {
         ? { views: -1, publishedAt: -1 }
         : { publishedAt: -1 }
 
+    let newsQuery = NewsModel.find(filter).sort(sort).skip(skip).limit(limit)
+    if (!wantsAdmin) {
+      newsQuery = newsQuery.select(PUBLIC_NEWS_LIST_SELECT)
+    }
+
     const [news, total] = await Promise.all([
-      NewsModel.find(filter)
-        .sort(sort)
-        .skip(skip)
-        .limit(limit)
-        .lean(),
+      newsQuery.lean(),
       NewsModel.countDocuments(filter),
     ])
 
@@ -343,12 +344,13 @@ export async function POST(req: NextRequest) {
       await news.save()
     }
     
-    // Log the creation action asynchronously
     logAdminAction({
       action: 'CREATE_NEWS',
       targetId: news._id?.toString() || news.slug,
       targetName: news.title?.uzb || news.title?.uz || news.slug,
     })
+
+    revalidateNewsPublicCache(news.slug)
 
     return Response.json(news, { status: 201 })
   } catch (err) {

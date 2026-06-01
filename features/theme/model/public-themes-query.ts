@@ -1,8 +1,11 @@
 "use client"
 
 import { useQuery } from "@tanstack/react-query"
+import { publicThemesQueryKey } from "@/shared/common/lib/public-query-keys"
 import { usePublicSiteSettingsQuery } from "@/shared/server/public-site-settings-query"
 import type { PublicTheme } from "../lib/theme-utils"
+
+const PUBLIC_THEMES_STALE_MS = 300_000
 
 async function fetchPublicThemes(): Promise<PublicTheme[]> {
   const res = await fetch("/api/themes")
@@ -27,11 +30,12 @@ export function usePublicThemesQuery() {
   const enabled = (settings?.clientDelivery.mode ?? "normal") !== "server-off"
 
   return useQuery({
-    queryKey: ["public-themes"],
+    queryKey: publicThemesQueryKey,
     queryFn: fetchPublicThemes,
-    staleTime: 60_000,
+    staleTime: PUBLIC_THEMES_STALE_MS,
     enabled,
     placeholderData: [],
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   })
 }
-

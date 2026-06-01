@@ -3,6 +3,7 @@ import { dbConnect } from "@/shared/common/lib/db"
 import { AdModel } from "@/features/ads/model/ads.model"
 import { createAdSchema, createAdSchemaInput } from "@/features/ads/model/schemas"
 import { requireAdminSession } from "@/shared/server/require-admin-session"
+import { revalidateAdsPublicCache } from "@/shared/server/revalidate-public-cache"
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const unauthorized = await requireAdminSession(["ceo", "administrator", "ads_manager"])
@@ -38,6 +39,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   }
   const updated = await AdModel.findByIdAndUpdate((await params).id, { $set: update }, { new: true, runValidators: true }).lean()
   if (!updated) return Response.json({ error: "Reklama topilmadi" }, { status: 404 })
+  revalidateAdsPublicCache()
   return Response.json(updated)
 }
 
@@ -70,6 +72,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     runValidators: true,
   }).lean()
   if (!updated) return Response.json({ error: "Reklama topilmadi" }, { status: 404 })
+  revalidateAdsPublicCache()
   return Response.json(updated)
 }
 
@@ -80,5 +83,6 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
   await dbConnect()
   const deleted = await AdModel.findByIdAndDelete((await params).id).lean()
   if (!deleted) return Response.json({ error: "Reklama topilmadi" }, { status: 404 })
+  revalidateAdsPublicCache()
   return Response.json({ ok: true })
 }

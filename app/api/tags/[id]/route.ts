@@ -4,6 +4,7 @@ import { requireAdminSession } from '@/shared/server/require-admin-session'
 import { TagModel } from '@/features/tags/model/tag.model'
 import { createTagSchema } from '@/features/tags/model/schemas'
 import { protectPublicApi } from '@/shared/server/protect-api'
+import { revalidateTagsPublicCache } from '@/shared/server/revalidate-public-cache'
 
 export async function GET(
   req: NextRequest,
@@ -50,6 +51,8 @@ export async function PUT(
     return Response.json({ error: 'Teg topilmadi' }, { status: 404 })
   }
 
+  revalidateTagsPublicCache()
+
   return Response.json(updated)
 }
 
@@ -81,6 +84,8 @@ export async function PATCH(
     return Response.json({ error: 'Teg topilmadi' }, { status: 404 })
   }
 
+  revalidateTagsPublicCache()
+
   return Response.json(updated)
 }
 
@@ -97,6 +102,8 @@ export async function DELETE(
   if (!deleted) {
     return Response.json({ error: 'Teg topilmadi' }, { status: 404 })
   }
+
+  revalidateTagsPublicCache()
 
   return Response.json({ ok: true })
 }

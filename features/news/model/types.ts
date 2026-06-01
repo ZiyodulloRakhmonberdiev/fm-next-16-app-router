@@ -223,7 +223,6 @@ export function getPublishedNewsListForLocale(
   return getNewsListForLocale(filterPublishedRawNews(rawList), locale)
 }
 
-/** Faqat matnli yangiliklar (image/video yo'q va type=text). */
 export function isTextOnlyRawNews(item: RawNewsItem): boolean {
   const hasVideo = item.hasVideo ?? Boolean(item.videoUrl && item.videoUrl.trim())
   const hasAudio = item.hasAudio ?? Boolean(item.audioUrl && item.audioUrl.trim())
@@ -233,12 +232,10 @@ export function isTextOnlyRawNews(item: RawNewsItem): boolean {
   return !hasVideo && !hasAudio && !hasImages
 }
 
-/** Rasmli/video cardlarda ko'rsatish mumkin bo'lgan yangiliklar. */
 export function isVisualRawNews(item: RawNewsItem): boolean {
   return !isTextOnlyRawNews(item)
 }
 
-/** Faqat rasmli yangiliklar — top/latest/related kabi joylarda ko'rsatish uchun. Type video va text ko'rinmasin. */
 export function isImageTypeRawNews(item: RawNewsItem): boolean {
   if (typeof item.hasImage === "boolean") return item.hasImage
   return (

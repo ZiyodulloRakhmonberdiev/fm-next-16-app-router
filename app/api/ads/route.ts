@@ -4,6 +4,7 @@ import { isClientDeliveryEnabled } from "@/shared/server/server-client-delivery"
 import { AdModel } from "@/features/ads/model/ads.model"
 import { createAdSchema } from "@/features/ads/model/schemas"
 import { requireAdminSession } from "@/shared/server/require-admin-session"
+import { revalidateAdsPublicCache } from "@/shared/server/revalidate-public-cache"
 import { protectPublicApi } from "@/shared/server/protect-api"
 import { CACHE_TIMINGS, publicCacheHeaders } from "@/shared/common/lib/http-cache"
 
@@ -81,6 +82,7 @@ export async function POST(req: NextRequest) {
       advertiseWithUsUrl: parsed.data.advertiseWithUsUrl || undefined,
       links: parsed.data.links ?? [],
     })
+    revalidateAdsPublicCache()
     return Response.json(ad, { status: 201 })
   } catch (err) {
     const message = err instanceof Error ? err.message : "Reklama yaratib bo'lmadi"

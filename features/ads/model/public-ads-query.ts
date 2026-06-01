@@ -1,6 +1,9 @@
 "use client"
 
 import { useQuery } from "@tanstack/react-query"
+import { publicAdsQueryKeyPrefix } from "@/shared/common/lib/public-query-keys"
+
+const PUBLIC_ADS_STALE_MS = 300_000
 
 export type PublicAd = {
   _id: string
@@ -28,16 +31,18 @@ export type PublicAd = {
 
 export function usePublicAdsQuery(placement?: NonNullable<PublicAd["placement"]>) {
   return useQuery({
-    queryKey: ["public-ads", placement],
+    queryKey: [...publicAdsQueryKeyPrefix, placement],
     queryFn: async () => {
       const qs = placement ? `&placement=${placement}` : ""
       const res = await fetch(`/api/ads?public=1${qs}`)
       if (!res.ok) throw new Error("Ads fetch failed")
       return (await res.json()) as PublicAd[]
     },
-    staleTime: 2 * 60_000,
+    staleTime: PUBLIC_ADS_STALE_MS,
     gcTime: 10 * 60_000,
     retry: 1,
     placeholderData: [],
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   })
 }

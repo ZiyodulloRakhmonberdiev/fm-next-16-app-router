@@ -5,6 +5,7 @@ import { protectPublicApi } from "@/shared/server/protect-api"
 import { logAdminAction } from "@/features/admin-logs/lib/log-action"
 import { ThemeModel } from "@/features/theme/model/theme.model"
 import { createThemeSchema } from "@/features/theme/model/schemas"
+import { revalidateThemesPublicCache } from "@/shared/server/revalidate-public-cache"
 
 export async function GET(
   req: NextRequest,
@@ -53,6 +54,8 @@ export async function PUT(
     targetName: updated.name?.uzb || updated.name?.uz || updated.slug,
   })
 
+  revalidateThemesPublicCache()
+
   return Response.json(updated)
 }
 
@@ -87,6 +90,8 @@ export async function PATCH(
     targetName: updated.name?.uzb || updated.name?.uz || updated.slug,
   })
 
+  revalidateThemesPublicCache()
+
   return Response.json(updated)
 }
 
@@ -108,6 +113,8 @@ export async function DELETE(
     targetId: deleted._id.toString(),
     targetName: deleted.name?.uzb || deleted.name?.uz || deleted.slug,
   })
+
+  revalidateThemesPublicCache()
 
   return Response.json({ ok: true })
 }

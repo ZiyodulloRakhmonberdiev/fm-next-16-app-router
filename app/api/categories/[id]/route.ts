@@ -5,6 +5,7 @@ import { CategoryModel } from '@/features/category/model/category.model'
 import { createCategorySchema } from '@/features/category/model/schemas'
 import { logAdminAction } from '@/features/admin-logs/lib/log-action'
 import { protectPublicApi } from '@/shared/server/protect-api'
+import { revalidateCategoriesPublicCache } from '@/shared/server/revalidate-public-cache'
 
 export async function GET(
   req: NextRequest,
@@ -57,6 +58,8 @@ export async function PUT(
     targetName: updated.name?.uzb || updated.name?.uz || updated.slug,
   })
 
+  revalidateCategoriesPublicCache()
+
   return Response.json(updated)
 }
 
@@ -94,6 +97,8 @@ export async function PATCH(
     targetName: updated.name?.uzb || updated.name?.uz || updated.slug,
   })
 
+  revalidateCategoriesPublicCache()
+
   return Response.json(updated)
 }
 
@@ -116,6 +121,8 @@ export async function DELETE(
     targetId: deleted._id.toString(),
     targetName: deleted.name?.uzb || deleted.name?.uz || deleted.slug,
   })
+
+  revalidateCategoriesPublicCache()
 
   return Response.json({ ok: true })
 }

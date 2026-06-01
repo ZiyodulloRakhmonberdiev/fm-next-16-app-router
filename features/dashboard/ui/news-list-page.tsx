@@ -58,6 +58,8 @@ import { usePublicCategoriesQuery } from '@/features/category/model/public-categ
 import { getCategoryLabelForNewsItem } from '@/features/category/model/use-category-label'
 import { useNewsQuery } from '@/features/dashboard/model/admin-hooks'
 import { useQueryClient } from '@tanstack/react-query'
+import { useRouter } from '@/i18n/navigation'
+import { invalidatePublicClientCaches } from '@/features/news/model/invalidate-public-client-cache'
 import { useSession } from 'next-auth/react'
 import { normalizeRole } from '@/shared/common/lib/rbac'
 import {
@@ -212,6 +214,7 @@ export function DashboardNewsListPage({
   initialStatus = '',
 }: DashboardNewsListPageProps) {
   const queryClient = useQueryClient()
+  const router = useRouter()
   const { data: session } = useSession()
   const isCeo = normalizeRole(session?.user?.role) === 'ceo'
   const { data: categories = [], isPending: categoriesPending } = usePublicCategoriesQuery()
@@ -455,6 +458,8 @@ export function DashboardNewsListPage({
       toast.success('Yangilik bazadan butunlay o‘chirildi')
       setPermanentDeleteSlug(null)
       await queryClient.invalidateQueries({ queryKey: ['admin', 'news'] })
+      invalidatePublicClientCaches(queryClient)
+      router.refresh()
     } finally {
       setPermanentDeleting(false)
     }
@@ -501,6 +506,8 @@ export function DashboardNewsListPage({
       toast.success("Tezkor amallar saqlandi")
       setQuickEditSlug(null)
       await queryClient.invalidateQueries({ queryKey: ['admin', 'news'] })
+      invalidatePublicClientCaches(queryClient)
+      router.refresh()
     } finally {
       setQuickEditSaving(false)
     }

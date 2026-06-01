@@ -11,6 +11,7 @@ import { requireAdminSession } from '@/shared/server/require-admin-session'
 import { logAdminAction } from '@/features/admin-logs/lib/log-action'
 import { protectPublicApi } from '@/shared/server/protect-api'
 import { pickUserLocaleText } from '@/features/users/lib/user-locale'
+import { revalidateNewsPublicCache } from '@/shared/server/revalidate-public-cache'
 
 async function syncTelegramForNews(
   news: any,
@@ -272,6 +273,11 @@ export async function PUT(
     targetName: updated.title?.uzb || updated.title?.uz || updated.slug,
   })
 
+  revalidateNewsPublicCache(updated.slug)
+  if (existing.slug !== updated.slug) {
+    revalidateNewsPublicCache(existing.slug)
+  }
+
   return Response.json(updated.toObject())
 }
 
@@ -360,6 +366,11 @@ export async function PATCH(
     targetName: updated.title?.uzb || updated.title?.uz || updated.slug,
   })
 
+  revalidateNewsPublicCache(updated.slug)
+  if (existing.slug !== updated.slug) {
+    revalidateNewsPublicCache(existing.slug)
+  }
+
   return Response.json(updated.toObject())
 }
 
@@ -386,6 +397,8 @@ export async function DELETE(
     targetId: deleted._id?.toString() || deleted.slug,
     targetName: deleted.title?.uzb || deleted.title?.uz || deleted.slug,
   })
+
+  revalidateNewsPublicCache(deleted.slug)
 
   return Response.json({ ok: true })
 }

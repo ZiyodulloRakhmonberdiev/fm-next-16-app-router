@@ -5,6 +5,7 @@ import { TagModel } from '@/features/tags/model/tag.model'
 import { createTagSchema } from '@/features/tags/model/schemas'
 import { protectPublicApi } from '@/shared/server/protect-api'
 import { CACHE_TIMINGS, publicCacheHeaders } from '@/shared/common/lib/http-cache'
+import { revalidateTagsPublicCache } from '@/shared/server/revalidate-public-cache'
 
 export async function GET(req: NextRequest) {
   const isProtected = await protectPublicApi(req)
@@ -43,6 +44,7 @@ export async function POST(req: NextRequest) {
     }
 
     const tag = await TagModel.create(parsed.data)
+    revalidateTagsPublicCache()
     return Response.json(tag, { status: 201 })
   } catch (err) {
     const anyErr = err as any

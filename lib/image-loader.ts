@@ -1,9 +1,3 @@
-/**
- * Custom loader: Next.js talab qiladi — qaytarilgan URL ichida `width` ishtirok etsin
- * (https://nextjs.org/docs/messages/next-image-missing-loader-width).
- * Statik `/public` va ko‘p CDN URL’lar uchun `?w=` query brauzerda e’tiborsiz qoladi;
- * asl fayl o‘sha manzildan yuklanadi.
- */
 export default function imageLoader({
   src,
   width,

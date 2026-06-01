@@ -20,6 +20,7 @@ import { SettingsForm } from './settings-section'
 import type { NewsStatus } from '@/features/news/model'
 import type { EditNewsInitialData } from '@/features/news/lib/raw-to-edit-initial'
 import { adminQueryKeys } from '@/features/dashboard/model/admin-hooks'
+import { invalidatePublicClientCaches } from '@/features/news/model/invalidate-public-client-cache'
 import { uploadFileViaPresignedUrl } from '@/shared/infra/cloudinary-client-upload'
 
 const LOCALES: AppLocale[] = ['uz', 'uzb', 'ru', 'en']
@@ -406,6 +407,8 @@ export function CreateNewsForm({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminQueryKeys.news() })
+      invalidatePublicClientCaches(queryClient)
+      router.refresh()
     },
   })
 

@@ -5,6 +5,8 @@ import { useSearchParams } from "next/navigation"
 import { toast } from "sonner"
 import { Card, CardContent } from "@/shared/common/components/ui/card"
 import { useRouter } from "@/i18n/navigation"
+import { useQueryClient } from "@tanstack/react-query"
+import { invalidatePublicClientCaches } from "@/features/news/model/invalidate-public-client-cache"
 import { Loader2 } from "lucide-react"
 import { uploadFileViaPresignedUrl } from "@/shared/infra/cloudinary-client-upload"
 import { applyAdItemToForm, emptyForm, type AdItem } from "./_components/ads-dashboard-types"
@@ -19,6 +21,7 @@ import { AdsList, AdsListCardHeader } from "./_components/ads-list"
 
 function DashboardAdsPage() {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const searchParams = useSearchParams()
   const [items, setItems] = useState<AdItem[]>([])
   const [form, setForm] = useState(emptyForm)
@@ -178,6 +181,8 @@ function DashboardAdsPage() {
     setForm(emptyForm)
     setEditId(null)
     clearEditQuery()
+    invalidatePublicClientCaches(queryClient)
+    router.refresh()
     void loadAds()
   }
 
@@ -190,6 +195,8 @@ function DashboardAdsPage() {
         return
       }
       toast.success("Reklama o'chirildi")
+      invalidatePublicClientCaches(queryClient)
+      router.refresh()
       void loadAds()
     } finally {
       setDeletingId(null)

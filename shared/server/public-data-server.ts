@@ -7,17 +7,16 @@ import { TagModel } from "@/features/tags/model/tag.model"
 import { AdModel } from "@/features/ads/model/ads.model"
 import { UserModel } from "@/features/users/model/user.model"
 import { pickUserLocaleText } from "@/features/users/lib/user-locale"
+import { PUBLIC_NEWS_LIST_SELECT } from "@/features/news/lib/news-list-projection"
 
-/**
- * Bu funksiyalar faqat SERVER COMPONENTLAR ichida chaqiriladi.
- * Next.js 'unstable_cache' orqali ISR (Incremental Static Regeneration) ni ta'minlaydi.
- */
+const PUBLIC_DATA_REVALIDATE_SECONDS = 300
 
 export const getCachedPublicNews = unstable_cache(
   async () => {
     await dbConnect()
     // Home sahifasi uchun faqat oxirgi 120 ta maqola yetarli (pagination kerak emas home da)
     const news = await NewsModel.find({ status: "published", ad: { $ne: true }, stats: { $ne: true } })
+      .select(PUBLIC_NEWS_LIST_SELECT)
       .sort({ publishedAt: -1 })
       .limit(120)
       .lean()
@@ -37,17 +36,17 @@ export const getCachedPublicNews = unstable_cache(
       author: item.authorId ? (authorNameById.get(item.authorId) ?? item.author) : item.author,
     }))
 
-    // Mongoose hujjatlarini plain JSON qilib qaytaramiz (Date ob'ektlarini string qilib)
     return JSON.parse(JSON.stringify(normalizedNews))
   },
   ["public-news-list"],
-  { revalidate: 10, tags: ["news"] }
+  { revalidate: PUBLIC_DATA_REVALIDATE_SECONDS, tags: ["news"] }
 )
 
 export const getCachedPublicAdNews = unstable_cache(
   async () => {
     await dbConnect()
     const news = await NewsModel.find({ status: "published", ad: true })
+      .select(PUBLIC_NEWS_LIST_SELECT)
       .sort({ publishedAt: -1 })
       .limit(40)
       .lean()
@@ -70,13 +69,14 @@ export const getCachedPublicAdNews = unstable_cache(
     return JSON.parse(JSON.stringify(normalizedNews))
   },
   ["public-ad-news-list"],
-  { revalidate: 10, tags: ["news"] }
+  { revalidate: PUBLIC_DATA_REVALIDATE_SECONDS, tags: ["news"] }
 )
 
 export const getCachedPublicStatsNews = unstable_cache(
   async () => {
     await dbConnect()
     const news = await NewsModel.find({ status: "published", stats: true })
+      .select(PUBLIC_NEWS_LIST_SELECT)
       .sort({ publishedAt: -1 })
       .limit(60)
       .lean()
@@ -99,7 +99,7 @@ export const getCachedPublicStatsNews = unstable_cache(
     return JSON.parse(JSON.stringify(normalizedNews))
   },
   ["public-stats-news-list"],
-  { revalidate: 10, tags: ["news"] }
+  { revalidate: PUBLIC_DATA_REVALIDATE_SECONDS, tags: ["news"] }
 )
 
 export const getCachedPublicCategories = unstable_cache(
@@ -111,7 +111,7 @@ export const getCachedPublicCategories = unstable_cache(
     return JSON.parse(JSON.stringify(categories))
   },
   ["public-categories-list"],
-  { revalidate: 10, tags: ["categories"] }
+  { revalidate: PUBLIC_DATA_REVALIDATE_SECONDS, tags: ["categories"] }
 )
 
 export const getCachedPublicThemes = unstable_cache(
@@ -123,7 +123,7 @@ export const getCachedPublicThemes = unstable_cache(
     return JSON.parse(JSON.stringify(themes))
   },
   ["public-themes-list"],
-  { revalidate: 10, tags: ["themes"] }
+  { revalidate: PUBLIC_DATA_REVALIDATE_SECONDS, tags: ["themes"] }
 )
 
 export const getCachedPublicTags = unstable_cache(
@@ -133,7 +133,7 @@ export const getCachedPublicTags = unstable_cache(
     return JSON.parse(JSON.stringify(tags))
   },
   ["public-tags-list"],
-  { revalidate: 10, tags: ["tags"] }
+  { revalidate: PUBLIC_DATA_REVALIDATE_SECONDS, tags: ["tags"] }
 )
 
 export const getCachedPublicAds = unstable_cache(
@@ -149,12 +149,9 @@ export const getCachedPublicAds = unstable_cache(
     return JSON.parse(JSON.stringify(ads))
   },
   ["public-ads-list"],
-  { revalidate: 10, tags: ["ads"] }
+  { revalidate: PUBLIC_DATA_REVALIDATE_SECONDS, tags: ["ads"] }
 )
 
-/**
- * SEO 'generateMetadata' uchun bitta kategoriyani slug orqali olamiz.
- */
 export const getCachedCategoryBySlug = unstable_cache(
   async (slug: string) => {
     await dbConnect()
@@ -177,9 +174,6 @@ export const getCachedThemeBySlug = unstable_cache(
   { revalidate: 3600, tags: ["themes"] }
 )
 
-/**
- * Sitemap uchun barcha e'lon qilingan yangiliklar va kategoriyalarni olamiz.
- */
 export async function getSitemapData() {
   await dbConnect()
   const news = await NewsModel.find({ status: "published", ad: { $ne: true }, stats: { $ne: true } })
