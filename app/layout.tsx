@@ -3,8 +3,6 @@ import { Geist, Roboto  } from "next/font/google";
 import { getLocale } from "next-intl/server";
 import "@/shared/common/styles/globals.css";
 import { Providers } from "./providers";
-import { Analytics } from "@vercel/analytics/next"
-import { SpeedInsights } from "@vercel/speed-insights/next"
 import { GoogleAnalytics } from "@next/third-parties/google"
 
 const geistSans = Geist({
@@ -39,8 +37,6 @@ export default async function RootLayout({
       >
         <Providers>{children}</Providers>
         {gaId ? <GoogleAnalytics gaId={gaId} /> : null}
-        <Analytics />
-        <SpeedInsights />
       </body>
     </html>
   );

@@ -52,9 +52,6 @@ export function AdSlot({ placement }: Props) {
 
   useEffect(() => {
     if (!ads.length) return
-    // Hozircha auto-rotation o'chirilgan:
-    // sahifa yangilanmaguncha bitta ad ko'rsatiladi,
-    // refresh bo'lganda esa keyingi ad chiqadi.
     const key = `fm:ad-slot-index:${placement}`
     const prevRaw = window.sessionStorage.getItem(key)
     const prevIndex = Number.isFinite(Number(prevRaw)) ? Number(prevRaw) : -1
