@@ -3,7 +3,7 @@ import { Geist, Roboto  } from "next/font/google";
 import { getLocale } from "next-intl/server";
 import "@/shared/common/styles/globals.css";
 import { Providers } from "./providers";
-// import { GoogleAnalytics } from "@next/third-parties/google"
+import { GoogleAnalytics } from "@next/third-parties/google"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,7 +36,7 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${roboto.variable} antialiased`}
       >
         <Providers>{children}</Providers>
-        {/* {gaId ? <GoogleAnalytics gaId={gaId} /> : null} */}
+        {gaId ? <GoogleAnalytics gaId={gaId} /> : null}
       </body>
     </html>
   );
