@@ -12,6 +12,7 @@ import { usePublicSiteSettingsQuery } from "@/shared/server/public-site-settings
 import { useCategoryLabel } from "@/features/category/model/use-category-label"
 import type { LocaleMap } from "@/shared/common/lib/locale-types"
 import { AdSlot } from "@/features/ads/ui/ad-slot"
+import { enqueueNewsView } from "@/shared/common/lib/news-views-queue"
 import { usePublicAdsQuery } from "@/features/ads/model/public-ads-query"
 import { FaTelegram } from "react-icons/fa6"
 import { TagsForMobile } from "@/entities/news/slug/_components/atoms"
@@ -168,12 +169,8 @@ export default function NewsSlugPageContent({ news, newsId }: NewsPageContentPro
     const prev = prevRaw ? Number(prevRaw) : 0
     if (prev && now - prev < 10_000) return
     window.sessionStorage.setItem(key, String(now))
-    void fetch("/api/news/views", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ slug: news.slug }),
-      keepalive: true,
-    }).catch(() => { })
+    // Darhol yubormaymiz — navbatga qo'shamiz, har 30 soniyada batch yuboriladi
+    enqueueNewsView(news.slug)
   }, [news.slug])
 
   return (
