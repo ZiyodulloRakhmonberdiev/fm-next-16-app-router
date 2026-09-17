@@ -37,13 +37,16 @@ export const adminQueryKeys = {
   reactions: (params: ReactionsParams) => ['admin', 'reactions', params] as const,
 }
 
-const ADMIN_LIVE_REFETCH_MS = 2_000
-
-function adminLiveQueryOptions() {
+/**
+ * Dashboard query: polling yo'q (Fluid Active CPU tejash).
+ * Yangilanish — mutation onSuccess dagi invalidateQueries (+ kerak joyda router.refresh).
+ * Tabga qaytganda / reconnect da yumshoq refetch.
+ */
+function adminQueryOptions() {
   return {
-    staleTime: 0,
-    refetchInterval: ADMIN_LIVE_REFETCH_MS,
-    refetchIntervalInBackground: true,
+    staleTime: 60_000,
+    refetchInterval: false as const,
+    refetchIntervalInBackground: false,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
   } as const
@@ -53,7 +56,7 @@ export function useCategoriesQuery() {
   return useQuery({
     queryKey: adminQueryKeys.categories,
     queryFn: getCategories,
-    ...adminLiveQueryOptions(),
+    ...adminQueryOptions(),
   })
 }
 
@@ -92,7 +95,7 @@ export function useTagsQuery() {
   return useQuery({
     queryKey: adminQueryKeys.tags,
     queryFn: getTags,
-    ...adminLiveQueryOptions(),
+    ...adminQueryOptions(),
   })
 }
 
@@ -100,7 +103,7 @@ export function useThemesQuery() {
   return useQuery({
     queryKey: adminQueryKeys.themes,
     queryFn: getThemes,
-    ...adminLiveQueryOptions(),
+    ...adminQueryOptions(),
   })
 }
 
@@ -168,7 +171,7 @@ export function useUsersQuery() {
   return useQuery({
     queryKey: adminQueryKeys.users,
     queryFn: getUsers,
-    ...adminLiveQueryOptions(),
+    ...adminQueryOptions(),
   })
 }
 
@@ -198,7 +201,7 @@ export function useNewsQuery(status?: NewsStatus) {
   return useQuery({
     queryKey: adminQueryKeys.news(status),
     queryFn: () => getNews(status),
-    ...adminLiveQueryOptions(),
+    ...adminQueryOptions(),
   })
 }
 
@@ -206,7 +209,7 @@ export function useReactionsQuery(params: ReactionsParams = {}) {
   return useQuery({
     queryKey: adminQueryKeys.reactions(params),
     queryFn: () => getReactions(params),
-    ...adminLiveQueryOptions(),
+    ...adminQueryOptions(),
   })
 }
 
