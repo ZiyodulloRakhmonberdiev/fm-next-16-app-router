@@ -7,24 +7,26 @@ import { NewsSlugPageContent, NewsSlugSidebar } from "@/entities/news/slug/_comp
 import { pickNewsForLocale, type RawNewsItem } from "@/features/news/model"
 import LatestNews from "@/entities/news/lists/latest-news"
 import { isAppLocale } from "@/shared/common/lib/locale-api"
-import { dbConnect } from "@/shared/common/lib/db"
-import { NewsModel } from "@/features/news/model/news.model"
+import { getPublishedNewsBySlug } from "@/shared/server/public-news-detail"
+import { setPageLocale } from "@/i18n/set-page-locale"
 import { UserModel } from "@/features/users/model/user.model"
 import ClientSiteNothingGate from "../../_components/client-site-nothing-gate"
 import ClientServerOffGate from "../../_components/client-server-off-gate"
-import { getCachedPublicNews } from "@/shared/server/public-data-server"
+import { getPublicSidebarNews } from "@/shared/server/public-data-server"
 import { pickUserLocaleText } from "@/features/users/lib/user-locale"
 
 type Props = {
   params: Promise<{ locale: string; slug: string }>
 }
 
+export function generateStaticParams() { return [] }
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, slug } = await params
+  setPageLocale(locale)
   const currentLocale = isAppLocale(locale) ? locale : "uz"
 
-  await dbConnect()
-  const raw = await NewsModel.findOne({ slug, status: "published" }).lean()
+  const raw = await getPublishedNewsBySlug(slug)
   if (!raw) return {}
 
   const news = pickNewsForLocale(raw as RawNewsItem, currentLocale)
@@ -59,10 +61,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function NewsPage({ params }: Props) {
   const { locale, slug } = await params
+  setPageLocale(locale)
   const currentLocale = isAppLocale(locale) ? locale : "uz"
-  await dbConnect()
-  const raw = await NewsModel.findOne({ slug, status: "published" }).lean()
-  if (!raw) notFound()
+  const cachedRaw = await getPublishedNewsBySlug(slug)
+  if (!cachedRaw) notFound()
+  const raw = { ...cachedRaw }
   if (raw.authorId) {
     const author = await UserModel.findById(raw.authorId).select({ _id: 1, full_name: 1, image: 1 }).lean()
     if (author?.full_name) {
@@ -100,7 +103,7 @@ export default async function NewsPage({ params }: Props) {
                 <NewsSlugPageContent news={news} newsId={newsId} />
               </div>
               <aside className="hidden md:flex flex-col gap-6 lg:col-span-2 px-4 md:px-6 pb-16">
-                <LatestNews excludeSlug={news.slug} initialNews={await getCachedPublicNews()} />
+                <LatestNews items={await getPublicSidebarNews(currentLocale, news.slug)} />
               </aside>
             </div>
           </ClientServerOffGate>

@@ -1,3 +1,4 @@
+import { setPageLocale, type LocalePageProps } from "@/i18n/set-page-locale"
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
 import ClientSiteNothingGate from "../_components/client-site-nothing-gate"
@@ -9,14 +10,16 @@ import { dbConnect } from "@/shared/common/lib/db"
 import { NewsModel } from "@/features/news/model/news.model"
 import { SpecialNewsPageContent } from "@/features/news/ui/special-news-page-content"
 import LatestNews from "@/entities/news/lists/latest-news"
-import { getCachedPublicNews } from "@/shared/server/public-data-server"
+import { getPublicSidebarNews } from "@/shared/server/public-data-server"
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: LocalePageProps): Promise<Metadata> {
+  setPageLocale((await params).locale)
   const t = await getTranslations("common")
   return { title: t("articles") }
 }
 
-export default async function StatsNewsPage() {
+export default async function StatsNewsPage({ params }: LocalePageProps) {
+  const pageLocale = setPageLocale((await params).locale)
   const t = await getTranslations("common")
   await dbConnect()
   const filter = { status: "published", stats: true }
@@ -52,7 +55,7 @@ export default async function StatsNewsPage() {
                 />
               </div>
               <aside className="hidden md:flex flex-col gap-6 px-4 md:px-6 lg:col-span-1">
-                <LatestNews initialNews={await getCachedPublicNews()} />
+                <LatestNews items={await getPublicSidebarNews(pageLocale)} />
               </aside>
             </div>
           </ClientServerOffGate>

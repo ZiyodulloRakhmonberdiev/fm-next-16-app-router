@@ -49,11 +49,8 @@ export default function NewsSlugPageContent({ news, newsId }: NewsPageContentPro
   const videoCaption = news.videoCaption?.trim()
   const audioCaption = news.audioCaption?.trim()
 
-  const [reactionTotal, setReactionTotal] = React.useState(0)
-  const [commentTotal, setCommentTotal] = React.useState(0)
   const [tagsCatalog, setTagsCatalog] = React.useState<Array<{ slug: string; name: LocaleMap }>>([])
   const [showTelegramPost, setShowTelegramPost] = React.useState(false)
-  const newsRef = newsId ?? news.slug
   const telegramWidgetPost = React.useMemo(() => {
     if (!news.telegramMessageLink) return null
     try {
@@ -107,21 +104,6 @@ export default function NewsSlugPageContent({ news, newsId }: NewsPageContentPro
       cancelled = true
     }
   }, [])
-
-  React.useEffect(() => {
-    if (!newsRef) return
-    const ac = new AbortController()
-    Promise.all([
-      fetch(`/api/news/${newsRef}/reactions`, { signal: ac.signal }).then((r) => r.ok ? r.json() : { counts: {} }),
-      fetch(`/api/news/${newsRef}/comments?limit=1&offset=0`, { signal: ac.signal }).then((r) => r.ok ? r.json() : { totalPublic: 0 }),
-    ]).then(([reactions, comments]) => {
-      const counts = (reactions?.counts ?? {}) as Record<string, number>
-      const total = Object.values(counts).reduce((a: number, b) => a + Number(b), 0)
-      setReactionTotal(total)
-      setCommentTotal(Number((comments as { totalPublic?: number })?.totalPublic ?? 0))
-    }).catch(() => { })
-    return () => ac.abort()
-  }, [newsRef])
 
   const categoryLabelRaw = useCategoryLabel(categorySlug, locale, news.category)
   const categoryLabel = React.useMemo(() => {

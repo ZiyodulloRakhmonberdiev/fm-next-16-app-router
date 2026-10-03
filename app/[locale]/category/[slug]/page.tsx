@@ -1,3 +1,4 @@
+import { setPageLocale } from "@/i18n/set-page-locale"
 import { Metadata } from "next"
 import type { AppLocale } from "@/shared/common/lib/formatter"
 import { isAppLocale } from "@/shared/common/lib/locale-api"
@@ -8,8 +9,11 @@ type Props = {
   params: Promise<{ locale: string; slug: string }>
 }
 
+export function generateStaticParams() { return [] }
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, slug } = await params
+  setPageLocale(locale)
   const currentLocale = (isAppLocale(locale) ? locale : "uz") as AppLocale
   const category = await getCachedCategoryBySlug(slug)
   
@@ -36,6 +40,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function CategoryPage({ params }: Props) {
   const { locale, slug } = await params
+  setPageLocale(locale)
   const currentLocale = (isAppLocale(locale) ? locale : "uz") as AppLocale
   return <NewsListingPage locale={currentLocale} variant="latest" initialCategorySlug={slug} />
 }

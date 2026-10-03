@@ -2,6 +2,26 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+## Public-page caching
+
+Public locale pages use on-demand ISR: pages are generated on first request, with a 300-second revalidation interval. News listings that depend on the public list cache revalidate every 60 seconds. News writes invalidate the `news` tag and locale layouts; team writes invalidate the team cache and team pages. Authentication, dashboard, user and saved-news routes remain dynamic.
+
+Article sidebars send at most 10 localized card records to the browser. Metadata and article rendering share one request-scoped article query. Public server listings read the database through a tagged cache instead of requesting this deployment's own API.
+
+Verification commands:
+
+```bash
+node --test tests/public-rendering.test.cjs
+npm run build
+node node_modules/next/dist/bin/next start --hostname 127.0.0.1 --port 3107
+# In a second terminal; read-only HTTP checks, restricted to localhost:
+node scripts/check-isr.mjs
+```
+
+The HTTP checks need configured database access and a published article. They cover public ISR, locale documents, anonymous access protection and 404 responses; they do not exercise signed-in browser interactions.
+
+## Development server
+
 First, run the development server:
 
 ```bash

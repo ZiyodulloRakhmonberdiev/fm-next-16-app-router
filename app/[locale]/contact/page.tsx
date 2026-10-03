@@ -1,3 +1,4 @@
+import { setPageLocale, type LocalePageProps } from "@/i18n/set-page-locale"
 import { getTranslations } from "next-intl/server"
 import ClientSiteNothingGate from "../_components/client-site-nothing-gate"
 import ClientServerOffGate from "../_components/client-server-off-gate"
@@ -7,14 +8,16 @@ import { Header } from "@/widgets/client-header"
 import { ContactPageClient } from "./contact-client"
 import type { Metadata } from "next"
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: LocalePageProps): Promise<Metadata> {
+  setPageLocale((await params).locale)
   const t = await getTranslations("contactPage")
   return {
     title: t("page_title"),
   }
 }
 
-export default async function ContactPage() {
+export default async function ContactPage({ params }: LocalePageProps) {
+  setPageLocale((await params).locale)
   return (
     <ClientSiteNothingGate>
       <div className="block md:hidden">

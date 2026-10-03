@@ -1,7 +1,7 @@
 "use client"
 
-import { getNewsListForLocale, isImageTypeRawNews, type NewsItem, type RawNewsItem } from "@/features/news/model"
-import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
+import { type NewsItem, type RawNewsItem } from "@/features/news/model"
+import { selectSidebarNews } from "@/features/news/lib/sidebar-news"
 import { useLocale, useTranslations } from "next-intl"
 import type { AppLocale } from "@/shared/common/lib/formatter"
 import SimpleNewsCard from "@/entities/news/cards/simple-news-card"
@@ -9,23 +9,13 @@ import SimpleNewsCard from "@/entities/news/cards/simple-news-card"
 type LatestNewsProps = {
   excludeSlug?: string
   initialNews?: RawNewsItem[]
+  items?: NewsItem[]
 }
 
-export default function LatestNews({ excludeSlug, initialNews }: LatestNewsProps = {}) {
+export default function LatestNews({ excludeSlug, initialNews, items }: LatestNewsProps) {
   const locale = useLocale() as AppLocale
   const t = useTranslations("Home")
-  const { data: qNews = [] } = usePublicNewsQuery()
-  const publicNews = initialNews ?? qNews
-
-  const rawSorted = [...publicNews]
-    .filter(isImageTypeRawNews)
-    .filter((n) => !excludeSlug || n.slug !== excludeSlug)
-    .sort(
-      (a, b) =>
-        new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
-    )
-    .slice(0, 10)
-  const sorted = getNewsListForLocale(rawSorted, locale)
+  const sorted = items ?? selectSidebarNews(initialNews ?? [], locale, excludeSlug)
   if (sorted.length === 0) return null
 
   return (

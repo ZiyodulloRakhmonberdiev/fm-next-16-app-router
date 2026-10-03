@@ -3,6 +3,8 @@
 // import { useEffect, useState } from "react";
 // import { useTheme } from "next-themes";
 
+export const dynamic = "force-dynamic";
+
 export default async function AuthLayout({
   children,
 }: {

@@ -5,6 +5,8 @@ import { SidebarProvider } from '@/shared/common/components/ui/sidebar'
 import { AdminDashboardShell } from '@/widgets/admin-sidebar'
 import { authOptions } from '@/shared/common/lib/auth-options'
 
+export const dynamic = 'force-dynamic'
+
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) {

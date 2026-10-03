@@ -1,3 +1,4 @@
+import { setPageLocale, type LocalePageProps } from "@/i18n/set-page-locale"
 import type { Metadata } from "next"
 import { getLocale } from "next-intl/server"
 import type { AppLocale } from "@/shared/common/lib/locale-api"
@@ -173,13 +174,15 @@ const SPECIAL_PROJECTS = [
   "PR-maqola",
 ]
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: LocalePageProps): Promise<Metadata> {
+  setPageLocale((await params).locale)
   const locale = (await getLocale()) as AppLocale
   const text = PAGE_TEXT[locale] ?? PAGE_TEXT.uz
   return { title: text.title }
 }
 
-export default async function HamkorlikPage() {
+export default async function HamkorlikPage({ params }: LocalePageProps) {
+  setPageLocale((await params).locale)
   const locale = (await getLocale()) as AppLocale
   const text = PAGE_TEXT[locale] ?? PAGE_TEXT.uz
   let analyticsData: Awaited<ReturnType<typeof getPartnersAnalytics>> | null = null

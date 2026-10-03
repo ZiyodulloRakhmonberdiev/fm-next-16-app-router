@@ -26,11 +26,13 @@ import type { AppLocale } from "@/shared/common/lib/locale-api";
 import HomePublicDataProvider from "./home-public-data-provider";
 
 export default async function HomeMainContent() {
-  const publicNews = await getCachedPublicNews();
-  const adNews = await getCachedPublicAdNews();
-  const statsNews = await getCachedPublicStatsNews();
-  const categories = await getCachedPublicCategories();
-  const themes = await getCachedPublicThemes();
+  const [publicNews, adNews, statsNews, categories, themes] = await Promise.all([
+    getCachedPublicNews(),
+    getCachedPublicAdNews(),
+    getCachedPublicStatsNews(),
+    getCachedPublicCategories(),
+    getCachedPublicThemes(),
+  ]);
   const locale = (await getLocale()) as AppLocale;
 
   if (!publicNews || !categories) {

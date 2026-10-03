@@ -8,6 +8,12 @@ import { AdModel } from "@/features/ads/model/ads.model"
 import { UserModel } from "@/features/users/model/user.model"
 import { pickUserLocaleText } from "@/features/users/lib/user-locale"
 import { PUBLIC_NEWS_LIST_SELECT } from "@/features/news/lib/news-list-projection"
+import { selectSidebarNews } from "@/features/news/lib/sidebar-news"
+import type { AppLocale } from "@/shared/common/lib/locale-api"
+
+export async function getPublicSidebarNews(locale: AppLocale, excludeSlug?: string) {
+  return selectSidebarNews(await getCachedPublicNews(), locale, excludeSlug)
+}
 
 const PUBLIC_DATA_REVALIDATE_SECONDS = 300
 

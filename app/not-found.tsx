@@ -4,9 +4,12 @@ import { ClientSidebar } from "@/widgets/client-sidebar"
 import { Header } from "@/widgets/client-header"
 import Link from "next/link"
 import { Button } from "@/shared/common/components/ui/button"
+import { SiteDocument } from "./_components/site-document"
+import { routing } from "@/i18n/routing"
 
 export default async function NotFound() {
   return (
+    <SiteDocument locale={routing.defaultLocale}>
     <ClientSiteNothingGate>
       <div className="block md:hidden">
         {/* <ClientSidebar /> */}
@@ -40,5 +43,6 @@ export default async function NotFound() {
         {/* <Footer /> */}
       </div>
     </ClientSiteNothingGate>
+    </SiteDocument>
   )
 }

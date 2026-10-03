@@ -1,3 +1,4 @@
+import { setPageLocale } from "@/i18n/set-page-locale"
 import { Metadata } from "next"
 import type { AppLocale } from "@/shared/common/lib/formatter"
 import { isAppLocale } from "@/shared/common/lib/locale-api"
@@ -12,14 +13,17 @@ import { Footer } from "@/widgets/client-footer"
 import LatestNews from "@/entities/news/lists/latest-news"
 import { dbConnect } from "@/shared/common/lib/db"
 import { NewsModel } from "@/features/news/model/news.model"
-import { getCachedPublicNews } from "@/shared/server/public-data-server"
+import { getPublicSidebarNews } from "@/shared/server/public-data-server"
 
 type Props = {
   params: Promise<{ locale: string; slug: string }>
 }
 
+export function generateStaticParams() { return [] }
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, slug } = await params
+  setPageLocale(locale)
   const currentLocale = (isAppLocale(locale) ? locale : "uz") as AppLocale
   const theme = await getCachedThemeBySlug(slug)
 
@@ -46,6 +50,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ThemePage({ params }: Props) {
   const { locale, slug } = await params
+  setPageLocale(locale)
   const currentLocale = (isAppLocale(locale) ? locale : "uz") as AppLocale
   const theme = await getCachedThemeBySlug(slug)
   if (!theme?._id) notFound()
@@ -87,7 +92,7 @@ export default async function ThemePage({ params }: Props) {
                 />
               </div>
               <aside className="hidden md:flex flex-col gap-6 px-4 md:px-6 lg:col-span-1">
-                <LatestNews initialNews={await getCachedPublicNews()} />
+                <LatestNews items={await getPublicSidebarNews(currentLocale)} />
               </aside>
             </div>
           </ClientServerOffGate>

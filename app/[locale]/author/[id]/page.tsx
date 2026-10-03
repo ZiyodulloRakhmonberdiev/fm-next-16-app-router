@@ -1,3 +1,4 @@
+import { setPageLocale } from "@/i18n/set-page-locale"
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { getTranslations } from "next-intl/server"
@@ -11,7 +12,7 @@ import { UserModel } from "@/features/users/model/user.model"
 import { NewsModel } from "@/features/news/model/news.model"
 import { SpecialNewsPageContent } from "@/features/news/ui/special-news-page-content"
 import LatestNews from "@/entities/news/lists/latest-news"
-import { getCachedPublicNews } from "@/shared/server/public-data-server"
+import { getPublicSidebarNews } from "@/shared/server/public-data-server"
 import { isAppLocale, type AppLocale } from "@/shared/common/lib/locale-api"
 import { pickUserLocaleText } from "@/features/users/lib/user-locale"
 
@@ -19,8 +20,11 @@ type Props = {
   params: Promise<{ locale: string; id: string }>
 }
 
+export function generateStaticParams() { return [] }
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, id } = await params
+  setPageLocale(locale)
   const currentLocale: AppLocale = isAppLocale(locale) ? locale : "uz"
   await dbConnect()
   const author = await UserModel.findById(id).select({ full_name: 1 }).lean()
@@ -31,6 +35,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function AuthorPage({ params }: Props) {
   const { locale, id } = await params
+  setPageLocale(locale)
   const currentLocale: AppLocale = isAppLocale(locale) ? locale : "uz"
   const t = await getTranslations("common")
 
@@ -77,7 +82,7 @@ export default async function AuthorPage({ params }: Props) {
                 />
               </div>
               <aside className="hidden md:flex flex-col gap-6 px-4 md:px-6 lg:col-span-1">
-                <LatestNews initialNews={await getCachedPublicNews()} />
+                <LatestNews items={await getPublicSidebarNews(currentLocale)} />
               </aside>
             </div>
           </ClientServerOffGate>

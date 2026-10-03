@@ -5,6 +5,8 @@ import { ClientSidebar } from "@/widgets/client-sidebar"
 import ClientSiteNothingGate from "../../_components/client-site-nothing-gate"
 import ClientServerOffGate from "../../_components/client-server-off-gate"
 
+export const dynamic = "force-dynamic"
+
 export default function SavedNewsPage() {
   return (
     <ClientSiteNothingGate>

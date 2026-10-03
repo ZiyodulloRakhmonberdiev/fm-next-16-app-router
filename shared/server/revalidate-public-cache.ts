@@ -42,3 +42,8 @@ export function revalidateAdsPublicCache() {
   revalidateTag("ads", REVALIDATE_NOW)
   revalidatePublicLayouts()
 }
+
+export function revalidateTeamPublicCache() {
+  revalidateTag("team", REVALIDATE_NOW)
+  for (const locale of PUBLIC_LOCALES) revalidatePath(`/${locale}/team`)
+}

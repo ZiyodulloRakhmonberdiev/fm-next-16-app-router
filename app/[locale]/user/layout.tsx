@@ -5,6 +5,8 @@ import { authOptions } from "@/shared/common/lib/auth-options"
 import { Header } from "@/widgets/client-header"
 import { Footer } from "@/widgets/client-footer"
 
+export const dynamic = "force-dynamic"
+
 export default async function UserLayout({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) {

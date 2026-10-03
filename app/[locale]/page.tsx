@@ -6,8 +6,10 @@ import HomeMainContent from "./_components/home-main-content";
 import HomePageSkeleton from "./_components/home-page-skeleton";
 import ClientSiteNothingGate from "./_components/client-site-nothing-gate";
 import ClientServerOffGate from "./_components/client-server-off-gate";
+import { setPageLocale, type LocalePageProps } from "@/i18n/set-page-locale";
 
-export default function HomePage() {
+export default async function HomePage({ params }: LocalePageProps) {
+  setPageLocale((await params).locale);
   return (
     <ClientSiteNothingGate>
       <div className="block md:hidden">

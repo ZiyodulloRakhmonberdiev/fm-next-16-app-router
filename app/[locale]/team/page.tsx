@@ -1,5 +1,6 @@
+import { setPageLocale, type LocalePageProps } from "@/i18n/set-page-locale"
 
-import { getServerApiUrl } from "@/shared/common/lib/server-api-url"
+import { getPublicTeam } from "@/shared/server/public-team"
 import { BadgeCheck } from "lucide-react"
 import ClientServerOffGate from "../_components/client-server-off-gate"
 import { Footer } from "@/widgets/client-footer"
@@ -18,15 +19,10 @@ type TeamRow = {
   badgeImage?: string
 }
 
-export default async function TeamPage() {
+export default async function TeamPage({ params }: LocalePageProps) {
+  setPageLocale((await params).locale)
   const t = await getTranslations("common")
-  // const teamT = await getTranslations("teamPage")
-  const url = await getServerApiUrl("/api/team?public=1")
-  const res = await fetch(url, { next: { revalidate: 300 } })
-  if (!res.ok) {
-    throw new Error("Jamoa ma'lumotlarini yuklab bo'lmadi")
-  }
-  const items = (await res.json()) as TeamRow[]
+  const items: TeamRow[] = await getPublicTeam()
 
   return (
     <ClientSiteNothingGate>

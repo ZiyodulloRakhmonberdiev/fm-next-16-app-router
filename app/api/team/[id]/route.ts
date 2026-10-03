@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server"
+import { revalidateTeamPublicCache } from "@/shared/server/revalidate-public-cache"
 import { dbConnect } from "@/shared/common/lib/db"
 import { mapTeamDocToClient } from "@/features/team/lib/team-api-map"
 import { TeamMemberModel } from "@/features/team/model/team.model"
@@ -46,6 +47,7 @@ export async function PATCH(
     if (!updated) {
       return Response.json({ error: "Topilmadi" }, { status: 404 })
     }
+    revalidateTeamPublicCache()
     return Response.json(mapTeamDocToClient(updated))
   } catch (err) {
     const message = err instanceof Error ? err.message : "Yangilashda xatolik"
@@ -66,5 +68,6 @@ export async function DELETE(
   if (!deleted) {
     return Response.json({ error: "Topilmadi" }, { status: 404 })
   }
+  revalidateTeamPublicCache()
   return Response.json({ ok: true })
 }

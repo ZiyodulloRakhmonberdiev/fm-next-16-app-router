@@ -1,3 +1,4 @@
+import { setPageLocale, type LocalePageProps } from "@/i18n/set-page-locale"
 import type { Metadata } from "next"
 import { getLocale } from "next-intl/server"
 import ClientSiteNothingGate from "../_components/client-site-nothing-gate"
@@ -9,13 +10,15 @@ import { dbConnect } from "@/shared/common/lib/db"
 import { NewsModel } from "@/features/news/model/news.model"
 import { SpecialNewsPageContent } from "@/features/news/ui/special-news-page-content"
 import LatestNews from "@/entities/news/lists/latest-news"
-import { getCachedPublicNews } from "@/shared/server/public-data-server"
+import { getPublicSidebarNews } from "@/shared/server/public-data-server"
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: LocalePageProps): Promise<Metadata> {
+  setPageLocale((await params).locale)
   return { title: "Reklama yangiliklar" }
 }
 
-export default async function AdsNewsPage() {
+export default async function AdsNewsPage({ params }: LocalePageProps) {
+  const pageLocale = setPageLocale((await params).locale)
   await dbConnect()
   const rows = await NewsModel.find({ status: "published", ad: true })
     .sort({ publishedAt: -1 })
@@ -37,7 +40,7 @@ export default async function AdsNewsPage() {
                 <SpecialNewsPageContent title="E'lonlar" initialNews={list} />
               </div>
               <aside className="hidden md:flex flex-col gap-6 px-4 md:px-6 lg:col-span-1">
-                <LatestNews initialNews={await getCachedPublicNews()} />
+                <LatestNews items={await getPublicSidebarNews(pageLocale)} />
               </aside>
             </div>
           </ClientServerOffGate>

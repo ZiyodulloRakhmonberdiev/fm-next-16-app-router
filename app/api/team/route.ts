@@ -7,6 +7,7 @@ import { createTeamMemberSchema } from "@/features/team/model/schemas"
 import { requireAdminSession } from "@/shared/server/require-admin-session"
 import { protectPublicApi } from "@/shared/server/protect-api"
 import { CACHE_TIMINGS, publicCacheHeaders } from "@/shared/common/lib/http-cache"
+import { revalidateTeamPublicCache } from "@/shared/server/revalidate-public-cache"
 
 export async function GET(req: NextRequest) {
   const isProtected = await protectPublicApi(req)
@@ -58,6 +59,7 @@ export async function POST(req: NextRequest) {
       ...(d.badgeImage && d.badgeImage !== "" ? { badgeImage: d.badgeImage } : {}),
     })
     const plain = created.toObject()
+    revalidateTeamPublicCache()
     return Response.json(mapTeamDocToClient(plain), { status: 201 })
   } catch (err) {
     const message = err instanceof Error ? err.message : "Saqlashda xatolik"
