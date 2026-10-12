@@ -251,9 +251,6 @@ export default function CategoryList() {
       <Link href="/news/audio" className="hover:text-brand transition-colors">
         <span>{t("audio")}</span>
       </Link>
-      {/* <Link href="/news/radio" className="hover:text-brand transition-colors">
-        <span>{t("radio")}</span>
-      </Link> */}
     </div>
   );
 }
@@ -285,9 +282,6 @@ export function CategoryListForSidebar() {
       <Link href="/news/audio" className="text-sm">
         <span className="text-xl font-medium">{t("audio")}</span>
       </Link>
-      {/* <Link href="/news/radio" className="text-sm">
-        <span className="text-xl font-medium">{t("radio")}</span>
-      </Link> */}
     </div>
   );
 }
@@ -316,9 +310,6 @@ export function CategoryListForMobile() {
       <Link href="/news/audio" className="text-sm">
         <span>{t("audio")}</span>
       </Link>
-      {/* <Link href="/news/radio" className="text-sm">
-        <span>{t("radio")}</span>
-      </Link> */}
     </div>
   );
 }
@@ -347,9 +338,6 @@ export function CategoryListForNewsPage() {
       <Link href="/news/audio" className="text-sm">
         <span className="text-lg font-medium">{t("audio")}</span>
       </Link>
-      {/* <Link href="/news/radio" className="text-sm">
-        <span className="text-lg font-medium">{t("radio")}</span>
-      </Link> */}
     </div>
   );
 }

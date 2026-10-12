@@ -5,7 +5,7 @@ import { cn } from "@/shared/common/lib/utils"
 import { RiMenuFill } from "react-icons/ri";
 import { RiHome5Fill } from "react-icons/ri";
 import { HiLightningBolt } from "react-icons/hi";
-import { FaRadio } from "react-icons/fa6";
+import { FaHeadphones } from "react-icons/fa6";
 import { IoTv } from "react-icons/io5";
 import { BsFillPlayCircleFill } from "react-icons/bs";
 import { LayoutDashboard } from "lucide-react";
@@ -18,7 +18,7 @@ const navItems = [
   { key: "home", href: "/", label: "Bosh sahifa", icon: RiHome5Fill },
   { key: "news", href: "/news", label: "Yangiliklar", icon: HiLightningBolt },
   { key: "shows", href: "/news/video", label: "Ko'rsatuvlar", icon: IoTv },
-  { key: "audio", href: "/news/audio", label: "Audio", icon: FaRadio },
+  { key: "audio", href: "/news/audio", label: "Audio", icon: FaHeadphones },
   { key: "menu", href: "/menu", label: "Menu", icon: TbLayoutDashboardFilled },
 ] as const
 
