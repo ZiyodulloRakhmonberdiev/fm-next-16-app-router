@@ -43,3 +43,6 @@ export default async function AboutPage({ params }: LocalePageProps) {
     </ClientSiteNothingGate>
   )
 }
+
+// Route-level freshness; the locale layout must not shorten this interval.
+export const revalidate = 300

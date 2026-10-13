@@ -11,11 +11,11 @@ import { PUBLIC_NEWS_LIST_SELECT } from "@/features/news/lib/news-list-projectio
 import { selectSidebarNews } from "@/features/news/lib/sidebar-news"
 import type { AppLocale } from "@/shared/common/lib/locale-api"
 
-export async function getPublicSidebarNews(locale: AppLocale, excludeSlug?: string) {
-  return selectSidebarNews(await getCachedPublicNews(), locale, excludeSlug)
+export async function getPublicSidebarNews(locale: AppLocale, excludeSlug?: string, limit = 10) {
+  return selectSidebarNews(await getCachedPublicNews(), locale, excludeSlug, limit)
 }
 
-const PUBLIC_DATA_REVALIDATE_SECONDS = 300
+const PUBLIC_DATA_REVALIDATE_SECONDS = 3600
 
 export const getCachedPublicNews = unstable_cache(
   async () => {

@@ -92,3 +92,6 @@ export default async function AuthorPage({ params }: Props) {
     </ClientSiteNothingGate>
   )
 }
+
+// Route-level freshness; the locale layout must not shorten this interval.
+export const revalidate = 300

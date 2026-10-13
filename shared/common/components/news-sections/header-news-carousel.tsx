@@ -29,7 +29,7 @@ function LiveIndicator() {
 export default function HeaderNewsCarousel({ initialNews }: HeaderNewsCarouselProps) {
   const locale = useLocale() as AppLocale
   const contextNews = usePublicNewsInitial()
-  const { data: qNews = [], isPending, isFetching } = usePublicNewsQuery()
+  const { data: qNews = [], isPending, isFetching } = usePublicNewsQuery(initialNews)
   const publicNews = initialNews ?? contextNews ?? qNews
   const t = useTranslations("common")
   const items = React.useMemo(() => {

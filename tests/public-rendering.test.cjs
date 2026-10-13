@@ -34,6 +34,9 @@ const localeStubs = {
   '@/shared/common/lib/seed-helpers': { getCategoryName: (slug) => slug, getTagNames: (slugs) => slugs ?? [] },
 }
 const { selectSidebarNews } = loader(localeStubs)('features/news/lib/sidebar-news.ts')
+const { publicCardPayload } = loader(localeStubs)('features/news/lib/public-card-payload.ts')
+const { selectHomeNews } = loader(localeStubs)('features/news/lib/home-news-selection.ts')
+const { getNewsListForLocale } = loader(localeStubs)('features/news/model/types.ts')
 function news(index, overrides = {}) {
   return {
     slug: `story-${index}`, title: { uz: `Yangilik ${index}`, ru: `Новость ${index}` },
@@ -190,4 +193,111 @@ test('DB failure propagates so failed ISR regeneration cannot replace a good pag
   const fixture = listFixture()
   fixture.fail()
   await assert.rejects(fixture.getPublicNewsPage({ locale: 'uz', pageSize: 10 }), /Database unavailable/)
+})
+
+test('localized card payload retains visible text, fallback and media without content/admin/other-language data', () => {
+  const rows = [news(1, { isTop: true, authorsChoice: true, videoUrl: 'video.mp4', audioUrl: 'audio.mp3',
+    pushedToTelegram: true, telegramPushReason: 'internal', createdBy: { userId: 'admin' } }),
+    news(2, { title: { uz: 'Fallback', ru: '' } })]
+  const before = JSON.stringify(rows)
+  for (const locale of ['uz', 'uzb', 'ru', 'en']) {
+    const output = publicCardPayload(rows, locale)
+    const originalCards = getNewsListForLocale(rows, locale)
+    const cards = getNewsListForLocale(output, locale)
+    for (let i = 0; i < cards.length; i++) {
+      for (const field of ['slug', 'title', 'description', 'categorySlug', 'videoUrl', 'audioUrl', 'isTop', 'hasImage']) {
+        assert.deepEqual(cards[i][field], originalCards[i][field], `${locale}: ${field}`)
+      }
+      assert.deepEqual(Object.keys(output[i].title), ['uz'])
+      for (const field of ['content', 'createdBy', 'telegramPushReason', 'pushedToTelegram', 'updatedAt']) {
+        assert.equal(field in output[i], false)
+      }
+    }
+    assert.equal(output[0].authorsChoice, true)
+    assert.ok(Buffer.byteLength(JSON.stringify(output)) < Buffer.byteLength(before) / 2)
+  }
+  assert.equal(JSON.stringify(rows), before)
+})
+
+test('home sections retain existing ordering, filters, limits and legacy media flags', () => {
+  const rows = Array.from({ length: 45 }, (_, i) => news(i, {
+    isTop: i % 2 === 0, authorsChoice: i % 3 === 0, isBreaking: i % 4 === 0,
+    categorySlug: i % 2 ? 'world' : 'science',
+  }))
+  const before = JSON.stringify(rows)
+  assert.deepEqual(selectHomeNews(rows, 'banner', 'world').map(x => x.slug),
+    rows.filter(x => x.categorySlug === 'world').reverse().slice(0, 9).map(x => x.slug))
+  assert.equal(selectHomeNews(rows, 'row').length, 28)
+  assert.equal(selectHomeNews(rows, 'top').length, 10)
+  assert.ok(selectHomeNews(rows, 'top').every(x => x.isTop))
+  assert.equal(selectHomeNews(rows, 'authors').length, 6)
+  assert.ok(selectHomeNews(rows, 'authors').every(x => x.authorsChoice))
+  assert.equal(selectHomeNews(rows, 'breaking').length, 7)
+  assert.equal(selectHomeNews(rows, 'slide', 'world').length, 22, 'keep existing carousel cards')
+  assert.deepEqual(selectHomeNews(rows, 'banner', 'empty'), [])
+  assert.equal(selectHomeNews([news(1, { hasVideo: undefined, videoUrl: 'legacy.mp4' })], 'video').length, 1)
+  assert.equal(selectHomeNews([news(1, { hasVideo: false, videoUrl: 'hidden.mp4' })], 'video').length, 0)
+  assert.equal(selectHomeNews([news(1, { stats: true, images: [], audioUrl: 'a.mp3' })], 'stats').length, 1)
+  assert.equal(selectHomeNews([news(1, { ad: true, images: [], audioUrl: 'a.mp3' })], 'ads').length, 0)
+  assert.equal(JSON.stringify(rows), before)
+})
+
+test('editing or renaming a story invalidates its old/new pages and listings, never unrelated article layouts', () => {
+  const calls = [], tags = []
+  const { revalidateNewsPublicCache, revalidateAdsPublicCache } = loader({
+    'next/cache': { revalidatePath: (...args) => calls.push(args), revalidateTag: (...args) => tags.push(args) },
+  })('shared/server/revalidate-public-cache.ts')
+  revalidateNewsPublicCache('old-slug')
+  revalidateNewsPublicCache('new-slug')
+  for (const locale of ['uz', 'uzb', 'ru', 'en']) {
+    for (const suffix of ['', '/articles', '/news/old-slug', '/news/new-slug']) {
+      assert.ok(calls.some(([path]) => path === `/${locale}${suffix}`))
+    }
+    assert.ok(calls.some(([path]) => path === `/api/news/sidebar/${locale}`))
+  }
+  assert.ok(tags.some(([tag, options]) => tag === 'news' && options.expire === 0))
+  assert.equal(calls.some(([, type]) => type === 'layout'), false)
+  assert.equal(calls.some(([path]) => path === '/[locale]/news/[slug]'), false)
+  calls.length = 0
+  revalidateAdsPublicCache()
+  assert.equal(calls.some(([path]) => path.includes('/news/')), false)
+})
+
+test('shared sidebar serves eleven cards so each article can exclude itself without losing a card', () => {
+  const rows = Array.from({ length: 20 }, (_, i) => news(i))
+  const payload = selectSidebarNews(rows, 'uz', undefined, 11)
+  for (const slug of ['story-19', 'story-15', 'outside-feed']) {
+    const result = payload.filter(item => item.slug !== slug).slice(0, 10)
+    assert.equal(result.length, 10)
+    assert.ok(result.every(item => item.slug !== slug))
+  }
+})
+
+test('section props and a closed search do not fetch or seed a truncated global news feed', () => {
+  const { usePublicNewsQuery } = loader({
+    '@tanstack/react-query': { useQuery: (options) => options },
+    '@/shared/server/public-site-settings-query': { usePublicSiteSettingsQuery: () => ({ data: undefined }) },
+    './public-news-initial': { usePublicNewsInitial: () => undefined },
+  })('features/news/model/public-news-query.ts')
+  for (const serverItems of [[], publicCardPayload([news(1)], 'ru')]) {
+    const options = usePublicNewsQuery(serverItems)
+    assert.equal(options.enabled, false)
+    assert.equal(options.initialData, undefined)
+  }
+  assert.equal(usePublicNewsQuery(undefined, false).enabled, false)
+  assert.equal(usePublicNewsQuery(undefined, true).enabled, true)
+})
+
+test('article fallback sidebar has no shared news-cache dependency and excludes the current story', async () => {
+  const rows = Array.from({ length: 15 }, (_, i) => news(i))
+  const query = { select: () => query, sort: () => query, limit: () => query, lean: async () => rows }
+  const { getArticleSidebarSnapshot } = loader({
+    ...localeStubs,
+    '@/shared/common/lib/db': { dbConnect: async () => {} },
+    '@/features/news/model/news.model': { NewsModel: { find: () => query } },
+    'next/cache': { unstable_cache: () => { throw new Error('Must not depend on the global feed cache') } },
+  })('shared/server/article-sidebar-snapshot.ts')
+  const result = await getArticleSidebarSnapshot('uz', 'story-14')
+  assert.equal(result.length, 10)
+  assert.equal(result[0].slug, 'story-13')
 })

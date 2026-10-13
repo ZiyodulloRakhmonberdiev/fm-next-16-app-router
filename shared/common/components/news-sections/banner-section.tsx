@@ -24,7 +24,7 @@ export default function BannerSection({
   initialCategories,
 }: BannerSectionProps) {
   const locale = useLocale() as AppLocale
-  const { data: qNews = [] } = usePublicNewsQuery()
+  const { data: qNews = [] } = usePublicNewsQuery(initialNews)
   const { data: qCats = [] } = usePublicCategoriesQuery()
   
   const publicNews = initialNews ?? qNews

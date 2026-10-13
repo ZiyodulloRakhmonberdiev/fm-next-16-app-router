@@ -68,7 +68,7 @@ async function fetchPublishedNewsFeed(): Promise<RawNewsItem[]> {
 
 export { publicNewsQueryKey } from "@/shared/common/lib/public-query-keys"
 
-export function usePublicNewsQuery() {
+export function usePublicNewsQuery(serverNews?: RawNewsItem[], fetchEnabled = true) {
   const initialNews = usePublicNewsInitial()
   const hasServerInitial = Array.isArray(initialNews) && initialNews.length > 0
   const { data: settings } = usePublicSiteSettingsQuery()
@@ -81,7 +81,9 @@ export function usePublicNewsQuery() {
     queryFn: fetchPublishedNewsFeed,
     staleTime: PUBLIC_NEWS_STALE_MS,
     retry: 1,
-    enabled: clientDeliveryEnabled,
+    // Section-sized, localized props are authoritative, including an empty list.
+    // Never put them into the global multilingual feed or fetch the full feed for them.
+    enabled: clientDeliveryEnabled && serverNews === undefined && fetchEnabled,
     initialData: hasServerInitial ? initialNews : undefined,
     placeholderData: initialNews ?? [],
     refetchOnWindowFocus: false,

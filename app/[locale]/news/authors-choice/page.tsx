@@ -11,3 +11,6 @@ export default async function AuthorsChoiceNewsPage({
   // boshlang'ich ko'rinish uchun ham shu turdagi filter ishlaydi.
   return <NewsListingPage locale={locale} variant="latest" />
 }
+
+// Route-level freshness; the locale layout must not shorten this interval.
+export const revalidate = 300

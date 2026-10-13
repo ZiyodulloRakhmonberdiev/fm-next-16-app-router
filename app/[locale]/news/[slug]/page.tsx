@@ -5,14 +5,14 @@ import { Header } from "@/widgets/client-header"
 import ClientSidebar from "@/widgets/client-sidebar/ui/client-sidebar"
 import { NewsSlugPageContent, NewsSlugSidebar } from "@/entities/news/slug/_components"
 import { pickNewsForLocale, type RawNewsItem } from "@/features/news/model"
-import LatestNews from "@/entities/news/lists/latest-news"
+import ArticleLatestNews from "@/entities/news/lists/article-latest-news"
 import { isAppLocale } from "@/shared/common/lib/locale-api"
 import { getPublishedNewsBySlug } from "@/shared/server/public-news-detail"
 import { setPageLocale } from "@/i18n/set-page-locale"
 import { UserModel } from "@/features/users/model/user.model"
 import ClientSiteNothingGate from "../../_components/client-site-nothing-gate"
 import ClientServerOffGate from "../../_components/client-server-off-gate"
-import { getPublicSidebarNews } from "@/shared/server/public-data-server"
+import { getArticleSidebarSnapshot } from "@/shared/server/article-sidebar-snapshot"
 import { pickUserLocaleText } from "@/features/users/lib/user-locale"
 
 type Props = {
@@ -103,7 +103,7 @@ export default async function NewsPage({ params }: Props) {
                 <NewsSlugPageContent news={news} newsId={newsId} />
               </div>
               <aside className="hidden md:flex flex-col gap-6 lg:col-span-2 px-4 md:px-6 pb-16">
-                <LatestNews items={await getPublicSidebarNews(currentLocale, news.slug)} />
+                <ArticleLatestNews initialItems={await getArticleSidebarSnapshot(currentLocale, news.slug)} excludeSlug={news.slug} />
               </aside>
             </div>
           </ClientServerOffGate>
@@ -115,3 +115,6 @@ export default async function NewsPage({ params }: Props) {
     </ClientSiteNothingGate>
   )
 }
+
+// Route-level freshness; the locale layout must not shorten this interval.
+export const revalidate = 86400

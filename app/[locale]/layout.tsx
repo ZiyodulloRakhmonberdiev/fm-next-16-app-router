@@ -6,7 +6,7 @@ import { setPageLocale } from "@/i18n/set-page-locale";
 
 // Generate localized pages on first request, without enumerating DB records at build time.
 export function generateStaticParams() { return []; }
-export const revalidate = 300;
+export const revalidate = 86400;
 
 type Props = {
   children: React.ReactNode;

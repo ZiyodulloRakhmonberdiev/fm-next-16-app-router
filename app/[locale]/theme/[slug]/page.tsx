@@ -103,3 +103,6 @@ export default async function ThemePage({ params }: Props) {
   )
 }
 
+
+// Route-level freshness; the locale layout must not shorten this interval.
+export const revalidate = 300

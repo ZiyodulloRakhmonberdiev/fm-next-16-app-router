@@ -1,26 +1,29 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+## Public page caching
 
-## Public-page caching
+Detailed change record (Uzbek): [Vercel resurslarini tejash — 2026-10-13](docs/vercel-resource-optimization-2026-10-13.md).
 
-Public locale pages use on-demand ISR: pages are generated on first request, with a 300-second revalidation interval. News listings that depend on the public list cache revalidate every 60 seconds. News writes invalidate the `news` tag and locale layouts; team writes invalidate the team cache and team pages. Authentication, dashboard, user and saved-news routes remain dynamic.
+- Home and `/articles`: one-hour fallback revalidation. News writes invalidate these pages on the next visit.
+- `/[locale]/news/[slug]`: one-day fallback. Create/edit/unpublish/delete handlers invalidate the affected slug in all four languages; renames invalidate both slugs.
+- Other public pages retain their previous route freshness. Their leaf exports are explicit because a short locale-layout TTL would also cap the article and home TTLs.
+- `revalidate-public-cache.ts` invalidates news listings and affected articles, not entire locale layouts. Any future news import/write path must call `revalidateNewsPublicCache` after a successful write.
+- An article's initial latest-news sidebar is a snapshot, independent of the shared news cache. On desktop, `/api/news/sidebar/{locale}` refreshes those cards without regenerating the article. It returns eleven public cards so the current article can be excluded. The endpoint is invalidated on news writes; the browser query stays fresh for five minutes and does not poll. If loading fails, the snapshot remains visible.
+- Home sections receive only their selected, localized card fields. Do not seed the shared multilingual query cache with these partial lists. The full search feed loads when the search dialog opens.
 
-Article sidebars send at most 10 localized card records to the browser. Metadata and article rendering share one request-scoped article query. Public server listings read the database through a tagged cache instead of requesting this deployment's own API.
-
-Verification commands:
+Validation (no production writes):
 
 ```bash
 node --test tests/public-rendering.test.cjs
 npm run build
-node node_modules/next/dist/bin/next start --hostname 127.0.0.1 --port 3107
-# In a second terminal; read-only HTTP checks, restricted to localhost:
-node scripts/check-isr.mjs
+npm start -- -p 3107
+# In another terminal, against the local production server:
+node scripts/check-isr.mjs http://127.0.0.1:3107
 ```
 
-The HTTP checks need configured database access and a published article. They cover public ISR, locale documents, anonymous access protection and 404 responses; they do not exercise signed-in browser interactions.
+Metadata and article rendering still share one request-scoped query. The smoke check reads the configured database and does not exercise signed-in browser interactions. Use a staging database for manual create/edit/unpublish/delete checks. After deploying, compare equal traffic/time windows for CPU and ISR write units; accumulated monthly usage does not reset after a fix.
 
-## Development server
+## Running locally
 
 First, run the development server:
 

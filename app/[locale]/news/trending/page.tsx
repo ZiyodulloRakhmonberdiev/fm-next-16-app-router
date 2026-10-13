@@ -9,3 +9,6 @@ export default async function TrendingTrendingPage({
   const { locale } = await params
   return <NewsListingPage locale={locale} variant="trending" />
 }
+
+// Route-level freshness; the locale layout must not shorten this interval.
+export const revalidate = 300

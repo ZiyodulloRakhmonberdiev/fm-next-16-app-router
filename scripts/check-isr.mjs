@@ -5,7 +5,7 @@ import { setTimeout } from 'node:timers/promises'
 const origin = process.argv[2] ?? 'http://127.0.0.1:3107'
 assert.ok(['localhost', '127.0.0.1', '[::1]'].includes(new URL(origin).hostname), 'Use a local production server')
 const headers = { accept: 'text/html', referer: `${origin}/uz` }
-async function page(path, locale) {
+async function page(path, locale, expectedRevalidate) {
   for (let attempt = 0; attempt < 20; attempt++) {
     const response = await fetch(`${origin}${path}`, { headers, redirect: 'manual' })
     const html = await response.text()
@@ -16,6 +16,9 @@ async function page(path, locale) {
     assert.ok(!html.includes('NEXT_HTTP_ERROR_FALLBACK;500'), `${path}: no streamed server error`)
     const cache = response.headers.get('cache-control') ?? ''
     assert.match(cache, /s-maxage=[1-9]\d*/, `${path}: shared ISR cache`)
+    if (expectedRevalidate) {
+      assert.match(cache, new RegExp(`s-maxage=${expectedRevalidate}(?:,|$)`), `${path}: intended cache lifetime`)
+    }
     assert.doesNotMatch(cache, /private|no-store/, `${path}: public page`)
     if (attempt >= 1 && response.headers.get('x-nextjs-cache') === 'HIT') {
       console.log(`PASS ${path}: HIT, ${Buffer.byteLength(html)} bytes, ${cache}`)
@@ -27,9 +30,9 @@ async function page(path, locale) {
   assert.fail(`${path}: ISR did not reach HIT within the polling window`)
 }
 
-for (const locale of ['uz', 'uzb', 'ru', 'en']) await page(`/${locale}`, locale)
+for (const locale of ['uz', 'uzb', 'ru', 'en']) await page(`/${locale}`, locale, 3600)
 for (const suffix of ['news', 'news/latest', 'news/trending', 'news/video', 'news/audio', 'news/breaking', 'news/authors-choice', 'about', 'contact', 'privacy', 'terms', 'team', 'menu', 'articles', 'announcements', 'partners']) {
-  await page(`/uz/${suffix}`, 'uz')
+  await page(`/uz/${suffix}`, 'uz', suffix === 'articles' ? 3600 : undefined)
 }
 
 for (const suffix of ['auth/login', 'auth/register', 'news/saved']) {
@@ -45,7 +48,17 @@ const feedResponse = await fetch(`${origin}/api/news?status=published&limit=1`, 
 assert.equal(feedResponse.status, 200)
 const { data } = await feedResponse.json()
 assert.ok(data?.length, 'Need a published article to exercise dynamic slug ISR')
-for (const locale of ['uz', 'uzb', 'ru', 'en']) await page(`/${locale}/news/${encodeURIComponent(data[0].slug)}`, locale)
+for (const locale of ['uz', 'uzb', 'ru', 'en']) {
+  await page(`/${locale}/news/${encodeURIComponent(data[0].slug)}`, locale, 86400)
+  const sidebar = await fetch(`${origin}/api/news/sidebar/${locale}`, { headers })
+  assert.equal(sidebar.status, 200)
+  assert.match(sidebar.headers.get('cache-control') ?? '', /s-maxage=3600(?:,|$)/)
+  const items = await sidebar.json()
+  assert.ok(Array.isArray(items) && items.length <= 11)
+  assert.ok(items.every(item => !('content' in item) && !('createdBy' in item)), 'sidebar is a public card payload')
+  console.log(`PASS sidebar/${locale}: public, at most eleven cards, one-hour cache`)
+}
+assert.equal((await fetch(`${origin}/api/news/sidebar/invalid`, { headers })).status, 404)
 await page(`/uz/category/${encodeURIComponent(data[0].categorySlug)}`, 'uz')
 if (data[0].authorId) await page(`/uz/author/${encodeURIComponent(data[0].authorId)}`, 'uz')
 const themeResponse = await fetch(`${origin}/api/themes`, { headers })

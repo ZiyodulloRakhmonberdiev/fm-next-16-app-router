@@ -55,7 +55,7 @@ export default function SlideNewsSection({
   )
   const locale = useLocale() as AppLocale
   const t = useTranslations("common")
-  const { data: qNews = [] } = usePublicNewsQuery()
+  const { data: qNews = [] } = usePublicNewsQuery(initialNews)
   const { data: qCats = [] } = usePublicCategoriesQuery()
 
   const publicNews = initialNews ?? qNews

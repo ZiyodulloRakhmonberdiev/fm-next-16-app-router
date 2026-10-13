@@ -6,6 +6,8 @@ import ClientServerOffGate from "../_components/client-server-off-gate"
 import { Footer } from "@/widgets/client-footer"
 import ClientSidebar from "@/widgets/client-sidebar/ui/client-sidebar"
 import { Header } from "@/widgets/client-header"
+import { publicCardPayload } from "@/features/news/lib/public-card-payload"
+import { PUBLIC_NEWS_LIST_SELECT } from "@/features/news/lib/news-list-projection"
 import { dbConnect } from "@/shared/common/lib/db"
 import { NewsModel } from "@/features/news/model/news.model"
 import { SpecialNewsPageContent } from "@/features/news/ui/special-news-page-content"
@@ -25,12 +27,13 @@ export default async function StatsNewsPage({ params }: LocalePageProps) {
   const filter = { status: "published", stats: true }
   const [rows, total] = await Promise.all([
     NewsModel.find(filter)
+      .select(PUBLIC_NEWS_LIST_SELECT)
     .sort({ publishedAt: -1 })
       .limit(20)
       .lean(),
     NewsModel.countDocuments(filter),
   ])
-  const list = JSON.parse(JSON.stringify(rows))
+  const list = publicCardPayload(JSON.parse(JSON.stringify(rows)), pageLocale)
   const totalPages = Math.max(1, Math.ceil(total / 10))
   const initialPage = totalPages >= 2 ? 2 : 1
 
@@ -46,6 +49,7 @@ export default async function StatsNewsPage({ params }: LocalePageProps) {
             <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 lg:grid-cols-3">
               <div className="min-w-0 px-4 md:px-6 lg:col-span-2">
                 <SpecialNewsPageContent
+                  key={pageLocale}
                   title={t("articles")}
                   initialNews={list}
                   initialPage={initialPage}
@@ -65,3 +69,6 @@ export default async function StatsNewsPage({ params }: LocalePageProps) {
     </ClientSiteNothingGate>
   )
 }
+
+// Route-level freshness; the locale layout must not shorten this interval.
+export const revalidate = 3600

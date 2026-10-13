@@ -14,7 +14,7 @@ import {
   CarouselPrevious,
 } from "@/shared/common/components/ui/carousel"
 import type { CarouselApi } from "@/shared/common/components/ui/carousel"
-import { getNewsListForLocale, isImageTypeRawNews, type NewsItem } from "@/features/news/model"
+import { getNewsListForLocale, isImageTypeRawNews, type NewsItem, type RawNewsItem } from "@/features/news/model"
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
 import { usePublicNewsInitial } from "@/features/news/model/public-news-initial"
 import { usePublicCategoriesQuery } from "@/features/category/model/public-categories-query"
@@ -53,13 +53,14 @@ function CarouselDots({
   )
 }
 
-export default function TopNewsCarousel() {
+export default function TopNewsCarousel({ initialNews: serverNews }: { initialNews?: RawNewsItem[] }) {
   const plugin = React.useRef(
     Autoplay({ delay: 6000, stopOnInteraction: true })
   )
   const locale = useLocale() as AppLocale
-  const initialNews = usePublicNewsInitial()
-  const { data: qNews = [], isPending, isFetching } = usePublicNewsQuery()
+  const contextNews = usePublicNewsInitial()
+  const initialNews = serverNews ?? contextNews
+  const { data: qNews = [], isPending, isFetching } = usePublicNewsQuery(serverNews)
   const publicNews = initialNews ?? qNews
   const { data: categories = [], isPending: categoriesPending } = usePublicCategoriesQuery()
   const [api, setApi] = React.useState<CarouselApi | null>(null)

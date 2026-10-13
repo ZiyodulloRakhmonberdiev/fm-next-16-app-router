@@ -42,3 +42,6 @@ export default async function VideoNewsPage({
   )
 }
 
+
+// Route-level freshness; the locale layout must not shorten this interval.
+export const revalidate = 300

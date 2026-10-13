@@ -40,3 +40,6 @@ export default async function BreakingNewsPage({
     </ClientSiteNothingGate>
   )
 }
+
+// Route-level freshness; the locale layout must not shorten this interval.
+export const revalidate = 300

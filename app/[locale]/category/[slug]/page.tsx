@@ -44,3 +44,6 @@ export default async function CategoryPage({ params }: Props) {
   const currentLocale = (isAppLocale(locale) ? locale : "uz") as AppLocale
   return <NewsListingPage locale={currentLocale} variant="latest" initialCategorySlug={slug} />
 }
+
+// Route-level freshness; the locale layout must not shorten this interval.
+export const revalidate = 300

@@ -10,3 +10,6 @@ export default async function LatestNewsPage({
   return <NewsListingPage locale={locale} variant="latest" />
 }
 
+
+// Route-level freshness; the locale layout must not shorten this interval.
+export const revalidate = 300

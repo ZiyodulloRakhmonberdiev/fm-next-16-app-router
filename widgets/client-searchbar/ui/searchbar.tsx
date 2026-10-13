@@ -28,7 +28,7 @@ export function SearchBar({ open, onClose }: { open: boolean; onClose: () => voi
   const t = useTranslations("common")
   const router = useRouter()
   const locale = useLocale() as "en" | "ru" | "uz" | "uzb"
-  const { data: publicNews = [] } = usePublicNewsQuery()
+  const { data: publicNews = [] } = usePublicNewsQuery(undefined, open)
   const items = useMemo(() => getPublishedNewsListForLocale(publicNews, locale), [locale, publicNews])
 
   return (

@@ -22,7 +22,7 @@ export default function RowSection({
   initialCategories,
 }: RowSectionProps) {
   const locale = useLocale() as AppLocale
-  const { data: qNews = [] } = usePublicNewsQuery()
+  const { data: qNews = [] } = usePublicNewsQuery(initialNews)
   const { data: qCats = [] } = usePublicCategoriesQuery()
   
   const publicNews = initialNews ?? qNews

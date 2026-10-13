@@ -1,6 +1,6 @@
 "use client"
 
-import { getNewsListForLocale, isImageTypeRawNews, type NewsItem } from "@/features/news/model"
+import { getNewsListForLocale, isImageTypeRawNews, type NewsItem, type RawNewsItem } from "@/features/news/model"
 import { usePublicNewsQuery } from "@/features/news/model/public-news-query"
 import type { AppLocale } from "@/shared/common/lib/formatter"
 import { useLocale, useTranslations } from "next-intl"
@@ -8,10 +8,11 @@ import TextNewsCard from "@/entities/news/cards/text-news-card"
 
 const GRID_COUNT = 6
 
-export default function AuthorsChoice() {
+export default function AuthorsChoice({ initialNews }: { initialNews?: RawNewsItem[] }) {
   const locale = useLocale() as AppLocale
   const t = useTranslations("common")
-  const { data: publicNews = [] } = usePublicNewsQuery()
+  const { data: qNews = [] } = usePublicNewsQuery(initialNews)
+  const publicNews = initialNews ?? qNews
 
   const rawFiltered = [...publicNews]
     .filter(isImageTypeRawNews)

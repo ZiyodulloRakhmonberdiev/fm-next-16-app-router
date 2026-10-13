@@ -2,12 +2,12 @@ import { getNewsListForLocale, isImageTypeRawNews, type NewsItem, type RawNewsIt
 import type { AppLocale } from "@/shared/common/lib/locale-api"
 
 /** Only fields rendered by the ten sidebar cards cross the server/client boundary. */
-export function selectSidebarNews(news: RawNewsItem[], locale: AppLocale, excludeSlug?: string): NewsItem[] {
+export function selectSidebarNews(news: RawNewsItem[], locale: AppLocale, excludeSlug?: string, limit = 10): NewsItem[] {
   const selected = [...news]
     .filter(isImageTypeRawNews)
     .filter((item) => !excludeSlug || item.slug !== excludeSlug)
     .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
-    .slice(0, 10)
+    .slice(0, limit)
 
   return getNewsListForLocale(selected, locale).map((item) => ({
     slug: item.slug,

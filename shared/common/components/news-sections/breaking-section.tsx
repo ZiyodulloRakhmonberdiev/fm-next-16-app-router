@@ -29,7 +29,7 @@ export default function BreakingSection({
 }: BreakingSectionProps) {
   const locale = useLocale() as AppLocale
   const t = useTranslations("common")
-  const { data: qNews = [] } = usePublicNewsQuery()
+  const { data: qNews = [] } = usePublicNewsQuery(initialNews)
   const publicNews = initialNews ?? qNews
 
   const items = React.useMemo(() => {

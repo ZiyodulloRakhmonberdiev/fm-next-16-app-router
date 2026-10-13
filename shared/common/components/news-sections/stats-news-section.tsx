@@ -43,7 +43,7 @@ export default function StatsNewsSection({
 }: StatsNewsSectionProps) {
   const locale = useLocale() as AppLocale;
   const t = useTranslations("common");
-  const { data: qNews = [] } = usePublicNewsQuery();
+  const { data: qNews = [] } = usePublicNewsQuery(initialNews);
   const { data: qCats = [], isPending: categoriesPending } = usePublicCategoriesQuery();
   const publicNews = initialNews ?? qNews;
   const categories = initialCategories ?? qCats;

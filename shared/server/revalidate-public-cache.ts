@@ -1,37 +1,40 @@
 import { revalidatePath, revalidateTag } from "next/cache"
 
 const PUBLIC_LOCALES = ["uz", "uzb", "ru", "en"] as const
-
-/** Admin yozuvidan keyin kesh darhol eskirsin (Next.js 16 ikkinchi argument majburiy) */
 const REVALIDATE_NOW = { expire: 0 } as const
 
-/** Barcha locale layoutlari va sitemap — SSR keshini yangilash */
-function revalidatePublicLayouts() {
+function revalidateLocalizedPages(suffixes: string[]) {
   for (const locale of PUBLIC_LOCALES) {
-    revalidatePath(`/${locale}`, "layout")
+    for (const suffix of suffixes) revalidatePath(`/${locale}${suffix}`)
   }
+}
+
+/** Listings with direct DB reads need explicit invalidation. Never flush a locale layout. */
+function revalidateNewsListings() {
+  revalidateLocalizedPages(["", "/articles", "/announcements", "/news", "/news/latest",
+    "/news/trending", "/news/breaking", "/news/video", "/news/audio", "/news/authors-choice"])
+  for (const pattern of ["/[locale]/category/[slug]", "/[locale]/theme/[slug]", "/[locale]/author/[id]"]) {
+    revalidatePath(pattern, "page")
+  }
+  for (const locale of PUBLIC_LOCALES) revalidatePath(`/api/news/sidebar/${locale}`)
   revalidatePath("/sitemap.xml")
 }
 
-/** Yangiliklar (bosh sahifa, ad, stats) — `unstable_cache` tag: news */
+/** Create, edit, unpublish, delete and slug changes all use this entrypoint. */
 export function revalidateNewsPublicCache(slug?: string) {
   revalidateTag("news", REVALIDATE_NOW)
-  if (slug) {
-    for (const locale of PUBLIC_LOCALES) {
-      revalidatePath(`/${locale}/news/${slug}`)
-    }
-  }
-  revalidatePublicLayouts()
+  if (slug) revalidateLocalizedPages([`/news/${slug}`])
+  revalidateNewsListings()
 }
 
 export function revalidateCategoriesPublicCache() {
   revalidateTag("categories", REVALIDATE_NOW)
-  revalidatePublicLayouts()
+  revalidateNewsListings()
 }
 
 export function revalidateThemesPublicCache() {
   revalidateTag("themes", REVALIDATE_NOW)
-  revalidatePublicLayouts()
+  revalidateNewsListings()
 }
 
 export function revalidateTagsPublicCache() {
@@ -40,10 +43,10 @@ export function revalidateTagsPublicCache() {
 
 export function revalidateAdsPublicCache() {
   revalidateTag("ads", REVALIDATE_NOW)
-  revalidatePublicLayouts()
+  revalidateLocalizedPages(["", "/announcements"])
 }
 
 export function revalidateTeamPublicCache() {
   revalidateTag("team", REVALIDATE_NOW)
-  for (const locale of PUBLIC_LOCALES) revalidatePath(`/${locale}/team`)
+  revalidateLocalizedPages(["/team"])
 }

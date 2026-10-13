@@ -7,7 +7,7 @@ import { PublicNewsInitialProvider } from "@/features/news/model/public-news-ini
 import type { RawNewsItem } from "@/features/news/model"
 
 type HomePublicDataProviderProps = {
-  news: RawNewsItem[]
+  news?: RawNewsItem[]
   categories: PublicCategory[]
   children: ReactNode
 }

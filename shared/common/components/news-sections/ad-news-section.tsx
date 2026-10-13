@@ -33,7 +33,7 @@ const MOBILE_PROGRESS_DELAY_MS = 4500
 
 export default function AdNewsSection({ initialNews }: AdNewsSectionProps) {
   const locale = useLocale() as AppLocale
-  const { data: qNews = [] } = usePublicNewsQuery()
+  const { data: qNews = [] } = usePublicNewsQuery(initialNews)
   const publicNews = initialNews ?? qNews
   const autoplay = React.useRef(
     Autoplay({
